@@ -22,6 +22,7 @@ interface Props {
   userName: string | null
   userIconUrl?: string | null
   authorId: string
+  comments?: any[]
 }
 
 function Avatar({ name, iconUrl, size=28 }: { name:string; iconUrl?:string; size?:number }) {
