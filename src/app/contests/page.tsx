@@ -140,29 +140,49 @@ export default async function ContestsPage() {
                 <span style={{width:4,height:16,background:'#3b82f6',borderRadius:2,display:'inline-block'}}/>
                 外部コンテスト情報
               </h2>
-              <div style={{display:'flex',flexDirection:'column',gap:10}}>
+              <div style={{display:'flex',flexDirection:'column',gap:12}}>
                 {externalContests.map((c:any) => {
                   const status = getStatusLabel(c.deadline, c.judging_end)
                   return (
                     <a key={c.id} href={c.apply_url||'#'} target="_blank" rel="noopener noreferrer"
-                      style={{textDecoration:'none',display:'block',background:'#fff',border:'1px solid #F0D9C9',borderRadius:10,padding:'14px 18px'}}>
-                      <div style={{display:'flex',alignItems:'center',gap:8,marginBottom:4,flexWrap:'wrap'}}>
-                        <span style={{fontSize:10,fontWeight:700,color:status.color,background:status.bg,
-                          border:`1px solid ${status.border}`,padding:'1px 8px',borderRadius:8}}>
-                          {status.label}
-                        </span>
-                        {c.deadline && (
-                          <span style={{fontSize:11,color:'#94a3b8'}}>締切：{new Date(c.deadline).toLocaleDateString('ja-JP')}</span>
-                        )}
-                        <span style={{fontSize:10,color:'#3b82f6',marginLeft:'auto'}}>外部サイト ↗</span>
-                      </div>
-                      <div style={{fontSize:14,fontWeight:600,color:'#2B211B'}}>{c.title}</div>
-                      {c.description && (
-                        <div style={{fontSize:12,color:'#77706A',marginTop:4,lineHeight:1.7,overflow:'hidden',
-                          display:'-webkit-box',WebkitLineClamp:1,WebkitBoxOrient:'vertical' as any}}>
-                          {c.description}
+                      style={{textDecoration:'none',display:'block',background:'#fff',border:'1px solid #F0D9C9',borderRadius:12,overflow:'hidden',display:'flex'}}>
+                      {c.image_url && (
+                        <div style={{width:200,flexShrink:0,overflow:'hidden',background:'#FFF9F2'}}>
+                          <img src={c.image_url} alt={c.title}
+                            style={{width:'100%',height:'100%',objectFit:'cover',display:'block'}}/>
                         </div>
                       )}
+                      <div style={{padding:'20px 24px',flex:1,minWidth:0}}>
+                        <div style={{display:'flex',alignItems:'center',gap:8,marginBottom:8,flexWrap:'wrap'}}>
+                          <span style={{fontSize:11,fontWeight:700,color:status.color,background:status.bg,
+                            border:`1px solid ${status.border}`,padding:'2px 10px',borderRadius:10}}>
+                            {status.label}
+                          </span>
+                          {c.deadline && (
+                            <span style={{fontSize:11,color:'#94a3b8'}}>
+                              締切：{new Date(c.deadline).toLocaleDateString('ja-JP')}
+                            </span>
+                          )}
+                          <span style={{fontSize:11,color:'#3b82f6',marginLeft:'auto',fontWeight:600}}>外部サイト ↗</span>
+                        </div>
+                        <h3 style={{fontSize:17,fontWeight:700,color:'#2B211B',marginBottom:8,lineHeight:1.4,fontFamily:"'Noto Serif JP',serif"}}>
+                          {c.title}
+                        </h3>
+                        {c.description && (
+                          <p style={{fontSize:12,color:'#77706A',lineHeight:1.8,overflow:'hidden',
+                            display:'-webkit-box',WebkitLineClamp:2,WebkitBoxOrient:'vertical' as any}}>
+                            {c.description}
+                          </p>
+                        )}
+                        {status.label === '募集中' && (
+                          <div style={{marginTop:10}}>
+                            <span style={{display:'inline-block',padding:'6px 16px',background:'#3b82f6',color:'#fff',
+                              fontWeight:700,fontSize:12,borderRadius:6}}>
+                              外部サイトで応募する ↗
+                            </span>
+                          </div>
+                        )}
+                      </div>
                     </a>
                   )
                 })}
