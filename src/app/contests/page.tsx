@@ -85,8 +85,7 @@ export default async function ContestsPage() {
                   return (
                     <Link key={c.id} href={`/contests/${c.id}`} style={{textDecoration:'none'}}>
                       <div style={{background:'#fff',border:'1px solid #F0D9C9',borderRadius:12,overflow:'hidden',display:'flex',gap:0,transition:'box-shadow .15s'}}
-                        onMouseEnter={e=>(e.currentTarget.style.boxShadow='0 4px 16px rgba(242,106,33,.12)')}
-                        onMouseLeave={e=>(e.currentTarget.style.boxShadow='none')}>
+>
                         {c.image_url && (
                           <div style={{width:200,flexShrink:0,overflow:'hidden',background:'#FFF9F2'}}>
                             <img src={c.image_url} alt={c.title}
