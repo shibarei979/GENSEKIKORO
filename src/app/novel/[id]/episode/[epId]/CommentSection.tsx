@@ -12,6 +12,7 @@ interface Comment {
 interface Props {
   novelId: string; episodeId: string; userId: string | null
   userName: string | null; userIconUrl?: string | null; authorId: string
+  comments?: any[]
 }
 
 function Avatar({ name, iconUrl, size=26 }: { name:string; iconUrl?:string; size?:number }) {
