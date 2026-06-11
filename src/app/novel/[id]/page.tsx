@@ -88,6 +88,9 @@ export default async function NovelPage({ params }: { params: { id: string } }) 
   }
 
   const { count: likeCount }     = await supabase.from('likes').select('*',{count:'exact',head:true}).eq('novel_id', params.id)
+  // 閲覧数取得
+  const { data: viewData } = await supabase.from('novel_views').select('view_count').eq('novel_id', params.id).maybeSingle()
+  const viewCount = viewData?.view_count || 0
   const { count: discoverCount } = await supabase.from('discovers').select('*',{count:'exact',head:true}).eq('novel_id', params.id).eq('is_pending', false)
   const { count: bookmarkCount } = await supabase.from('bookmarks').select('*',{count:'exact',head:true}).eq('novel_id', params.id)
 
@@ -102,6 +105,11 @@ export default async function NovelPage({ params }: { params: { id: string } }) 
     discovered = !!d.data
     bookmarked = !!b.data
   }
+
+  // 作品ページ閲覧を記録
+  try {
+    await supabase.from('page_views').insert({ novel_id: params.id, user_id: user?.id || null })
+  } catch (_) {}
 
   const author   = authorProfile as any
   const isAuthor = user?.id === author?.user_id

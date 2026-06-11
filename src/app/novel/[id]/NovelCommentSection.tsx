@@ -56,7 +56,7 @@ export default function NovelCommentSection({ novelId, userId, userName, userIco
 
   useEffect(() => {
     supabase.from('comments')
-      .select('id,body,created_at,user_id,is_pinned,parent_id')
+      .select('id,body,created_at,user_id,is_pinned,parent_id,profiles(display_name,icon_url)')
       .eq('novel_id', novelId)
       .is('episode_id', null)
       .order('created_at', { ascending: true })
@@ -67,8 +67,8 @@ export default function NovelCommentSection({ novelId, userId, userName, userIco
           id: d.id, body: d.body, created_at: d.created_at,
           user_id: d.user_id, is_pinned: d.is_pinned,
           like_count: 0, parent_id: d.parent_id,
-          display_name: d.profiles?.display_name || '不明',
-          icon_url: d.profiles?.icon_url || '',
+          display_name: (d.profiles as any)?.display_name || '不明',
+          icon_url: (d.profiles as any)?.icon_url || '',
         }))
         const roots = flat.filter(c => !c.parent_id)
         roots.forEach(r => { r.replies = flat.filter(c => c.parent_id === r.id) })
