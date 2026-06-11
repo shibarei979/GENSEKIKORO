@@ -25,10 +25,8 @@ function getType(t: string) {
 function validate(form: { title:string; body:string; link:string; type:string; image_url:string }) {
   const errors: Record<string, string> = {}
   if (!form.type) errors.type = '種別は必須です'
-  if (!form.link.trim()) errors.link = 'URLは必須です'
   if (!form.title.trim()) errors.title = 'タイトルは必須です'
   if (!form.body.trim()) errors.body = '本文は必須です'
-  if (!form.image_url) errors.image_url = '画像は必須です'
   return errors
 }
 
@@ -129,7 +127,7 @@ export default function AnnouncementManager({ initialAnnouncements }: { initialA
 
             {/* URL */}
             <div>
-              <label style={{fontSize:12,color:'#64748b',display:'block',marginBottom:4}}>URL <span style={{color:'#ef4444'}}>*</span></label>
+              <label style={{fontSize:12,color:'#64748b',display:'block',marginBottom:4}}>URL <span style={{color:'#94a3b8',fontSize:10}}>(任意)</span></label>
               <input value={form.link} onChange={e=>{setForm({...form,link:e.target.value});setErrors(ev=>({...ev,link:''}))}}
                 style={inputStyle('link')} placeholder="https://..."/>
               {errors.link && <div style={{fontSize:11,color:'#ef4444',marginTop:3}}>{errors.link}</div>}
@@ -154,7 +152,7 @@ export default function AnnouncementManager({ initialAnnouncements }: { initialA
             {/* 画像（必須） */}
             <div>
               <label style={{fontSize:12,color:'#64748b',display:'block',marginBottom:6}}>
-                バナー画像 <span style={{color:'#ef4444'}}>*</span>
+                バナー画像 <span style={{color:'#94a3b8',fontSize:10}}>(任意)</span>
                 <span style={{fontSize:10,color:'#94a3b8',fontWeight:400,marginLeft:6}}>推奨サイズ：600×300px（2:1）</span>
               </label>
               <input type="file" accept="image/*" onChange={handleImageUpload} style={{fontSize:12,marginBottom:4}}/>
