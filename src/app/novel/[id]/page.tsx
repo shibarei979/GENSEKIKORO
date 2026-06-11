@@ -106,11 +106,6 @@ export default async function NovelPage({ params }: { params: { id: string } }) 
     bookmarked = !!b.data
   }
 
-  // 作品ページ閲覧を記録
-  try {
-    await supabase.from('page_views').insert({ novel_id: params.id, user_id: user?.id || null })
-  } catch (_) {}
-
   const author   = authorProfile as any
   const isAuthor = user?.id === author?.user_id
 
