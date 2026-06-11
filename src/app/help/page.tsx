@@ -1,0 +1,138 @@
+import { createClient } from '@/lib/supabase/server'
+import Header from '@/components/layout/Header'
+import Footer from '@/components/layout/Footer'
+import AdBanner from '@/components/layout/AdBanner'
+import Link from 'next/link'
+
+const navLinks: {href:string;label:string;active?:boolean}[] = [
+  { href: '/about',    label: '原石航路とは' },
+  { href: '/guide',    label: '投稿ガイド' },
+  { href: '/faq',      label: 'よくある質問' },
+  { href: '/help',     label: 'ヘルプ・FAQ', active: true },
+  { href: '/contact',  label: 'お問い合わせ' },
+  { href: '/feedback', label: 'ご意見・ご要望' },
+]
+
+const helpCategories = [
+  {
+    label: 'アカウントについて', icon: '👤',
+    items: [
+      { q: 'アカウント登録ができません', a: '入力したメールアドレスに誤りがないか確認してください。迷惑メールフォルダに確認メールが届いていないかも確認してください。それでも登録できない場合はお問い合わせください。' },
+      { q: 'ログインできません', a: 'メールアドレスやパスワードに誤りがないか確認してください。Googleログインを利用している場合は、登録時と同じ方法でログインしてください。' },
+      { q: 'パスワードを忘れました', a: 'ログイン画面の「パスワードを忘れた方はこちら」から再設定を行ってください。登録メールアドレス宛に再設定用のリンクが届きます。' },
+      { q: 'メールアドレスを変更したい', a: 'マイページの設定（歯車アイコン）から「メールアドレスを変更」を選択してください。現在のパスワードの確認が必要です。' },
+      { q: 'パスワードを変更したい', a: 'マイページの設定（歯車アイコン）から「パスワードを変更」を選択してください。現在のパスワードの確認が必要です。' },
+    ]
+  },
+  {
+    label: '投稿について', icon: '📝',
+    items: [
+      { q: '投稿画面で何を入力すればいいですか？', a: '作品タイトル・作品の長さ・ジャンル・話タイトル・本文は必須です。あらすじ・前書き・挿絵・あとがきは任意です。' },
+      { q: '下書き保存した作品はどこで確認できますか？', a: 'マイページから確認できます。下書きは公開されていないため他のユーザーには表示されません。' },
+      { q: '投稿ボタンを押したらすぐ公開されますか？', a: '基本的には投稿ボタンを押すと作品またはエピソードが公開されます。公開前にタイトル・本文・ジャンル・タグ・年齢区分をよく確認してください。' },
+      { q: '連載作品に続きを追加したいです', a: '投稿画面で「連載中の作品に追加」を選択してください。追加したい作品を選び、新しい話タイトルと本文を入力してください。' },
+      { q: '本文の文字サイズ変更は読者にも反映されますか？', a: '投稿画面の文字サイズ変更は作者が書きやすくするための編集補助機能です。読者側の表示文字サイズを強制するものではありません。' },
+    ]
+  },
+  {
+    label: '閲覧について', icon: '📚',
+    items: [
+      { q: '作品を探すにはどうすればいいですか？', a: '検索バー・ジャンル一覧・タグ・ランキング・原石発掘などから作品を探せます。' },
+      { q: 'R18作品が表示されません', a: 'R18作品はログイン済みかつ18歳以上であることを確認したユーザーにのみ表示されます。' },
+      { q: '保存した作品はどこで見られますか？', a: 'マイページ内の保存作品一覧から確認できます。' },
+    ]
+  },
+  {
+    label: '評価・コメントについて', icon: '💬',
+    items: [
+      { q: 'いいねを取り消せますか？', a: 'もう一度いいねボタンを押すことで解除できます。' },
+      { q: '発掘するを押すとどうなりますか？', a: '作品に「発掘する」反応が記録されます。原石発掘や原石レコメンドなどの参考になる場合があります。' },
+      { q: 'コメントを削除できますか？', a: 'コメント欄の自分のコメントに「削除」ボタンが表示されます。押すと確認の後、削除されます。' },
+      { q: '誹謗中傷コメントを見つけました', a: '通報機能またはお問い合わせフォームからご連絡ください。運営が確認し必要に応じて削除や利用制限を行います。' },
+    ]
+  },
+  {
+    label: 'その他', icon: '⚙️',
+    items: [
+      { q: '退会したいです', a: 'マイページの設定（歯車アイコン）から「退会する」を選択してください。退会しても投稿作品は自動的に削除されません。削除したい場合は退会前に削除手続きを行ってください。' },
+      { q: 'バグを見つけました', a: 'お問い合わせページからご連絡ください。発生したページ・操作方法・使用端末・使用ブラウザ・エラー文などを添えていただけると対応がスムーズです。' },
+    ]
+  },
+]
+
+export default async function HelpPage() {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  let profile = null
+  if (user) {
+    const { data } = await supabase.from('profiles').select('*').eq('user_id', user.id).single()
+    profile = data
+  }
+
+  return (
+    <div style={{minHeight:'100vh',background:'#fff',fontFamily:"'Noto Sans JP',sans-serif"}}>
+      <Header profile={profile} user={user} />
+
+      <div style={{background:'#FFF9F2',borderBottom:'1px solid #F0D9C9',overflowX:'auto'}}>
+        <div style={{maxWidth:860,margin:'0 auto',padding:'0 24px',display:'flex'}}>
+          {navLinks.map(n => (
+            <Link key={n.href} href={n.href}
+              style={{padding:'12px 18px',fontSize:13,color:n.active?'#F26A21':'#77706A',textDecoration:'none',whiteSpace:'nowrap',
+                borderBottom:n.active?'2px solid #F26A21':'2px solid transparent',fontWeight:n.active?700:400}}>
+              {n.label}
+            </Link>
+          ))}
+        </div>
+      </div>
+
+      <div style={{maxWidth:860,margin:'0 auto',padding:'40px 24px 60px'}}>
+        <div style={{marginBottom:28}}>
+          <h1 style={{fontSize:24,fontWeight:700,color:'#2B211B',marginBottom:4}}>ヘルプ・FAQ</h1>
+          <p style={{fontSize:13,color:'#77706A'}}>困ったときはこちらをご確認ください</p>
+        </div>
+
+        {/* クイックリンク */}
+        <div style={{display:'grid',gridTemplateColumns:'repeat(3,1fr)',gap:10,marginBottom:28}}>
+          {helpCategories.map((cat,i) => (
+            <a key={i} href={`#cat-${i}`}
+              style={{background:'#FFF9F2',border:'1px solid #F0D9C9',borderRadius:10,padding:'14px',textDecoration:'none',display:'flex',alignItems:'center',gap:8}}>
+              <span style={{fontSize:12,fontWeight:600,color:'#2B211B'}}>{cat.label}</span>
+            </a>
+          ))}
+        </div>
+
+        {helpCategories.map((cat,ci) => (
+          <div key={ci} id={`cat-${ci}`} style={{marginBottom:24}}>
+            <div style={{display:'flex',alignItems:'center',gap:8,marginBottom:12}}>
+              <h2 style={{fontSize:16,fontWeight:700,color:'#2B211B'}}>{cat.label}</h2>
+            </div>
+            <div style={{display:'flex',flexDirection:'column',gap:8}}>
+              {cat.items.map((item,i) => (
+                <details key={i} style={{background:'#FFF9F2',border:'1px solid #F0D9C9',borderRadius:10,overflow:'hidden'}}>
+                  <summary style={{padding:'14px 18px',fontSize:14,fontWeight:600,color:'#2B211B',cursor:'pointer',listStyle:'none',display:'flex',alignItems:'center',gap:10}}>
+                    <span style={{color:'#F26A21',fontWeight:700,fontSize:16,flexShrink:0}}>Q</span>
+                    {item.q}
+                  </summary>
+                  <div style={{padding:'12px 18px 14px',borderTop:'1px solid #FFF1E6',display:'flex',gap:10,alignItems:'flex-start',background:'#FFF9F2'}}>
+                    <span style={{color:'#2563eb',fontWeight:700,fontSize:16,flexShrink:0}}>A</span>
+                    <p style={{fontSize:13,color:'#2B211B',lineHeight:1.8,margin:0}}>{item.a}</p>
+                  </div>
+                </details>
+              ))}
+            </div>
+          </div>
+        ))}
+
+        <div style={{background:'#FFF9F2',border:'1px solid #F0D9C9',borderRadius:12,padding:'20px 24px',textAlign:'center'}}>
+          <p style={{fontSize:13,color:'#77706A',marginBottom:12}}>解決しない場合はお問い合わせください</p>
+          <Link href="/contact" style={{padding:'10px 24px',background:'#F26A21',color:'#fff',borderRadius:20,textDecoration:'none',fontSize:13,fontWeight:700}}>
+            お問い合わせはこちら
+          </Link>
+        </div>
+      </div>
+
+      <AdBanner />
+      <Footer user={user} />
+    </div>
+  )
+}
