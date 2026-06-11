@@ -1,4 +1,5 @@
 import { createClient } from '@/lib/supabase/server'
+export const dynamic = 'force-dynamic'
 import { redirect } from 'next/navigation'
 import Header from '@/components/layout/Header'
 import Footer from '@/components/layout/Footer'
@@ -16,7 +17,6 @@ export default async function HistoryPage() {
   const { data } = await supabase.from('profiles').select('*').eq('user_id', user.id).single()
   profile = data
 
-  // 閲覧履歴取得（episode_idを持つpage_viewsから）
   const { data: views } = await supabase
     .from('page_views')
     .select('episode_id, viewed_at')
@@ -24,9 +24,8 @@ export default async function HistoryPage() {
     .order('viewed_at', { ascending: false })
     .limit(200)
 
-  const epIds = [...new Set((views||[]).map((v: any) => v.episode_id).filter(Boolean))]
+  const epIds = Array.from(new Set((views||[]).map((v: any) => v.episode_id).filter(Boolean)))
 
-  // 各episodeの最新閲覧時刻
   const latestViewMap: Record<string,string> = {}
   views?.forEach((v: any) => {
     if (v.episode_id && !latestViewMap[v.episode_id]) {
@@ -41,15 +40,13 @@ export default async function HistoryPage() {
       .select('id, title, ep_number, novel_id, novels(id, title, genre, author_id)')
       .in('id', epIds as string[])
 
-    // 作者名取得
-    const authorIds = [...new Set((episodes||[]).map((e: any) => e.novels?.author_id).filter(Boolean))]
+    const authorIds = Array.from(new Set((episodes||[]).map((e: any) => e.novels?.author_id).filter(Boolean)))
     const authorMap: Record<string,string> = {}
     if (authorIds.length > 0) {
       const { data: authors } = await supabase.from('profiles').select('user_id, display_name').in('user_id', authorIds as string[])
       authors?.forEach((a: any) => { authorMap[a.user_id] = a.display_name })
     }
 
-    // novel_idでグループ化（作品単位で最新話を表示）
     const novelMap: Record<string, any> = {}
     episodes?.forEach((ep: any) => {
       const novel = ep.novels
@@ -89,7 +86,6 @@ export default async function HistoryPage() {
 
       <div style={{maxWidth:1200,margin:'0 auto',padding:'28px 32px',display:'flex',gap:20,alignItems:'flex-start'}}>
         <div style={{flex:1,minWidth:0}}>
-
           <div style={{marginBottom:20}}>
             <h1 style={{fontSize:22,fontWeight:700,color:'#2B211B',marginBottom:4}}>閲覧履歴</h1>
             <p style={{fontSize:12,color:'#77706A'}}>最近読んだ作品が表示されます（最大200件）</p>
@@ -98,10 +94,9 @@ export default async function HistoryPage() {
           <div style={{background:'#fff',border:'1px solid #F0D9C9',borderRadius:12,overflow:'hidden'}}>
             {historyItems.length === 0 ? (
               <div style={{padding:'60px',textAlign:'center',color:'#B8AEA8',fontSize:13}}>
-                <div style={{fontSize:40,marginBottom:12}}></div>
                 まだ閲覧履歴がありません
               </div>
-            ) : historyItems.map((item, i) => (
+            ) : historyItems.map((item) => (
               <Link key={item.novelId} href={`/novel/${item.novelId}`} style={{textDecoration:'none',display:'flex',gap:14,padding:'14px 20px',borderBottom:'1px solid #FFF1E6',background:'#fff',alignItems:'center',color:'inherit'}}>
                 <span style={{flex:1,minWidth:0,display:'block'}}>
                   <span style={{display:'flex',gap:6,marginBottom:4,flexWrap:'wrap',alignItems:'center'}}>
@@ -110,8 +105,7 @@ export default async function HistoryPage() {
                   <span style={{display:'block',fontSize:15,fontWeight:700,color:'#2B211B',marginBottom:2}}>{item.novelTitle}</span>
                   <span style={{display:'block',fontSize:12,color:'#77706A',marginBottom:4}}>作者：{item.displayName}</span>
                   <span style={{display:'block',fontSize:11,color:'#B8AEA8'}}>
-                    最後に読んだ話：
-                    <span style={{color:'#F26A21'}}>{item.epTitle}</span>
+                    最後に読んだ話：<span style={{color:'#F26A21'}}>{item.epTitle}</span>
                   </span>
                 </span>
                 <span style={{fontSize:11,color:'#B8AEA8',flexShrink:0,textAlign:'right',display:'block'}}>
@@ -124,7 +118,6 @@ export default async function HistoryPage() {
             ))}
           </div>
         </div>
-
         <Sidebar />
       </div>
 

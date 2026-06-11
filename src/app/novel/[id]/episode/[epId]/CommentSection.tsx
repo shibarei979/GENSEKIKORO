@@ -49,8 +49,7 @@ export default function CommentSection({ novelId, episodeId, userId, userName, u
       .limit(200)
       .then(async ({ data }) => {
         if (!data) return
-        // 作者名を別途取得
-        const uids = [...new Set(data.map((d: any) => d.user_id))]
+        const uids = Array.from(new Set(data.map((d: any) => d.user_id)))
         const { data: profiles } = await supabase
           .from('profiles').select('user_id,display_name,icon_url').in('user_id', uids)
         const profileMap: Record<string,any> = {}
@@ -87,7 +86,6 @@ export default function CommentSection({ novelId, episodeId, userId, userName, u
     const newComment = { ...data, display_name: userName||'', icon_url: userIconUrl||'', like_count:0, replies:[] }
     setComments(prev => [...prev, newComment])
     setBody('')
-    // 作者に通知（自分が作者でない場合）
     if (userId !== authorId) {
       fetch('/api/notify', { method:'POST', headers:{'Content-Type':'application/json'},
         body: JSON.stringify({ user_id: authorId, type:'comment',
@@ -107,7 +105,6 @@ export default function CommentSection({ novelId, episodeId, userId, userName, u
     const newReply: Comment = { ...data, display_name: userName||'', icon_url: userIconUrl||'', like_count:0 }
     setComments(prev => prev.map(c => {
       if (c.id !== parentId) return c
-      // 元コメント投稿者に通知
       if (userId !== c.user_id) {
         fetch('/api/notify', { method:'POST', headers:{'Content-Type':'application/json'},
           body: JSON.stringify({ user_id: c.user_id, type:'reply',

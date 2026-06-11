@@ -5,7 +5,6 @@ export async function POST(req: Request) {
   const supabase = await createClient()
   const { novel_id } = await req.json()
 
-  // 作品情報を取得
   const { data: novel } = await supabase
     .from('novels')
     .select('id, title, summary, genre, tags, author_id')
@@ -14,7 +13,6 @@ export async function POST(req: Request) {
 
   if (!novel) return NextResponse.json({ error: 'novel not found' }, { status: 404 })
 
-  // 同じ作者の過去作を取得
   const { data: pastNovels } = await supabase
     .from('novels')
     .select('title, genre, tags')
@@ -22,7 +20,6 @@ export async function POST(req: Request) {
     .neq('id', novel_id)
     .limit(5)
 
-  // 全作品のジャンル・タグを取得（珍しさの比較用）
   const { data: allNovels } = await supabase
     .from('novels')
     .select('genre, tags')
@@ -44,7 +41,7 @@ ${pastNovels && pastNovels.length > 0
   : '（なし・初投稿）'}
 
 ## サイト内の他作品のジャンル分布
-${allNovels ? [...new Set(allNovels.map((n: any) => n.genre))].join('、') : ''}
+${allNovels ? Array.from(new Set(allNovels.map((n: any) => n.genre))).join('、') : ''}
 
 ## 採点基準（合計100点）
 1. テーマ・設定の新しさ：25点
@@ -74,7 +71,6 @@ ${allNovels ? [...new Set(allNovels.map((n: any) => n.genre))].join('、') : ''}
     const json = JSON.parse(text.replace(/```json|```/g, '').trim())
     const score = Math.min(100, Math.max(0, json.total || 0))
 
-    // DBに保存
     await supabase.from('novels').update({ originality_score: score }).eq('id', novel_id)
 
     return NextResponse.json({ score, breakdown: json.breakdown })
