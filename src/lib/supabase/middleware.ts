@@ -10,7 +10,7 @@ export async function updateSession(request: NextRequest) {
     {
       cookies: {
         getAll() { return request.cookies.getAll() },
-        setAll(cookiesToSet) {
+        setAll(cookiesToSet: { name: string; value: string; options?: any }[]) {
           cookiesToSet.forEach(({ name, value }) =>
             request.cookies.set(name, value)
           )
@@ -25,7 +25,6 @@ export async function updateSession(request: NextRequest) {
 
   const { data: { user } } = await supabase.auth.getUser()
 
-  // 認証が必要なページへの未ログインアクセスをリダイレクト
   const protectedPaths = ['/mypage', '/post']
   const isProtected = protectedPaths.some(p => request.nextUrl.pathname.startsWith(p))
 
