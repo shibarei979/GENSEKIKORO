@@ -23,7 +23,6 @@ export default function Header({ profile, user, activeGenre }: Props) {
   const supabase = createClient()
 
   useEffect(() => {
-    // 毎日年齢確認
     const lastCheck = localStorage.getItem('age_check_date')
     const today = new Date().toDateString()
     if (lastCheck !== today) {
@@ -35,7 +34,6 @@ export default function Header({ profile, user, activeGenre }: Props) {
         })
         .catch(() => {})
     } else {
-      // キャッシュから
       fetch('/api/age-check', { method: 'POST' })
         .then(r => r.json())
         .then(d => setAgeVerified(d.age_verified))
@@ -93,7 +91,6 @@ export default function Header({ profile, user, activeGenre }: Props) {
               <>
                 <Link href="/post" className="header-post-btn" style={{border:'1.5px solid #F26A21',color:'#F26A21',padding:'6px 18px',borderRadius:20,background:'#fff',fontSize:13,fontWeight:500,display:'inline-block'}}>＋ 投稿する</Link>
 
-                {/* 通知ベル */}
                 <div ref={notifRef} style={{position:'relative'}}>
                   <button onClick={handleOpenNotif}
                     style={{position:'relative',width:36,height:36,borderRadius:'50%',border:'1.5px solid #F0D9C9',background:'#fff',cursor:'pointer',display:'flex',alignItems:'center',justifyContent:'center',flexShrink:0}}>
@@ -107,7 +104,6 @@ export default function Header({ profile, user, activeGenre }: Props) {
                     )}
                   </button>
 
-                  {/* 通知ドロップダウン */}
                   {showNotif && (
                     <div style={{position:'absolute',right:0,top:'calc(100% + 8px)',width:320,background:'#fff',border:'1px solid #F0D9C9',borderRadius:12,boxShadow:'0 8px 32px rgba(0,0,0,0.12)',zIndex:200,overflow:'hidden',maxHeight:showAllNotif?'80vh':'360px',transition:'max-height .25s ease',display:'flex',flexDirection:'column'}}>
                       <div style={{padding:'10px 14px',borderBottom:'1px solid #F0D9C9',display:'flex',alignItems:'center',justifyContent:'space-between'}}>
@@ -156,9 +152,10 @@ export default function Header({ profile, user, activeGenre }: Props) {
       <nav style={{background:'#fff',borderBottom:'2px solid #F0D9C9'}}>
         <div style={{maxWidth:1200,margin:'0 auto',padding:'0 32px',display:'flex',gap:8}}>
           {[
-            {label:'ホーム',    href:'/'},
-            {label:'ランキング',href:'/ranking'},
-            {label:'作品を探す',href:'/search'},
+            {label:'ホーム',      href:'/'},
+            {label:'ランキング',  href:'/ranking'},
+            {label:'作品を探す',  href:'/search'},
+            {label:'コンテスト',  href:'/contests'},
           ].map(item => (
             <Link key={item.href} href={item.href}
               style={{padding:'9px 16px',fontSize:13,whiteSpace:'nowrap',textDecoration:'none',display:'inline-block',
