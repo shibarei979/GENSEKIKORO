@@ -113,8 +113,8 @@ export default function MypageClient({ profile, novels: initialNovels, bookmarke
   const initial    = profile.display_name.slice(0, 1)
   const published  = myNovels.filter(n => n.published)
   const drafts     = myNovels.filter(n => !n.published)
-  const userNumber = profile.user_number
-    ? '#' + String(profile.user_number).padStart(4, '0')
+  const userNumber = (profile as any).user_number
+    ? '#' + String((profile as any).user_number).padStart(4, '0')
     : null
 
   async function handleEmailChange() {
