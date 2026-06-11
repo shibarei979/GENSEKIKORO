@@ -91,7 +91,7 @@ export default async function SearchPage({ searchParams }: Props) {
     })
   }
 
-  const authorIds = Array.from(new Set((results).map((n: any) => n.author_id))]
+  const authorIds = Array.from(new Set((results).map((n: any) => n.author_id)))
   const authorMap: Record<string, string> = {}
   if (authorIds.length > 0) {
     const { data: authors } = await supabase.from('profiles').select('user_id, display_name').in('user_id', authorIds as string[])

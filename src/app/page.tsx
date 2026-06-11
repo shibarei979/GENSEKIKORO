@@ -94,7 +94,7 @@ export default async function HomePage() {
     })
     .slice(0, 10)
 
-  const epAuthorIds = Array.from(new Set(latestEpisodesFiltered.map((ep: any) => (ep.novels as any)?.author_id).filter(Boolean))]
+  const epAuthorIds = Array.from(new Set(latestEpisodesFiltered.map((ep: any) => (ep.novels as any)?.author_id).filter(Boolean)))
   let epAuthorMap: Record<string,string> = {}
   if (epAuthorIds.length > 0) {
     const { data: epAuthors } = await supabase.from('profiles').select('user_id, display_name').in('user_id', epAuthorIds as string[])
@@ -496,7 +496,7 @@ function WelcomeToast({ profile }: { profile: any }) {
 
 async function addAuthorNames(supabase: any, novels: any[]) {
   if (!novels || novels.length === 0) return []
-  const authorIds = Array.from(new Set(novels.map((n: any) => n.author_id))]
+  const authorIds = Array.from(new Set(novels.map((n: any) => n.author_id)))
   const { data: authors } = await supabase.from('profiles').select('user_id, display_name').in('user_id', authorIds)
   const authorMap: Record<string,string> = {}
   authors?.forEach((a: any) => { authorMap[a.user_id] = a.display_name })

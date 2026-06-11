@@ -22,7 +22,7 @@ export default async function AdminNovelsPage({ searchParams }: { searchParams: 
   if (q) query = (query as any).ilike('title', `%${q}%`)
   const { data: novels, count } = await (query as any).order('created_at', { ascending: false }).range(offset, offset + PAGE_SIZE - 1)
 
-  const authorIds = Array.from(new Set((novels||[]).map((n: any) => n.author_id))]
+  const authorIds = Array.from(new Set((novels||[]).map((n: any) => n.author_id)))
   const authorMap: Record<string, string> = {}
   if (authorIds.length > 0) {
     const { data: authors } = await supabase.from('profiles').select('user_id, display_name').in('user_id', authorIds as string[])

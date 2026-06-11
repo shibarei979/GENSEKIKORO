@@ -21,7 +21,7 @@ export default async function AdminDiscoversPage() {
     .order('created_at', { ascending: false })
 
   // novel_idからタイトル取得
-  const novelIds = Array.from(new Set((pending||[]).map((d:any) => d.novel_id))]
+  const novelIds = Array.from(new Set((pending||[]).map((d:any) => d.novel_id)))
   let novelMap: Record<string,string> = {}
   if (novelIds.length > 0) {
     const { data: novels } = await supabase

@@ -39,7 +39,7 @@ export default async function RankingPage({ searchParams }: Props) {
         .select('author_id, created_at')
         .eq('published', true)
         .gte('created_at', since30)
-      const newAuthorIds = Array.from(new Set((newAuthors||[]).map((n: any) => n.author_id))]
+      const newAuthorIds = Array.from(new Set((newAuthors||[]).map((n: any) => n.author_id)))
       if (newAuthorIds.length === 0) return { items: [], total: 0 }
 
       const { data: newNovels } = await supabase.from('novels')
@@ -53,7 +53,7 @@ export default async function RankingPage({ searchParams }: Props) {
       const sorted2 = (newNovels||[]).sort((a: any,b: any) => (lm2[b.id]||0)-(lm2[a.id]||0))
       const total2 = sorted2.length
       const paginated2 = showMore ? sorted2 : sorted2.slice(0, PAGE_SIZE)
-      const aIds2 = Array.from(new Set(paginated2.map((n: any) => n.author_id))]
+      const aIds2 = Array.from(new Set(paginated2.map((n: any) => n.author_id)))
       const aMap2: Record<string,string> = {}
       if (aIds2.length > 0) {
         const { data: auths2 } = await supabase.from('profiles').select('user_id, display_name').in('user_id', aIds2 as string[])
@@ -91,7 +91,7 @@ export default async function RankingPage({ searchParams }: Props) {
     const total  = sorted.length
     const paged  = sorted.slice(offset, offset + PAGE_SIZE)
 
-    const authorIds = Array.from(new Set(paged.map((n: any) => n.author_id))]
+    const authorIds = Array.from(new Set(paged.map((n: any) => n.author_id)))
     const authorMap: Record<string,string> = {}
     if (authorIds.length > 0) {
       const { data: authors } = await supabase.from('profiles').select('user_id, display_name').in('user_id', authorIds as string[])
