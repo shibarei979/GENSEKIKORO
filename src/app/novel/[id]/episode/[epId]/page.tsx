@@ -85,7 +85,7 @@ export default async function EpisodePage({ params }: Props) {
     clData?.forEach((cl: any) => { commentLikeCounts[cl.comment_id] = (commentLikeCounts[cl.comment_id] || 0) + 1 })
   }
 
-  const commentUserIds = [...new Set((rawComments || []).map((c: any) => c.user_id).filter(Boolean))]
+  const commentUserIds = Array.from(new Set((rawComments || []).map((c: any) => c.user_id).filter(Boolean))]
   let commentProfiles: Record<string, {display_name: string, icon_url: string}> = {}
   if (commentUserIds.length > 0) {
     const { data: cpData } = await supabase.from('profiles').select('user_id, display_name, icon_url').in('user_id', commentUserIds as string[])

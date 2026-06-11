@@ -58,7 +58,7 @@ export default async function ContestPage({ params }: Props) {
       .eq('published', true)
 
     // 作者名取得
-    const authorIds = [...new Set((novelData||[]).map((n:any) => n.author_id))]
+    const authorIds = Array.from(new Set((novelData||[]).map((n:any) => n.author_id))]
     let authorMap: Record<string,string> = {}
     if (authorIds.length > 0) {
       const { data: profiles } = await supabase.from('profiles').select('user_id, display_name').in('user_id', authorIds)

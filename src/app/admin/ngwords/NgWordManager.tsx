@@ -36,9 +36,9 @@ export default function NgWordManager({ initialWords }: { initialWords: NgWord[]
 
   async function handleBulkAdd() {
     setError('')
-    const newWords = [...new Set(
+    const newWords = Array.from(new Set(
       bulk.split(/[\n,、，]/).map(w => w.trim()).filter(w => w.length > 0)
-    )].filter(w => !words.some(existing => existing.word === w))
+    )).filter(w => !words.some(existing => existing.word === w))
 
     if (newWords.length === 0) { setError('新しいワードがありません'); return }
     setLoading(true)
