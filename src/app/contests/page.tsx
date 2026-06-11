@@ -145,7 +145,7 @@ export default async function ContestsPage() {
                   const status = getStatusLabel(c.deadline, c.judging_end)
                   return (
                     <a key={c.id} href={c.apply_url||'#'} target="_blank" rel="noopener noreferrer"
-                      style={{textDecoration:'none',display:'block',background:'#fff',border:'1px solid #F0D9C9',borderRadius:12,overflow:'hidden',display:'flex'}}>
+                      style={{textDecoration:'none',display:'flex',background:'#fff',border:'1px solid #F0D9C9',borderRadius:12,overflow:'hidden'}}>
                       {c.image_url && (
                         <div style={{width:200,flexShrink:0,overflow:'hidden',background:'#FFF9F2'}}>
                           <img src={c.image_url} alt={c.title}
