@@ -69,10 +69,8 @@ export default function NovelCommentSection({ novelId, userId, userName, userIco
           display_name: d.profiles?.display_name || '不明',
           icon_url: d.profiles?.icon_url || '',
         }))
-        // ツリー構造に変換（parent_idがnullのものが親）
         const roots = flat.filter(c => !c.parent_id)
         roots.forEach(r => { r.replies = flat.filter(c => c.parent_id === r.id) })
-        // ピン留め優先でソート
         roots.sort((a,b) => (b.is_pinned?1:0)-(a.is_pinned?1:0) || (b.like_count||0)-(a.like_count||0))
         setComments(roots)
       })
@@ -80,7 +78,7 @@ export default function NovelCommentSection({ novelId, userId, userName, userIco
 
   useEffect(() => {
     if (!userId || comments.length === 0) return
-    const allIds = [...comments.flatMap(c => [c.id, ...(c.replies||[]).map(r=>r.id)])]
+    const allIds = comments.flatMap(c => [c.id, ...(c.replies||[]).map(r=>r.id)])
     supabase.from('comment_likes').select('comment_id').eq('user_id', userId).in('comment_id', allIds)
       .then(({ data }) => { if (data) setLikedIds(new Set(data.map((d: any) => d.comment_id))) })
   }, [userId, comments.length])
@@ -109,7 +107,6 @@ export default function NovelCommentSection({ novelId, userId, userName, userIco
     const newReply: Comment = { ...data, display_name: userName||'', icon_url: userIconUrl||'', like_count:0 }
     setComments(prev => prev.map(c => {
       if (c.id !== parentId) return c
-      // 元コメント投稿者に通知
       if (userId !== c.user_id) {
         fetch('/api/notify', { method:'POST', headers:{'Content-Type':'application/json'},
           body: JSON.stringify({ user_id: c.user_id, type:'reply',
@@ -134,7 +131,7 @@ export default function NovelCommentSection({ novelId, userId, userName, userIco
       })))
     } else {
       await supabase.from('comment_likes').insert({ user_id: userId, comment_id: commentId })
-      setLikedIds(prev => new Set([...prev, commentId]))
+      setLikedIds(prev => new Set([...Array.from(prev), commentId]))
       setComments(prev => prev.map(c => ({
         ...c,
         like_count: c.id === commentId ? (c.like_count||0)+1 : c.like_count,
@@ -216,7 +213,6 @@ export default function NovelCommentSection({ novelId, userId, userName, userIco
               {deletingId===c.id?'削除中…':'削除'}
             </button>
           )}
-
         </div>
       </div>
     )
@@ -227,8 +223,6 @@ export default function NovelCommentSection({ novelId, userId, userName, userIco
       <div style={{padding:'12px 16px',borderBottom:'1px solid #F0D9C9',display:'flex',alignItems:'center',justifyContent:'space-between'}}>
         <span style={{fontSize:14,fontWeight:700,color:'#2B211B'}}>コメント ({comments.reduce((sum,c)=>sum+(c.replies?.length||0)+1,0)})</span>
       </div>
-
-      {/* 投稿フォーム */}
       <div style={{padding:'12px 16px',borderBottom:'1px solid #F0D9C9',background:'#FFF9F2'}}>
         {userId ? (
           <>
@@ -253,16 +247,12 @@ export default function NovelCommentSection({ novelId, userId, userName, userIco
           </div>
         )}
       </div>
-
-      {/* コメント一覧 */}
       {comments.length === 0
         ? <div style={{padding:'24px',textAlign:'center',fontSize:12,color:'#B8AEA8'}}>まだコメントがありません</div>
         : displayComments.map(c => (
           <div key={c.id}>
             <CommentCard c={c}/>
-            {/* 返信一覧 */}
             {(c.replies||[]).map(r => <CommentCard key={r.id} c={r} isReply parentId={c.id} parentRootId={c.id}/>)}
-            {/* 返信フォーム */}
             {replyTo?.id === c.id && (
               <div style={{marginLeft:36,padding:'8px 12px',background:'#FFF9F2',borderLeft:'2px solid #F26A21'}}>
                 <div style={{fontSize:11,color:'#F26A21',marginBottom:4}}>{replyTo.name} への返信</div>

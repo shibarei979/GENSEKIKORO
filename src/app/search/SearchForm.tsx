@@ -5,7 +5,6 @@ import { useRouter } from 'next/navigation'
 
 const GENRES_BASE = ['異世界','ファンタジー','SF','恋愛','学園','ミステリー','ホラー','歴史・時代','日常','アクション','コメディ','その他']
 
-
 const MOODS = [
   { emoji: '💘', label: '胸きゅんしたい',   tags: ['恋愛','ときめき','胸キュン','片思い','ラブコメ'] },
   { emoji: '😢', label: '切ない物語が読みたい', tags: ['切ない','悲恋','別れ','涙','感動'] },
@@ -71,14 +70,13 @@ export default function SearchForm({
     } catch {}
   }, [])
 
-
   function handleMoodSelect(mood: typeof MOODS[0]) {
     if (activeMood === mood.label) {
       setActiveMood(null)
       setTags(tags.filter(t => !mood.tags.includes(t)))
     } else {
       setActiveMood(mood.label)
-      const newTags = [...new Set([...tags.filter(t => !MOODS.some(m => m.tags.includes(t))), ...mood.tags.slice(0,3)])]
+      const newTags = Array.from(new Set([...tags.filter(t => !MOODS.some(m => m.tags.includes(t))), ...mood.tags.slice(0,3)]))
       setTags(newTags)
     }
   }
@@ -130,8 +128,6 @@ export default function SearchForm({
 
   return (
     <div style={{background:'#fff',border:'1px solid #F0D9C9',borderRadius:12,padding:'20px',marginBottom:16}}>
-
-      {/* タイトル */}
       <div style={{fontSize:15,fontWeight:700,color:'#2B211B',marginBottom:14,display:'flex',alignItems:'center',gap:8}}>
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#F26A21" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
           <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
@@ -139,9 +135,7 @@ export default function SearchForm({
         作品を探す
       </div>
 
-      {/* キーワード・除外 */}
       <div style={{display:'flex',gap:10,marginBottom:12}}>
-        {/* キーワード */}
         <div style={{flex:1}}>
           <div style={{fontSize:11,color:'#77706A',fontWeight:600,marginBottom:4}}>キーワード</div>
           <input value={q} onChange={e=>setQ(e.target.value)} onKeyDown={handleKeyDown}
@@ -160,9 +154,7 @@ export default function SearchForm({
                 <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:6}}>
                   <span style={{fontSize:10,color:'#B8AEA8'}}>最近の検索</span>
                   <button type="button" onClick={()=>{setHistory([]);try{localStorage.removeItem('search_history')}catch{}}}
-                    style={{fontSize:10,color:'#B8AEA8',background:'none',border:'none',cursor:'pointer',padding:0}}>
-                    クリア
-                  </button>
+                    style={{fontSize:10,color:'#B8AEA8',background:'none',border:'none',cursor:'pointer',padding:0}}>クリア</button>
                 </div>
                 {history.length === 0
                   ? <div style={{fontSize:11,color:'#B8AEA8'}}>まだ検索履歴がありません</div>
@@ -171,9 +163,7 @@ export default function SearchForm({
                       <button key={i} type="button" onClick={()=>setQ(h)}
                         style={{padding:'2px 9px',borderRadius:10,fontSize:11,cursor:'pointer',
                           background:q===h?'#F26A21':'#fff',color:q===h?'#fff':'#77706A',
-                          border:`1px solid ${q===h?'#F26A21':'#F0D9C9'}`}}>
-                        {h}
-                      </button>
+                          border:`1px solid ${q===h?'#F26A21':'#F0D9C9'}`}}>{h}</button>
                     ))}
                   </div>
                 }
@@ -198,9 +188,7 @@ export default function SearchForm({
                       <button key={ex} type="button" onClick={()=>setQ(q===ex?'':ex)}
                         style={{padding:'3px 10px',borderRadius:10,fontSize:11,cursor:'pointer',
                           background:q===ex?'#F26A21':'#fff',color:q===ex?'#fff':'#77706A',
-                          border:`1px solid ${q===ex?'#F26A21':'#F0D9C9'}`}}>
-                        {ex}
-                      </button>
+                          border:`1px solid ${q===ex?'#F26A21':'#F0D9C9'}`}}>{ex}</button>
                     ))}
                   </div>
                 </div>
@@ -209,7 +197,6 @@ export default function SearchForm({
           )}
         </div>
 
-        {/* 除外キーワード */}
         <div style={{flex:1}}>
           <div style={{fontSize:11,color:'#77706A',fontWeight:600,marginBottom:4}}>除外キーワード</div>
           <input value={exclude} onChange={e=>setExclude(e.target.value)} onKeyDown={handleKeyDown}
@@ -228,9 +215,7 @@ export default function SearchForm({
                 <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:6}}>
                   <span style={{fontSize:10,color:'#B8AEA8'}}>最近の除外</span>
                   <button type="button" onClick={()=>{setExHistory([]);try{localStorage.removeItem('exclude_history')}catch{}}}
-                    style={{fontSize:10,color:'#B8AEA8',background:'none',border:'none',cursor:'pointer',padding:0}}>
-                    クリア
-                  </button>
+                    style={{fontSize:10,color:'#B8AEA8',background:'none',border:'none',cursor:'pointer',padding:0}}>クリア</button>
                 </div>
                 {exHistory.length === 0
                   ? <div style={{fontSize:11,color:'#B8AEA8'}}>まだ除外履歴がありません</div>
@@ -239,9 +224,7 @@ export default function SearchForm({
                       <button key={i} type="button" onClick={()=>setExclude(h)}
                         style={{padding:'2px 9px',borderRadius:10,fontSize:11,cursor:'pointer',
                           background:exclude===h?'#F26A21':'#fff',color:exclude===h?'#fff':'#77706A',
-                          border:`1px solid ${exclude===h?'#F26A21':'#F0D9C9'}`}}>
-                        {h}
-                      </button>
+                          border:`1px solid ${exclude===h?'#F26A21':'#F0D9C9'}`}}>{h}</button>
                     ))}
                   </div>
                 }
@@ -266,9 +249,7 @@ export default function SearchForm({
                       <button key={ex} type="button" onClick={()=>setExclude(exclude===ex?'':ex)}
                         style={{padding:'3px 10px',borderRadius:10,fontSize:11,cursor:'pointer',
                           background:exclude===ex?'#F26A21':'#fff',color:exclude===ex?'#fff':'#77706A',
-                          border:`1px solid ${exclude===ex?'#F26A21':'#F0D9C9'}`}}>
-                        {ex}
-                      </button>
+                          border:`1px solid ${exclude===ex?'#F26A21':'#F0D9C9'}`}}>{ex}</button>
                     ))}
                   </div>
                 </div>
@@ -278,7 +259,6 @@ export default function SearchForm({
         </div>
       </div>
 
-      {/* 気分で探す */}
       <div style={{marginBottom:12}}>
         <button type="button" onClick={()=>setShowMoods(!showMoods)}
           style={{display:'flex',alignItems:'center',gap:6,width:'100%',padding:'7px 14px',border:'1.5px solid #F0D9C9',
@@ -307,7 +287,6 @@ export default function SearchForm({
         )}
       </div>
 
-      {/* 詳細条件トグル */}
       <button onClick={()=>setShowDetail(!showDetail)}
         style={{display:'flex',alignItems:'center',gap:6,padding:'7px 14px',border:'1.5px solid #F0D9C9',
           borderRadius:8,background:'#FFF9F2',color:'#77706A',fontSize:12,fontWeight:600,cursor:'pointer',
@@ -319,10 +298,8 @@ export default function SearchForm({
         </svg>
       </button>
 
-      {/* 詳細条件 */}
       {showDetail && (
         <div style={{border:'1px solid #F0D9C9',borderRadius:8,padding:'14px',marginBottom:12,background:'#FFF9F2'}}>
-          {/* ジャンル */}
           <div style={{marginBottom:12}}>
             <div style={{fontSize:11,color:'#77706A',fontWeight:600,marginBottom:6}}>ジャンル</div>
             <div style={{display:'flex',gap:6,flexWrap:'wrap'}}>
@@ -332,7 +309,6 @@ export default function SearchForm({
               ))}
             </div>
           </div>
-          {/* 長さ・連載 */}
           <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:12,marginBottom:12}}>
             <div>
               <div style={{fontSize:11,color:'#77706A',fontWeight:600,marginBottom:6}}>作品の長さ</div>
@@ -351,7 +327,6 @@ export default function SearchForm({
               </div>
             </div>
           </div>
-          {/* タグ */}
           <div>
             <div style={{fontSize:11,color:'#77706A',fontWeight:600,marginBottom:6}}>タグ</div>
             <div style={{display:'flex',gap:6,marginBottom:8,alignItems:'center'}}>
@@ -390,7 +365,6 @@ export default function SearchForm({
         </div>
       )}
 
-      {/* 並び順・検索ボタン */}
       <div style={{display:'flex',gap:10,alignItems:'center',justifyContent:'space-between',marginTop:12}}>
         <div style={{display:'flex',alignItems:'center',gap:8}}>
           <span style={{fontSize:11,color:'#77706A',fontWeight:600}}>並び順</span>

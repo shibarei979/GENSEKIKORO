@@ -128,7 +128,7 @@ export default function CommentSection({ novelId, episodeId, userId, userName, u
       })))
     } else {
       await supabase.from('comment_likes').insert({ user_id: userId, comment_id: commentId })
-      setLikedIds(prev => new Set([...prev, commentId]))
+      setLikedIds(prev => new Set([...Array.from(prev), commentId]))
       setComments(prev => prev.map(c => ({
         ...c, like_count: c.id===commentId?(c.like_count||0)+1:c.like_count,
         replies:(c.replies||[]).map(r=>r.id===commentId?{...r,like_count:(r.like_count||0)+1}:r)
