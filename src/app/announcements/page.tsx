@@ -57,7 +57,7 @@ export default async function AnnouncementsPage() {
               const isExternal = !!n.link
               return (
                 <a key={n.id} href={href} target={isExternal?'_blank':'_self'} rel="noopener noreferrer"
-                  style={{textDecoration:'none',display:'block',background:'#fff',border:'1px solid #F0D9C9',borderRadius:12,padding:'16px 20px',display:'flex',gap:16,alignItems:'flex-start'} as any}>
+                  style={{textDecoration:'none',display:'flex',gap:16,alignItems:'flex-start',background:'#fff',border:'1px solid #F0D9C9',borderRadius:12,padding:'16px 20px'} as any}>
                   {n.image_url && (
                     <div style={{flexShrink:0,width:160,height:80,borderRadius:8,overflow:'hidden',background:'#FFF9F2'}}>
                       <img src={n.image_url} alt={n.title}
