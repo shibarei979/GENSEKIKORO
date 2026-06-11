@@ -24,8 +24,8 @@ export default async function AdminContestsPage() {
     .order('created_at', { ascending: false })
 
   // novel_id → タイトル・作者名マップ
-  const novelIds = [...new Set((allEntries||[]).map((e:any) => e.novel_id))]
-  const userIds  = [...new Set((allEntries||[]).map((e:any) => e.user_id))]
+  const novelIds = Array.from(new Set((allEntries||[]).map((e:any) => e.novel_id)))
+  const userIds  = Array.from(new Set((allEntries||[]).map((e:any) => e.user_id)))
   let novelMap: Record<string,string> = {}
   let authorMap: Record<string,string> = {}
 
