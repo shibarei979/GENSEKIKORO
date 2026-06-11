@@ -10,7 +10,7 @@ import AdBanner from '@/components/layout/AdBanner'
 import type { Profile, Novel } from '@/types'
 import ContestEntry from './ContestEntry'
 
-interface Contest { id: string; title: string; deadline: string | null }
+interface Contest { id: string; title: string; deadline: string | null; is_site_contest: boolean }
 interface Entry { contest_id: string; novel_id: string }
 
 interface Props {
