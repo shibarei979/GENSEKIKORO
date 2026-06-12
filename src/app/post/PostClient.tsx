@@ -23,34 +23,30 @@ export default function PostClient({ profile, userId }: Props) {
   const [illustPreview, setIllustPreview] = useState<string>('')
   const [illustUploading, setIllustUploading] = useState(false)
 
-  // 新連載 or 連載中
   const [mode, setMode] = useState<'new'|'existing'>('new')
   const [myNovels, setMyNovels] = useState<any[]>([])
   const [selectedNovelId, setSelectedNovelId] = useState('')
   const [nextEpNum, setNextEpNum] = useState(1)
 
-  // 新連載用
   const [title,   setTitle]   = useState('')
   const [summary, setSummary] = useState('')
+  const [catchcopy, setCatchcopy] = useState('')
   const [genre,   setGenre]   = useState('')
   const [tags,      setTags]      = useState<string[]>([])
   const [tagInput,  setTagInput]  = useState('')
   const [novelType, setNovelType] = useState<'長編'|'短編'>('長編')
 
-  // 話情報（共通）
   const [epTitle,   setEpTitle]   = useState('')
   const [preface,   setPreface]   = useState('')
   const [body,      setBody]      = useState('')
   const [afterword, setAfterword] = useState('')
 
-  // エディタ
   const [fontSize,     setFontSize]     = useState(15)
   const [showReplace,  setShowReplace]  = useState(false)
   const [replaceFrom,  setReplaceFrom]  = useState('')
   const [replaceTo,    setReplaceTo]    = useState('')
   const [replaceCount, setReplaceCount] = useState<number|null>(null)
 
-  // UI
   const [errors,  setErrors]  = useState<Record<string,string>>({})
   const [loading,   setLoading]   = useState(false)
   const [toast,     setToast]     = useState('')
@@ -62,22 +58,20 @@ export default function PostClient({ profile, userId }: Props) {
   const [editEpisodes,  setEditEpisodes]  = useState<any[]>([])
   const [editEpId,      setEditEpId]      = useState<string>('')
 
-  // 自分の連載中作品を取得
   useEffect(() => {
     supabase.from('novels').select('id,title,genre').eq('author_id', userId).eq('published', true)
       .then(({ data }) => setMyNovels(data || []))
   }, [userId])
 
-  // 編集モード：URLにedit=novelIdがある場合にデータを読み込む
   useEffect(() => {
     if (!editNovelId) return
     setEditMode(true)
-    // 作品情報を読み込む
     supabase.from('novels').select('*').eq('id', editNovelId).single()
       .then(({ data: novel }) => {
         if (!novel) return
         setTitle(novel.title || '')
         setSummary(novel.summary || '')
+        setCatchcopy(novel.catchcopy || '')
         setGenre(novel.genre || '')
         setTags(novel.tags || [])
         setNovelType(novel.novel_type || '長編')
@@ -85,13 +79,11 @@ export default function PostClient({ profile, userId }: Props) {
         setIsR15(novel.is_r15 || false)
         setSavedNovelId(novel.id)
       })
-    // エピソード一覧を読み込む
     supabase.from('episodes').select('id,title,ep_number,body,preface,afterword,illust_url')
       .eq('novel_id', editNovelId).order('ep_number', { ascending: true })
       .then(({ data }) => setEditEpisodes(data || []))
   }, [editNovelId])
 
-  // 編集する話を選択したときにフォームに反映
   useEffect(() => {
     if (!editEpId) return
     const ep = editEpisodes.find(e => e.id === editEpId)
@@ -103,7 +95,6 @@ export default function PostClient({ profile, userId }: Props) {
     setIllustPreview(ep.illust_url || '')
   }, [editEpId, editEpisodes])
 
-  // 作品選択時に次の話番号を取得
   useEffect(() => {
     if (!selectedNovelId) return
     supabase.from('episodes').select('ep_number').eq('novel_id', selectedNovelId)
@@ -114,20 +105,17 @@ export default function PostClient({ profile, userId }: Props) {
       })
   }, [selectedNovelId])
 
-  // 文字数
   const prefaceLen = preface.length
   const bodyLen    = body.length
   const afterLen   = afterword.length
   const bodyPct    = Math.min(100, (bodyLen / 100000) * 100)
   const bodyColor  = bodyLen < 500 ? '#dc2626' : bodyLen > 90000 ? '#f59e0b' : '#22c55e'
 
-  // タグ追加
   function addTag() {
     const t = tagInput.trim()
     if (t && !tags.includes(t) && tags.length < 10) { setTags([...tags,t]); setTagInput('') }
   }
 
-  // テキスト挿入（選択範囲を囲む）
   function insertText(before: string, after = '') {
     const el = bodyRef.current; if (!el) return
     const s = el.selectionStart, e2 = el.selectionEnd
@@ -140,17 +128,13 @@ export default function PostClient({ profile, userId }: Props) {
     }, 0)
   }
 
-  // ルビ挿入: 選択テキストを｜テキスト《》に変換
   function insertRuby() {
     const el = bodyRef.current; if (!el) return
     const s = el.selectionStart, e2 = el.selectionEnd
     const sel = body.substring(s, e2)
-    // 選択していれば: 魔法 → ｜魔法《まほう》
-    // 選択なし: ｜《》を挿入してカーソルを《》の中に
     if (sel) {
       const newVal = body.substring(0,s) + '｜' + sel + '《》' + body.substring(e2)
       setBody(newVal)
-      // カーソルを《》の中に
       const rubyPos = s + 1 + sel.length + 1
       setTimeout(() => { el.focus(); el.setSelectionRange(rubyPos, rubyPos) }, 0)
     } else {
@@ -160,7 +144,6 @@ export default function PostClient({ profile, userId }: Props) {
     }
   }
 
-  // 挿絵アップロード
   async function handleIllustUpload(file: File) {
     setIllustUploading(true)
     const ext = file.name.split('.').pop()
@@ -174,24 +157,18 @@ export default function PostClient({ profile, userId }: Props) {
     setIllustUploading(false)
   }
 
-  // 全文：「」で始まらない行に全角スペースを追加
   function indentNonDialogue() {
     const lines = body.split('\n')
     const result = lines.map(line => {
       const trimmed = line.trimStart()
-      // 空行はそのまま
       if (trimmed === '') return line
-      // すでに字下げされている行はそのまま
-      if (line.startsWith('　')) return line
-      // 「で始まる行（セリフ）はそのまま
-      if (trimmed.startsWith('「') || trimmed.startsWith('『') || trimmed.startsWith('【')) return line
-      // それ以外は先頭に全角スペースを追加
-      return '　' + line
+      if (line.startsWith('\u3000')) return line
+      if (trimmed.startsWith('\u300c') || trimmed.startsWith('\u300e') || trimmed.startsWith('\u3010')) return line
+      return '\u3000' + line
     })
     setBody(result.join('\n'))
   }
 
-  // 一括置換
   function handleReplace() {
     if (!replaceFrom) return
     const count = body.split(replaceFrom).length - 1
@@ -200,7 +177,6 @@ export default function PostClient({ profile, userId }: Props) {
     setTimeout(() => setReplaceCount(null), 2500)
   }
 
-  // バリデーション
   function validate(publish: boolean) {
     const errs: Record<string,string> = {}
     if (mode === 'new') {
@@ -210,14 +186,13 @@ export default function PostClient({ profile, userId }: Props) {
       if (!selectedNovelId) errs.novel = '作品を選択してください'
     }
     if (!epTitle.trim()) errs.ep = 'タイトルを入力してください'
-    if (prefaceLen > 20000) errs.preface = `前書きは20,000文字以内にしてください`
-    if (afterLen > 20000)   errs.afterword = `あとがきは20,000文字以内にしてください`
-    if (bodyLen > 100000)   errs.body = `本文は100,000文字以内にしてください`
+    if (prefaceLen > 20000) errs.preface = '前書きは20,000文字以内にしてください'
+    if (afterLen > 20000)   errs.afterword = 'あとがきは20,000文字以内にしてください'
+    if (bodyLen > 100000)   errs.body = '本文は100,000文字以内にしてください'
     if (publish && bodyLen < 500) errs.body = `公開には本文500文字以上必要です（現在${bodyLen}文字）`
     return errs
   }
 
-  // 保存・投稿
   async function handleSubmit(publish: boolean) {
     const errs = validate(publish)
     if (Object.keys(errs).length) { setErrors(errs); return }
@@ -226,7 +201,6 @@ export default function PostClient({ profile, userId }: Props) {
     try {
       let novelId = savedNovelId || selectedNovelId
 
-      // 新連載 かつ まだ作品が作られていない場合のみinsert
       if (mode === 'new' && !savedNovelId) {
         const { data: novel, error: nErr } = await supabase.from('novels').insert({
           author_id: userId, title: title.trim(),
@@ -234,35 +208,32 @@ export default function PostClient({ profile, userId }: Props) {
           is_serial: true, published: publish,
           novel_type: novelType,
           is_r18: isR18, is_r15: isR15,
+          catchcopy: catchcopy.trim() || null,
         }).select().single()
         if (nErr) throw nErr
         novelId = novel.id
         setSavedNovelId(novel.id)
       } else if (mode === 'new' && savedNovelId && publish) {
-        // 下書きから公開に変更する場合
         await supabase.from('novels').update({ published: true }).eq('id', savedNovelId)
       }
 
-      // 話を追加（下書き保存済みならupdate、なければinsert）
       let epErr
       if (editMode && editEpId) {
-        // 編集モード → episodeをupdateする
         await supabase.from('novels').update({
           title: title.trim(), summary: summary.trim()||null, genre, tags,
           is_r18: isR18, is_r15: isR15,
+          catchcopy: catchcopy.trim() || null,
         }).eq('id', savedNovelId)
         const res = await supabase.from('episodes')
           .update({ title: epTitle.trim(), body, preface: preface.trim()||null, afterword: afterword.trim()||null, illust_url: illustPreview||null })
           .eq('id', editEpId)
         epErr = res.error
       } else if (draftSaved && savedNovelId) {
-        // すでに下書き保存済み → episodeをupdateする
         const res = await supabase.from('episodes')
           .update({ title: epTitle.trim(), body, preface: preface.trim()||null, afterword: afterword.trim()||null, illust_url: illustPreview||null })
           .eq('novel_id', savedNovelId).eq('ep_number', mode==='new'?1:nextEpNum)
         epErr = res.error
       } else {
-        // 年齢制限を作品に反映
         if (novelId) {
           await supabase.from('novels').update({ is_r18: isR18, is_r15: isR15 }).eq('id', novelId)
         }
@@ -280,16 +251,14 @@ export default function PostClient({ profile, userId }: Props) {
       if (epErr) throw epErr
 
       if (publish) {
-        // 独創性スコアをバックグラウンドで計算
         fetch('/api/originality', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ novel_id: novelId }),
-        }).catch(() => {}) // エラーは無視
+        }).catch(() => {})
 
         setToast(editMode ? '変更を保存しました！' : '投稿しました！')
 
-        // 編集モードでない場合のみ更新通知を送信
         if (!editMode && novelId) {
           fetch('/api/notify-update', {
             method: 'POST',
@@ -311,7 +280,6 @@ export default function PostClient({ profile, userId }: Props) {
     }
   }
 
-  // スタイル定数
   const inp = {width:'100%',padding:'8px 10px',border:'1.5px solid #F0D9C9',borderRadius:6,fontSize:13,background:'#fff',color:'#2B211B',outline:'none',boxSizing:'border-box'} as const
   const sec = {background:'#fff',border:'1px solid #F0D9C9',borderRadius:10,marginBottom:12,overflow:'hidden'} as const
   const sh  = {padding:'10px 14px',fontSize:13,fontWeight:700,color:'#2B211B',borderBottom:'1px solid #F0D9C9',background:'#FFF9F2'} as const
@@ -327,8 +295,6 @@ export default function PostClient({ profile, userId }: Props) {
 
       <div style={{maxWidth:760,margin:'0 auto',padding:'24px 24px 60px'}}>
 
-        {/* ===== 新連載 or 連載中 ===== */}
-        {/* 編集モード：話選択 */}
         {editMode && (
           <div style={{background:'#fff',border:'1px solid #F0D9C9',borderRadius:10,marginBottom:12,overflow:'hidden'}}>
             <div style={{padding:'10px 14px',fontSize:13,fontWeight:700,color:'#2B211B',borderBottom:'1px solid #F0D9C9',background:'#FFF9F2'}}>
@@ -355,7 +321,7 @@ export default function PostClient({ profile, userId }: Props) {
         )}
 
         {!editMode && (<div style={sec}>
-          {editMode ? null : <div style={sh}>投稿タイプ</div>}
+          <div style={sh}>投稿タイプ</div>
           <div style={sb}>
             <div style={{display:'flex',gap:12}}>
               {[{v:'new' as const,l:'新連載',d:'新しい作品の第1話を投稿する'},
@@ -372,7 +338,6 @@ export default function PostClient({ profile, userId }: Props) {
           </div>
         </div>)}
 
-        {/* ===== 新連載: 作品情報 ===== */}
         {(mode === 'new' || editMode) && (
           <div style={sec}>
             <div style={sh}>作品情報</div>
@@ -386,21 +351,31 @@ export default function PostClient({ profile, userId }: Props) {
                 <label style={lbl}>あらすじ</label>
                 <textarea style={{...inp,resize:'vertical',minHeight:80}} value={summary} onChange={e=>setSummary(e.target.value)} placeholder="作品のあらすじ（省略可）"/>
               </div>
-               <div style={fg}>
-              <label style={lbl}>作品の長さ <span style={{color:'#dc2626'}}>*</span></label>
-              <div style={{display:'flex',gap:10}}>
-                {(['長編','短編'] as const).map(t=>(
-                  <button key={t} type="button" onClick={()=>setNovelType(t)}
-                    style={{flex:1,padding:'10px',borderRadius:10,border:'2px solid',cursor:'pointer',textAlign:'center' as const,
-                      background:novelType===t?'#FFF1E6':'#fff',
-                      borderColor:novelType===t?'#F26A21':'#F0D9C9'}}>
-                    <div style={{fontSize:14,fontWeight:700,color:novelType===t?'#F26A21':'#2B211B'}}>{t}</div>
-                    <div style={{fontSize:11,color:'#77706A',marginTop:2}}>{t==='長編'?'複数話にわたる作品':'1話完結の作品'}</div>
-                  </button>
-                ))}
+              <div style={fg}>
+                <label style={lbl}>
+                  キャッチコピー・決め台詞
+                  <span style={{fontWeight:400,color:'#B8AEA8',fontSize:11,marginLeft:6}}>作品カードに表示されます（省略可・100文字以内）</span>
+                </label>
+                <textarea style={{...inp,resize:'vertical',minHeight:60}} value={catchcopy}
+                  onChange={e=>setCatchcopy(e.target.value.slice(0,100))}
+                  placeholder="例：「私は絶対に、あなたを守ってみせる」"/>
+                <div style={{fontSize:10,color:'#B8AEA8',textAlign:'right',marginTop:2}}>{catchcopy.length}/100</div>
               </div>
-            </div>
-           <div style={fg}>
+              <div style={fg}>
+                <label style={lbl}>作品の長さ <span style={{color:'#dc2626'}}>*</span></label>
+                <div style={{display:'flex',gap:10}}>
+                  {(['長編','短編'] as const).map(t=>(
+                    <button key={t} type="button" onClick={()=>setNovelType(t)}
+                      style={{flex:1,padding:'10px',borderRadius:10,border:'2px solid',cursor:'pointer',textAlign:'center' as const,
+                        background:novelType===t?'#FFF1E6':'#fff',
+                        borderColor:novelType===t?'#F26A21':'#F0D9C9'}}>
+                      <div style={{fontSize:14,fontWeight:700,color:novelType===t?'#F26A21':'#2B211B'}}>{t}</div>
+                      <div style={{fontSize:11,color:'#77706A',marginTop:2}}>{t==='長編'?'複数話にわたる作品':'1話完結の作品'}</div>
+                    </button>
+                  ))}
+                </div>
+              </div>
+              <div style={fg}>
                 <label style={lbl}>ジャンル <span style={{color:'#dc2626'}}>*</span></label>
                 <div style={{display:'flex',flexWrap:'wrap',gap:6,marginTop:4}}>
                   {GENRES.map(g=>(
@@ -440,7 +415,6 @@ export default function PostClient({ profile, userId }: Props) {
           </div>
         )}
 
-        {/* ===== 連載中: 作品選択 ===== */}
         {mode === 'existing' && (
           <div style={sec}>
             <div style={sh}>作品を選択</div>
@@ -460,15 +434,12 @@ export default function PostClient({ profile, userId }: Props) {
                     ))}
                   </select>
                   {errors.novel && <div style={er}>{errors.novel}</div>}
-
                 </>
               )}
             </div>
           </div>
         )}
 
-
-        {/* 年齢制限 */}
         <div style={sec}>
           <div style={sh}>年齢制限</div>
           <div style={{padding:'14px 18px'}}>
@@ -492,11 +463,8 @@ export default function PostClient({ profile, userId }: Props) {
           </div>
         </div>
 
-        {/* ===== 話の内容 ===== */}
         {(!editMode || editEpId) && (<div style={sec}>
-          <div style={sh}>
-            話の内容
-          </div>
+          <div style={sh}>話の内容</div>
           <div style={sb}>
             <div style={fg}>
               <label style={lbl}>
@@ -507,7 +475,6 @@ export default function PostClient({ profile, userId }: Props) {
               {errors.ep && <div style={er}>{errors.ep}</div>}
             </div>
 
-            {/* 前書き */}
             <div style={fg}>
               <label style={lbl}>前書き<span style={{fontWeight:400,color:'#B8AEA8',fontSize:11,marginLeft:6}}>{prefaceLen.toLocaleString()} / 20,000文字</span></label>
               <textarea style={{...inp,resize:'vertical',minHeight:60,borderColor:errors.preface?'#dc2626':'#F0D9C9'}}
@@ -515,7 +482,6 @@ export default function PostClient({ profile, userId }: Props) {
               {errors.preface && <div style={er}>{errors.preface}</div>}
             </div>
 
-            {/* 挿絵 */}
             <div style={fg}>
               <label style={lbl}>挿絵（本文の上に表示）</label>
               <div style={{border:'2px dashed #F0D9C9',borderRadius:10,padding:'16px',textAlign:'center',background:'#FFF9F2',cursor:'pointer',position:'relative'}}
@@ -551,7 +517,6 @@ export default function PostClient({ profile, userId }: Props) {
               </div>
             </div>
 
-            {/* 本文 */}
             <div style={fg}>
               <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',marginBottom:6}}>
                 <label style={{...lbl,marginBottom:0}}>
@@ -572,9 +537,8 @@ export default function PostClient({ profile, userId }: Props) {
                 </div>
               </div>
 
-              {/* ツールバー */}
               <div style={{display:'flex',flexWrap:'wrap',gap:3,marginBottom:5,padding:5,background:'#FFF9F2',border:'1px solid #F0D9C9',borderRadius:6}}>
-<button type="button" onClick={insertRuby} style={toolBtn}>ルビ　｜漢字《かんじ》</button>
+                <button type="button" onClick={insertRuby} style={toolBtn}>ルビ　｜漢字《かんじ》</button>
                 <button type="button" onClick={()=>insertText('《《','》》')} style={toolBtn}>《《強調》》</button>
                 <button type="button" onClick={()=>insertText('\n────────────\n')} style={toolBtn}>─ 区切り線</button>
                 <button type="button" onClick={indentNonDialogue} style={toolBtn} title="「」以外の行頭に全角スペースを追加">一文字下げ（「」以外）</button>
@@ -586,7 +550,6 @@ export default function PostClient({ profile, userId }: Props) {
                 </button>
               </div>
 
-              {/* 一括置換パネル */}
               {showReplace && (
                 <div style={{background:'#FFF9F2',border:'1px solid #F0D9C9',borderRadius:6,padding:'10px 12px',marginBottom:6,display:'flex',gap:8,alignItems:'center',flexWrap:'wrap'}}>
                   <input value={replaceFrom} onChange={e=>setReplaceFrom(e.target.value)} placeholder="置換前のテキスト"
@@ -610,7 +573,6 @@ export default function PostClient({ profile, userId }: Props) {
                 value={body} onChange={e=>setBody(e.target.value)}
                 placeholder="本文を入力してください"/>
 
-              {/* 文字数バー */}
               <div style={{display:'flex',alignItems:'center',gap:8,marginTop:4}}>
                 <div style={{flex:1,height:4,background:'#F0D9C9',borderRadius:2,overflow:'hidden'}}>
                   <div style={{height:'100%',borderRadius:2,background:bodyColor,width:`${bodyPct}%`,transition:'width .2s'}}/>
@@ -620,7 +582,6 @@ export default function PostClient({ profile, userId }: Props) {
               {errors.body && <div style={er}>{errors.body}</div>}
             </div>
 
-            {/* あとがき */}
             <div>
               <label style={lbl}>あとがき<span style={{fontWeight:400,color:'#B8AEA8',fontSize:11,marginLeft:6}}>{afterLen.toLocaleString()} / 20,000文字</span></label>
               <textarea style={{...inp,resize:'vertical',minHeight:60,borderColor:errors.afterword?'#dc2626':'#F0D9C9'}}
