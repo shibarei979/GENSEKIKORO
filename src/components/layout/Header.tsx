@@ -269,7 +269,7 @@ export default function Header({ profile, user, activeGenre }: Props) {
 
       {/* デスクトップNAV */}
       <nav className="desktop-header" style={{display:'flex',background:'#fff',borderBottom:'2px solid #F0D9C9'}}>
-        <div style={{maxWidth:1200,margin:'0 auto',padding:'0 32px',display:'flex',gap:8}}>
+        <div style={{maxWidth:1200,margin:'0 auto',padding:'0 32px',display:'flex',gap:0,width:'100%'}}>
           {[
             {label:'ホーム',href:'/'},
             {label:'ランキング',href:'/ranking'},

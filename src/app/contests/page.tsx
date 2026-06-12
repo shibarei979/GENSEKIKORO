@@ -54,7 +54,7 @@ export default async function ContestsPage() {
   const endedContests  = siteContests.filter((c:any) => getStatusLabel(c.deadline, c.judging_end).label === '終了')
 
   return (
-    <div style={{minHeight:'100vh',background:'#FFF9F2',fontFamily:"'Noto Sans JP',sans-serif"}}>
+    <div style={{minHeight:'100vh',background:'#fff',fontFamily:"'Noto Sans JP',sans-serif"}}>
       <Header profile={profile} user={user} />
 
       <div className="main-layout" style={{maxWidth:1200,margin:'0 auto',padding:'28px 32px',display:'flex',gap:20,alignItems:'flex-start'}}>
