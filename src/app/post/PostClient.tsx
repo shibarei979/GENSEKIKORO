@@ -353,7 +353,7 @@ export default function PostClient({ profile, userId }: Props) {
               </div>
               <div style={fg}>
                 <label style={lbl}>
-                  キャッチコピー・決め台詞
+                  キャッチコピー
                   <span style={{fontWeight:400,color:'#B8AEA8',fontSize:11,marginLeft:6}}>作品カードに表示されます（省略可・100文字以内）</span>
                 </label>
                 <textarea style={{...inp,resize:'vertical',minHeight:60}} value={catchcopy}
