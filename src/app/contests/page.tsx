@@ -1,5 +1,5 @@
 import { createClient } from '@/lib/supabase/server'
-export const dynamic = 'force-dynamic'
+export const revalidate = 21600 // 6時間キャッシュ（0時・6時・12時・18時更新）
 import Link from 'next/link'
 import Header from '@/components/layout/Header'
 import Footer from '@/components/layout/Footer'

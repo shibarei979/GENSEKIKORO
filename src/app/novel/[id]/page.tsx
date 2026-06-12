@@ -1,5 +1,5 @@
 import { createClient } from '@/lib/supabase/server'
-export const dynamic = 'force-dynamic'
+export const revalidate = 21600 // 6時間キャッシュ（0時・6時・12時・18時更新）
 
 export async function generateMetadata({ params }: { params: { id: string } }) {
   const { createClient } = await import('@/lib/supabase/server')

@@ -1,5 +1,5 @@
 import { createClient } from '@/lib/supabase/server'
-export const dynamic = 'force-dynamic'
+export const revalidate = 30
 import Link from 'next/link'
 import HomeSidebar from './HomeSidebar'
 import NovelList from './NovelList'
@@ -47,7 +47,17 @@ export default async function HomePage() {
     supabase.from('profiles').select('*', { count: 'exact', head: true }),
     supabase.from('comments').select('*', { count: 'exact', head: true }),
   ])
-  const { count: totalViews } = await supabase.from('page_views').select('*', { count: 'exact', head: true })
+  const [{ count: totalViews }, [{ data: sidebarAnnouncementsA }, { data: allContestsA }]] = await Promise.all([
+    supabase.from('page_views').select('*', { count: 'exact', head: true }),
+    Promise.all([
+      supabase.from('announcements').select('id, title, body, type, link, image_url, created_at')
+        .eq('is_published', true).order('created_at', { ascending: false }).limit(5),
+      supabase.from('contests').select('id, title, description, deadline, judging_end, apply_url, image_url, is_published, is_site_contest')
+        .eq('is_published', true).order('created_at', { ascending: false }),
+    ])
+  ])
+  const sidebarAnnouncements = sidebarAnnouncementsA
+  const allContests = allContestsA
 
   function fmtNum(n: number): string {
     if (n >= 10000) return (Math.floor(n / 1000) / 10) + '万'
