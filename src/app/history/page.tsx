@@ -118,7 +118,7 @@ export default async function HistoryPage() {
             ))}
           </div>
         </div>
-        <Sidebar />
+        <div className="desktop-only"><Sidebar /></div>
       </div>
 
       <AdBanner />
