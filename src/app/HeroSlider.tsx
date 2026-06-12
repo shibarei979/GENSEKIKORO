@@ -93,10 +93,10 @@ export default function HeroSlider({ items }: Props) {
         <div style={{
           display:'flex', gap:4,
           transition:'transform 0.4s cubic-bezier(.4,0,.2,1)',
-          transform:`translateX(calc(-${offset} * (78px + 4px)))`,
+          transform:`translateX(calc(-${offset} * (156px + 4px)))`,
         }}>
           {items.map(item => (
-            <div key={item.id} style={{flexShrink:0,width:78,height:39,borderRadius:4,overflow:'hidden'}}>
+            <div key={item.id} style={{flexShrink:0,width:156,height:78,borderRadius:4,overflow:'hidden'}}>
               {item.link ? (
                 <a href={item.link} target={item.link?.startsWith('/')?'_self':'_blank'} rel="noopener noreferrer" style={{display:'block',width:'100%',height:'100%'}}>
                   <img src={item.image_url} alt={item.title} style={{width:'100%',height:'100%',objectFit:'cover',display:'block'}}/>
