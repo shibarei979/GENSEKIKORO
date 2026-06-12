@@ -104,6 +104,8 @@ export default function GemSection({ novels, discoverCommentMap }: Props) {
             </NovelPreviewPopup>
           ) : null)}
         </div>
+        </div>
+        </div>
       </div>
     </>
   )
