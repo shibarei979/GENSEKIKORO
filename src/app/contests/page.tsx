@@ -54,22 +54,13 @@ export default async function ContestsPage() {
   const endedContests  = siteContests.filter((c:any) => getStatusLabel(c.deadline, c.judging_end).label === '終了')
 
   return (
-    <div style={{minHeight:'100vh',background:'#fff',fontFamily:"'Noto Sans JP',sans-serif"}}>
+    <div style={{minHeight:'100vh',background:'#FFF9F2',fontFamily:"'Noto Sans JP',sans-serif"}}>
       <Header profile={profile} user={user} />
 
       <div className="main-layout" style={{maxWidth:1200,margin:'0 auto',padding:'28px 32px',display:'flex',gap:20,alignItems:'flex-start'}}>
         <div style={{flex:1,minWidth:0}}>
 
-          {/* パンくず */}
-          <div style={{fontSize:12,color:'#77706A',marginBottom:16,display:'flex',alignItems:'center',gap:4}}>
-            <Link href="/" style={{color:'#F26A21',textDecoration:'none'}}>ホーム</Link>
-            <span>›</span>
-            <span>コンテスト</span>
-          </div>
 
-          <h1 style={{fontSize:22,fontWeight:700,color:'#2B211B',marginBottom:20,fontFamily:"'Noto Serif JP',serif"}}>
-            コンテスト
-          </h1>
 
           {/* サイトコンテスト（開催中・選考中・結果発表） */}
           {activeContests.length > 0 && (
