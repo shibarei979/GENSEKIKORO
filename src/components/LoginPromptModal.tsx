@@ -36,7 +36,6 @@ export default function LoginPromptModal({ show, onClose, message = 'この機�
           boxShadow:'0 8px 32px rgba(0,0,0,0.15)',
           animation:'modalIn .2s ease',
         }}>
-        <div style={{fontSize:32,marginBottom:12}}>🔒</div>
         <div style={{fontSize:16,fontWeight:700,color:'#2B211B',marginBottom:8}}>{message}</div>
         <div style={{fontSize:13,color:'#77706A',marginBottom:24,lineHeight:1.7}}>
           ログインすると、いいね・ブックマーク・拡散・コメントなどの機能が使えます。

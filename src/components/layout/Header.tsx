@@ -4,6 +4,7 @@ import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useState, useEffect, useRef } from 'react'
 import { createClient } from '@/lib/supabase/client'
+import SettingsModal from '@/components/SettingsModal'
 
 interface Props {
   profile?: { display_name: string; user_number?: number; icon_url?: string | null } | null
@@ -20,6 +21,7 @@ export default function Header({ profile, user, activeGenre }: Props) {
   const [showAllNotif, setShowAllNotif] = useState(false)
   const [showUserMenu, setShowUserMenu] = useState(false)
   const [showSettings, setShowSettings] = useState(false)
+  const [showSettingsModal, setShowSettingsModal] = useState(false)
   const notifRef = useRef<HTMLDivElement>(null)
   const userMenuRef = useRef<HTMLDivElement>(null)
   const supabase = createClient()
@@ -170,24 +172,11 @@ export default function Header({ profile, user, activeGenre }: Props) {
                       {/* 設定 */}
                       <div>
                         <button
-                          onClick={()=>setShowSettings(!showSettings)}
+                          onClick={()=>{setShowSettingsModal(true);setShowUserMenu(false)}}
                           style={{display:'flex',alignItems:'center',justifyContent:'space-between',width:'100%',padding:'11px 16px',borderBottom:'1px solid #FFF1E6',background:'#fff',border:'none',cursor:'pointer',fontSize:13,color:'#2B211B'}}>
                           <span>設定</span>
-                          <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#77706A" strokeWidth="2.5">
-                            <polyline points={showSettings?"18 15 12 9 6 15":"6 9 12 15 18 9"}/>
-                          </svg>
+                          <span style={{color:'#B8AEA8',fontSize:12}}>›</span>
                         </button>
-                        {showSettings && (
-                          <div style={{background:'#FFF9F2',borderBottom:'1px solid #FFF1E6'}}>
-                            {settingsItems.map(item => (
-                              <Link key={item.hash} href={`/mypage#${item.hash}`}
-                                onClick={()=>{setShowUserMenu(false);setShowSettings(false)}}
-                                style={{display:'block',padding:'8px 16px 8px 28px',fontSize:12,color:'#77706A',textDecoration:'none',borderBottom:'1px solid #F0D9C9'}}>
-                                {item.label}
-                              </Link>
-                            ))}
-                          </div>
-                        )}
                       </div>
 
                       {/* ログアウト */}
@@ -214,6 +203,13 @@ export default function Header({ profile, user, activeGenre }: Props) {
         .user-menu .user-tooltip { opacity: 0; transition: opacity .15s; }
         .user-menu:hover .user-tooltip { opacity: 1; }
       `}</style>
+
+      <SettingsModal
+        show={showSettingsModal}
+        onClose={()=>setShowSettingsModal(false)}
+        profile={profile}
+        userId={user?.id || ''}
+      />
 
       {/* メインNAV */}
       <nav style={{background:'#fff',borderBottom:'2px solid #F0D9C9'}}>
