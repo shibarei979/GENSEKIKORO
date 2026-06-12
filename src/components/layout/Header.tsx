@@ -96,7 +96,7 @@ export default function Header({ profile, user, activeGenre }: Props) {
           <Link href="/" style={{flexShrink:0}}>
             <img src="/logo.png" alt="原石航路" style={{height:90,width:'auto',display:'block',objectFit:'contain'}}/>
           </Link>
-          <form onSubmit={handleSearch} style={{position:'absolute',left:'calc(50% - 120px)',transform:'translateX(-50%)',width:480,display:'flex',alignItems:'center',border:'1.5px solid #F0D9C9',borderRadius:24,background:'#FFF9F2',overflow:'hidden'}}>
+          <form onSubmit={handleSearch} style={{position:'absolute',left:'calc(50% - 80px)',transform:'translateX(-50%)',width:520,display:'flex',alignItems:'center',border:'1.5px solid #F0D9C9',borderRadius:24,background:'#FFF9F2',overflow:'hidden'}}>
             <input value={q} onChange={e=>setQ(e.target.value)} placeholder="作品名・作者名・キーワードで検索"
               style={{flex:1,padding:'7px 16px',border:'none',background:'transparent',fontSize:13,color:'#2B211B',outline:'none'}}/>
             <button type="submit" style={{padding:'7px 14px',background:'none',border:'none',borderLeft:'1px solid #F0D9C9',cursor:'pointer',display:'flex',alignItems:'center'}}>
