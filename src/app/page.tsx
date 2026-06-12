@@ -291,15 +291,16 @@ export default async function HomePage() {
       </div>
 
       {/* モバイル用お知らせ */}
-      <div className="mobile-only" style={{background:'#FFF1E6',borderBottom:'2px solid #F26A21',padding:'12px 16px'}}>
-        <div style={{display:'flex',alignItems:'center',gap:6,marginBottom:8}}>
-          <span style={{background:'#F26A21',color:'#fff',fontSize:10,fontWeight:700,padding:'2px 8px',borderRadius:4}}>お知らせ</span>
+      <div className="mobile-only" style={{background:'#fff',border:'1px solid #F0D9C9',borderRadius:10,overflow:'hidden',margin:'12px 16px 0'}}>
+        <div style={{padding:'10px 16px',borderBottom:'1px solid #F0D9C9',display:'flex',alignItems:'center',justifyContent:'space-between',background:'#FFF9F2'}}>
+          <span style={{fontSize:14,fontWeight:700,color:'#2B211B'}}>お知らせ</span>
+          <a href="/announcements" style={{fontSize:12,color:'#F26A21',textDecoration:'none'}}>もっと見る ›</a>
         </div>
         {(sidebarAnnouncements||[]).slice(0,3).map((a:any)=>(
           <a key={a.id} href={a.link||`/announcements/${a.id}`}
-            style={{display:'flex',alignItems:'center',gap:6,fontSize:13,color:'#2B211B',padding:'7px 0',borderBottom:'1px solid #F0D9C9',textDecoration:'none',fontWeight:500}}>
-            <span style={{width:4,height:4,borderRadius:'50%',background:'#F26A21',flexShrink:0}}/>
-            {a.title}
+            style={{display:'block',padding:'10px 16px',borderBottom:'1px solid #FFF1E6',textDecoration:'none'}}>
+            <div style={{fontSize:12,color:'#2B211B',fontWeight:500,marginBottom:2}}>{a.title}</div>
+            <div style={{fontSize:10,color:'#B8AEA8'}}>{new Date(a.created_at).toLocaleDateString('ja-JP')}</div>
           </a>
         ))}
       </div>

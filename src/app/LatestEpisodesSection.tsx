@@ -21,7 +21,7 @@ interface Props {
 export default function LatestEpisodesSection({ episodes }: Props) {
   return (
     <div className="mobile-1col" style={{display:'grid',gridTemplateColumns:'1fr 1fr'}}>
-      {Array.from({length:10},(_,i)=>{ const mobileHide = i >= 4;
+      {Array.from({length:10},(_,i)=>{ const mobileHide = i >= 5;
         const ep = episodes[i]
         return ep ? (
           <NovelPreviewPopup key={ep.id} novel={{

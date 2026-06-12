@@ -50,7 +50,7 @@ export default function RecommendedNovels({ novels }: Props) {
         </button>
       </div>
       <div className="mobile-1col" style={{display:'grid',gridTemplateColumns:'1fr 1fr'}}>
-        {Array.from({length:8},(_,i) => { const mobileHide = i >= 4;
+        {Array.from({length:8},(_,i) => { const mobileHide = i >= 5;
           const n = displayed[i]
           return n ? (
             <NovelPreviewPopup key={n.id} novel={{...n, like_count: n.likeCount || n.like_count || 0}}>
