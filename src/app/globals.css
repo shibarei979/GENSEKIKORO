@@ -263,3 +263,11 @@ footer a:hover { color: #F26A21 !important; opacity: 1; }
     border-right: none !important;
   }
 }
+
+/* ===== スライダー デスクトップ/モバイル ===== */
+.slider-desktop { display: block !important; }
+.slider-mobile  { display: none !important; }
+@media (max-width: 768px) {
+  .slider-desktop { display: none !important; }
+  .slider-mobile  { display: block !important; }
+}

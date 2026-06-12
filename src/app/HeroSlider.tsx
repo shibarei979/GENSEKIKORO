@@ -12,21 +12,13 @@ interface Props {
   items: SlideItem[]
 }
 
+// デスクトップサイズ
 const ITEM_H = 156
 const ITEM_W = 312
 const GAP = 8
 
 export default function HeroSlider({ items }: Props) {
   const [offset, setOffset] = useState(0)
-  const [isMobile, setIsMobile] = useState(false)
-  useEffect(() => {
-    const check = () => setIsMobile(window.innerWidth <= 768)
-    check()
-    window.addEventListener('resize', check)
-    return () => window.removeEventListener('resize', check)
-  }, [])
-  const itemH = isMobile ? 39 : ITEM_H
-  const itemW = isMobile ? 78 : ITEM_W  // 縦1:横2の比率維持
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
   const max = Math.max(0, items.length - 2)
@@ -40,7 +32,6 @@ export default function HeroSlider({ items }: Props) {
     timerRef.current = setTimeout(() => {
       setOffset(prev => {
         if (prev >= max) {
-          // 最後まで来たら2秒後に先頭へ
           setTimeout(() => setOffset(0), 2000)
           return prev
         }
@@ -58,17 +49,38 @@ export default function HeroSlider({ items }: Props) {
 
   return (
     <div style={{position:'relative'}}>
-      <div style={{overflow:'hidden',borderRadius:8}}>
+      {/* デスクトップ */}
+      <div className="slider-desktop" style={{overflow:'hidden',borderRadius:8}}>
         <div style={{
-          display:'flex',
-          gap:GAP,
+          display:'flex', gap:GAP,
           transition:'transform 0.4s cubic-bezier(.4,0,.2,1)',
-          transform:`translateX(calc(-${offset} * (${itemW}px + ${GAP}px)))`,
+          transform:`translateX(calc(-${offset} * (${ITEM_W}px + ${GAP}px)))`,
         }}>
           {items.map(item => (
-            <div key={item.id} style={{flexShrink:0,width:ITEM_W,height:itemH,borderRadius:6,overflow:'hidden'}}>
+            <div key={item.id} style={{flexShrink:0,width:ITEM_W,height:ITEM_H,borderRadius:6,overflow:'hidden'}}>
               {item.link ? (
-                <a href={item.link} target={item.link?.startsWith('/') ? '_self' : '_blank'} rel="noopener noreferrer" style={{display:'block',width:'100%',height:'100%'}}>
+                <a href={item.link} target={item.link?.startsWith('/')?'_self':'_blank'} rel="noopener noreferrer" style={{display:'block',width:'100%',height:'100%'}}>
+                  <img src={item.image_url} alt={item.title} style={{width:'100%',height:'100%',objectFit:'cover',display:'block'}}/>
+                </a>
+              ) : (
+                <img src={item.image_url} alt={item.title} style={{width:'100%',height:'100%',objectFit:'cover',display:'block'}}/>
+              )}
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* モバイル（縦1:横2、1/4サイズ） */}
+      <div className="slider-mobile" style={{display:'none',overflow:'hidden',borderRadius:6}}>
+        <div style={{
+          display:'flex', gap:4,
+          transition:'transform 0.4s cubic-bezier(.4,0,.2,1)',
+          transform:`translateX(calc(-${offset} * (78px + 4px)))`,
+        }}>
+          {items.map(item => (
+            <div key={item.id} style={{flexShrink:0,width:78,height:39,borderRadius:4,overflow:'hidden'}}>
+              {item.link ? (
+                <a href={item.link} target={item.link?.startsWith('/')?'_self':'_blank'} rel="noopener noreferrer" style={{display:'block',width:'100%',height:'100%'}}>
                   <img src={item.image_url} alt={item.title} style={{width:'100%',height:'100%',objectFit:'cover',display:'block'}}/>
                 </a>
               ) : (
