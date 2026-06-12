@@ -12,152 +12,85 @@ body {
 
 ::-webkit-scrollbar { width: 5px; height: 5px; }
 ::-webkit-scrollbar-thumb { background: #F0D9C9; border-radius: 3px; }
-
 input[type="checkbox"] { accent-color: #F26A21; }
-
-/* ===== ホバーエフェクト（プロトタイプ準拠） ===== */
-
-/* ボタン共通 */
 button { cursor: pointer; }
-
-/* オレンジボタン hover */
 button[style*="background:'#F26A21'"]:hover,
-button[style*='background:"#F26A21"']:hover {
-  background: #d95a18 !important;
-}
-
-/* アウトラインボタン hover */
-button[style*="color:'#F26A21'"]:hover {
-  background: #FFF1E6 !important;
-}
-
-/* リンク全般 */
+button[style*='background:"#F26A21"']:hover { background: #d95a18 !important; }
+button[style*="color:'#F26A21'"]:hover { background: #FFF1E6 !important; }
 a { transition: opacity 0.15s ease; }
-
-/* カード hover（原石発掘・作品カード） */
 a[href*="/novel"]:hover > div,
-div[style*="cursor:'pointer'"]:hover {
-  background: #FFF9F2 !important;
-}
-
-/* ランキング・リスト行 hover */
+div[style*="cursor:'pointer'"]:hover { background: #FFF9F2 !important; }
 .list-row { transition: background 0.1s; cursor: pointer; }
 .list-row:hover { background: #FFF9F2 !important; }
 .list-row:hover .list-row-title { color: #F26A21 !important; }
-
-/* サイドバーアイテム hover */
 .sw-item:hover { background: #FFF9F2 !important; }
-
-/* 原石カード hover */
-.gem-card {
-  transition: transform .15s, box-shadow .15s;
-  cursor: pointer;
-}
-.gem-card:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 6px 18px rgba(242,106,33,.12);
-}
-
-/* ナビ hover */
+.gem-card { transition: transform .15s, box-shadow .15s; cursor: pointer; }
+.gem-card:hover { transform: translateY(-2px); box-shadow: 0 6px 18px rgba(242,106,33,.12); }
 nav a:hover { color: #F26A21 !important; opacity: 1; }
-
-/* ページャー hover */
 .pager:hover { border-color: #F26A21; color: #F26A21; }
-
-/* フォーム input focus */
-.finput:focus, .ftarea:focus,
-input:focus, textarea:focus {
-  border-color: #F26A21 !important;
-  outline: none;
-}
-
-/* インタラクティブ要素の cursor */
+.finput:focus, .ftarea:focus, input:focus, textarea:focus { border-color: #F26A21 !important; outline: none; }
 [style*="cursor:'pointer'"] { cursor: pointer; }
-
-/* Link要素がhover時にtitleをオレンジに */
-a:hover [style*="fontWeight:700"][style*="color:'#2B211B'"] {
-  color: #F26A21 !important;
-}
-
-/* ボタン全般の transition */
-button {
-  transition: background 0.15s ease, transform 0.1s ease, opacity 0.15s ease;
-}
-button:hover:not(:disabled) {
-  transform: translateY(-1px);
-}
-button:active:not(:disabled) {
-  transform: translateY(0);
-}
-
-/* テキストリンク（もっと見る等） */
-button[style*="background:'none'"]:hover,
-button[style*="background:none"]:hover,
-a[style*="color:'#F26A21'"]:hover {
-  opacity: 0.75;
-  text-decoration: underline;
-}
-
-/* フッターリスト */
+a:hover [style*="fontWeight:700"][style*="color:'#2B211B'"] { color: #F26A21 !important; }
+button { transition: background 0.15s ease, transform 0.1s ease, opacity 0.15s ease; }
+button:hover:not(:disabled) { transform: translateY(-1px); }
+button:active:not(:disabled) { transform: translateY(0); }
 .footer-col li:hover { color: #F26A21; }
-
-/* ユーザーメニュー */
 .user-menu:hover .user-tooltip { opacity: 1 !important; }
+footer a:hover { color: #F26A21 !important; opacity: 1; }
+.header-post-btn { transition: transform 0.15s ease, box-shadow 0.15s ease !important; }
+.header-post-btn:hover { transform: translateY(-3px) !important; box-shadow: 0 4px 12px rgba(242,106,33,0.25) !important; background: #fff8f5 !important; }
+.more-link:hover { transform: scale(1.08) !important; opacity: 1 !important; }
+.search-result-row:hover { background: #FFF9F2 !important; }
+.search-banner-link { transition: transform 0.15s ease, box-shadow 0.15s ease; display: block; border-radius: 14px; }
+.search-banner-link:hover { transform: translateY(-4px) !important; box-shadow: 0 8px 24px rgba(242,106,33,0.4) !important; opacity: 1 !important; }
+.announcement-title-link { font-size: 11px; color: #2B211B; line-height: 1.5; text-decoration: none; display: inline-block; }
+.announcement-title-link:hover { text-decoration: underline; opacity: 1 !important; }
 
-/* フッターリンク hover → オレンジ */
-footer a:hover {
-  color: #F26A21 !important;
-  opacity: 1;
+/* ===== レスポンシブ ===== */
+
+/* デスクトップ */
+.desktop-only { display: block; }
+.mobile-only  { display: none; }
+
+/* モバイル（〜768px） */
+@media (max-width: 768px) {
+  .desktop-only { display: none !important; }
+  .mobile-only  { display: block !important; }
+
+  /* padding調整 */
+  .page-container { padding: 12px 16px !important; }
+
+  /* 2カラム→1カラム */
+  .grid-2col { grid-template-columns: 1fr !important; }
+
+  /* サイドバー非表示 */
+  .sidebar { display: none !important; }
+
+  /* ヒーローh1 */
+  .hero-title { font-size: 22px !important; line-height: 1.4 !important; }
+
+  /* 統計バー2列 */
+  .stats-bar { grid-template-columns: repeat(2,1fr) !important; }
+
+  /* モーダル幅 */
+  .modal-inner { width: 92vw !important; max-width: 92vw !important; }
+
+  /* iOS入力ズーム防止 */
+  input, textarea, select { font-size: 16px !important; }
+
+  /* ランキングサイドバー縮小 */
+  .ranking-sidebar { width: 72px !important; min-width: 72px !important; font-size: 11px !important; }
+
+  /* フッターグリッド */
+  .footer-grid { grid-template-columns: repeat(2,1fr) !important; gap: 16px !important; }
+
+  /* テーブル横スクロール */
+  .table-wrap { overflow-x: auto !important; }
 }
 
-/* もっと見る / ランキングをもっと見る → hover で少し大きく */
-a[style*="ランキングをもっと見る"],
-a[style*="もっと見る"] {
-  transition: transform 0.15s ease, font-size 0.15s ease;
-  display: inline-block;
-}
-
-/* ヘッダーの「投稿する」ボタン hover → 上に浮く */
-.header-post-btn {
-  transition: transform 0.15s ease, box-shadow 0.15s ease !important;
-}
-.header-post-btn:hover {
-  transform: translateY(-3px) !important;
-  box-shadow: 0 4px 12px rgba(242,106,33,0.25) !important;
-}
-
-/* もっと見る hover */
-.more-link:hover {
-  transform: scale(1.08) !important;
-  opacity: 1 !important;
-}
-
-/* 検索結果行 hover */
-.search-result-row:hover {
-  background: #FFF9F2 !important;
-}
-
-/* 作品を探すバナー */
-.search-banner-link {
-  transition: transform 0.15s ease, box-shadow 0.15s ease;
-  display: block;
-  border-radius: 14px;
-}
-.search-banner-link:hover {
-  transform: translateY(-4px) !important;
-  box-shadow: 0 8px 24px rgba(242, 106, 33, 0.4) !important;
-  opacity: 1 !important;
-}
-
-/* お知らせタイトルリンク hover → 下線 */
-.announcement-title-link {
-  font-size: 11px;
-  color: #2B211B;
-  line-height: 1.5;
-  text-decoration: none;
-  display: inline-block;
-}
-.announcement-title-link:hover {
-  text-decoration: underline;
-  opacity: 1 !important;
+/* タブレット（769px〜1024px） */
+@media (min-width: 769px) and (max-width: 1024px) {
+  .page-container { padding: 16px 20px !important; }
+  .hero-title { font-size: 26px !important; }
+  .sidebar { width: 200px !important; min-width: 200px !important; }
 }
