@@ -173,13 +173,13 @@ export default function Header({ profile, user, activeGenre }: Props) {
             <img src="/logo.png" alt="原石航路" style={{height:92,width:'auto',display:'block',objectFit:'contain'}}/>
           </Link>
           {/* 右上にボタン */}
-          <div style={{display:'flex',alignItems:'center',gap:8,marginLeft:'auto',paddingTop:8}}>
-            <button onClick={()=>setShowMobileSearch(!showMobileSearch)}
-              style={{width:34,height:34,borderRadius:'50%',border:'1.5px solid #F0D9C9',background:'#FFF9F2',cursor:'pointer',display:'flex',alignItems:'center',justifyContent:'center'}}>
+          <div style={{display:'flex',alignItems:'center',gap:8,marginLeft:'auto',paddingTop:18}}>
+            <Link href="/search"
+              style={{width:34,height:34,borderRadius:'50%',border:'1.5px solid #F0D9C9',background:'#FFF9F2',cursor:'pointer',display:'flex',alignItems:'center',justifyContent:'center',textDecoration:'none'}}>
               <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#F26A21" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                 <circle cx="11" cy="11" r="7"/><line x1="16.5" y1="16.5" x2="22" y2="22"/>
               </svg>
-            </button>
+            </Link>
             <button onClick={()=>setShowMobileMenu(!showMobileMenu)}
               style={{width:34,height:34,borderRadius:'50%',border:'1.5px solid #F0D9C9',background:'#FFF9F2',cursor:'pointer',display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',gap:4}}>
               <span style={{display:'block',width:15,height:1.5,background:'#77706A',borderRadius:1}}/>

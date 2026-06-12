@@ -291,18 +291,21 @@ export default async function HomePage() {
       </div>
 
       {/* モバイル用お知らせ */}
-      <div className="mobile-only" style={{background:'#fff',borderBottom:'1px solid #F0D9C9',padding:'12px 16px'}}>
-        <div style={{fontSize:13,fontWeight:700,color:'#2B211B',marginBottom:8}}>お知らせ</div>
+      <div className="mobile-only" style={{background:'#FFF1E6',borderBottom:'2px solid #F26A21',padding:'12px 16px'}}>
+        <div style={{display:'flex',alignItems:'center',gap:6,marginBottom:8}}>
+          <span style={{background:'#F26A21',color:'#fff',fontSize:10,fontWeight:700,padding:'2px 8px',borderRadius:4}}>お知らせ</span>
+        </div>
         {(sidebarAnnouncements||[]).slice(0,3).map((a:any)=>(
           <a key={a.id} href={a.link||`/announcements/${a.id}`}
-            style={{display:'block',fontSize:12,color:'#2B211B',padding:'6px 0',borderBottom:'1px solid #FFF1E6',textDecoration:'none'}}>
+            style={{display:'flex',alignItems:'center',gap:6,fontSize:13,color:'#2B211B',padding:'7px 0',borderBottom:'1px solid #F0D9C9',textDecoration:'none',fontWeight:500}}>
+            <span style={{width:4,height:4,borderRadius:'50%',background:'#F26A21',flexShrink:0}}/>
             {a.title}
           </a>
         ))}
       </div>
 
       {/* ユーザーの推し */}
-      <div style={{background:'#fff',borderTop:'1px solid #F0D9C9',padding:'24px 0'}}>
+      <div className="gem-section-wrap" style={{background:'#fff',borderTop:'1px solid #F0D9C9',padding:'24px 0'}}>
         <div style={{maxWidth:1200,margin:'0 auto',padding:'0 32px'}}>
           <div className="gem-layout" style={{display:'flex',alignItems:'flex-start',gap:28}}>
             <div className="gem-label" style={{flexShrink:0,minWidth:160,maxWidth:160}}>
@@ -316,7 +319,7 @@ export default async function HomePage() {
       </div>
 
       {/* 作品を探す */}
-      <div style={{background:'#fff',padding:'20px 0'}}>
+      <div className="search-banner-section" style={{background:'#fff',padding:'20px 0'}}>
         <div style={{maxWidth:1200,margin:'0 auto',padding:'0 32px'}}>
           <SearchBanner />
         </div>

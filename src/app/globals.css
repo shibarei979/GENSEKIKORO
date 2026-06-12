@@ -397,3 +397,27 @@ footer a:hover { color: #F26A21 !important; opacity: 1; }
     flex: 1 !important;
   }
 }
+
+/* ===== 閲覧履歴 モバイル全幅 ===== */
+@media (max-width: 768px) {
+  .main-layout > div:first-child {
+    width: 100% !important;
+    flex: unset !important;
+  }
+}
+
+/* ===== モバイル4件表示 ===== */
+@media (max-width: 768px) {
+  .mobile-hide { display: none !important; }
+}
+
+/* ===== ユーザーの推し・作品を探す 順番変更 ===== */
+@media (max-width: 768px) {
+  .gem-section-wrap { order: 3; }
+  .search-banner-section { order: 2; }
+}
+
+/* ===== お知らせ モバイル ===== */
+@media (max-width: 768px) {
+  .mobile-only { display: block !important; }
+}

@@ -58,9 +58,9 @@ export default function RankingSection({ rankingLong, rankingShort }: Props) {
       {/* モバイル：1列（長編→短編） */}
       <div className="ranking-mobile" style={{display:'none'}}>
         <div style={{padding:'5px 12px',background:'#FFF9F2',borderBottom:'1px solid #F0D9C9',fontSize:11,fontWeight:700,color:'#F26A21'}}>長編</div>
-        {[0,1,2,3,4].map(i => <div key={`l${i}`}><RankItem n={rankingLong?.[i]} i={i}/></div>)}
+        {[0,1,2].map(i => <div key={`l${i}`}><RankItem n={rankingLong?.[i]} i={i}/></div>)}
         <div style={{padding:'5px 12px',background:'#FFF9F2',borderBottom:'1px solid #F0D9C9',borderTop:'1px solid #F0D9C9',fontSize:11,fontWeight:700,color:'#F26A21',marginTop:4}}>短編</div>
-        {[0,1,2,3,4].map(i => <div key={`s${i}`}><RankItem n={rankingShort?.[i]} i={i}/></div>)}
+        {[0,1,2].map(i => <div key={`s${i}`}><RankItem n={rankingShort?.[i]} i={i}/></div>)}
       </div>
     </>
   )

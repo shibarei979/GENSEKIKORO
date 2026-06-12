@@ -50,11 +50,11 @@ export default function RecommendedNovels({ novels }: Props) {
         </button>
       </div>
       <div className="mobile-1col" style={{display:'grid',gridTemplateColumns:'1fr 1fr'}}>
-        {Array.from({length:8},(_,i) => {
+        {Array.from({length:8},(_,i) => { const mobileHide = i >= 4;
           const n = displayed[i]
           return n ? (
             <NovelPreviewPopup key={n.id} novel={{...n, like_count: n.likeCount || n.like_count || 0}}>
-              <div style={{padding:'9px 14px',borderBottom:'1px solid #FFF1E6',borderRight:i%2===0?'1px solid #FFF1E6':'none',minHeight:60,cursor:'pointer'}}>
+              <div className={mobileHide?'mobile-hide':''} style={{padding:'9px 14px',borderBottom:'1px solid #FFF1E6',borderRight:i%2===0?'1px solid #FFF1E6':'none',minHeight:60,cursor:'pointer'}}>
                 <div style={{display:'flex',gap:4,marginBottom:2,flexWrap:'wrap'}}>
                   <span style={{fontSize:9,background:'#FFF1E6',color:'#F26A21',border:'1px solid #f5b080',padding:'1px 5px',borderRadius:3}}>{n.genre}</span>
                   {n.novel_type && <span style={{fontSize:9,background:'#eff6ff',color:'#2563eb',border:'1px solid #bfdbfe',padding:'1px 5px',borderRadius:3}}>{n.novel_type}</span>}
