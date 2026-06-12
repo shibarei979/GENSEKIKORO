@@ -291,7 +291,7 @@ export default async function HomePage() {
       </div>
 
       {/* モバイル用お知らせ */}
-      <div className="mobile-only" style={{background:'#fff',border:'1px solid #F0D9C9',borderRadius:10,overflow:'hidden',margin:'12px 16px 0'}}>
+      <div className="mobile-only" style={{background:'#fff',border:'1px solid #F0D9C9',borderRadius:10,overflow:'hidden'}}>
         <div style={{padding:'10px 16px',borderBottom:'1px solid #F0D9C9',display:'flex',alignItems:'center',justifyContent:'space-between',background:'#FFF9F2'}}>
           <span style={{fontSize:14,fontWeight:700,color:'#2B211B'}}>お知らせ</span>
           <a href="/announcements" style={{fontSize:12,color:'#F26A21',textDecoration:'none'}}>もっと見る ›</a>

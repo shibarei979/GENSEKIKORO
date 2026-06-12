@@ -68,7 +68,7 @@ export default function GemSection({ novels, discoverCommentMap }: Props) {
 
       {/* モバイル：お知らせ風デザイン */}
       <div className="gem-mobile" style={{display:'none',width:'100%'}}>
-        <div style={{background:'#fff',border:'1px solid #F0D9C9',borderRadius:10,overflow:'hidden',margin:'0 16px'}}>
+        <div style={{background:'#fff',border:'1px solid #F0D9C9',borderRadius:10,overflow:'hidden'}}>
           <div style={{padding:'10px 16px',borderBottom:'1px solid #F0D9C9',display:'flex',alignItems:'center',justifyContent:'space-between',background:'#FFF9F2'}}>
             <span style={{fontSize:14,fontWeight:700,color:'#2B211B'}}>ユーザーの推し</span>
             <a href="/search" style={{fontSize:12,color:'#F26A21',textDecoration:'none'}}>作品を探す ›</a>
