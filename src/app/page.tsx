@@ -265,7 +265,7 @@ export default async function HomePage() {
               </div>
             </div>
             {sliderItems.length > 0 && (
-              <div style={{flex:1,minWidth:0}}>
+              <div className="desktop-only" style={{flex:1,minWidth:0}}>
                 <HeroSlider items={sliderItems} />
               </div>
             )}
