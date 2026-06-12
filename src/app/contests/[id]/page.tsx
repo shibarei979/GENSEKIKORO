@@ -1,5 +1,5 @@
 import { createClient } from '@/lib/supabase/server'
-export const revalidate = 60 // 1分キャッシュ
+export const revalidate = 10 // 10秒キャッシュ
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
 import Header from '@/components/layout/Header'

@@ -1,5 +1,5 @@
 import { createClient } from '@/lib/supabase/server'
-export const revalidate = 60 // 1分キャッシュ
+export const revalidate = 10 // 10秒キャッシュ
 
 export async function generateMetadata({ params }: { params: { id: string } }) {
   const { createClient } = await import('@/lib/supabase/server')
