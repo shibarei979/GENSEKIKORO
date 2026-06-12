@@ -1,5 +1,6 @@
 import type { Metadata } from 'next'
 import './globals.css'
+import Script from 'next/script'
 
 export const metadata: Metadata = {
   title: '原石航路 - ライトノベル投稿サイト',
@@ -17,6 +18,12 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       </head>
       <body style={{background:'#FFF9F2'}} className="font-sans bg-bg text-text antialiased">
         {children}
+        <Script
+          async
+          src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-6967115026241459"
+          crossOrigin="anonymous"
+          strategy="afterInteractive"
+        />
       </body>
     </html>
   )
