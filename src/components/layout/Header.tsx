@@ -155,11 +155,16 @@ export default function Header({ profile, user, activeGenre }: Props) {
                   </button>
 
                   {showUserMenu && (
-                    <div style={{position:'absolute',right:0,top:'calc(100% + 8px)',width:180,background:'#fff',border:'1px solid #F0D9C9',borderRadius:12,boxShadow:'0 8px 24px rgba(0,0,0,0.12)',zIndex:200,overflow:'hidden'}}>
+                    <div style={{position:'absolute',right:0,top:'calc(100% + 8px)',width:200,background:'#fff',border:'1px solid #F0D9C9',borderRadius:12,boxShadow:'0 8px 24px rgba(0,0,0,0.12)',zIndex:200,overflow:'hidden'}}>
+                      {/* ユーザー情報 */}
+                      <div style={{padding:'10px 16px',borderBottom:'1px solid #F0D9C9',background:'#FFF9F2'}}>
+                        <div style={{fontSize:13,fontWeight:700,color:'#2B211B'}}>{profile?.display_name}</div>
+                        {userNumber && <div style={{fontSize:11,color:'#B8AEA8',marginTop:2}}>{userNumber}</div>}
+                      </div>
                       {/* マイページ */}
                       <Link href="/mypage" onClick={()=>setShowUserMenu(false)}
                         style={{display:'flex',alignItems:'center',gap:10,padding:'11px 16px',borderBottom:'1px solid #FFF1E6',textDecoration:'none',color:'#2B211B',fontSize:13}}>
-                        👤 マイページ
+                        マイページ
                       </Link>
 
                       {/* 設定 */}
@@ -167,7 +172,7 @@ export default function Header({ profile, user, activeGenre }: Props) {
                         <button
                           onClick={()=>setShowSettings(!showSettings)}
                           style={{display:'flex',alignItems:'center',justifyContent:'space-between',width:'100%',padding:'11px 16px',borderBottom:'1px solid #FFF1E6',background:'#fff',border:'none',cursor:'pointer',fontSize:13,color:'#2B211B'}}>
-                          <span>⚙️ 設定</span>
+                          <span>設定</span>
                           <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#77706A" strokeWidth="2.5">
                             <polyline points={showSettings?"18 15 12 9 6 15":"6 9 12 15 18 9"}/>
                           </svg>
@@ -188,7 +193,7 @@ export default function Header({ profile, user, activeGenre }: Props) {
                       {/* ログアウト */}
                       <button onClick={handleLogout}
                         style={{display:'flex',alignItems:'center',gap:10,padding:'11px 16px',width:'100%',border:'none',background:'#fff',cursor:'pointer',fontSize:13,color:'#dc2626',textAlign:'left'}}>
-                        🚪 ログアウト
+                        ログアウト
                       </button>
                     </div>
                   )}
