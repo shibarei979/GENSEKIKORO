@@ -167,10 +167,10 @@ export default function Header({ profile, user, activeGenre }: Props) {
         </div>
 
         {/* モバイルヘッダー */}
-        <div className="mobile-header" style={{display:'none',alignItems:'center',justifyContent:'center',padding:'0 16px',height:130,position:'relative',background:'#fff'}}>
+        <div className="mobile-header" style={{display:'none',alignItems:'center',justifyContent:'center',padding:'0 16px',height:78,position:'relative',background:'#fff'}}>
           {/* ロゴ中央 */}
           <Link href="/" style={{position:'absolute',left:'50%',transform:'translateX(-50%)'}}>
-            <img src="/logo.png" alt="原石航路" style={{height:144,width:'auto',display:'block',objectFit:'contain'}}/>
+            <img src="/logo.png" alt="原石航路" style={{height:115,width:'auto',display:'block',objectFit:'contain'}}/>
           </Link>
           {/* 右上にボタン */}
           <div style={{display:'flex',alignItems:'center',gap:8,marginLeft:'auto'}}>

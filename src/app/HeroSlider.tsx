@@ -25,8 +25,8 @@ export default function HeroSlider({ items }: Props) {
     window.addEventListener('resize', check)
     return () => window.removeEventListener('resize', check)
   }, [])
-  const itemH = isMobile ? Math.round(ITEM_H / 5) : ITEM_H
-  const itemW = isMobile ? Math.round(ITEM_W / 5) : ITEM_W
+  const itemH = isMobile ? Math.round(ITEM_H / 4) : ITEM_H
+  const itemW = isMobile ? Math.round(ITEM_W / 4) : ITEM_W
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
   const max = Math.max(0, items.length - 2)
