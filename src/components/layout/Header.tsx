@@ -6,7 +6,7 @@ import { useState, useEffect, useRef } from 'react'
 import { createClient } from '@/lib/supabase/client'
 
 interface Props {
-  profile?: { display_name: string; user_number?: number; icon_url?: string } | null
+  profile?: { display_name: string; user_number?: number; icon_url?: string | null } | null
   user?: any
   activeGenre?: string
 }
