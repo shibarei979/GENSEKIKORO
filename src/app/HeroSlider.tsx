@@ -21,7 +21,7 @@ export default function HeroSlider({ items }: Props) {
   const [offset, setOffset] = useState(0)
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
-  const max = Math.max(0, items.length - 2)
+  const max = Math.max(0, items.length - 1)
 
   function next() { setOffset(prev => prev >= max ? 0 : prev + 1) }
   function prev() { setOffset(prev => prev <= 0 ? max : prev - 1) }
@@ -96,7 +96,7 @@ export default function HeroSlider({ items }: Props) {
 
       {items.length > 1 && (
         <div style={{display:'flex',justifyContent:'center',gap:5,marginTop:6}}>
-          {Array.from({length: max + 1}, (_, i) => (
+          {Array.from({length: items.length}, (_, i) => (
             <button key={i} onClick={()=>setOffset(i)} style={{width:i===offset?16:6,height:6,borderRadius:3,border:'none',cursor:'pointer',background:i===offset?'#F26A21':'#F0D9C9',transition:'all .3s',padding:0}}/>
           ))}
         </div>
