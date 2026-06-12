@@ -251,12 +251,12 @@ export default async function HomePage() {
 
       {/* ヒーロー */}
       <section style={{background:'#FFF1E6',borderBottom:'1px solid #F0D9C9'}}>
-        <div style={{maxWidth:1200,margin:'0 auto',padding:'36px 32px 36px'}}>
-          <h1 style={{fontFamily:"'Noto Serif JP',serif",fontSize:32,fontWeight:700,color:'#2B211B',lineHeight:1.35,marginBottom:12}}>
+        <div className="hero-section" style={{maxWidth:1200,margin:'0 auto',padding:'36px 32px 36px'}}>
+          <h1 className="hero-title" style={{fontFamily:"'Noto Serif JP',serif",fontSize:32,fontWeight:700,color:'#2B211B',lineHeight:1.35,marginBottom:12}}>
             次のブームは、<em style={{color:'#F26A21',fontStyle:'normal'}}>ここから</em>生まれる。
           </h1>
           {/* テキスト＋ボタン＋スライダー横並び */}
-          <div style={{display:'flex',gap:24,alignItems:'center',marginRight:-80}}>
+          <div className="hero-flex" style={{display:'flex',gap:24,alignItems:'center',marginRight:-80}}>
             <div style={{flexShrink:0}}>
               <p style={{fontSize:13,color:'#77706A',lineHeight:1.85,marginBottom:16}}>まだ知られていない物語の原石を、<br/>読者とともに発掘するライトノベル投稿サイト。</p>
               <div style={{display:'flex',gap:10,flexWrap:'wrap'}}>
@@ -275,7 +275,7 @@ export default async function HomePage() {
 
       {/* 統計バー */}
       <div style={{background:'#fff',borderBottom:'1px solid #F0D9C9'}}>
-        <div style={{maxWidth:1200,margin:'0 auto',padding:'0 32px',display:'grid',gridTemplateColumns:'repeat(4,1fr)'}}>
+        <div className="stats-grid" style={{maxWidth:1200,margin:'0 auto',padding:'0 32px',display:'grid',gridTemplateColumns:'repeat(4,1fr)'}}>
           {[
             ['投稿作品数', fmtNum(novelCount ?? 0) + '作品'],
             ['登録ユーザー数', fmtNum(userCount ?? 0) + '人'],
@@ -290,11 +290,22 @@ export default async function HomePage() {
         </div>
       </div>
 
+      {/* モバイル用お知らせ */}
+      <div className="mobile-only" style={{background:'#fff',borderBottom:'1px solid #F0D9C9',padding:'12px 16px'}}>
+        <div style={{fontSize:13,fontWeight:700,color:'#2B211B',marginBottom:8}}>お知らせ</div>
+        {(sidebarAnnouncements||[]).slice(0,3).map((a:any)=>(
+          <a key={a.id} href={a.link||`/announcements/${a.id}`}
+            style={{display:'block',fontSize:12,color:'#2B211B',padding:'6px 0',borderBottom:'1px solid #FFF1E6',textDecoration:'none'}}>
+            {a.title}
+          </a>
+        ))}
+      </div>
+
       {/* ユーザーの推し */}
       <div style={{background:'#fff',borderTop:'1px solid #F0D9C9',padding:'24px 0'}}>
         <div style={{maxWidth:1200,margin:'0 auto',padding:'0 32px'}}>
-          <div style={{display:'flex',alignItems:'flex-start',gap:28}}>
-            <div style={{flexShrink:0,minWidth:160,maxWidth:160}}>
+          <div className="gem-layout" style={{display:'flex',alignItems:'flex-start',gap:28}}>
+            <div className="gem-label" style={{flexShrink:0,minWidth:160,maxWidth:160}}>
               <h2 style={{fontSize:17,fontWeight:700,color:'#2B211B',marginBottom:8}}>ユーザーの推し</h2>
               <p style={{fontSize:12,color:'#2B211B',lineHeight:1.9,marginBottom:12}}>推しの作品を拡散しよう！</p>
               <a href="/search" style={{display:'inline-block',fontSize:11,color:'#F26A21',border:'1.5px solid #F26A21',borderRadius:14,padding:'5px 12px',textDecoration:'none',fontWeight:600}}>作品を検索する</a>
@@ -312,7 +323,7 @@ export default async function HomePage() {
       </div>
 
       {/* メインエリア */}
-      <div style={{maxWidth:1200,margin:'0 auto',padding:'20px 32px',display:'flex',gap:20,alignItems:'flex-start'}}>
+      <div className="main-layout" style={{maxWidth:1200,margin:'0 auto',padding:'20px 32px',display:'flex',gap:20,alignItems:'flex-start'}}>
         <div style={{flex:1,minWidth:0,display:'flex',flexDirection:'column',gap:16}}>
 
           {/* 週間ランキング */}
@@ -349,7 +360,7 @@ export default async function HomePage() {
 
         </div>
 
-        <HomeSidebar announcements={sidebarAnnouncements||[]} contests={sidebarContests} />
+        <div className="desktop-only"><HomeSidebar announcements={sidebarAnnouncements||[]} contests={sidebarContests} /></div>
       </div>
 
       <AdBanner />
