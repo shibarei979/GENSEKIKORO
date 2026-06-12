@@ -1,5 +1,5 @@
 'use client'
-import { useState, useEffect } from 'react'
+import { useState, useRef } from 'react'
 
 interface Props {
   novel: {
@@ -18,57 +18,52 @@ interface Props {
 
 export default function NovelPreviewPopup({ novel, children }: Props) {
   const [show, setShow] = useState(false)
-  const [pos,  setPos]  = useState({ x: 0, y: 0 })
+  const ref = useRef<HTMLDivElement>(null)
+  const timerRef = useRef<ReturnType<typeof setTimeout>|null>(null)
 
-  // マス目風に表示するテキスト
   const displayText = novel.catchcopy || novel.summary?.slice(0, 60) || ''
-
-  // マス目に1文字ずつ配置
   const COLS = 10
   const ROWS = 4
   const chars = displayText.split('')
   const cells = Array.from({ length: COLS * ROWS }, (_, i) => chars[i] || '')
 
-  function handleMouseEnter(e: React.MouseEvent) {
-    const rect = (e.currentTarget as HTMLElement).getBoundingClientRect()
-    const x = rect.left + rect.width / 2
-    const y = rect.top
-    setPos({ x, y })
-    setShow(true)
+  function handleMouseEnter() {
+    if (timerRef.current) clearTimeout(timerRef.current)
+    timerRef.current = setTimeout(() => setShow(true), 200)
   }
 
   function handleMouseLeave() {
-    setShow(false)
-  }
-
-  function handleClick(e: React.MouseEvent) {
-    e.preventDefault()
-    window.location.href = `/novel/${novel.id}`
+    if (timerRef.current) clearTimeout(timerRef.current)
+    timerRef.current = setTimeout(() => setShow(false), 100)
   }
 
   return (
-    <div style={{position:'relative',display:'contents'}}
+    <div ref={ref} style={{position:'relative'}}
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}>
       {children}
 
       {show && (
         <div
-          onClick={handleClick}
+          onClick={() => window.location.href = `/novel/${novel.id}`}
+          onMouseEnter={handleMouseEnter}
+          onMouseLeave={handleMouseLeave}
           style={{
-            position:'fixed',
-            left: Math.min(pos.x - 160, window.innerWidth - 340),
-            top: Math.max(pos.y - 280, 60),
+            position:'absolute',
+            left:'50%',
+            bottom:'calc(100% + 8px)',
+            transform:'translateX(-50%)',
             zIndex:1000,
-            width:320,
+            width:300,
             background:'#fff',
             border:'2px solid #F26A21',
             borderRadius:12,
-            boxShadow:'0 8px 32px rgba(242,106,33,.2)',
+            boxShadow:'0 8px 32px rgba(242,106,33,.25)',
             cursor:'pointer',
             overflow:'hidden',
             animation:'popupIn .15s ease',
           }}>
+
           {/* ヘッダー */}
           <div style={{background:'#FFF1E6',padding:'10px 14px',borderBottom:'1px solid #F0D9C9'}}>
             <div style={{display:'flex',gap:5,marginBottom:4,flexWrap:'wrap'}}>
@@ -89,17 +84,16 @@ export default function NovelPreviewPopup({ novel, children }: Props) {
                 border:'1px solid #d4a843',
                 borderRadius:4,
                 overflow:'hidden',
-                marginBottom:10,
+                marginBottom:8,
               }}>
                 {cells.map((char, i) => (
                   <div key={i} style={{
-                    width:'100%',
                     aspectRatio:'1',
                     border:'0.5px solid #e8d5a0',
                     display:'flex',
                     alignItems:'center',
                     justifyContent:'center',
-                    fontSize:13,
+                    fontSize:12,
                     color:'#2B211B',
                     background: i % 2 === 0 ? '#FFFDF8' : '#FFF9EE',
                     fontFamily:"'Noto Serif JP',serif",
@@ -110,7 +104,7 @@ export default function NovelPreviewPopup({ novel, children }: Props) {
                 ))}
               </div>
               {displayText.length > COLS * ROWS && (
-                <div style={{fontSize:11,color:'#B8AEA8',textAlign:'center',marginBottom:6}}>…続きを読む</div>
+                <div style={{fontSize:11,color:'#B8AEA8',textAlign:'center'}}>…続く</div>
               )}
             </div>
           ) : (
@@ -120,9 +114,9 @@ export default function NovelPreviewPopup({ novel, children }: Props) {
           )}
 
           {/* CTAボタン */}
-          <div style={{padding:'10px 14px',borderTop:'1px solid #F0D9C9',textAlign:'center',background:'#FFF9F2'}}>
-            <span style={{display:'inline-block',padding:'7px 24px',background:'#F26A21',color:'#fff',
-              fontWeight:700,fontSize:13,borderRadius:20}}>
+          <div style={{padding:'8px 14px',borderTop:'1px solid #F0D9C9',textAlign:'center',background:'#FFF9F2'}}>
+            <span style={{display:'inline-block',padding:'6px 20px',background:'#F26A21',color:'#fff',
+              fontWeight:700,fontSize:12,borderRadius:20}}>
               作品を読む →
             </span>
           </div>
@@ -131,8 +125,8 @@ export default function NovelPreviewPopup({ novel, children }: Props) {
 
       <style>{`
         @keyframes popupIn {
-          from { opacity:0; transform:translateY(6px) scale(.97) }
-          to   { opacity:1; transform:translateY(0) scale(1) }
+          from { opacity:0; transform:translateX(-50%) translateY(6px) scale(.97) }
+          to   { opacity:1; transform:translateX(-50%) translateY(0) scale(1) }
         }
       `}</style>
     </div>

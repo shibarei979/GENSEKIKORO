@@ -25,7 +25,7 @@ export default function NovelList({ novels }: { novels: any[] }) {
       <div style={{display:'grid',gridTemplateColumns:'1fr 1fr'}}>
         {slots.map((n, i) => n ? (
           <NovelPreviewPopup key={n.id} novel={n}>
-            <a href={`/novel/${n.id}`} style={{textDecoration:'none',display:'block'}}>
+            <a href={`/novel/${n.id}`} style={{textDecoration:'none',display:'block',height:'100%'}}>
               <div style={{padding:'9px 14px',borderBottom:'1px solid #FFF1E6',borderRight:i%2===0?'1px solid #FFF1E6':'none',minHeight:68}}>
                 <div style={{display:'flex',gap:4,marginBottom:3,flexWrap:'wrap',alignItems:'center'}}>
                   <span style={{fontSize:9,background:'#FFF1E6',color:'#F26A21',border:'1px solid #f5b080',padding:'1px 5px',borderRadius:3}}>{n.genre}</span>
