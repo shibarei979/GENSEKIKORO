@@ -66,11 +66,9 @@ export default async function HomePage() {
   }
 
   // お知らせ・コンテスト取得
-  const [{ data: sidebarAnnouncements }, { data: allContests }] = await Promise.all([
+  const [{ data: sidebarAnnouncements }] = await Promise.all([
     supabase.from('announcements').select('id, title, body, type, link, image_url, created_at')
       .eq('is_published', true).order('created_at', { ascending: false }).limit(5),
-    supabase.from('contests').select('id, title, description, deadline, judging_end, apply_url, image_url, is_published, is_site_contest')
-      .eq('is_published', true).order('created_at', { ascending: false }),
   ])
 
   // サイドバー用コンテスト（全件・期限切れ除く）
