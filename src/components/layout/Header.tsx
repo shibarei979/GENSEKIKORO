@@ -19,6 +19,7 @@ export default function Header({ profile, user, activeGenre }: Props) {
   const [unreadCount, setUnreadCount] = useState(0)
   const [showAllNotif, setShowAllNotif] = useState(false)
   const [showUserMenu, setShowUserMenu] = useState(false)
+  const [showSettings, setShowSettings] = useState(false)
   const notifRef = useRef<HTMLDivElement>(null)
   const userMenuRef = useRef<HTMLDivElement>(null)
   const supabase = createClient()
@@ -34,11 +35,13 @@ export default function Header({ profile, user, activeGenre }: Props) {
     }
   }, [])
 
-  // 外側クリックでメニューを閉じる
   useEffect(() => {
     function handleClick(e: MouseEvent) {
       if (notifRef.current && !notifRef.current.contains(e.target as Node)) setShowNotif(false)
-      if (userMenuRef.current && !userMenuRef.current.contains(e.target as Node)) setShowUserMenu(false)
+      if (userMenuRef.current && !userMenuRef.current.contains(e.target as Node)) {
+        setShowUserMenu(false)
+        setShowSettings(false)
+      }
     }
     document.addEventListener('mousedown', handleClick)
     return () => document.removeEventListener('mousedown', handleClick)
@@ -77,11 +80,13 @@ export default function Header({ profile, user, activeGenre }: Props) {
     if (q.trim()) router.push(`/?q=${encodeURIComponent(q.trim())}`)
   }
 
-  const menuItems = [
-    { label: 'マイページ', href: '/mypage', icon: '👤' },
-    { label: '作品を投稿する', href: '/post', icon: '✏️' },
-    { label: '閲覧履歴', href: '/history', icon: '📖' },
-    { label: '設定', href: '/mypage#settings', icon: '⚙️' },
+  const settingsItems = [
+    { label: 'メールアドレスを変更', hash: 'email' },
+    { label: 'パスワードを変更', hash: 'password' },
+    { label: 'アイコンを変更', hash: 'icon' },
+    { label: '名前を変更', hash: 'name' },
+    { label: '自己紹介を編集', hash: 'bio' },
+    { label: '生年月日を設定', hash: 'birthdate' },
   ]
 
   return (
@@ -104,7 +109,7 @@ export default function Header({ profile, user, activeGenre }: Props) {
           <div style={{display:'flex',alignItems:'center',gap:12,position:'relative',zIndex:1}}>
             {user ? (
               <>
-                <Link href="/post" style={{border:'1.5px solid #F26A21',color:'#F26A21',padding:'6px 18px',borderRadius:20,background:'#fff',fontSize:13,fontWeight:500,display:'inline-block',textDecoration:'none'}}>＋ 投稿する</Link>
+                <Link href="/post" className="header-post-btn" style={{border:'1.5px solid #F26A21',color:'#F26A21',padding:'6px 18px',borderRadius:20,background:'#fff',fontSize:13,fontWeight:500,display:'inline-block',textDecoration:'none'}}>＋ 投稿する</Link>
 
                 {/* 通知ベル */}
                 <div ref={notifRef} style={{position:'relative'}}>
@@ -139,13 +144,10 @@ export default function Header({ profile, user, activeGenre }: Props) {
                 </div>
 
                 {/* ユーザーメニュー */}
-                <div ref={userMenuRef} style={{position:'relative'}}>
-                  <button onClick={()=>setShowUserMenu(!showUserMenu)}
+                <div ref={userMenuRef} style={{position:'relative'}} className="user-menu">
+                  <button onClick={()=>{setShowUserMenu(!showUserMenu);setShowSettings(false)}}
                     style={{display:'flex',alignItems:'center',gap:6,padding:'6px 14px',borderRadius:20,background:'#FFF9F2',border:'1.5px solid #F0D9C9',cursor:'pointer',fontSize:13}}>
-                    {profile?.icon_url
-                      ? <img src={profile.icon_url} style={{width:22,height:22,borderRadius:'50%',objectFit:'cover'}}/>
-                      : <span style={{width:22,height:22,borderRadius:'50%',background:'#F0D9C9',display:'flex',alignItems:'center',justifyContent:'center',fontSize:11,color:'#77706A'}}>👤</span>
-                    }
+                    <span style={{color:'#B8AEA8',fontSize:12}}>ユーザー：</span>
                     <span style={{color:'#F26A21',fontWeight:700}}>{(profile?.display_name || 'ユーザー').length > 8 ? (profile?.display_name || 'ユーザー').slice(0, 8) + '…' : (profile?.display_name || 'ユーザー')}</span>
                     <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#77706A" strokeWidth="2.5">
                       <polyline points="6 9 12 15 18 9"/>
@@ -153,25 +155,40 @@ export default function Header({ profile, user, activeGenre }: Props) {
                   </button>
 
                   {showUserMenu && (
-                    <div style={{position:'absolute',right:0,top:'calc(100% + 8px)',width:200,background:'#fff',border:'1px solid #F0D9C9',borderRadius:12,boxShadow:'0 8px 24px rgba(0,0,0,0.12)',zIndex:200,overflow:'hidden'}}>
-                      {/* ユーザー情報 */}
-                      <div style={{padding:'12px 16px',borderBottom:'1px solid #F0D9C9',background:'#FFF9F2'}}>
-                        <div style={{fontSize:13,fontWeight:700,color:'#2B211B'}}>{profile?.display_name}</div>
-                        {userNumber && <div style={{fontSize:11,color:'#B8AEA8',marginTop:2}}>{userNumber}</div>}
+                    <div style={{position:'absolute',right:0,top:'calc(100% + 8px)',width:180,background:'#fff',border:'1px solid #F0D9C9',borderRadius:12,boxShadow:'0 8px 24px rgba(0,0,0,0.12)',zIndex:200,overflow:'hidden'}}>
+                      {/* マイページ */}
+                      <Link href="/mypage" onClick={()=>setShowUserMenu(false)}
+                        style={{display:'flex',alignItems:'center',gap:10,padding:'11px 16px',borderBottom:'1px solid #FFF1E6',textDecoration:'none',color:'#2B211B',fontSize:13}}>
+                        👤 マイページ
+                      </Link>
+
+                      {/* 設定 */}
+                      <div>
+                        <button
+                          onClick={()=>setShowSettings(!showSettings)}
+                          style={{display:'flex',alignItems:'center',justifyContent:'space-between',width:'100%',padding:'11px 16px',borderBottom:'1px solid #FFF1E6',background:'#fff',border:'none',cursor:'pointer',fontSize:13,color:'#2B211B'}}>
+                          <span>⚙️ 設定</span>
+                          <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#77706A" strokeWidth="2.5">
+                            <polyline points={showSettings?"18 15 12 9 6 15":"6 9 12 15 18 9"}/>
+                          </svg>
+                        </button>
+                        {showSettings && (
+                          <div style={{background:'#FFF9F2',borderBottom:'1px solid #FFF1E6'}}>
+                            {settingsItems.map(item => (
+                              <Link key={item.hash} href={`/mypage#${item.hash}`}
+                                onClick={()=>{setShowUserMenu(false);setShowSettings(false)}}
+                                style={{display:'block',padding:'8px 16px 8px 28px',fontSize:12,color:'#77706A',textDecoration:'none',borderBottom:'1px solid #F0D9C9'}}>
+                                {item.label}
+                              </Link>
+                            ))}
+                          </div>
+                        )}
                       </div>
-                      {/* メニュー項目 */}
-                      {menuItems.map(item => (
-                        <Link key={item.href} href={item.href} onClick={()=>setShowUserMenu(false)}
-                          style={{display:'flex',alignItems:'center',gap:10,padding:'10px 16px',borderBottom:'1px solid #FFF1E6',textDecoration:'none',color:'#2B211B',fontSize:13}}>
-                          <span>{item.icon}</span>
-                          <span>{item.label}</span>
-                        </Link>
-                      ))}
+
                       {/* ログアウト */}
                       <button onClick={handleLogout}
-                        style={{display:'flex',alignItems:'center',gap:10,padding:'10px 16px',width:'100%',border:'none',background:'#fff',cursor:'pointer',fontSize:13,color:'#dc2626',textAlign:'left'}}>
-                        <span>🚪</span>
-                        <span>ログアウト</span>
+                        style={{display:'flex',alignItems:'center',gap:10,padding:'11px 16px',width:'100%',border:'none',background:'#fff',cursor:'pointer',fontSize:13,color:'#dc2626',textAlign:'left'}}>
+                        🚪 ログアウト
                       </button>
                     </div>
                   )}
@@ -186,6 +203,12 @@ export default function Header({ profile, user, activeGenre }: Props) {
           </div>
         </div>
       </header>
+
+      <style>{`
+        .header-post-btn:hover { background: #FFF1E6 !important; transform: translateY(-1px); transition: all .15s; }
+        .user-menu .user-tooltip { opacity: 0; transition: opacity .15s; }
+        .user-menu:hover .user-tooltip { opacity: 1; }
+      `}</style>
 
       {/* メインNAV */}
       <nav style={{background:'#fff',borderBottom:'2px solid #F0D9C9'}}>
