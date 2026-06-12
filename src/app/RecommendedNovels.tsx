@@ -1,7 +1,7 @@
 'use client'
 
-import Link from 'next/link'
 import { useState, useCallback } from 'react'
+import NovelPreviewPopup from '@/components/NovelPreviewPopup'
 
 interface Novel {
   id: string
@@ -10,6 +10,10 @@ interface Novel {
   novel_type: string
   display_name: string
   likeCount: number
+  like_count?: number
+  summary?: string | null
+  catchcopy?: string | null
+  tags?: string[]
 }
 
 interface Props {
@@ -49,8 +53,8 @@ export default function RecommendedNovels({ novels }: Props) {
         {Array.from({length:8},(_,i) => {
           const n = displayed[i]
           return n ? (
-            <Link key={n.id} href={`/novel/${n.id}`} style={{textDecoration:'none'}}>
-              <div style={{padding:'9px 14px',borderBottom:'1px solid #FFF1E6',borderRight:i%2===0?'1px solid #FFF1E6':'none',display:'block',minHeight:60}}>
+            <NovelPreviewPopup key={n.id} novel={{...n, like_count: n.likeCount || n.like_count || 0}}>
+              <div style={{padding:'9px 14px',borderBottom:'1px solid #FFF1E6',borderRight:i%2===0?'1px solid #FFF1E6':'none',minHeight:60,cursor:'pointer'}}>
                 <div style={{display:'flex',gap:4,marginBottom:2,flexWrap:'wrap'}}>
                   <span style={{fontSize:9,background:'#FFF1E6',color:'#F26A21',border:'1px solid #f5b080',padding:'1px 5px',borderRadius:3}}>{n.genre}</span>
                   {n.novel_type && <span style={{fontSize:9,background:'#eff6ff',color:'#2563eb',border:'1px solid #bfdbfe',padding:'1px 5px',borderRadius:3}}>{n.novel_type}</span>}
@@ -61,7 +65,7 @@ export default function RecommendedNovels({ novels }: Props) {
                   <span>♡ {n.likeCount||0}</span>
                 </div>
               </div>
-            </Link>
+            </NovelPreviewPopup>
           ) : (
             <div key={i} style={{padding:'9px 14px',borderBottom:'1px solid #FFF1E6',borderRight:i%2===0?'1px solid #FFF1E6':'none',minHeight:60}}>
               <div style={{display:'flex',gap:4,marginBottom:2}}>

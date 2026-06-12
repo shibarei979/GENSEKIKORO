@@ -1,5 +1,5 @@
 'use client'
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect } from 'react'
 import { createPortal } from 'react-dom'
 
 interface Props {
@@ -11,6 +11,8 @@ interface Props {
     summary?: string | null
     catchcopy?: string | null
     display_name?: string
+    like_count?: number
+    tags?: string[]
   }
   children: React.ReactNode
 }
@@ -21,11 +23,44 @@ export default function NovelPreviewPopup({ novel, children }: Props) {
 
   useEffect(() => { setMounted(true) }, [])
 
-  const displayText = novel.catchcopy || novel.summary?.slice(0, 60) || ''
-  const COLS = 10
-  const ROWS = 4
-  const chars = displayText.split('')
-  const cells = Array.from({ length: COLS * ROWS }, (_, i) => chars[i] || '')
+  const rawText = novel.catchcopy || novel.summary || ''
+
+  // 縦書き用文字変換：数字を全角に、ーはそのまま（回転で対応）
+  function toVertical(text: string): string {
+    return text
+      .replace(/0/g, '０').replace(/1/g, '１').replace(/2/g, '２')
+      .replace(/3/g, '３').replace(/4/g, '４').replace(/5/g, '５')
+      .replace(/6/g, '６').replace(/7/g, '７').replace(/8/g, '８')
+      .replace(/9/g, '９')
+  }
+
+  // 横向きにすべき文字（rotate90deg）
+  function isHorizontalChar(ch: string): boolean {
+    return ['ー','〜','…','‥','─','—','－'].includes(ch)
+  }
+
+  const ROWS = 20
+  const TOTAL_COLS = 7   // 表示上の総列数
+  const TEXT_COLS = 5    // 文章が入る列数（中央）
+  const BLANK_COLS = 1   // 左右の空白列数
+  const CELL = 27
+
+  // 改行で列を区切る
+  const lines = rawText.split('\n').map(toVertical)
+  const processedChars: (string | null)[] = []
+  for (const line of lines) {
+    const usedInCurrentCol = processedChars.length % ROWS
+    if (usedInCurrentCol > 0) {
+      const remaining = ROWS - usedInCurrentCol
+      for (let i = 0; i < remaining; i++) processedChars.push(null)
+    }
+    for (const ch of line.split('')) {
+      processedChars.push(ch)
+      if (processedChars.length >= ROWS * TEXT_COLS) break
+    }
+    if (processedChars.length >= ROWS * TEXT_COLS) break
+  }
+  const textCells = Array.from({ length: ROWS * TEXT_COLS }, (_, i) => processedChars[i] ?? null)
 
   function handleCardClick(e: React.MouseEvent) {
     e.preventDefault()
@@ -40,61 +75,114 @@ export default function NovelPreviewPopup({ novel, children }: Props) {
       <div
         onClick={e=>e.stopPropagation()}
         style={{
-          width:320,
           background:'#fff',
           border:'2px solid #F26A21',
           borderRadius:16,
-          boxShadow:'0 16px 48px rgba(0,0,0,.25)',
+          boxShadow:'0 8px 24px rgba(0,0,0,0.15)',
           overflow:'hidden',
           animation:'modalIn .2s ease',
+          width: CELL * (TOTAL_COLS + 5) + 56,
+          maxWidth:'95vw',
         }}>
 
         {/* ヘッダー */}
         <div style={{background:'#FFF1E6',padding:'12px 16px',borderBottom:'1px solid #F0D9C9',position:'relative'}}>
           <button onClick={()=>setShow(false)}
-            style={{position:'absolute',top:8,right:10,background:'none',border:'none',fontSize:18,color:'#B8AEA8',cursor:'pointer'}}>
+            style={{position:'absolute',top:8,right:12,background:'none',border:'none',fontSize:18,color:'#B8AEA8',cursor:'pointer'}}>
             ×
           </button>
           <div style={{display:'flex',gap:5,marginBottom:4,flexWrap:'wrap'}}>
             <span style={{fontSize:10,background:'#FFF1E6',color:'#F26A21',border:'1px solid #f5b080',padding:'1px 6px',borderRadius:3}}>{novel.genre}</span>
             {novel.novel_type && <span style={{fontSize:10,background:'#eff6ff',color:'#2563eb',border:'1px solid #bfdbfe',padding:'1px 6px',borderRadius:3}}>{novel.novel_type}</span>}
           </div>
-          <div style={{fontSize:15,fontWeight:700,color:'#2B211B',lineHeight:1.4,fontFamily:"'Noto Serif JP',serif",paddingRight:20}}>{novel.title}</div>
-          {novel.display_name && <div style={{fontSize:11,color:'#77706A',marginTop:3}}>作者：{novel.display_name}</div>}
-        </div>
-
-        {/* 原稿用紙風マス目 */}
-        {displayText ? (
-          <div style={{padding:'14px 16px',background:'#FFFDF8'}}>
-            <div style={{fontSize:10,color:'#B8AEA8',marginBottom:6,textAlign:'center'}}>― キャッチコピー ―</div>
-            <div style={{
-              display:'grid',
-              gridTemplateColumns:`repeat(${COLS}, 1fr)`,
-              gap:1,
-              border:'1px solid #d4a843',
-              borderRadius:6,
-              overflow:'hidden',
-              marginBottom:8,
-            }}>
-              {cells.map((char, i) => (
-                <div key={i} style={{
-                  aspectRatio:'1',
-                  border:'0.5px solid #e8d5a0',
-                  display:'flex',
-                  alignItems:'center',
-                  justifyContent:'center',
-                  fontSize:13,
-                  color: char ? '#2B211B' : 'transparent',
-                  background: i % 2 === 0 ? '#FFFDF8' : '#FFF9EE',
-                  fontFamily:"'Noto Serif JP',serif",
-                  lineHeight:1,
-                }}>
-                  {char || '　'}
-                </div>
+          <div style={{fontSize:15,fontWeight:700,color:'#2B211B',lineHeight:1.4,fontFamily:"'Noto Serif JP',serif",paddingRight:24}}>{novel.title}</div>
+          {novel.display_name && (
+            <div style={{display:'flex',alignItems:'center',gap:8,marginTop:3,flexWrap:'wrap'}}>
+              <span style={{fontSize:11,color:'#77706A'}}>作者：{novel.display_name}</span>
+              {novel.like_count !== undefined && novel.like_count > 0 && (
+                <span style={{fontSize:11,color:'#77706A'}}>♡ {novel.like_count}</span>
+              )}
+            </div>
+          )}
+          {(novel.tags||[]).length > 0 && (
+            <div style={{display:'flex',gap:4,flexWrap:'wrap',marginTop:5}}>
+              {(novel.tags||[]).slice(0,5).map((t:string) => (
+                <span key={t} style={{fontSize:9,background:'#FFF9F2',color:'#77706A',border:'1px solid #F0D9C9',padding:'1px 5px',borderRadius:3}}>#{t}</span>
               ))}
             </div>
-            {displayText.length > COLS * ROWS && (
-              <div style={{fontSize:11,color:'#B8AEA8',textAlign:'center'}}>…続く</div>
+          )}
+        </div>
+
+        {/* マス目 */}
+        {rawText ? (
+          <div style={{padding:'16px 0',background:'#fff'}}>
+            <div style={{fontSize:10,color:'#999',marginBottom:8,textAlign:'center',letterSpacing:'0.1em'}}>
+              {novel.catchcopy ? '― キャッチコピー ―' : '― あらすじ ―'}
+            </div>
+            <div style={{margin:'0 28px'}}>
+              {/* 7列のグリッド：左1列空白 + 中央5列文章 + 右1列空白 */}
+              <div style={{
+                display:'flex',
+                flexDirection:'row',
+                border:'1px solid #ccc',
+                borderRadius:3,
+                overflow:'hidden',
+                padding:'12px 0',
+              }}>
+                {/* 右の空白地帯 */}
+                <div style={{flex:1,display:'flex',flexDirection:'column'}}>
+                  {Array.from({length: ROWS}, (_, row) => (
+                    <div key={row} style={{flex:1,height:CELL,borderBottom:row<ROWS-1?'1px solid #eee':'none',borderRight:'1px solid #ddd'}}/>
+                  ))}
+                </div>
+
+                {/* 中央5列（右から左の順で文章） */}
+                {Array.from({length: TEXT_COLS}, (_, col) => {
+                  const actualCol = TEXT_COLS - 1 - col
+                  return (
+                    <div key={col} style={{
+                      display:'flex',
+                      flexDirection:'column',
+                      borderRight:'1px solid #ddd',
+                    }}>
+                      {Array.from({length: ROWS}, (_, row) => {
+                        const char = textCells[actualCol * ROWS + row]
+                        return (
+                          <div key={row} style={{
+                            width:CELL,
+                            height:CELL,
+                            borderBottom:row<ROWS-1?'1px solid #eee':'none',
+                            display:'flex',
+                            alignItems:'center',
+                            justifyContent:'center',
+                            fontSize:15,
+                            color: char ? '#111' : 'transparent',
+                            fontFamily:"'Noto Serif JP',serif",
+                            lineHeight:1,
+                            flexShrink:0,
+                          }}>
+                            <span style={{
+                              display:'inline-block',
+                              transform: isHorizontalChar(char || '') ? 'rotate(90deg)' : 'none',
+                              lineHeight: 1,
+                            }}>{char || '　'}</span>
+                          </div>
+                        )
+                      })}
+                    </div>
+                  )
+                })}
+
+                {/* 左の空白地帯 */}
+                <div style={{flex:1,display:'flex',flexDirection:'column'}}>
+                  {Array.from({length: ROWS}, (_, row) => (
+                    <div key={row} style={{flex:1,height:CELL,borderBottom:row<ROWS-1?'1px solid #eee':'none'}}/>
+                  ))}
+                </div>
+              </div>
+            </div>
+            {rawText.replace(/\n/g,'').length > ROWS * TEXT_COLS && (
+              <div style={{fontSize:11,color:'#B8AEA8',textAlign:'center',marginTop:6}}>…続く</div>
             )}
           </div>
         ) : (

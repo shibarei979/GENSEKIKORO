@@ -10,6 +10,9 @@ import Header from '@/components/layout/Header'
 import Footer from '@/components/layout/Footer'
 import AdBanner from '@/components/layout/AdBanner'
 import HeroSlider from './HeroSlider'
+import GemSection from './GemSection'
+import RankingSection from './RankingSection'
+import LatestEpisodesSection from './LatestEpisodesSection'
 
 function getContestStatusKey(deadline: string | null, judging_end: string | null) {
   const now = new Date()
@@ -79,7 +82,7 @@ export default async function HomePage() {
 
   const { data: latestEpisodesRaw } = await supabase
     .from('episodes')
-    .select('id, title, ep_number, created_at, novel_id, novels(id, title, genre, author_id, published)')
+    .select('id, title, ep_number, created_at, novel_id, novels(id, title, genre, author_id, published, summary, catchcopy, tags)')
     .order('created_at', { ascending: false })
     .limit(20)
 
@@ -108,13 +111,16 @@ export default async function HomePage() {
     novel_title: (ep.novels as any)?.title,
     genre: (ep.novels as any)?.genre,
     author_name: epAuthorMap[(ep.novels as any)?.author_id] || '',
+    summary: (ep.novels as any)?.summary || null,
+    catchcopy: (ep.novels as any)?.catchcopy || null,
+    tags: (ep.novels as any)?.tags || [],
   }))
 
   // 新着作品
   const oneMonthAgo = new Date(Date.now() - 30*24*60*60*1000).toISOString()
   const { data: allLatestRaw } = await supabase
     .from('novels')
-    .select('id, title, genre, is_serial, novel_type, author_id, created_at')
+    .select('id, title, genre, is_serial, novel_type, author_id, created_at, summary, catchcopy, tags')
     .eq('published', true)
     .eq('is_r18', false)
     .neq('genre', '官能')
@@ -138,7 +144,7 @@ export default async function HomePage() {
   if (weeklyNovelIds.length > 0) {
     const { data: weeklyNovels } = await supabase
       .from('novels')
-      .select('id, title, genre, novel_type, author_id')
+      .select('id, title, genre, novel_type, author_id, summary, catchcopy, tags')
       .in('id', weeklyNovelIds)
       .eq('published', true)
     const sorted = (weeklyNovels || []).sort((a: any, b: any) => (weeklyLikeMap[b.id]||0) - (weeklyLikeMap[a.id]||0))
@@ -161,13 +167,14 @@ export default async function HomePage() {
   const latestNovels = latestNovelsBase.map((n: any) => ({
     ...n,
     likeCount:     latestLikeMap[n.id]     || 0,
+    like_count:    latestLikeMap[n.id]     || 0,
     bookmarkCount: latestBookmarkMap[n.id] || 0,
   }))
 
   // おすすめ枠
   const { data: allNovelsRaw } = await supabase
     .from('novels')
-    .select('id, title, genre, novel_type, author_id, created_at, originality_score, is_r18')
+    .select('id, title, genre, novel_type, author_id, created_at, originality_score, is_r18, summary, catchcopy, tags')
     .eq('published', true)
     .eq('is_r18', false)
     .neq('genre', '官能')
@@ -192,6 +199,7 @@ export default async function HomePage() {
     ...n,
     score: (likeMap[n.id]||0)*3 + (bookmarkMap[n.id]||0)*2 + (discoverMap[n.id]||0)*4 + Math.round((n.originality_score||0)/5),
     likeCount: likeMap[n.id]||0,
+    like_count: likeMap[n.id]||0,
   }))
   const recommended = [...scored.sort((a: any,b: any)=>b.score-a.score).slice(0,20)].sort(()=>Math.random()-0.5).slice(0,8)
 
@@ -291,55 +299,7 @@ export default async function HomePage() {
               <p style={{fontSize:12,color:'#2B211B',lineHeight:1.9,marginBottom:12}}>推しの作品を拡散しよう！</p>
               <a href="/search" style={{display:'inline-block',fontSize:11,color:'#F26A21',border:'1.5px solid #F26A21',borderRadius:14,padding:'5px 12px',textDecoration:'none',fontWeight:600}}>作品を検索する</a>
             </div>
-            <div style={{flex:1,overflowX:'auto'}}>
-              <div style={{display:'flex',gap:12,minWidth:'max-content',paddingBottom:6}}>
-                {Array.from({length:7},(_,i)=>{
-                  const n = gemNovels[i]
-                  return n ? (
-                    <Link key={n.id} href={`/novel/${n.id}`} style={{textDecoration:'none'}}>
-                      <div style={{width:195,height:195,background:'#fff',border:'1px solid #F0D9C9',borderRadius:10,overflow:'hidden',flexShrink:0,display:'flex',flexDirection:'column'}}>
-                        <div style={{padding:9,flex:2,overflow:'hidden'}}>
-                          <div style={{display:'flex',gap:4,marginBottom:4,flexWrap:'wrap'}}>
-                            <span style={{fontSize:9,fontWeight:700,color:'#F26A21',background:'#FFF1E6',border:'1px solid #f5b080',padding:'1px 5px',borderRadius:3}}>原石</span>
-                            <span style={{fontSize:9,color:'#77706A',background:'#FFF9F2',border:'1px solid #F0D9C9',padding:'1px 5px',borderRadius:3}}>{n.genre}</span>
-                          </div>
-                          <div style={{fontSize:13,fontWeight:700,color:'#2B211B',lineHeight:1.4,marginBottom:3,overflow:'hidden',display:'-webkit-box',WebkitLineClamp:2,WebkitBoxOrient:'vertical' as any}}>{n.title}</div>
-                          <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',gap:4}}>
-                            <div style={{fontSize:10,color:'#77706A',overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap'}}>作者：{n.display_name}</div>
-                            <div style={{display:'flex',alignItems:'center',gap:5,flexShrink:0}}>
-                              {n.likeCount2 > 0 && <span style={{fontSize:9,color:'#B8AEA8'}}>♡ {n.likeCount2}</span>}
-                              {n.discoverCount > 0 && (
-                                <span style={{fontSize:9,color:'#B8AEA8',display:'flex',alignItems:'center',gap:1}}>
-                                  <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="#B8AEA8" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                                    <polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/>
-                                  </svg>
-                                  {n.discoverCount}
-                                </span>
-                              )}
-                            </div>
-                          </div>
-                        </div>
-                        <GemComment novelId={n.id} discoverCount={n.discoverCount} likeCount={n.likeCount2} discoverComments={discoverCommentMap[n.id]||[]} />
-                      </div>
-                    </Link>
-                  ) : (
-                    <div key={i} style={{width:195,height:195,background:'#fff',border:'1px solid #F0D9C9',borderRadius:10,overflow:'hidden',flexShrink:0,display:'flex',flexDirection:'column'}}>
-                      <div style={{padding:9,flex:2,overflow:'hidden'}}>
-                        <div style={{display:'flex',gap:4,marginBottom:4}}>
-                          <span style={{fontSize:9,fontWeight:700,color:'#F26A21',background:'#FFF1E6',border:'1px solid #f5b080',padding:'1px 5px',borderRadius:3}}>原石</span>
-                          <span style={{fontSize:9,color:'#77706A',background:'#FFF9F2',border:'1px solid #F0D9C9',padding:'1px 5px',borderRadius:3}}>ジャンル</span>
-                        </div>
-                        <div style={{fontSize:13,fontWeight:700,color:'#2B211B',lineHeight:1.4,marginBottom:3}}>作品タイトル（準備中）</div>
-                      </div>
-                      <div style={{borderTop:'1px solid #F0D9C9',background:'#FFF9F2',padding:'8px 10px',flex:3,display:'flex',flexDirection:'column',justifyContent:'center'}}>
-                        <div style={{fontSize:9,fontWeight:700,color:'#F26A21',marginBottom:3}}>読者の声</div>
-                        <div style={{fontSize:10,color:'#B8AEA8',lineHeight:1.55,fontStyle:'italic',textAlign:'center',width:'100%'}}>君の声を届けよう</div>
-                      </div>
-                    </div>
-                  )
-                })}
-              </div>
-            </div>
+            <GemSection novels={gemNovels} discoverCommentMap={discoverCommentMap} />
           </div>
         </div>
       </div>
@@ -360,55 +320,7 @@ export default async function HomePage() {
             <div style={{padding:'10px 16px',borderBottom:'1px solid #F0D9C9',display:'flex',alignItems:'center',justifyContent:'space-between',background:'#FFF9F2'}}>
               <span style={{fontSize:14,fontWeight:700,color:'#2B211B'}}>週間ランキング</span>
             </div>
-            <div style={{display:'grid',gridTemplateColumns:'1fr 1fr'}}>
-              <div style={{padding:'5px 12px',background:'#FFF9F2',borderBottom:'1px solid #F0D9C9',fontSize:11,fontWeight:700,color:'#F26A21',borderRight:'1px solid #F0D9C9'}}>長編</div>
-              <div style={{padding:'5px 12px',background:'#FFF9F2',borderBottom:'1px solid #F0D9C9',fontSize:11,fontWeight:700,color:'#F26A21'}}>短編</div>
-              {[0,1,2,3,4].map(i => {
-                const l = rankingLong?.[i]
-                const s = rankingShort?.[i]
-                const rowStyle = {borderBottom:'1px solid #FFF1E6',display:'flex',gap:8,padding:'9px 14px',alignItems:'flex-start',height:'100%',boxSizing:'border-box' as const}
-                return (<>
-                  <div key={`l${i}`} style={{borderRight:'1px solid #F0D9C9'}}>
-                    {l ? (
-                      <Link href={`/novel/${l.id}`} style={{textDecoration:'none',display:'block',height:'100%'}}>
-                        <div style={rowStyle}>
-                          <span style={{fontSize:15,fontWeight:700,minWidth:18,fontFamily:"'Noto Serif JP',serif",color:i===0?'#F26A21':i===1?'#9ca3af':i===2?'#cd7f32':'#2B211B',flexShrink:0}}>{i+1}</span>
-                          <div>
-                            <div style={{marginBottom:2}}><span style={{fontSize:9,background:'#FFF1E6',color:'#F26A21',border:'1px solid #f5b080',padding:'1px 5px',borderRadius:3}}>{l.genre}</span></div>
-                            <div style={{fontSize:13,fontWeight:700,color:'#2B211B'}}>{l.title}</div>
-                            <div style={{fontSize:10,color:'#77706A',marginTop:1}}>作者：{l.display_name} · ♡ {l.like_count||0}</div>
-                          </div>
-                        </div>
-                      </Link>
-                    ) : (
-                      <div style={rowStyle}>
-                        <span style={{fontSize:15,fontWeight:700,minWidth:18,color:'#E8C8B0',flexShrink:0}}>{i+1}</span>
-                        <div><div style={{marginBottom:2}}><span style={{fontSize:9,background:'#FFF1E6',color:'#F26A21',border:'1px solid #f5b080',padding:'1px 5px',borderRadius:3}}>ジャンル</span></div><div style={{fontSize:13,fontWeight:700,color:'#2B211B'}}>作品タイトル（準備中）</div></div>
-                      </div>
-                    )}
-                  </div>
-                  <div key={`s${i}`}>
-                    {s ? (
-                      <Link href={`/novel/${s.id}`} style={{textDecoration:'none',display:'block',height:'100%'}}>
-                        <div style={rowStyle}>
-                          <span style={{fontSize:15,fontWeight:700,minWidth:18,fontFamily:"'Noto Serif JP',serif",color:i===0?'#F26A21':i===1?'#9ca3af':i===2?'#cd7f32':'#2B211B',flexShrink:0}}>{i+1}</span>
-                          <div>
-                            <div style={{marginBottom:2}}><span style={{fontSize:9,background:'#FFF1E6',color:'#F26A21',border:'1px solid #f5b080',padding:'1px 5px',borderRadius:3}}>{s.genre}</span></div>
-                            <div style={{fontSize:13,fontWeight:700,color:'#2B211B'}}>{s.title}</div>
-                            <div style={{fontSize:10,color:'#77706A',marginTop:1}}>作者：{s.display_name} · ♡ {s.like_count||0}</div>
-                          </div>
-                        </div>
-                      </Link>
-                    ) : (
-                      <div style={rowStyle}>
-                        <span style={{fontSize:15,fontWeight:700,minWidth:18,color:'#E8C8B0',flexShrink:0}}>{i+1}</span>
-                        <div><div style={{marginBottom:2}}><span style={{fontSize:9,background:'#FFF1E6',color:'#F26A21',border:'1px solid #f5b080',padding:'1px 5px',borderRadius:3}}>ジャンル</span></div><div style={{fontSize:13,fontWeight:700,color:'#2B211B'}}>作品タイトル（準備中）</div></div>
-                      </div>
-                    )}
-                  </div>
-                </>)
-              })}
-            </div>
+            <RankingSection rankingLong={rankingLong} rankingShort={rankingShort} />
             <div style={{padding:'9px 16px',textAlign:'center',borderTop:'1px solid #F0D9C9'}}>
               <a href='/ranking' className='more-link' style={{fontSize:12,color:'#F26A21',textDecoration:'none',display:'inline-block'}}>もっと見る ›</a>
             </div>
@@ -421,32 +333,7 @@ export default async function HomePage() {
             <div style={{padding:'10px 16px',borderBottom:'1px solid #F0D9C9',display:'flex',alignItems:'center',justifyContent:'space-between',background:'#FFF9F2'}}>
               <span style={{fontSize:14,fontWeight:700,color:'#2B211B'}}>最新話更新</span>
             </div>
-            <div style={{display:'grid',gridTemplateColumns:'1fr 1fr'}}>
-              {Array.from({length:10},(_,i)=>{
-                const ep = latestEpisodes[i]
-                return ep ? (
-                  <Link key={ep.id} href={`/novel/${ep.novel_id}/episode/${ep.id}`} style={{textDecoration:'none'}}>
-                    <div style={{padding:'9px 14px',borderBottom:'1px solid #FFF1E6',borderRight:i%2===0?'1px solid #FFF1E6':'none'}}>
-                      <div style={{display:'flex',gap:4,alignItems:'center',marginBottom:2}}>
-                        <span style={{fontSize:9,background:'#FFF1E6',color:'#F26A21',border:'1px solid #f5b080',padding:'1px 5px',borderRadius:3}}>{ep.genre}</span>
-                        <span style={{background:'#F26A21',color:'#fff',fontSize:9,padding:'0 4px',borderRadius:3,fontWeight:700}}>NEW</span>
-                      </div>
-                      <div style={{fontSize:13,fontWeight:700,color:'#2B211B',marginBottom:1}}>{ep.novel_title}</div>
-                      <div style={{fontSize:10,color:'#77706A'}}>{ep.title}</div>
-                      <div style={{fontSize:10,color:'#77706A'}}>作者：{ep.author_name}</div>
-                    </div>
-                  </Link>
-                ) : (
-                  <div key={i} style={{padding:'9px 14px',borderBottom:'1px solid #FFF1E6',borderRight:i%2===0?'1px solid #FFF1E6':'none'}}>
-                    <div style={{display:'flex',gap:4,alignItems:'center',marginBottom:2}}>
-                      <span style={{fontSize:9,background:'#FFF1E6',color:'#F26A21',border:'1px solid #f5b080',padding:'1px 5px',borderRadius:3}}>ジャンル</span>
-                      <span style={{background:'#F26A21',color:'#fff',fontSize:9,padding:'0 4px',borderRadius:3,fontWeight:700}}>NEW</span>
-                    </div>
-                    <div style={{fontSize:13,fontWeight:700,color:'#2B211B'}}>作品タイトル（準備中）</div>
-                  </div>
-                )
-              })}
-            </div>
+            <LatestEpisodesSection episodes={latestEpisodes} />
             <div style={{padding:'9px 16px',textAlign:'center',borderTop:'1px solid #F0D9C9'}}>
               <a href='/ranking' className='more-link' style={{fontSize:12,color:'#F26A21',textDecoration:'none',display:'inline-block'}}>もっと見る ›</a>
             </div>
