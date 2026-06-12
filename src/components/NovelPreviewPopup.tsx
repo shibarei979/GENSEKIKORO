@@ -1,5 +1,5 @@
 'use client'
-import { useState, useRef } from 'react'
+import { useState, useEffect, useRef } from 'react'
 
 interface Props {
   novel: {
@@ -16,8 +16,7 @@ interface Props {
 
 export default function NovelPreviewPopup({ novel, children }: Props) {
   const [show, setShow] = useState(false)
-  const enterTimer = useRef<ReturnType<typeof setTimeout>|null>(null)
-  const leaveTimer = useRef<ReturnType<typeof setTimeout>|null>(null)
+  const popupRef = useRef<HTMLDivElement>(null)
 
   const displayText = novel.catchcopy || novel.summary?.slice(0, 60) || ''
   const COLS = 10
@@ -25,39 +24,46 @@ export default function NovelPreviewPopup({ novel, children }: Props) {
   const chars = displayText.split('')
   const cells = Array.from({ length: COLS * ROWS }, (_, i) => chars[i] || '')
 
-  function onEnter() {
-    if (leaveTimer.current) clearTimeout(leaveTimer.current)
-    enterTimer.current = setTimeout(() => setShow(true), 300)
-  }
-
-  function onLeave() {
-    if (enterTimer.current) clearTimeout(enterTimer.current)
-    leaveTimer.current = setTimeout(() => setShow(false), 150)
-  }
+  // 外側クリックで閉じる
+  useEffect(() => {
+    if (!show) return
+    function handleClick(e: MouseEvent) {
+      if (popupRef.current && !popupRef.current.contains(e.target as Node)) {
+        setShow(false)
+      }
+    }
+    document.addEventListener('mousedown', handleClick)
+    return () => document.removeEventListener('mousedown', handleClick)
+  }, [show])
 
   return (
-    <div style={{position:'relative'}} onMouseEnter={onEnter} onMouseLeave={onLeave}>
-      {children}
+    <div style={{position:'relative'}}>
+      {/* クリックでポップアップ表示 */}
+      <div onClick={(e) => { e.preventDefault(); e.stopPropagation(); setShow(s => !s) }}>
+        {children}
+      </div>
 
       {show && (
-        <div
-          onMouseEnter={onEnter}
-          onMouseLeave={onLeave}
-          style={{
-            position:'absolute',
-            left:'50%',
-            bottom:'calc(100% + 6px)',
-            transform:'translateX(-50%)',
-            zIndex:1000,
-            width:300,
-            background:'#fff',
-            border:'2px solid #F26A21',
-            borderRadius:12,
-            boxShadow:'0 8px 32px rgba(242,106,33,.25)',
-            pointerEvents:'auto',
-            overflow:'hidden',
-            animation:'popupIn .15s ease',
-          }}>
+        <div ref={popupRef} style={{
+          position:'absolute',
+          left:'50%',
+          bottom:'calc(100% + 8px)',
+          transform:'translateX(-50%)',
+          zIndex:1000,
+          width:300,
+          background:'#fff',
+          border:'2px solid #F26A21',
+          borderRadius:12,
+          boxShadow:'0 8px 32px rgba(242,106,33,.25)',
+          overflow:'hidden',
+          animation:'popupIn .15s ease',
+        }}>
+
+          {/* 閉じるボタン */}
+          <button onClick={()=>setShow(false)}
+            style={{position:'absolute',top:6,right:8,background:'none',border:'none',fontSize:16,color:'#B8AEA8',cursor:'pointer',zIndex:1}}>
+            ×
+          </button>
 
           {/* ヘッダー */}
           <div style={{background:'#FFF1E6',padding:'10px 14px',borderBottom:'1px solid #F0D9C9'}}>
@@ -108,14 +114,18 @@ export default function NovelPreviewPopup({ novel, children }: Props) {
             </div>
           )}
 
-          {/* CTAボタン */}
-          <a href={`/novel/${novel.id}`}
-            style={{display:'block',padding:'8px 14px',borderTop:'1px solid #F0D9C9',textAlign:'center',background:'#FFF9F2',textDecoration:'none'}}>
-            <span style={{display:'inline-block',padding:'6px 20px',background:'#F26A21',color:'#fff',
-              fontWeight:700,fontSize:12,borderRadius:20}}>
+          {/* 作品ページへボタン */}
+          <div style={{padding:'10px 14px',borderTop:'1px solid #F0D9C9',background:'#FFF9F2',display:'flex',gap:8}}>
+            <button onClick={()=>setShow(false)}
+              style={{flex:1,padding:'7px',border:'1px solid #F0D9C9',borderRadius:8,background:'#fff',color:'#77706A',fontSize:12,cursor:'pointer'}}>
+              閉じる
+            </button>
+            <a href={`/novel/${novel.id}`}
+              style={{flex:2,display:'block',padding:'7px 0',background:'#F26A21',color:'#fff',
+                fontWeight:700,fontSize:12,borderRadius:8,textDecoration:'none',textAlign:'center'}}>
               作品を読む →
-            </span>
-          </a>
+            </a>
+          </div>
         </div>
       )}
 
