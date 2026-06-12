@@ -66,21 +66,26 @@ export default function GemSection({ novels, discoverCommentMap }: Props) {
         </div>
       </div>
 
-      {/* モバイル：おすすめ風グリッド */}
+      {/* モバイル：お知らせ風デザイン */}
       <div className="gem-mobile" style={{display:'none',width:'100%'}}>
-        <div style={{display:'grid',gridTemplateColumns:'1fr 1fr'}}>
+        <div style={{background:'#fff',border:'1px solid #F0D9C9',borderRadius:10,overflow:'hidden',margin:'0 16px'}}>
+          <div style={{padding:'10px 16px',borderBottom:'1px solid #F0D9C9',display:'flex',alignItems:'center',justifyContent:'space-between',background:'#FFF9F2'}}>
+            <span style={{fontSize:14,fontWeight:700,color:'#2B211B'}}>ユーザーの推し</span>
+            <a href="/search" style={{fontSize:12,color:'#F26A21',textDecoration:'none'}}>作品を探す ›</a>
+          </div>
           {novels.slice(0,4).map((n, i) => n ? (
             <NovelPreviewPopup key={n.id} novel={{...n, like_count: n.likeCount2}}>
-              <div style={{padding:'9px 14px',borderBottom:'1px solid #FFF1E6',borderRight:i%2===0?'1px solid #FFF1E6':'none',minHeight:68,cursor:'pointer'}}>
+              <div style={{padding:'10px 16px',borderBottom:'1px solid #FFF1E6',cursor:'pointer'}}>
                 <div style={{display:'flex',gap:4,marginBottom:3,flexWrap:'wrap'}}>
                   <span style={{fontSize:9,fontWeight:700,color:'#F26A21',background:'#FFF1E6',border:'1px solid #f5b080',padding:'1px 5px',borderRadius:3}}>原石</span>
                   <span style={{fontSize:9,color:'#77706A',background:'#FFF9F2',border:'1px solid #F0D9C9',padding:'1px 5px',borderRadius:3}}>{n.genre}</span>
                 </div>
-                <div style={{fontSize:13,fontWeight:700,color:'#2B211B',marginBottom:2,lineHeight:1.4}}>{n.title}</div>
-                <div style={{fontSize:10,color:'#77706A',marginBottom:3}}>作者：{n.display_name}</div>
+                <div style={{fontSize:13,fontWeight:700,color:'#2B211B',marginBottom:2}}>{n.title}</div>
+                <div style={{fontSize:11,color:'#77706A',marginBottom: (discoverCommentMap[n.id]||[]).length>0?4:0}}>作者：{n.display_name}</div>
                 {(discoverCommentMap[n.id]||[]).length > 0 && (
-                  <div style={{fontSize:10,color:'#F26A21',background:'#FFF9F2',borderRadius:4,padding:'3px 6px',borderLeft:'2px solid #F26A21',marginTop:2}}>
-                    「{discoverCommentMap[n.id][0].comment.slice(0,20)}…」
+                  <div style={{fontSize:11,color:'#77706A',background:'#FFF9F2',borderRadius:4,padding:'4px 8px',borderLeft:'2px solid #F26A21'}}>
+                    「{discoverCommentMap[n.id][0].comment.slice(0,30)}…」
+                    <span style={{fontSize:10,color:'#B8AEA8',marginLeft:4}}>{discoverCommentMap[n.id][0].display_name}</span>
                   </div>
                 )}
               </div>
