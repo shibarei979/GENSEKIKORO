@@ -1,4 +1,5 @@
 'use client'
+import { useState, useEffect } from 'react'
 import NovelPreviewPopup from '@/components/NovelPreviewPopup'
 
 interface Episode {
@@ -19,12 +20,20 @@ interface Props {
 }
 
 export default function LatestEpisodesSection({ episodes }: Props) {
+  const [isMobile, setIsMobile] = useState(false)
+  useEffect(() => {
+    const check = () => setIsMobile(window.innerWidth <= 768)
+    check()
+    window.addEventListener('resize', check)
+    return () => window.removeEventListener('resize', check)
+  }, [])
+  const displayCount = isMobile ? 5 : 10
   return (
     <div className="mobile-1col" style={{display:'grid',gridTemplateColumns:'1fr 1fr'}}>
-      {Array.from({length:10},(_,i)=>{ const mobileHide = i >= 5;
+      {Array.from({length:displayCount},(_,i)=>{
         const ep = episodes[i]
         return ep ? (
-          <div key={ep.id} className={mobileHide?'mobile-hide':''}>
+          <div key={ep.id}>
           <NovelPreviewPopup novel={{
             id: ep.novel_id,
             title: ep.novel_title,

@@ -421,3 +421,17 @@ footer a:hover { color: #F26A21 !important; opacity: 1; }
 @media (max-width: 768px) {
   .mobile-only { display: block !important; }
 }
+
+/* ===== mobile-hide 強化 ===== */
+@media (max-width: 768px) {
+  .mobile-hide,
+  .mobile-hide * {
+    display: none !important;
+    visibility: hidden !important;
+    height: 0 !important;
+    overflow: hidden !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    border: none !important;
+  }
+}

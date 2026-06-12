@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useCallback } from 'react'
+import { useState, useCallback, useEffect } from 'react'
 import NovelPreviewPopup from '@/components/NovelPreviewPopup'
 
 interface Novel {
@@ -22,6 +22,14 @@ interface Props {
 
 export default function RecommendedNovels({ novels }: Props) {
   const [spinning, setSpinning] = useState(false)
+  const [isMobile, setIsMobile] = useState(false)
+  useEffect(() => {
+    const check = () => setIsMobile(window.innerWidth <= 768)
+    check()
+    window.addEventListener('resize', check)
+    return () => window.removeEventListener('resize', check)
+  }, [])
+  const displayCount = isMobile ? 5 : 8
   const [displayed, setDisplayed] = useState<Novel[]>(() =>
     [...novels].sort(() => Math.random() - 0.5).slice(0, 8)
   )
@@ -50,10 +58,10 @@ export default function RecommendedNovels({ novels }: Props) {
         </button>
       </div>
       <div className="mobile-1col" style={{display:'grid',gridTemplateColumns:'1fr 1fr'}}>
-        {Array.from({length:8},(_,i) => { const mobileHide = i >= 5;
+        {Array.from({length:displayCount},(_,i) => {
           const n = displayed[i]
           return n ? (
-            <div key={n.id} className={mobileHide?'mobile-hide':''}>
+            <div key={n.id}>
             <NovelPreviewPopup novel={{...n, like_count: n.likeCount || n.like_count || 0}}>
               <div style={{padding:'9px 14px',borderBottom:'1px solid #FFF1E6',borderRight:i%2===0?'1px solid #FFF1E6':'none',minHeight:60,cursor:'pointer'}}>
                 <div style={{display:'flex',gap:4,marginBottom:2,flexWrap:'wrap'}}>

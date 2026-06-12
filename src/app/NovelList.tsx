@@ -1,15 +1,22 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import NovelPreviewPopup from '@/components/NovelPreviewPopup'
 
 const GENRE_TABS = ['すべて','異世界','ファンタジー','SF','恋愛','ミステリー','ホラー','歴史・時代']
 
 export default function NovelList({ novels }: { novels: any[] }) {
   const [genre, setGenre] = useState('すべて')
+  const [isMobile, setIsMobile] = useState(false)
+  useEffect(() => {
+    const check = () => setIsMobile(window.innerWidth <= 768)
+    check()
+    window.addEventListener('resize', check)
+    return () => window.removeEventListener('resize', check)
+  }, [])
+  const displayCount = isMobile ? 5 : 8
   const filtered = genre === 'すべて' ? novels : novels.filter(n => n.genre === genre)
-  const slots = Array.from({ length: 8 }, (_, i) => filtered[i] || null)
-  // モバイルでは4件まで表示
+  const slots = Array.from({ length: displayCount }, (_, i) => filtered[i] || null)
 
   return (
     <>
@@ -25,7 +32,7 @@ export default function NovelList({ novels }: { novels: any[] }) {
       </div>
       <div className="mobile-1col" style={{display:'grid',gridTemplateColumns:'1fr 1fr'}}>
         {slots.map((n, i) => n ? (
-          <div key={n.id} className={i>=5?'mobile-hide':''}>
+          <div key={n.id}>
           <NovelPreviewPopup novel={n}>
             <div style={{padding:'9px 14px',borderBottom:'1px solid #FFF1E6',borderRight:i%2===0?'1px solid #FFF1E6':'none',minHeight:68,cursor:'pointer'}}>
               <div style={{display:'flex',gap:4,marginBottom:3,flexWrap:'wrap',alignItems:'center'}}>
