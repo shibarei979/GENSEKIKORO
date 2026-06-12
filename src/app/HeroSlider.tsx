@@ -27,9 +27,13 @@ export default function HeroSlider({ items }: Props) {
     function calcMax() {
       if (!containerRef.current) return
       const containerW = containerRef.current.offsetWidth
-      // 全体幅 - 表示幅 をITEM_W+GAP で割る
+      // 最後の画像の右端がコンテナ右端に来るオフセットを計算
+      // totalW = items.length枚の幅 + gap
+      // 最後の画像右端位置 = totalW
+      // offset * (ITEM_W + GAP) = totalW - containerW
       const totalW = items.length * (ITEM_W + GAP) - GAP
-      const maxOffset = Math.max(0, Math.ceil((totalW - containerW) / (ITEM_W + GAP)))
+      const scrollNeeded = totalW - containerW
+      const maxOffset = Math.max(0, Math.floor(scrollNeeded / (ITEM_W + GAP)))
       setMax(maxOffset)
     }
     calcMax()
