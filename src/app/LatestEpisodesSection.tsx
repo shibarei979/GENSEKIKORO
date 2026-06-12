@@ -20,7 +20,7 @@ interface Props {
 
 export default function LatestEpisodesSection({ episodes }: Props) {
   return (
-    <div style={{display:'grid',gridTemplateColumns:'1fr 1fr'}}>
+    <div className="mobile-1col" style={{display:'grid',gridTemplateColumns:'1fr 1fr'}}>
       {Array.from({length:10},(_,i)=>{
         const ep = episodes[i]
         return ep ? (

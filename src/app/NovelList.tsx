@@ -22,7 +22,7 @@ export default function NovelList({ novels }: { novels: any[] }) {
           </button>
         ))}
       </div>
-      <div style={{display:'grid',gridTemplateColumns:'1fr 1fr'}}>
+      <div className="mobile-1col" style={{display:'grid',gridTemplateColumns:'1fr 1fr'}}>
         {slots.map((n, i) => n ? (
           <NovelPreviewPopup key={n.id} novel={n}>
             <div style={{padding:'9px 14px',borderBottom:'1px solid #FFF1E6',borderRight:i%2===0?'1px solid #FFF1E6':'none',minHeight:68,cursor:'pointer'}}>

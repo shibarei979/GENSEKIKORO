@@ -226,3 +226,40 @@ footer a:hover { color: #F26A21 !important; opacity: 1; }
 @media (max-width: 768px) {
   .hero-flex > div:last-child { max-height: unset !important; overflow: unset !important; }
 }
+
+/* ===== おすすめ・最新話・新着 モバイル1列 ===== */
+@media (max-width: 768px) {
+  /* 2列グリッドを1列に */
+  div[style*="gridTemplateColumns:'1fr 1fr'"] {
+    grid-template-columns: 1fr !important;
+  }
+  /* borderRightを消す */
+  div[style*="borderRight:'1px solid #FFF1E6'"] {
+    border-right: none !important;
+  }
+  div[style*="borderRight:i%2===0"] {
+    border-right: none !important;
+  }
+
+  /* モバイルヘッダー高さ2.5倍 */
+  .mobile-header-bar {
+    height: 120px !important;
+  }
+
+  /* コンテスト・お知らせ画像を小さく */
+  .hero-slider-img {
+    height: 31px !important;
+  }
+}
+
+/* ===== 1列グリッド モバイル ===== */
+.mobile-1col { display: grid !important; grid-template-columns: 1fr 1fr; }
+@media (max-width: 768px) {
+  .mobile-1col {
+    grid-template-columns: 1fr !important;
+  }
+  /* borderRight除去 */
+  .mobile-1col > * {
+    border-right: none !important;
+  }
+}

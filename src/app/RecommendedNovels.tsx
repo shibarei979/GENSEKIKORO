@@ -49,7 +49,7 @@ export default function RecommendedNovels({ novels }: Props) {
           </svg>
         </button>
       </div>
-      <div style={{display:'grid',gridTemplateColumns:'1fr 1fr'}}>
+      <div className="mobile-1col" style={{display:'grid',gridTemplateColumns:'1fr 1fr'}}>
         {Array.from({length:8},(_,i) => {
           const n = displayed[i]
           return n ? (

@@ -18,10 +18,15 @@ const GAP = 8
 
 export default function HeroSlider({ items }: Props) {
   const [offset, setOffset] = useState(0)
-  // モバイルでは小さいサイズを使う
-  const isMobile = typeof window !== 'undefined' && window.innerWidth <= 768
-  const itemH = isMobile ? 52 : ITEM_H
-  const itemW = isMobile ? 104 : ITEM_W
+  const [isMobile, setIsMobile] = useState(false)
+  useEffect(() => {
+    const check = () => setIsMobile(window.innerWidth <= 768)
+    check()
+    window.addEventListener('resize', check)
+    return () => window.removeEventListener('resize', check)
+  }, [])
+  const itemH = isMobile ? Math.round(ITEM_H / 5) : ITEM_H
+  const itemW = isMobile ? Math.round(ITEM_W / 5) : ITEM_W
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
   const max = Math.max(0, items.length - 2)
