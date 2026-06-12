@@ -167,7 +167,7 @@ export default function Header({ profile, user, activeGenre }: Props) {
         </div>
 
         {/* モバイルヘッダー */}
-        <div className="mobile-header" style={{display:'flex',alignItems:'center',justifyContent:'space-between',padding:'0 16px',height:52}}>
+        <div className="mobile-header" style={{display:'none',alignItems:'center',justifyContent:'space-between',padding:'0 16px',height:52}}>
           <Link href="/" style={{flexShrink:0}}>
             <img src="/logo.png" alt="原石航路" style={{height:44,width:'auto',display:'block',objectFit:'contain'}}/>
           </Link>
@@ -191,7 +191,7 @@ export default function Header({ profile, user, activeGenre }: Props) {
 
         {/* モバイル検索バー */}
         {showMobileSearch && (
-          <div className="mobile-header" style={{padding:'0 16px 10px'}}>
+          <div className="mobile-header" style={{display:'none',padding:'0 16px 10px'}}>
             <form onSubmit={handleSearch} style={{display:'flex',alignItems:'center',border:'1.5px solid #F0D9C9',borderRadius:24,background:'#FFF9F2',overflow:'hidden'}}>
               <input value={q} onChange={e=>setQ(e.target.value)} placeholder="検索..." autoFocus
                 style={{flex:1,padding:'8px 16px',border:'none',background:'transparent',fontSize:13,color:'#2B211B',outline:'none'}}/>
@@ -206,7 +206,7 @@ export default function Header({ profile, user, activeGenre }: Props) {
 
         {/* モバイルメニュー */}
         {showMobileMenu && (
-          <div className="mobile-header" style={{borderTop:'1px solid #F0D9C9',background:'#fff'}}>
+          <div className="mobile-header" style={{display:'none',borderTop:'1px solid #F0D9C9',background:'#fff'}}>
             {user ? (
               <>
                 <div style={{padding:'12px 16px',borderBottom:'1px solid #FFF1E6',background:'#FFF9F2',display:'flex',alignItems:'center',justifyContent:'space-between'}}>
@@ -268,7 +268,7 @@ export default function Header({ profile, user, activeGenre }: Props) {
       </header>
 
       {/* デスクトップNAV */}
-      <nav className="desktop-header" style={{background:'#fff',borderBottom:'2px solid #F0D9C9'}}>
+      <nav className="desktop-header" style={{display:'flex',background:'#fff',borderBottom:'2px solid #F0D9C9'}}>
         <div style={{maxWidth:1200,margin:'0 auto',padding:'0 32px',display:'flex',gap:8}}>
           {[
             {label:'ホーム',href:'/'},
@@ -297,8 +297,8 @@ export default function Header({ profile, user, activeGenre }: Props) {
       <SettingsModal show={showSettingsModal} onClose={()=>setShowSettingsModal(false)} profile={profile} userId={user?.id||''} />
 
       <style>{`
-        .desktop-header { display: flex; }
-        .mobile-header { display: none; }
+        .desktop-header { display: flex !important; }
+        .mobile-header { display: none !important; }
         .header-post-btn:hover { background: #fff8f5 !important; transform: translateY(-1px); transition: all .15s; box-shadow: 0 2px 8px rgba(242,106,33,.12); }
         @media (max-width: 768px) {
           .desktop-header { display: none !important; }
