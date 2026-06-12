@@ -24,12 +24,12 @@ interface Props {
 export default function GemSection({ novels, discoverCommentMap }: Props) {
   return (
     <div style={{flex:1,overflowX:'auto'}}>
-      <div style={{display:'flex',gap:12,minWidth:'max-content',paddingBottom:6}}>
+      <div style={{display:'flex',gap:10,minWidth:'max-content',paddingBottom:6}}>
         {Array.from({length:7},(_,i)=>{
           const n = novels[i]
           return n ? (
             <NovelPreviewPopup key={n.id} novel={{...n, like_count: n.likeCount2}}>
-              <div style={{width:195,height:195,background:'#fff',border:'1px solid #F0D9C9',borderRadius:10,overflow:'hidden',flexShrink:0,display:'flex',flexDirection:'column',cursor:'pointer'}}>
+              <div className="gem-card-inner" style={{width:195,height:195,background:'#fff',border:'1px solid #F0D9C9',borderRadius:10,overflow:'hidden',flexShrink:0,display:'flex',flexDirection:'column',cursor:'pointer'}}>
                 <div style={{padding:9,flex:2,overflow:'hidden'}}>
                   <div style={{display:'flex',gap:4,marginBottom:4,flexWrap:'wrap'}}>
                     <span style={{fontSize:9,fontWeight:700,color:'#F26A21',background:'#FFF1E6',border:'1px solid #f5b080',padding:'1px 5px',borderRadius:3}}>原石</span>

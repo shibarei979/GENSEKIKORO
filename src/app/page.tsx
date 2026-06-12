@@ -274,7 +274,7 @@ export default async function HomePage() {
       </section>
 
       {/* 統計バー */}
-      <div style={{background:'#fff',borderBottom:'1px solid #F0D9C9'}}>
+      <div className="stats-bar-section" style={{background:'#fff',borderBottom:'1px solid #F0D9C9'}}>
         <div className="stats-grid" style={{maxWidth:1200,margin:'0 auto',padding:'0 32px',display:'grid',gridTemplateColumns:'repeat(4,1fr)'}}>
           {[
             ['投稿作品数', fmtNum(novelCount ?? 0) + '作品'],

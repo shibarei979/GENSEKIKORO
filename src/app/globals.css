@@ -137,3 +137,59 @@ footer a:hover { color: #F26A21 !important; opacity: 1; }
   .stats-grid { padding: 0 20px !important; }
   div[style*="padding:'0 32px'"] { padding: 0 20px !important; }
 }
+
+/* ===== フッター ===== */
+.footer-desktop { display: grid !important; }
+.footer-mobile  { display: none !important; }
+@media (max-width: 768px) {
+  .footer-desktop { display: none !important; }
+  .footer-mobile  { display: block !important; }
+  footer { padding: 20px 16px 12px !important; }
+}
+
+/* ===== 統計バー モバイル非表示 ===== */
+@media (max-width: 768px) {
+  .stats-grid { display: none !important; }
+}
+
+/* ===== ヒーロー ===== */
+@media (max-width: 768px) {
+  .hero-section { padding: 16px 16px !important; }
+  .hero-title { font-size: 20px !important; margin-bottom: 8px !important; }
+  .hero-flex { flex-direction: column !important; margin-right: 0 !important; gap: 12px !important; }
+  .hero-flex p { font-size: 12px !important; margin-bottom: 10px !important; }
+  .hero-flex > div:first-child { width: 100% !important; flex-shrink: unset !important; }
+}
+
+/* ===== スライダー モバイル ===== */
+@media (max-width: 768px) {
+  .hero-slider-wrap { width: 100% !important; }
+}
+
+/* ===== ユーザーの推し モバイル ===== */
+@media (max-width: 768px) {
+  .gem-layout { flex-direction: column !important; gap: 8px !important; padding: 0 16px !important; }
+  .gem-label { display: flex !important; align-items: center !important; justify-content: space-between !important; min-width: unset !important; max-width: unset !important; width: 100% !important; }
+  .gem-label h2 { margin-bottom: 0 !important; font-size: 15px !important; }
+  .gem-label p  { display: none !important; }
+}
+
+/* ===== メインレイアウト ===== */
+@media (max-width: 768px) {
+  .main-layout { flex-direction: column !important; padding: 12px 16px !important; gap: 12px !important; }
+  .desktop-only { display: none !important; }
+  .mobile-only  { display: block !important; }
+  div[style*="padding:'0 32px'"] { padding: 0 16px !important; }
+  div[style*="padding:'24px 0'"] { padding: 12px 0 !important; }
+}
+
+/* ===== ユーザーの推しカード モバイル ===== */
+@media (max-width: 768px) {
+  .gem-card-inner {
+    width: 140px !important;
+    height: 130px !important;
+  }
+  .gem-card-inner > div:first-child {
+    padding: 7px !important;
+  }
+}
