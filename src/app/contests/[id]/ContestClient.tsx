@@ -1,6 +1,7 @@
 'use client'
 import { useState, useMemo } from 'react'
 import Link from 'next/link'
+import NovelPreviewPopup from '@/components/NovelPreviewPopup'
 
 interface Novel {
   id: string; title: string; genre: string; summary: string | null
@@ -71,7 +72,8 @@ export default function ContestClient({ novels, myEntryNovelIds, contestId }: Pr
           該当する作品がありません
         </div>
       ) : filtered.map((n, i) => (
-        <Link key={n.id} href={`/novel/${n.id}`} style={{textDecoration:'none',display:'block'}}>
+        <NovelPreviewPopup key={n.id} novel={{...n, like_count: n.like_count||0}}>
+        <div style={{cursor:'pointer',display:'block'}}>
           <div style={{padding:'14px 20px',borderBottom:i<filtered.length-1?'1px solid #FFF1E6':'none',
             background:myEntryNovelIds.includes(n.id)?'#FFF9F2':'#fff',cursor:'pointer'}}>
             <div style={{display:'flex',gap:6,marginBottom:6,flexWrap:'wrap',alignItems:'center'}}>
@@ -96,7 +98,8 @@ export default function ContestClient({ novels, myEntryNovelIds, contestId }: Pr
               </div>
             )}
           </div>
-        </Link>
+        </div>
+        </NovelPreviewPopup>
       ))}
     </div>
   )

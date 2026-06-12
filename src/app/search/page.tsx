@@ -5,6 +5,7 @@ import Footer from '@/components/layout/Footer'
 import AdBanner from '@/components/layout/AdBanner'
 import Sidebar from '@/components/layout/Sidebar'
 import Link from 'next/link'
+import NovelPreviewPopup from '@/components/NovelPreviewPopup'
 import SearchForm from './SearchForm'
 
 const PAGE_SIZE = 50
@@ -162,7 +163,8 @@ export default async function SearchPage({ searchParams }: Props) {
                 <div style={{fontSize:12}}>検索条件を変えてお試しください</div>
               </div>
             ) : novels.map((n: any, idx: number) => (
-              <Link key={n.id} href={`/novel/${n.id}`} style={{textDecoration:'none',color:'inherit',display:'block',padding:'16px 20px',borderBottom:idx<novels.length-1?'1px solid #FFF1E6':'none'}}>
+              <NovelPreviewPopup key={n.id} novel={{...n, like_count: n.like_count||0}}>
+              <div style={{cursor:'pointer',padding:'16px 20px',borderBottom:idx<novels.length-1?'1px solid #FFF1E6':'none'}}>
                 <span style={{display:'flex',gap:5,marginBottom:6,flexWrap:'wrap',alignItems:'center'}}>
                   <span style={{fontSize:10,background:'#FFF1E6',color:'#F26A21',border:'1px solid #f5b080',padding:'1px 6px',borderRadius:3}}>{n.genre}</span>
                   <span style={{fontSize:10,background:'#eff6ff',color:'#2563eb',border:'1px solid #bfdbfe',padding:'1px 6px',borderRadius:3}}>{n.novel_type}</span>
@@ -190,7 +192,8 @@ export default async function SearchPage({ searchParams }: Props) {
                   {n.updated_at && <span>最終更新：{new Date(n.updated_at).toLocaleDateString('ja-JP',{year:'numeric',month:'numeric',day:'numeric'})}</span>}
                   {n.likeCount > 0 && <span style={{color:'#77706A',fontWeight:600}}>♡ {fmtNum(n.likeCount)}</span>}
                 </span>
-              </Link>
+              </div>
+              </NovelPreviewPopup>
             ))}
           </div>
 

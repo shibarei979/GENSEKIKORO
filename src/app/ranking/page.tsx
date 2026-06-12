@@ -5,6 +5,7 @@ import Footer from '@/components/layout/Footer'
 import AdBanner from '@/components/layout/AdBanner'
 import Sidebar from '@/components/layout/Sidebar'
 import Link from 'next/link'
+import NovelPreviewPopup from '@/components/NovelPreviewPopup'
 
 const PAGE_SIZE = 50
 
@@ -243,7 +244,8 @@ export default async function RankingPage({ searchParams }: Props) {
               const abs = offset + i
               return (
                 <div key={n.id} style={{borderBottom:'1px solid #FFF1E6'}}>
-                  <div style={{display:'flex',gap:14,padding:'16px 20px',alignItems:'flex-start'}}>
+                  <NovelPreviewPopup novel={{...n, like_count: n.like_count||0}}>
+                  <div style={{display:'flex',gap:14,padding:'16px 20px',alignItems:'flex-start',cursor:'pointer'}}>
                     <div style={{width:32,textAlign:'center',flexShrink:0,paddingTop:2}}>
                       <span style={{fontSize:rankSize(abs),fontWeight:800,color:rankColor(abs),fontFamily:"'Noto Serif JP',serif"}}>{abs+1}</span>
                     </div>
@@ -253,7 +255,7 @@ export default async function RankingPage({ searchParams }: Props) {
                         <span style={{fontSize:10,background:'#eff6ff',color:'#2563eb',border:'1px solid #bfdbfe',padding:'1px 6px',borderRadius:3}}>{n.novel_type}</span>
                         {n.is_serial && <span style={{fontSize:10,background:'#f0fdf4',color:'#15803d',border:'1px solid #86efac',padding:'1px 6px',borderRadius:3}}>連載中</span>}
                       </div>
-                      <Link href={`/novel/${n.id}`} style={{textDecoration:'none',display:'block',fontSize:16,fontWeight:700,color:'#2B211B',marginBottom:3,lineHeight:1.4}}>{n.title}</Link>
+                      <div style={{fontSize:16,fontWeight:700,color:'#2B211B',marginBottom:3,lineHeight:1.4}}>{n.title}</div>
                       <div style={{fontSize:12,color:'#77706A',marginBottom:6}}>作者：{n.display_name}</div>
                       {n.summary && (
                         <div style={{fontSize:12,color:'#5a3a20',lineHeight:1.7,marginBottom:7,overflow:'hidden',display:'-webkit-box',WebkitLineClamp:6,WebkitBoxOrient:'vertical' as any}}>
@@ -274,6 +276,7 @@ export default async function RankingPage({ searchParams }: Props) {
                       </div>
                     </div>
                   </div>
+                  </NovelPreviewPopup>
                 </div>
               )
             })}
