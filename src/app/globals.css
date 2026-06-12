@@ -437,3 +437,13 @@ footer a:hover { color: #F26A21 !important; opacity: 1; }
 }
 
 
+
+/* ===== ユーザーの推し モバイル全幅 ===== */
+@media (max-width: 768px) {
+  .gem-inner {
+    padding: 0 !important;
+  }
+  .gem-section-wrap {
+    padding: 12px 0 !important;
+  }
+}

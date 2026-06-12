@@ -309,7 +309,7 @@ export default async function HomePage() {
 
       {/* ユーザーの推し */}
       <div className="gem-section-wrap" style={{background:'#fff',padding:'16px 0'}}>
-        <div style={{maxWidth:1200,margin:'0 auto',padding:'0 32px'}}>
+        <div className="gem-inner" style={{maxWidth:1200,margin:'0 auto',padding:'0 32px'}}>
           <div className="gem-layout" style={{display:'flex',alignItems:'flex-start',gap:28}}>
             <div className="gem-label desktop-only" style={{flexShrink:0,minWidth:160,maxWidth:160}}>
               <h2 style={{fontSize:17,fontWeight:700,color:'#2B211B',marginBottom:8}}>ユーザーの推し</h2>
