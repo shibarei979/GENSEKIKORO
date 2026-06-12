@@ -12,16 +12,30 @@ interface Props {
   items: SlideItem[]
 }
 
-// デスクトップサイズ
 const ITEM_H = 156
 const ITEM_W = 312
 const GAP = 8
 
 export default function HeroSlider({ items }: Props) {
   const [offset, setOffset] = useState(0)
+  const [max, setMax] = useState(0)
+  const containerRef = useRef<HTMLDivElement>(null)
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
-  const max = Math.max(0, items.length - 1)
+  // コンテナ幅から最大オフセットを計算
+  useEffect(() => {
+    function calcMax() {
+      if (!containerRef.current) return
+      const containerW = containerRef.current.offsetWidth
+      // 全体幅 - 表示幅 をITEM_W+GAP で割る
+      const totalW = items.length * (ITEM_W + GAP) - GAP
+      const maxOffset = Math.max(0, Math.ceil((totalW - containerW) / (ITEM_W + GAP)))
+      setMax(maxOffset)
+    }
+    calcMax()
+    window.addEventListener('resize', calcMax)
+    return () => window.removeEventListener('resize', calcMax)
+  }, [items.length])
 
   function next() { setOffset(prev => prev >= max ? 0 : prev + 1) }
   function prev() { setOffset(prev => prev <= 0 ? max : prev - 1) }
@@ -43,14 +57,14 @@ export default function HeroSlider({ items }: Props) {
   useEffect(() => {
     startTimer()
     return () => { if (timerRef.current) clearTimeout(timerRef.current) }
-  }, [offset, items.length, max])
+  }, [offset, max])
 
   if (items.length === 0) return null
 
   return (
     <div style={{position:'relative'}}>
       {/* デスクトップ */}
-      <div className="slider-desktop" style={{overflow:'hidden',borderRadius:8}}>
+      <div ref={containerRef} className="slider-desktop" style={{overflow:'hidden',borderRadius:8}}>
         <div style={{
           display:'flex', gap:GAP,
           transition:'transform 0.4s cubic-bezier(.4,0,.2,1)',
@@ -70,7 +84,7 @@ export default function HeroSlider({ items }: Props) {
         </div>
       </div>
 
-      {/* モバイル（縦1:横2、1/4サイズ） */}
+      {/* モバイル */}
       <div className="slider-mobile" style={{display:'none',overflow:'hidden',borderRadius:6}}>
         <div style={{
           display:'flex', gap:4,
@@ -96,7 +110,7 @@ export default function HeroSlider({ items }: Props) {
 
       {items.length > 1 && (
         <div style={{display:'flex',justifyContent:'center',gap:5,marginTop:6}}>
-          {Array.from({length: items.length}, (_, i) => (
+          {Array.from({length: max + 1}, (_, i) => (
             <button key={i} onClick={()=>setOffset(i)} style={{width:i===offset?16:6,height:6,borderRadius:3,border:'none',cursor:'pointer',background:i===offset?'#F26A21':'#F0D9C9',transition:'all .3s',padding:0}}/>
           ))}
         </div>
