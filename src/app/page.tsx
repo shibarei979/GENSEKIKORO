@@ -306,7 +306,7 @@ export default async function HomePage() {
       </div>
 
       {/* ユーザーの推し */}
-      <div className="gem-section-wrap" style={{background:'#fff',borderTop:'1px solid #F0D9C9',padding:'24px 0'}}>
+      <div className="gem-section-wrap" style={{background:'#fff',padding:'16px 0'}}>
         <div style={{maxWidth:1200,margin:'0 auto',padding:'0 32px'}}>
           <div className="gem-layout" style={{display:'flex',alignItems:'flex-start',gap:28}}>
             <div className="gem-label" style={{flexShrink:0,minWidth:160,maxWidth:160}}>

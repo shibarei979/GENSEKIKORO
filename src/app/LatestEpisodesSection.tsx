@@ -24,7 +24,8 @@ export default function LatestEpisodesSection({ episodes }: Props) {
       {Array.from({length:10},(_,i)=>{ const mobileHide = i >= 5;
         const ep = episodes[i]
         return ep ? (
-          <NovelPreviewPopup key={ep.id} novel={{
+          <div key={ep.id} className={mobileHide?'mobile-hide':''}>
+          <NovelPreviewPopup novel={{
             id: ep.novel_id,
             title: ep.novel_title,
             genre: ep.genre,
@@ -44,6 +45,7 @@ export default function LatestEpisodesSection({ episodes }: Props) {
               <div style={{fontSize:10,color:'#77706A'}}>作者：{ep.author_name}</div>
             </div>
           </NovelPreviewPopup>
+          </div>
         ) : (
           <div key={i} style={{padding:'9px 14px',borderBottom:'1px solid #FFF1E6',borderRight:i%2===0?'1px solid #FFF1E6':'none'}}>
             <div style={{display:'flex',gap:4,alignItems:'center',marginBottom:2}}>

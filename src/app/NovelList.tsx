@@ -25,8 +25,9 @@ export default function NovelList({ novels }: { novels: any[] }) {
       </div>
       <div className="mobile-1col" style={{display:'grid',gridTemplateColumns:'1fr 1fr'}}>
         {slots.map((n, i) => n ? (
-          <NovelPreviewPopup key={n.id} novel={n}>
-            <div className={i>=5?'mobile-hide':''} style={{padding:'9px 14px',borderBottom:'1px solid #FFF1E6',borderRight:i%2===0?'1px solid #FFF1E6':'none',minHeight:68,cursor:'pointer'}}>
+          <div key={n.id} className={i>=5?'mobile-hide':''}>
+          <NovelPreviewPopup novel={n}>
+            <div style={{padding:'9px 14px',borderBottom:'1px solid #FFF1E6',borderRight:i%2===0?'1px solid #FFF1E6':'none',minHeight:68,cursor:'pointer'}}>
               <div style={{display:'flex',gap:4,marginBottom:3,flexWrap:'wrap',alignItems:'center'}}>
                 <span style={{fontSize:9,background:'#FFF1E6',color:'#F26A21',border:'1px solid #f5b080',padding:'1px 5px',borderRadius:3}}>{n.genre}</span>
                 <span style={{background:'#F26A21',color:'#fff',fontSize:9,padding:'0 4px',borderRadius:3,fontWeight:700}}>NEW</span>
@@ -36,6 +37,7 @@ export default function NovelList({ novels }: { novels: any[] }) {
               <div style={{fontSize:11,color:'#77706A'}}>作者：{n.display_name}</div>
             </div>
           </NovelPreviewPopup>
+          </div>
         ) : (
           <div key={i} style={{padding:'9px 14px',borderBottom:'1px solid #FFF1E6',borderRight:i%2===0?'1px solid #FFF1E6':'none',minHeight:68}}>
             <div style={{display:'flex',gap:4,marginBottom:3,flexWrap:'wrap',alignItems:'center'}}>
