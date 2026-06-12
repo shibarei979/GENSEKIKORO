@@ -7,19 +7,17 @@ interface Props {
     title: string
     genre: string
     novel_type?: string
-    is_serial?: boolean
     summary?: string | null
     catchcopy?: string | null
     display_name?: string
-    tags?: string[]
   }
   children: React.ReactNode
 }
 
 export default function NovelPreviewPopup({ novel, children }: Props) {
   const [show, setShow] = useState(false)
-  const ref = useRef<HTMLDivElement>(null)
-  const timerRef = useRef<ReturnType<typeof setTimeout>|null>(null)
+  const enterTimer = useRef<ReturnType<typeof setTimeout>|null>(null)
+  const leaveTimer = useRef<ReturnType<typeof setTimeout>|null>(null)
 
   const displayText = novel.catchcopy || novel.summary?.slice(0, 60) || ''
   const COLS = 10
@@ -27,31 +25,28 @@ export default function NovelPreviewPopup({ novel, children }: Props) {
   const chars = displayText.split('')
   const cells = Array.from({ length: COLS * ROWS }, (_, i) => chars[i] || '')
 
-  function handleMouseEnter() {
-    if (timerRef.current) clearTimeout(timerRef.current)
-    timerRef.current = setTimeout(() => setShow(true), 200)
+  function onEnter() {
+    if (leaveTimer.current) clearTimeout(leaveTimer.current)
+    enterTimer.current = setTimeout(() => setShow(true), 300)
   }
 
-  function handleMouseLeave() {
-    if (timerRef.current) clearTimeout(timerRef.current)
-    timerRef.current = setTimeout(() => setShow(false), 100)
+  function onLeave() {
+    if (enterTimer.current) clearTimeout(enterTimer.current)
+    leaveTimer.current = setTimeout(() => setShow(false), 150)
   }
 
   return (
-    <div ref={ref} style={{position:'relative'}}
-      onMouseEnter={handleMouseEnter}
-      onMouseLeave={handleMouseLeave}>
+    <div style={{position:'relative'}} onMouseEnter={onEnter} onMouseLeave={onLeave}>
       {children}
 
       {show && (
         <div
-          onClick={() => window.location.href = `/novel/${novel.id}`}
-          onMouseEnter={handleMouseEnter}
-          onMouseLeave={handleMouseLeave}
+          onMouseEnter={onEnter}
+          onMouseLeave={onLeave}
           style={{
             position:'absolute',
             left:'50%',
-            bottom:'calc(100% + 8px)',
+            bottom:'calc(100% + 6px)',
             transform:'translateX(-50%)',
             zIndex:1000,
             width:300,
@@ -59,7 +54,7 @@ export default function NovelPreviewPopup({ novel, children }: Props) {
             border:'2px solid #F26A21',
             borderRadius:12,
             boxShadow:'0 8px 32px rgba(242,106,33,.25)',
-            cursor:'pointer',
+            pointerEvents:'auto',
             overflow:'hidden',
             animation:'popupIn .15s ease',
           }}>
@@ -114,19 +109,20 @@ export default function NovelPreviewPopup({ novel, children }: Props) {
           )}
 
           {/* CTAボタン */}
-          <div style={{padding:'8px 14px',borderTop:'1px solid #F0D9C9',textAlign:'center',background:'#FFF9F2'}}>
+          <a href={`/novel/${novel.id}`}
+            style={{display:'block',padding:'8px 14px',borderTop:'1px solid #F0D9C9',textAlign:'center',background:'#FFF9F2',textDecoration:'none'}}>
             <span style={{display:'inline-block',padding:'6px 20px',background:'#F26A21',color:'#fff',
               fontWeight:700,fontSize:12,borderRadius:20}}>
               作品を読む →
             </span>
-          </div>
+          </a>
         </div>
       )}
 
       <style>{`
         @keyframes popupIn {
-          from { opacity:0; transform:translateX(-50%) translateY(6px) scale(.97) }
-          to   { opacity:1; transform:translateX(-50%) translateY(0) scale(1) }
+          from { opacity:0; transform:translateX(-50%) translateY(6px) }
+          to   { opacity:1; transform:translateX(-50%) translateY(0) }
         }
       `}</style>
     </div>
