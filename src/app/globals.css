@@ -436,10 +436,4 @@ footer a:hover { color: #F26A21 !important; opacity: 1; }
   }
 }
 
-/* ===== モバイル お知らせ・ユーザーの推し 統一幅 ===== */
-@media (max-width: 768px) {
-  .mobile-only > div,
-  .gem-mobile > div {
-    margin: 0 16px !important;
-  }
-}
+
