@@ -6,7 +6,7 @@ import { useState, useEffect, useRef } from 'react'
 import { createClient } from '@/lib/supabase/client'
 
 interface Props {
-  profile?: { display_name: string; user_number?: number } | null
+  profile?: { display_name: string; user_number?: number; icon_url?: string } | null
   user?: any
   activeGenre?: string
 }
@@ -14,12 +14,13 @@ interface Props {
 export default function Header({ profile, user, activeGenre }: Props) {
   const router = useRouter()
   const [q, setQ] = useState('')
-  const [ageVerified,    setAgeVerified]    = useState(false)
-  const [notifications,  setNotifications]  = useState<any[]>([])
-  const [showNotif,      setShowNotif]      = useState(false)
-  const [unreadCount,    setUnreadCount]    = useState(0)
-  const [showAllNotif,   setShowAllNotif]   = useState(false)
+  const [notifications, setNotifications] = useState<any[]>([])
+  const [showNotif, setShowNotif] = useState(false)
+  const [unreadCount, setUnreadCount] = useState(0)
+  const [showAllNotif, setShowAllNotif] = useState(false)
+  const [showUserMenu, setShowUserMenu] = useState(false)
   const notifRef = useRef<HTMLDivElement>(null)
+  const userMenuRef = useRef<HTMLDivElement>(null)
   const supabase = createClient()
 
   useEffect(() => {
@@ -28,17 +29,19 @@ export default function Header({ profile, user, activeGenre }: Props) {
     if (lastCheck !== today) {
       fetch('/api/age-check', { method: 'POST' })
         .then(r => r.json())
-        .then(d => {
-          setAgeVerified(d.age_verified)
-          if (d.age_verified) localStorage.setItem('age_check_date', today)
-        })
-        .catch(() => {})
-    } else {
-      fetch('/api/age-check', { method: 'POST' })
-        .then(r => r.json())
-        .then(d => setAgeVerified(d.age_verified))
+        .then(d => { if (d.age_verified) localStorage.setItem('age_check_date', today) })
         .catch(() => {})
     }
+  }, [])
+
+  // 外側クリックでメニューを閉じる
+  useEffect(() => {
+    function handleClick(e: MouseEvent) {
+      if (notifRef.current && !notifRef.current.contains(e.target as Node)) setShowNotif(false)
+      if (userMenuRef.current && !userMenuRef.current.contains(e.target as Node)) setShowUserMenu(false)
+    }
+    document.addEventListener('mousedown', handleClick)
+    return () => document.removeEventListener('mousedown', handleClick)
   }, [])
 
   const userNumber = profile?.user_number
@@ -48,12 +51,17 @@ export default function Header({ profile, user, activeGenre }: Props) {
   async function handleOpenNotif() {
     setShowNotif(!showNotif)
     if (!showNotif && unreadCount > 0 && user) {
-      const supaClient = createClient()
-      await supaClient.from('notifications').update({ is_read: true })
+      await supabase.from('notifications').update({ is_read: true })
         .eq('user_id', user.id).eq('is_read', false)
       setUnreadCount(0)
       setNotifications(prev => prev.map((n: any) => ({ ...n, is_read: true })))
     }
+  }
+
+  async function handleLogout() {
+    await supabase.auth.signOut()
+    router.push('/')
+    router.refresh()
   }
 
   function fmtDate(s: string) {
@@ -68,6 +76,13 @@ export default function Header({ profile, user, activeGenre }: Props) {
     e.preventDefault()
     if (q.trim()) router.push(`/?q=${encodeURIComponent(q.trim())}`)
   }
+
+  const menuItems = [
+    { label: 'マイページ', href: '/mypage', icon: '👤' },
+    { label: '作品を投稿する', href: '/post', icon: '✏️' },
+    { label: '閲覧履歴', href: '/history', icon: '📖' },
+    { label: '設定', href: '/mypage#settings', icon: '⚙️' },
+  ]
 
   return (
     <>
@@ -89,8 +104,9 @@ export default function Header({ profile, user, activeGenre }: Props) {
           <div style={{display:'flex',alignItems:'center',gap:12,position:'relative',zIndex:1}}>
             {user ? (
               <>
-                <Link href="/post" className="header-post-btn" style={{border:'1.5px solid #F26A21',color:'#F26A21',padding:'6px 18px',borderRadius:20,background:'#fff',fontSize:13,fontWeight:500,display:'inline-block'}}>＋ 投稿する</Link>
+                <Link href="/post" style={{border:'1.5px solid #F26A21',color:'#F26A21',padding:'6px 18px',borderRadius:20,background:'#fff',fontSize:13,fontWeight:500,display:'inline-block',textDecoration:'none'}}>＋ 投稿する</Link>
 
+                {/* 通知ベル */}
                 <div ref={notifRef} style={{position:'relative'}}>
                   <button onClick={handleOpenNotif}
                     style={{position:'relative',width:36,height:36,borderRadius:'50%',border:'1.5px solid #F0D9C9',background:'#fff',cursor:'pointer',display:'flex',alignItems:'center',justifyContent:'center',flexShrink:0}}>
@@ -103,9 +119,8 @@ export default function Header({ profile, user, activeGenre }: Props) {
                       </span>
                     )}
                   </button>
-
                   {showNotif && (
-                    <div style={{position:'absolute',right:0,top:'calc(100% + 8px)',width:320,background:'#fff',border:'1px solid #F0D9C9',borderRadius:12,boxShadow:'0 8px 32px rgba(0,0,0,0.12)',zIndex:200,overflow:'hidden',maxHeight:showAllNotif?'80vh':'360px',transition:'max-height .25s ease',display:'flex',flexDirection:'column'}}>
+                    <div style={{position:'absolute',right:0,top:'calc(100% + 8px)',width:320,background:'#fff',border:'1px solid #F0D9C9',borderRadius:12,boxShadow:'0 8px 32px rgba(0,0,0,0.12)',zIndex:200,overflow:'hidden',maxHeight:showAllNotif?'80vh':'360px',display:'flex',flexDirection:'column'}}>
                       <div style={{padding:'10px 14px',borderBottom:'1px solid #F0D9C9',display:'flex',alignItems:'center',justifyContent:'space-between'}}>
                         <span style={{fontSize:13,fontWeight:700,color:'#2B211B'}}>通知</span>
                         <button onClick={()=>setShowAllNotif(!showAllNotif)} style={{fontSize:11,color:'#F26A21',background:'none',border:'none',cursor:'pointer'}}>{showAllNotif?'‹ 閉じる':'もっと見る ›'}</button>
@@ -123,30 +138,54 @@ export default function Header({ profile, user, activeGenre }: Props) {
                   )}
                 </div>
 
-                <div style={{position:'relative'}} className="user-menu">
-                  <Link href="/mypage" style={{display:'flex',alignItems:'center',gap:6,padding:'6px 14px',borderRadius:20,background:'#FFF9F2',border:'1.5px solid #F0D9C9',textDecoration:'none',fontSize:13}}>
-                    <span style={{color:'#B8AEA8',fontSize:12}}>ユーザー：</span>
+                {/* ユーザーメニュー */}
+                <div ref={userMenuRef} style={{position:'relative'}}>
+                  <button onClick={()=>setShowUserMenu(!showUserMenu)}
+                    style={{display:'flex',alignItems:'center',gap:6,padding:'6px 14px',borderRadius:20,background:'#FFF9F2',border:'1.5px solid #F0D9C9',cursor:'pointer',fontSize:13}}>
+                    {profile?.icon_url
+                      ? <img src={profile.icon_url} style={{width:22,height:22,borderRadius:'50%',objectFit:'cover'}}/>
+                      : <span style={{width:22,height:22,borderRadius:'50%',background:'#F0D9C9',display:'flex',alignItems:'center',justifyContent:'center',fontSize:11,color:'#77706A'}}>👤</span>
+                    }
                     <span style={{color:'#F26A21',fontWeight:700}}>{(profile?.display_name || 'ユーザー').length > 8 ? (profile?.display_name || 'ユーザー').slice(0, 8) + '…' : (profile?.display_name || 'ユーザー')}</span>
-                  </Link>
-                  {userNumber && (
-                    <div className="user-tooltip" style={{position:'absolute',top:'calc(100% + 8px)',right:0,background:'#2B211B',color:'#fff',borderRadius:8,padding:'8px 14px',fontSize:12,whiteSpace:'nowrap',pointerEvents:'none',opacity:0,transition:'opacity .15s',zIndex:100,boxShadow:'0 4px 12px rgba(0,0,0,.15)'}}>
-                      <div style={{color:'#B8AEA8',fontSize:11,marginBottom:2}}>ユーザーID</div>
-                      <div style={{fontWeight:700,fontSize:14}}>{userNumber}</div>
-                      <div style={{position:'absolute',top:-5,right:20,width:10,height:10,background:'#2B211B',transform:'rotate(45deg)',borderRadius:2}}/>
+                    <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#77706A" strokeWidth="2.5">
+                      <polyline points="6 9 12 15 18 9"/>
+                    </svg>
+                  </button>
+
+                  {showUserMenu && (
+                    <div style={{position:'absolute',right:0,top:'calc(100% + 8px)',width:200,background:'#fff',border:'1px solid #F0D9C9',borderRadius:12,boxShadow:'0 8px 24px rgba(0,0,0,0.12)',zIndex:200,overflow:'hidden'}}>
+                      {/* ユーザー情報 */}
+                      <div style={{padding:'12px 16px',borderBottom:'1px solid #F0D9C9',background:'#FFF9F2'}}>
+                        <div style={{fontSize:13,fontWeight:700,color:'#2B211B'}}>{profile?.display_name}</div>
+                        {userNumber && <div style={{fontSize:11,color:'#B8AEA8',marginTop:2}}>{userNumber}</div>}
+                      </div>
+                      {/* メニュー項目 */}
+                      {menuItems.map(item => (
+                        <Link key={item.href} href={item.href} onClick={()=>setShowUserMenu(false)}
+                          style={{display:'flex',alignItems:'center',gap:10,padding:'10px 16px',borderBottom:'1px solid #FFF1E6',textDecoration:'none',color:'#2B211B',fontSize:13}}>
+                          <span>{item.icon}</span>
+                          <span>{item.label}</span>
+                        </Link>
+                      ))}
+                      {/* ログアウト */}
+                      <button onClick={handleLogout}
+                        style={{display:'flex',alignItems:'center',gap:10,padding:'10px 16px',width:'100%',border:'none',background:'#fff',cursor:'pointer',fontSize:13,color:'#dc2626',textAlign:'left'}}>
+                        <span>🚪</span>
+                        <span>ログアウト</span>
+                      </button>
                     </div>
                   )}
                 </div>
               </>
             ) : (
               <>
-                <Link href="/auth/login" style={{border:'1.5px solid #F26A21',color:'#F26A21',padding:'6px 18px',borderRadius:20,background:'#fff',fontSize:13,fontWeight:500}}>ログイン</Link>
-                <Link href="/auth/register" style={{background:'#F26A21',color:'#fff',padding:'7px 18px',borderRadius:20,fontSize:13,fontWeight:700}}>新規登録</Link>
+                <Link href="/auth/login" style={{border:'1.5px solid #F26A21',color:'#F26A21',padding:'6px 18px',borderRadius:20,background:'#fff',fontSize:13,fontWeight:500,textDecoration:'none'}}>ログイン</Link>
+                <Link href="/auth/register" style={{background:'#F26A21',color:'#fff',padding:'7px 18px',borderRadius:20,fontSize:13,fontWeight:700,textDecoration:'none'}}>新規登録</Link>
               </>
             )}
           </div>
         </div>
       </header>
-      <style>{`.user-menu:hover .user-tooltip{opacity:1!important}`}</style>
 
       {/* メインNAV */}
       <nav style={{background:'#fff',borderBottom:'2px solid #F0D9C9'}}>

@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
+import LoginPromptModal from '@/components/LoginPromptModal'
 
 interface Props {
   novelId: string
@@ -36,9 +37,17 @@ export default function NovelActions({ novelId, userId, authorId, novelTitle, is
   const [showComment, setShowComment] = useState(false)
   const [comment,     setComment]     = useState('')
   const [submitting,  setSubmitting]  = useState(false)
+  const [showLogin,   setShowLogin]   = useState(false)
+  const [loginMsg,    setLoginMsg]    = useState('')
+
+  function requireLogin(msg: string) {
+    setLoginMsg(msg)
+    setShowLogin(true)
+  }
 
   async function toggleLike() {
-    if (!userId || loading) return
+    if (!userId) return requireLogin('いいねするにはログインが必要です')
+    if (loading) return
     setLoading(true)
     if (liked) {
       await supabase.from('likes').delete().eq('novel_id', novelId).eq('user_id', userId)
@@ -56,7 +65,8 @@ export default function NovelActions({ novelId, userId, authorId, novelTitle, is
   }
 
   async function toggleBookmark() {
-    if (!userId || loading) return
+    if (!userId) return requireLogin('ブックマークするにはログインが必要です')
+    if (loading) return
     setLoading(true)
     if (bookmarked) {
       await supabase.from('bookmarks').delete().eq('novel_id', novelId).eq('user_id', userId)
@@ -69,7 +79,8 @@ export default function NovelActions({ novelId, userId, authorId, novelTitle, is
   }
 
   async function handleDiscover() {
-    if (!userId || isAuthor) return
+    if (!userId) return requireLogin('拡散するにはログインが必要です')
+    if (isAuthor) return
     if (discovered) {
       if (!confirm('拡散を取り消すと、投稿したコメントも削除されます。よろしいですか？')) return
       await supabase.from('discovers').delete().eq('novel_id', novelId).eq('user_id', userId)
@@ -84,7 +95,6 @@ export default function NovelActions({ novelId, userId, authorId, novelTitle, is
     if (!userId || !comment.trim()) return
     setSubmitting(true)
 
-    // Claude APIでコメントを審査
     let isPending = false
     let pendingReason = ''
     try {
@@ -132,7 +142,7 @@ export default function NovelActions({ novelId, userId, authorId, novelTitle, is
 
   const btn = (active: boolean, color: string) => ({
     display:'inline-flex' as const, alignItems:'center' as const, gap:6,
-    padding:'8px 16px', borderRadius:20, border:'1.5px solid', cursor:userId?'pointer' as const:'default' as const,
+    padding:'8px 16px', borderRadius:20, border:'1.5px solid', cursor:'pointer' as const,
     fontSize:13, fontWeight:500 as const,
     background: active ? (color==='#dc2626'?'#fef2f2':'#FFF1E6') : '#fff',
     borderColor: active ? color : '#F0D9C9',
@@ -143,6 +153,8 @@ export default function NovelActions({ novelId, userId, authorId, novelTitle, is
 
   return (
     <div>
+      <LoginPromptModal show={showLogin} onClose={()=>setShowLogin(false)} message={loginMsg} />
+
       <div style={{display:'flex',gap:8,flexWrap:'wrap',alignItems:'center'}}>
         <button onClick={toggleLike} style={btn(liked,'#dc2626')}>
           {liked?'♥':'♡'} {fmtNum(likes)}
@@ -159,7 +171,6 @@ export default function NovelActions({ novelId, userId, authorId, novelTitle, is
           title={isAuthor ? '自分の作品は拡散できません' : 'この作品をもっと広めたい！という気持ちを伝える'}>
           拡散する
         </button>
-        {/* Xシェアボタン */}
         <button onClick={handleXShare}
           style={{display:'inline-flex',alignItems:'center',gap:6,padding:'8px 16px',borderRadius:20,
             border:'1.5px solid #e2e8f0',background:'#fff',color:'#374151',
@@ -173,7 +184,7 @@ export default function NovelActions({ novelId, userId, authorId, novelTitle, is
 
       {/* 拡散コメント入力 */}
       {showComment && (
-        <div style={{marginTop:12,background:'#FFF1E6',border:'1.5px solid #f5b080',borderRadius:12,padding:'16px',boxShadow:'0 4px 20px rgba(124,58,237,0.15)'}}>
+        <div style={{marginTop:12,background:'#FFF1E6',border:'1.5px solid #f5b080',borderRadius:12,padding:'16px'}}>
           <div style={{fontSize:13,fontWeight:700,color:'#F26A21',marginBottom:8}}>この作品の魅力を伝えよう！</div>
           <div style={{fontSize:11,color:'#2B211B',marginBottom:8,lineHeight:1.6}}>紹介コメントを書いてください。作品ページに表示されます。</div>
           <textarea value={comment} onChange={e=>setComment(e.target.value)}
