@@ -167,24 +167,24 @@ export default function Header({ profile, user, activeGenre }: Props) {
         </div>
 
         {/* モバイルヘッダー */}
-        <div className="mobile-header" style={{display:'none',alignItems:'center',justifyContent:'space-between',padding:'0 16px',height:52}}>
-          <Link href="/" style={{flexShrink:0}}>
-            <img src="/logo.png" alt="原石航路" style={{height:44,width:'auto',display:'block',objectFit:'contain'}}/>
+        <div className="mobile-header" style={{display:'none',alignItems:'center',justifyContent:'center',padding:'0 16px',height:52,position:'relative'}}>
+          {/* ロゴ中央 */}
+          <Link href="/" style={{position:'absolute',left:'50%',transform:'translateX(-50%)'}}>
+            <img src="/logo.png" alt="原石航路" style={{height:48,width:'auto',display:'block',objectFit:'contain'}}/>
           </Link>
-          <div style={{display:'flex',alignItems:'center',gap:8}}>
-            {/* 検索ボタン */}
+          {/* 右上にボタン */}
+          <div style={{display:'flex',alignItems:'center',gap:8,marginLeft:'auto'}}>
             <button onClick={()=>setShowMobileSearch(!showMobileSearch)}
-              style={{width:36,height:36,borderRadius:'50%',border:'1.5px solid #F0D9C9',background:'#FFF9F2',cursor:'pointer',display:'flex',alignItems:'center',justifyContent:'center'}}>
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#F26A21" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+              style={{width:34,height:34,borderRadius:'50%',border:'1.5px solid #F0D9C9',background:'#FFF9F2',cursor:'pointer',display:'flex',alignItems:'center',justifyContent:'center'}}>
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#F26A21" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                 <circle cx="11" cy="11" r="7"/><line x1="16.5" y1="16.5" x2="22" y2="22"/>
               </svg>
             </button>
-            {/* ハンバーガー */}
             <button onClick={()=>setShowMobileMenu(!showMobileMenu)}
-              style={{width:36,height:36,borderRadius:'50%',border:'1.5px solid #F0D9C9',background:'#FFF9F2',cursor:'pointer',display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',gap:4}}>
-              <span style={{display:'block',width:16,height:1.5,background:'#77706A',borderRadius:1}}/>
-              <span style={{display:'block',width:16,height:1.5,background:'#77706A',borderRadius:1}}/>
-              <span style={{display:'block',width:16,height:1.5,background:'#77706A',borderRadius:1}}/>
+              style={{width:34,height:34,borderRadius:'50%',border:'1.5px solid #F0D9C9',background:'#FFF9F2',cursor:'pointer',display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',gap:4}}>
+              <span style={{display:'block',width:15,height:1.5,background:'#77706A',borderRadius:1}}/>
+              <span style={{display:'block',width:15,height:1.5,background:'#77706A',borderRadius:1}}/>
+              <span style={{display:'block',width:15,height:1.5,background:'#77706A',borderRadius:1}}/>
             </button>
           </div>
         </div>

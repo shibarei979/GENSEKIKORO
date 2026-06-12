@@ -18,6 +18,10 @@ const GAP = 8
 
 export default function HeroSlider({ items }: Props) {
   const [offset, setOffset] = useState(0)
+  // モバイルでは小さいサイズを使う
+  const isMobile = typeof window !== 'undefined' && window.innerWidth <= 768
+  const itemH = isMobile ? 52 : ITEM_H
+  const itemW = isMobile ? 104 : ITEM_W
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
   const max = Math.max(0, items.length - 2)
@@ -54,10 +58,10 @@ export default function HeroSlider({ items }: Props) {
           display:'flex',
           gap:GAP,
           transition:'transform 0.4s cubic-bezier(.4,0,.2,1)',
-          transform:`translateX(calc(-${offset} * (${ITEM_W}px + ${GAP}px)))`,
+          transform:`translateX(calc(-${offset} * (${itemW}px + ${GAP}px)))`,
         }}>
           {items.map(item => (
-            <div key={item.id} style={{flexShrink:0,width:ITEM_W,height:ITEM_H,borderRadius:6,overflow:'hidden'}}>
+            <div key={item.id} style={{flexShrink:0,width:ITEM_W,height:itemH,borderRadius:6,overflow:'hidden'}}>
               {item.link ? (
                 <a href={item.link} target={item.link?.startsWith('/') ? '_self' : '_blank'} rel="noopener noreferrer" style={{display:'block',width:'100%',height:'100%'}}>
                   <img src={item.image_url} alt={item.title} style={{width:'100%',height:'100%',objectFit:'cover',display:'block'}}/>
