@@ -257,7 +257,7 @@ export default function PostClient({ profile, userId }: Props) {
           body: JSON.stringify({ novel_id: novelId }),
         }).catch(() => {})
 
-        setToast(editMode ? '変更を保存しました！' : '投稿しました！')
+        setToast(editMode ? '変更を保存しました！反映まで1分前後かかります' : '投稿しました！反映まで1分前後かかります')
 
         if (!editMode && novelId) {
           fetch('/api/notify-update', {
