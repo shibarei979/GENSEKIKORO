@@ -140,7 +140,7 @@ export default async function SearchPage({ searchParams }: Props) {
     <div style={{minHeight:'100vh',background:'#fff',fontFamily:"'Noto Sans JP',sans-serif"}}>
       <Header profile={profile} user={user} />
 
-      <div style={{maxWidth:1200,margin:'0 auto',padding:'24px 32px',display:'flex',gap:20,alignItems:'flex-start'}}>
+      <div className="main-layout" style={{maxWidth:1200,margin:'0 auto',padding:'24px 32px',display:'flex',gap:20,alignItems:'flex-start'}}>
         <div style={{flex:1,minWidth:0}}>
 
           <SearchForm
@@ -216,7 +216,7 @@ export default async function SearchPage({ searchParams }: Props) {
           )}
         </div>
 
-        <Sidebar />
+        <div className="desktop-only"><Sidebar /></div>
       </div>
 
       <AdBanner />

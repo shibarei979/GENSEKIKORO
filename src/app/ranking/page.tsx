@@ -174,14 +174,14 @@ export default async function RankingPage({ searchParams }: Props) {
     <div style={{minHeight:'100vh',background:'#fff',fontFamily:"'Noto Sans JP',sans-serif"}}>
       <Header profile={profile} user={user} />
 
-      <div style={{maxWidth:1200,margin:'0 auto',padding:'28px 32px',display:'flex',gap:20,alignItems:'flex-start'}}>
+      <div className="main-layout" style={{maxWidth:1200,margin:'0 auto',padding:'28px 32px',display:'flex',gap:20,alignItems:'flex-start'}}>
         <div style={{flex:1,minWidth:0}}>
           <div style={{marginBottom:16}}>
             <h1 style={{fontSize:22,fontWeight:700,color:'#2B211B',marginBottom:4}}>ランキング</h1>
           </div>
 
           {/* フィルターバー */}
-          <div style={{background:'#FFF9F2',border:'1px solid #F0D9C9',borderRadius:12,padding:'14px 18px',marginBottom:16}}>
+          <div className="ranking-filter" style={{background:'#FFF9F2',border:'1px solid #F0D9C9',borderRadius:12,padding:'14px 18px',marginBottom:16}}>
             <div style={{marginBottom:10}}>
               <div style={{fontSize:11,color:'#77706A',fontWeight:600,marginBottom:5}}>期間</div>
               <div style={{display:'flex',gap:6,flexWrap:'wrap'}}>
@@ -323,7 +323,7 @@ export default async function RankingPage({ searchParams }: Props) {
             </div>
           )}
         </div>
-        <Sidebar />
+        <div className="desktop-only"><Sidebar /></div>
       </div>
 
       <AdBanner />

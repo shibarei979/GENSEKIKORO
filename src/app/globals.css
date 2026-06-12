@@ -271,3 +271,118 @@ footer a:hover { color: #F26A21 !important; opacity: 1; }
   .slider-desktop { display: none !important; }
   .slider-mobile  { display: block !important; }
 }
+
+/* ===== 全ページ共通 モバイル ===== */
+@media (max-width: 768px) {
+  /* 右サイドバー非表示 */
+  .sidebar, aside { display: none !important; }
+
+  /* flex横並びを縦に（サイドバー付きレイアウト） */
+  .page-layout {
+    flex-direction: column !important;
+    padding: 12px 16px !important;
+    gap: 12px !important;
+  }
+
+  /* ランキングページ左サイドバーをコンパクトに */
+  .ranking-filter {
+    width: 100% !important;
+    min-width: unset !important;
+  }
+  .ranking-filter-inner {
+    display: flex !important;
+    flex-wrap: wrap !important;
+    gap: 6px !important;
+    flex-direction: row !important;
+  }
+
+  /* コンテスト・お知らせ画像を全幅に */
+  .contest-image img {
+    max-height: 160px !important;
+    width: 100% !important;
+    object-fit: cover !important;
+  }
+
+  /* マイページ プロフィール */
+  .profile-stats {
+    display: flex !important;
+    flex-direction: row !important;
+    flex-wrap: wrap !important;
+    gap: 8px !important;
+  }
+  .profile-stats > div {
+    writing-mode: horizontal-tb !important;
+    flex: 1 !important;
+    min-width: 60px !important;
+  }
+
+  /* テキスト縦書き防止 */
+  * { writing-mode: horizontal-tb !important; }
+
+  /* maxWidth制限でのpadding */
+  div[style*="maxWidth:900"],
+  div[style*="maxWidth:1200"],
+  div[style*="maxWidth:860"] {
+    padding-left: 16px !important;
+    padding-right: 16px !important;
+  }
+
+  /* flex横並びで幅が固定されているものを解除 */
+  div[style*="width:240"],
+  div[style*="width:200"],
+  div[style*="width:220"],
+  div[style*="minWidth:240"],
+  div[style*="minWidth:200"] {
+    width: 100% !important;
+    min-width: unset !important;
+  }
+}
+
+/* ===== ランキング フィルター モバイル ===== */
+@media (max-width: 768px) {
+  .ranking-filter > div {
+    display: flex !important;
+    flex-wrap: wrap !important;
+    flex-direction: row !important;
+    gap: 6px !important;
+    align-items: center !important;
+  }
+  .ranking-filter > div > div {
+    writing-mode: horizontal-tb !important;
+    white-space: nowrap !important;
+  }
+
+  /* コンテスト画像 */
+  .contest-img-wrap {
+    padding: 12px 12px 0 !important;
+  }
+  .contest-img-wrap img {
+    max-height: 160px !important;
+    border-radius: 8px !important;
+  }
+
+  /* マイページ */
+  .mypage-container { padding: 16px !important; }
+  .profile-card {
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    gap: 12px !important;
+    padding: 16px !important;
+  }
+
+  /* 閲覧履歴カード */
+  .history-card {
+    flex-direction: row !important;
+    writing-mode: horizontal-tb !important;
+  }
+  .history-card * {
+    writing-mode: horizontal-tb !important;
+  }
+
+  /* main-layout モバイル */
+  .main-layout {
+    flex-direction: column !important;
+    padding: 12px 16px !important;
+    gap: 12px !important;
+  }
+}

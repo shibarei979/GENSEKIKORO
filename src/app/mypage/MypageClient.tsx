@@ -239,9 +239,9 @@ export default function MypageClient({ profile, novels: initialNovels, bookmarke
     <div style={{minHeight:'100vh',background:'#fff'}}>
       <Header profile={profile} user={true} />
 
-      <div style={{maxWidth:860,margin:'0 auto',padding:'32px 24px'}}>
+      <div className="mypage-container" style={{maxWidth:860,margin:'0 auto',padding:'32px 24px'}}>
         {/* プロフィールカード */}
-        <div style={{background:'#fff',border:'1px solid #F0D9C9',borderRadius:16,padding:'24px 28px',marginBottom:20,display:'flex',alignItems:'center',gap:20}}>
+        <div className="profile-card" style={{background:'#fff',border:'1px solid #F0D9C9',borderRadius:16,padding:'24px 28px',marginBottom:20,display:'flex',alignItems:'center',gap:20}}>
           <div style={{position:'relative',flexShrink:0,cursor:'pointer'}} onClick={()=>iconInputRef.current?.click()} title="クリックしてアイコンを変更">
             <input ref={iconInputRef} type="file" accept="image/*" style={{display:'none'}} onChange={e=>{const f=e.target.files?.[0];if(f){handleIconUpload(f);e.target.value=''}}}/>
             {iconUrl ? (

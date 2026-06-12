@@ -84,7 +84,7 @@ export default async function HistoryPage() {
     <div style={{minHeight:'100vh',background:'#fff',fontFamily:"'Noto Sans JP',sans-serif"}}>
       <Header profile={profile} user={user} />
 
-      <div style={{maxWidth:1200,margin:'0 auto',padding:'28px 32px',display:'flex',gap:20,alignItems:'flex-start'}}>
+      <div className="main-layout" style={{maxWidth:1200,margin:'0 auto',padding:'28px 32px',display:'flex',gap:20,alignItems:'flex-start'}}>
         <div style={{flex:1,minWidth:0}}>
           <div style={{marginBottom:20}}>
             <h1 style={{fontSize:22,fontWeight:700,color:'#2B211B',marginBottom:4}}>閲覧履歴</h1>
