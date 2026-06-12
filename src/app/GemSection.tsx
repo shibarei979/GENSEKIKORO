@@ -83,9 +83,19 @@ export default function GemSection({ novels, discoverCommentMap }: Props) {
                 <div style={{fontSize:13,fontWeight:700,color:'#2B211B',marginBottom:2}}>{n.title}</div>
                 <div style={{fontSize:11,color:'#77706A',marginBottom: (discoverCommentMap[n.id]||[]).length>0?4:0}}>作者：{n.display_name}</div>
                 {(discoverCommentMap[n.id]||[]).length > 0 && (
-                  <div style={{fontSize:11,color:'#77706A',background:'#FFF9F2',borderRadius:4,padding:'4px 8px',borderLeft:'2px solid #F26A21'}}>
-                    「{discoverCommentMap[n.id][0].comment.slice(0,30)}…」
-                    <span style={{fontSize:10,color:'#B8AEA8',marginLeft:4}}>{discoverCommentMap[n.id][0].display_name}</span>
+                  <div style={{
+                    fontSize:11,color:'#5a3a20',
+                    background:'#FFF9A0',
+                    borderRadius:'2px 8px 8px 2px',
+                    padding:'5px 8px',
+                    boxShadow:'2px 2px 4px rgba(0,0,0,0.1)',
+                    transform:'rotate(-0.5deg)',
+                    marginTop:4,
+                    lineHeight:1.5,
+                    position:'relative',
+                  }}>
+                    「{discoverCommentMap[n.id][0].comment.slice(0,28)}」
+                    <div style={{fontSize:9,color:'#8a6a40',marginTop:2,textAlign:'right'}}>— {discoverCommentMap[n.id][0].display_name}</div>
                   </div>
                 )}
               </div>
