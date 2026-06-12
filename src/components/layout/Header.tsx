@@ -173,7 +173,7 @@ export default function Header({ profile, user, activeGenre }: Props) {
             <img src="/logo.png" alt="原石航路" style={{height:92,width:'auto',display:'block',objectFit:'contain'}}/>
           </Link>
           {/* 右上にボタン */}
-          <div style={{display:'flex',alignItems:'center',gap:8,marginLeft:'auto'}}>
+          <div style={{display:'flex',alignItems:'center',gap:8,marginLeft:'auto',paddingTop:8}}>
             <button onClick={()=>setShowMobileSearch(!showMobileSearch)}
               style={{width:34,height:34,borderRadius:'50%',border:'1.5px solid #F0D9C9',background:'#FFF9F2',cursor:'pointer',display:'flex',alignItems:'center',justifyContent:'center'}}>
               <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#F26A21" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">

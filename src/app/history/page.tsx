@@ -97,7 +97,7 @@ export default async function HistoryPage() {
                 まだ閲覧履歴がありません
               </div>
             ) : historyItems.map((item) => (
-              <Link key={item.novelId} href={`/novel/${item.novelId}`} style={{textDecoration:'none',display:'flex',gap:14,padding:'14px 20px',borderBottom:'1px solid #FFF1E6',background:'#fff',alignItems:'center',color:'inherit'}}>
+              <Link key={item.novelId} href={`/novel/${item.novelId}`} className="history-card" style={{textDecoration:'none',display:'flex',gap:14,padding:'14px 20px',borderBottom:'1px solid #FFF1E6',background:'#fff',alignItems:'center',color:'inherit'}}>
                 <span style={{flex:1,minWidth:0,display:'block'}}>
                   <span style={{display:'flex',gap:6,marginBottom:4,flexWrap:'wrap',alignItems:'center'}}>
                     <span style={{fontSize:10,background:'#FFF1E6',color:'#F26A21',border:'1px solid #f5b080',padding:'1px 6px',borderRadius:3}}>{item.genre}</span>
