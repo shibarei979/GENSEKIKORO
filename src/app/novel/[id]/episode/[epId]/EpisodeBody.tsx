@@ -25,13 +25,14 @@ function renderBodyV(text: string): string {
   r = r.replace(/《《([^》]+)》》/g, '<em style="font-style:normal;font-weight:700;border-bottom:2px solid #F26A21">$1</em>')
   // 数字を全角化
   r = r.replace(/[0-9]/g, (c: string) => String.fromCharCode(c.charCodeAt(0) + 0xFEE0))
-  // ーを縦書き用の縦棒文字に変換
-  r = r.replace(/ー/g, '｜')
-  r = r.replace(/〜/g, '〜')
-  r = r.replace(/－/g, '｜')
-  r = r.replace(/─/g, '｜')
-  r = r.replace(/―/g, '｜')
-  r = r.replace(/—/g, '｜')
+  // ーをCSSで縦に回転させる（writing-mode内でupright指定）
+  const vStyle = 'font-style:normal;-webkit-text-orientation:upright;text-orientation:upright;display:inline-block;width:1em;text-align:center'
+  r = r.replace(/ー/g, `<span style="${vStyle}">｜</span>`)
+  r = r.replace(/〜/g, `<span style="${vStyle}">｜</span>`)
+  r = r.replace(/－/g, `<span style="${vStyle}">｜</span>`)
+  r = r.replace(/─/g, `<span style="${vStyle}">｜</span>`)
+  r = r.replace(/―/g, `<span style="${vStyle}">｜</span>`)
+  r = r.replace(/—/g, `<span style="${vStyle}">｜</span>`)
   r = r.replace(/\n/g, '<br/>')
   return r
 }
