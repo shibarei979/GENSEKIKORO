@@ -429,6 +429,12 @@ export default function MypageClient({ profile, novels: initialNovels, bookmarke
                   style={{fontSize:12,border:'1px solid #F0D9C9',padding:'5px 12px',borderRadius:8,color:'#77706A',background:'#fff',textDecoration:'none'}}>
                   編集
                 </Link>
+                {!novel.published && (
+                  <Link href={`/post?edit=${novel.id}`}
+                    style={{fontSize:12,border:'1px solid #F26A21',padding:'5px 12px',borderRadius:8,color:'#F26A21',background:'#FFF1E6',textDecoration:'none',fontWeight:600}}>
+                    ✏️ 制作再開
+                  </Link>
+                )}
                 <button onClick={()=>handleTogglePublish(novel.id, novel.published)}
                   style={{fontSize:12,border:`1px solid ${novel.published?'#F0D9C9':'#86efac'}`,padding:'5px 12px',borderRadius:8,
                     color:novel.published?'#77706A':'#15803d',background:'#fff',cursor:'pointer'}}>
