@@ -447,3 +447,60 @@ footer a:hover { color: #F26A21 !important; opacity: 1; }
     padding: 12px 0 !important;
   }
 }
+
+/* ===================================================
+   globals.css 追記・変更箇所のみ
+   既存ファイルの末尾に追加 OR 該当箇所を置き換え
+   =================================================== */
+
+/* ===== ボトムナビ対応：コンテンツ下余白 ===== */
+@media (max-width: 768px) {
+  /* ボトムナビ分（56px + safe-area）の余白をbodyに */
+  body {
+    padding-bottom: calc(56px + env(safe-area-inset-bottom, 0px));
+  }
+
+  /* Footerはモバイルで非表示（ボトムナビがある） */
+  footer {
+    display: none !important;
+  }
+}
+
+/* ===== モバイルヘッダー検索バー ===== */
+@media (max-width: 768px) {
+  /* 検索バーのiOS zoom防止（font-sizeを14px以上に） */
+  .mobile-header-wrap input {
+    font-size: 14px !important;
+  }
+}
+
+/* ===== 急上昇横スクロール：スクロールバー非表示 ===== */
+.rising-scroll::-webkit-scrollbar {
+  display: none;
+}
+.rising-scroll {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+/* ===== モバイル：カードホバー ===== */
+@media (max-width: 768px) {
+  /* タップ時のフラッシュを抑制 */
+  a, button {
+    -webkit-tap-highlight-color: rgba(242,106,33,0.08);
+  }
+}
+
+/* ===== ランキングモバイル表示（既存クラスの補強） ===== */
+@media (max-width: 768px) {
+  .ranking-desktop { display: none !important; }
+  .ranking-mobile  { display: block !important; }
+}
+
+/* ===== GemSection モバイル（既存クラスの補強） ===== */
+@media (max-width: 768px) {
+  .gem-desktop { display: none !important; }
+  .gem-mobile  { display: block !important; }
+  .gem-inner   { padding: 0 16px !important; }
+  .gem-section-wrap { padding: 12px 0 0 !important; }
+}

@@ -65,32 +65,24 @@ export default async function HomePage() {
     return n.toLocaleString()
   }
 
-  // お知らせ・コンテスト取得
-
-
-  // サイドバー用コンテスト（全件・期限切れ除く）
   const sidebarContests = (allContests || []).filter(c => getContestStatusKey(c.deadline, c.judging_end) !== null)
 
-  // スライダー用データ作成
-  // お知らせ：contest種別除く・最大6枚
+  // スライダー用データ
   const sliderAnnouncements = (sidebarAnnouncements || [])
     .filter((n: any) => n.type !== 'contest' && n.image_url)
     .slice(0, 6)
     .map((n: any) => ({ id: `ann-${n.id}`, image_url: n.image_url, link: n.link, title: n.title }))
-
-  // コンテスト：募集中のみ全件
   const sliderContests = (allContests || [])
     .filter((c: any) => c.image_url && getContestStatusKey(c.deadline, c.judging_end) === '募集中')
     .map((c: any) => ({ id: `con-${c.id}`, image_url: c.image_url, link: c.is_site_contest ? `/contests/${c.id}` : c.apply_url, title: c.title }))
-
   const sliderItems = [...sliderAnnouncements, ...sliderContests]
 
+  // 最新話
   const { data: latestEpisodesRaw } = await supabase
     .from('episodes')
     .select('id, title, ep_number, created_at, novel_id, novels(id, title, genre, author_id, published, summary, catchcopy, tags)')
     .order('created_at', { ascending: false })
     .limit(20)
-
   const seenNovelIds = new Set<string>()
   const latestEpisodesFiltered = (latestEpisodesRaw || [])
     .filter((ep: any) => {
@@ -101,7 +93,6 @@ export default async function HomePage() {
       return true
     })
     .slice(0, 10)
-
   const epAuthorIds = Array.from(new Set(latestEpisodesFiltered.map((ep: any) => (ep.novels as any)?.author_id).filter(Boolean)))
   let epAuthorMap: Record<string,string> = {}
   if (epAuthorIds.length > 0) {
@@ -140,11 +131,9 @@ export default async function HomePage() {
     .select('novel_id, like_count')
     .order('like_count', { ascending: false })
     .limit(20)
-
   const weeklyNovelIds = (weeklyLikes || []).map((w: any) => w.novel_id)
-  const weeklyLikeMap  = Object.fromEntries((weeklyLikes || []).map((w: any) => [w.novel_id, w.like_count]))
-
-  let rankingLongRaw: any[]  = []
+  const weeklyLikeMap = Object.fromEntries((weeklyLikes || []).map((w: any) => [w.novel_id, w.like_count]))
+  let rankingLongRaw: any[] = []
   let rankingShortRaw: any[] = []
   if (weeklyNovelIds.length > 0) {
     const { data: weeklyNovels } = await supabase
@@ -159,14 +148,14 @@ export default async function HomePage() {
 
   const latestNovelsBase = await addAuthorNames(supabase, shuffledLatest || [])
   const latestIds = latestNovelsBase.map((n: any) => n.id)
-  let latestLikeMap: Record<string,number>     = {}
+  let latestLikeMap: Record<string,number> = {}
   let latestBookmarkMap: Record<string,number> = {}
   if (latestIds.length > 0) {
     const [ll, lb] = await Promise.all([
       supabase.from('likes').select('novel_id').in('novel_id', latestIds),
       supabase.from('bookmarks').select('novel_id').in('novel_id', latestIds),
     ])
-    ll.data?.forEach((l: any) => { latestLikeMap[l.novel_id]     = (latestLikeMap[l.novel_id]||0)+1 })
+    ll.data?.forEach((l: any) => { latestLikeMap[l.novel_id] = (latestLikeMap[l.novel_id]||0)+1 })
     lb.data?.forEach((b: any) => { latestBookmarkMap[b.novel_id] = (latestBookmarkMap[b.novel_id]||0)+1 })
   }
   const latestNovels = latestNovelsBase.map((n: any) => ({
@@ -176,7 +165,7 @@ export default async function HomePage() {
     bookmarkCount: latestBookmarkMap[n.id] || 0,
   }))
 
-  // おすすめ枠
+  // おすすめ
   const { data: allNovelsRaw } = await supabase
     .from('novels')
     .select('id, title, genre, novel_type, author_id, created_at, originality_score, is_r18, summary, catchcopy, tags')
@@ -187,7 +176,7 @@ export default async function HomePage() {
     .limit(50)
   const allNovels = await addAuthorNames(supabase, allNovelsRaw || [])
   const allIds = allNovels.map((n: any) => n.id)
-  let likeMap: Record<string,number>     = {}
+  let likeMap: Record<string,number> = {}
   let discoverMap: Record<string,number> = {}
   let bookmarkMap: Record<string,number> = {}
   if (allIds.length > 0) {
@@ -233,7 +222,6 @@ export default async function HomePage() {
     if (!seenGemIds.has(n.id)) { seenGemIds.add(n.id); gemNovels.push(n) }
     if (gemNovels.length >= 7) break
   }
-
   const gemIds = gemNovels.map((n: any) => n.id)
   const discoverCommentMap: Record<string,{comment:string;display_name:string}[]> = {}
   if (gemIds.length > 0) {
@@ -250,18 +238,19 @@ export default async function HomePage() {
   const rankingLong  = (await addAuthorNames(supabase, rankingLongRaw  || [])).map((n: any) => ({...n, like_count: weeklyLikeMap[n.id]||0}))
   const rankingShort = (await addAuthorNames(supabase, rankingShortRaw || [])).map((n: any) => ({...n, like_count: weeklyLikeMap[n.id]||0}))
 
+  // モバイル用：募集中コンテストを1件取得
+  const activeContest = (allContests || []).find((c: any) => c.image_url && getContestStatusKey(c.deadline, c.judging_end) === '募集中')
 
   return (
-    <div style={{minHeight:'100vh',background:'#fff',fontFamily:"'Noto Sans JP',sans-serif"}}>
+    <div style={{minHeight:'100vh',background:'#FFF9F2',fontFamily:"'Noto Sans JP',sans-serif"}}>
       <Header profile={profile} user={user} />
 
-      {/* ヒーロー */}
-      <section style={{background:'#FFF1E6',borderBottom:'1px solid #F0D9C9'}}>
-        <div className="hero-section" style={{maxWidth:1200,margin:'0 auto',padding:'36px 32px 36px'}}>
+      {/* ===== デスクトップ：ヒーロー ===== */}
+      <section className="desktop-only" style={{background:'#FFF1E6',borderBottom:'1px solid #F0D9C9'}}>
+        <div className="hero-section" style={{maxWidth:1200,margin:'0 auto',padding:'36px 32px'}}>
           <h1 className="hero-title" style={{fontFamily:"'Noto Serif JP',serif",fontSize:32,fontWeight:700,color:'#2B211B',lineHeight:1.35,marginBottom:12}}>
             次のブームは、<em style={{color:'#F26A21',fontStyle:'normal'}}>ここから</em>生まれる。
           </h1>
-          {/* テキスト＋ボタン＋スライダー横並び */}
           <div className="hero-flex" style={{display:'flex',gap:24,alignItems:'center',marginRight:-80}}>
             <div style={{flexShrink:0}}>
               <p style={{fontSize:13,color:'#77706A',lineHeight:1.85,marginBottom:16}}>まだ知られていない物語の原石を、<br/>読者とともに発掘するライトノベル投稿サイト。</p>
@@ -271,7 +260,7 @@ export default async function HomePage() {
               </div>
             </div>
             {sliderItems.length > 0 && (
-              <div className="desktop-only" style={{flex:1,minWidth:0}}>
+              <div style={{flex:1,minWidth:0}}>
                 <HeroSlider items={sliderItems} />
               </div>
             )}
@@ -279,9 +268,9 @@ export default async function HomePage() {
         </div>
       </section>
 
-      {/* 統計バー */}
-      <div className="stats-bar-section" style={{background:'#fff',borderBottom:'1px solid #F0D9C9'}}>
-        <div className="stats-grid" style={{maxWidth:1200,margin:'0 auto',padding:'0 32px',display:'grid',gridTemplateColumns:'repeat(4,1fr)'}}>
+      {/* ===== デスクトップ：統計バー ===== */}
+      <div className="desktop-only" style={{background:'#fff',borderBottom:'1px solid #F0D9C9'}}>
+        <div style={{maxWidth:1200,margin:'0 auto',padding:'0 32px',display:'grid',gridTemplateColumns:'repeat(4,1fr)'}}>
           {[
             ['投稿作品数', fmtNum(novelCount ?? 0) + '作品'],
             ['登録ユーザー数', fmtNum(userCount ?? 0) + '人'],
@@ -296,48 +285,127 @@ export default async function HomePage() {
         </div>
       </div>
 
-      {/* モバイル用お知らせ */}
-      <div className="mobile-only" style={{padding:'12px 16px 0'}}>
-      <div style={{background:'#fff',border:'1px solid #F0D9C9',borderRadius:10,overflow:'hidden'}}>
-        <div style={{padding:'10px 16px',borderBottom:'1px solid #F0D9C9',display:'flex',alignItems:'center',justifyContent:'space-between',background:'#FFF9F2'}}>
-          <span style={{fontSize:14,fontWeight:700,color:'#2B211B'}}>お知らせ</span>
-          <a href="/announcements" style={{fontSize:12,color:'#F26A21',textDecoration:'none'}}>もっと見る ›</a>
+      {/* ===== モバイル：バナー（コンテスト） ===== */}
+      {activeContest && (
+        <div className="mobile-only" style={{padding:'12px 16px 0'}}>
+          <Link href={activeContest.is_site_contest ? `/contests/${activeContest.id}` : (activeContest.apply_url || '#')}
+            style={{display:'block',borderRadius:12,overflow:'hidden',textDecoration:'none'}}>
+            <img
+              src={activeContest.image_url}
+              alt={activeContest.title}
+              style={{width:'100%',height:'auto',maxHeight:140,objectFit:'cover',display:'block'}}
+            />
+          </Link>
         </div>
-        {(sidebarAnnouncements||[]).slice(0,3).map((a:any)=>(
-          <a key={a.id} href={a.link||`/announcements/${a.id}`}
-            style={{display:'block',padding:'10px 16px',borderBottom:'1px solid #FFF1E6',textDecoration:'none'}}>
-            <div style={{fontSize:12,color:'#2B211B',fontWeight:500,marginBottom:2}}>{a.title}</div>
-            <div style={{fontSize:10,color:'#B8AEA8'}}>{new Date(a.created_at).toLocaleDateString('ja-JP')}</div>
-          </a>
-        ))}
-      </div>
+      )}
+
+      {/* ===== モバイル：急上昇作品 ===== */}
+      <div className="mobile-only" style={{padding:'16px 16px 0'}}>
+        <div style={{background:'#fff',borderRadius:12,overflow:'hidden',border:'1px solid #F0D9C9'}}>
+          <div style={{padding:'10px 16px',borderBottom:'1px solid #F0D9C9',display:'flex',alignItems:'center',justifyContent:'space-between',background:'#FFF9F2'}}>
+            <div style={{display:'flex',alignItems:'center',gap:6}}>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#F26A21" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                <polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/>
+              </svg>
+              <span style={{fontSize:14,fontWeight:700,color:'#2B211B'}}>急上昇作品</span>
+            </div>
+            <Link href="/ranking" style={{fontSize:12,color:'#F26A21',textDecoration:'none'}}>もっと見る ›</Link>
+          </div>
+          <div style={{overflowX:'auto',padding:'12px 16px',display:'flex',gap:10,scrollbarWidth:'none'}}>
+            {gemNovels.slice(0,5).map((n: any) => (
+              <Link key={n.id} href={`/novel/${n.id}`} style={{textDecoration:'none',flexShrink:0,width:100}}>
+                <div style={{width:100,height:130,background:'linear-gradient(135deg, #FFF1E6, #FFF9F2)',border:'1px solid #F0D9C9',borderRadius:8,overflow:'hidden',marginBottom:6,display:'flex',flexDirection:'column',justifyContent:'center',alignItems:'center',padding:8}}>
+                  <span style={{fontSize:9,fontWeight:700,color:'#F26A21',background:'#FFF1E6',border:'1px solid #f5b080',padding:'1px 5px',borderRadius:3,marginBottom:4,textAlign:'center'}}>{n.genre}</span>
+                  <div style={{fontSize:11,fontWeight:700,color:'#2B211B',textAlign:'center',lineHeight:1.4,overflow:'hidden',display:'-webkit-box',WebkitLineClamp:3,WebkitBoxOrient:'vertical' as any}}>{n.title}</div>
+                </div>
+                <div style={{fontSize:10,color:'#2B211B',fontWeight:500,lineHeight:1.3,textAlign:'center',overflow:'hidden',display:'-webkit-box',WebkitLineClamp:2,WebkitBoxOrient:'vertical' as any}}>{n.title}</div>
+                <div style={{fontSize:9,color:'#77706A',textAlign:'center',marginTop:2}}>{n.display_name}</div>
+                <div style={{fontSize:9,color:'#B8AEA8',textAlign:'center'}}>♡ {n.likeCount2||0}</div>
+              </Link>
+            ))}
+          </div>
+        </div>
       </div>
 
-      {/* ユーザーの推し */}
-      <div className="gem-section-wrap" style={{background:'#fff',padding:'16px 0'}}>
+      {/* ===== モバイル：編集部のおすすめ ===== */}
+      <div className="mobile-only" style={{padding:'12px 16px 0'}}>
+        <div style={{background:'#fff',borderRadius:12,overflow:'hidden',border:'1px solid #F0D9C9'}}>
+          <div style={{padding:'10px 16px',borderBottom:'1px solid #F0D9C9',display:'flex',alignItems:'center',justifyContent:'space-between',background:'#FFF9F2'}}>
+            <span style={{fontSize:14,fontWeight:700,color:'#2B211B'}}>編集部のおすすめ</span>
+            <Link href="/search" style={{fontSize:12,color:'#F26A21',textDecoration:'none'}}>もっと見る ›</Link>
+          </div>
+          {recommended.slice(0,3).map((n: any) => (
+            <Link key={n.id} href={`/novel/${n.id}`} style={{display:'flex',gap:12,padding:'12px 16px',borderBottom:'1px solid #FFF1E6',textDecoration:'none',alignItems:'flex-start'}}>
+              {/* サムネ代替：ジャンルカラーブロック */}
+              <div style={{width:52,height:68,borderRadius:6,background:'linear-gradient(135deg,#FFF1E6,#fde8d8)',border:'1px solid #F0D9C9',flexShrink:0,display:'flex',alignItems:'center',justifyContent:'center'}}>
+                <span style={{fontSize:9,fontWeight:700,color:'#F26A21',textAlign:'center',lineHeight:1.3,padding:'0 4px'}}>{n.genre}</span>
+              </div>
+              <div style={{flex:1,minWidth:0}}>
+                <div style={{fontSize:13,fontWeight:700,color:'#2B211B',lineHeight:1.4,marginBottom:3,overflow:'hidden',display:'-webkit-box',WebkitLineClamp:2,WebkitBoxOrient:'vertical' as any}}>{n.title}</div>
+                <div style={{fontSize:11,color:'#77706A',marginBottom:3}}>{n.display_name}</div>
+                {n.catchcopy && <div style={{fontSize:11,color:'#77706A',lineHeight:1.5,overflow:'hidden',display:'-webkit-box',WebkitLineClamp:2,WebkitBoxOrient:'vertical' as any}}>{n.catchcopy}</div>}
+                <div style={{fontSize:10,color:'#B8AEA8',marginTop:3}}>♡ {n.likeCount||0}</div>
+              </div>
+            </Link>
+          ))}
+        </div>
+      </div>
+
+      {/* ===== モバイル：新着作品 ===== */}
+      <div className="mobile-only" style={{padding:'12px 16px 0'}}>
+        <div style={{background:'#fff',borderRadius:12,overflow:'hidden',border:'1px solid #F0D9C9'}}>
+          <div style={{padding:'10px 16px',borderBottom:'1px solid #F0D9C9',display:'flex',alignItems:'center',justifyContent:'space-between',background:'#FFF9F2'}}>
+            <span style={{fontSize:14,fontWeight:700,color:'#2B211B'}}>新着作品</span>
+            <Link href="/search" style={{fontSize:12,color:'#F26A21',textDecoration:'none'}}>もっと見る ›</Link>
+          </div>
+          {latestNovels.slice(0,4).map((n: any) => (
+            <Link key={n.id} href={`/novel/${n.id}`} style={{display:'flex',gap:10,padding:'11px 16px',borderBottom:'1px solid #FFF1E6',textDecoration:'none',alignItems:'center'}}>
+              <div style={{flex:1,minWidth:0}}>
+                <div style={{display:'flex',gap:4,marginBottom:3,flexWrap:'wrap',alignItems:'center'}}>
+                  <span style={{fontSize:9,background:'#FFF1E6',color:'#F26A21',border:'1px solid #f5b080',padding:'1px 5px',borderRadius:3}}>{n.genre}</span>
+                  {n.novel_type && <span style={{fontSize:9,background:'#eff6ff',color:'#2563eb',border:'1px solid #bfdbfe',padding:'1px 5px',borderRadius:3}}>{n.novel_type}</span>}
+                  <span style={{background:'#F26A21',color:'#fff',fontSize:9,padding:'0 4px',borderRadius:3,fontWeight:700}}>NEW</span>
+                </div>
+                <div style={{fontSize:13,fontWeight:700,color:'#2B211B',marginBottom:1,overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap'}}>{n.title}</div>
+                <div style={{fontSize:11,color:'#77706A'}}>{n.display_name}</div>
+              </div>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#B8AEA8" strokeWidth="2"><polyline points="9 18 15 12 9 6"/></svg>
+            </Link>
+          ))}
+        </div>
+      </div>
+
+      {/* ===== ユーザーの推し（モバイル：gem-mobile 内で表示） ===== */}
+      <div className="gem-section-wrap" style={{padding:'12px 0 0'}}>
         <div className="gem-inner" style={{maxWidth:1200,margin:'0 auto',padding:'0 32px'}}>
-          <div className="gem-layout" style={{display:'flex',alignItems:'flex-start',gap:28}}>
-            <div className="gem-label desktop-only" style={{flexShrink:0,minWidth:160,maxWidth:160}}>
-              <h2 style={{fontSize:17,fontWeight:700,color:'#2B211B',marginBottom:8}}>ユーザーの推し</h2>
-              <p style={{fontSize:12,color:'#2B211B',lineHeight:1.9,marginBottom:12}}>推しの作品を拡散しよう！</p>
-              <a href="/search" className="desktop-only" style={{display:'inline-block',fontSize:11,color:'#F26A21',border:'1.5px solid #F26A21',borderRadius:14,padding:'5px 12px',textDecoration:'none',fontWeight:600}}>作品を検索する</a>
+          {/* デスクトップ */}
+          <div className="desktop-only" style={{background:'#fff',border:'1px solid #F0D9C9',borderRadius:10,overflow:'hidden',padding:'16px'}}>
+            <div style={{display:'flex',alignItems:'flex-start',gap:28}}>
+              <div style={{flexShrink:0,minWidth:160,maxWidth:160}}>
+                <h2 style={{fontSize:17,fontWeight:700,color:'#2B211B',marginBottom:8}}>ユーザーの推し</h2>
+                <p style={{fontSize:12,color:'#2B211B',lineHeight:1.9,marginBottom:12}}>推しの作品を拡散しよう！</p>
+                <Link href="/search" style={{display:'inline-block',fontSize:11,color:'#F26A21',border:'1.5px solid #F26A21',borderRadius:14,padding:'5px 12px',textDecoration:'none',fontWeight:600}}>作品を検索する</Link>
+              </div>
+              <GemSection novels={gemNovels} discoverCommentMap={discoverCommentMap} />
             </div>
+          </div>
+          {/* モバイル */}
+          <div className="mobile-only">
             <GemSection novels={gemNovels} discoverCommentMap={discoverCommentMap} />
           </div>
         </div>
       </div>
 
-      {/* 作品を探す */}
-      <div className="search-banner-section" style={{background:'#fff',padding:'20px 0'}}>
+      {/* ===== 作品を探す（デスクトップのみ） ===== */}
+      <div className="desktop-only search-banner-section" style={{padding:'20px 0'}}>
         <div style={{maxWidth:1200,margin:'0 auto',padding:'0 32px'}}>
           <SearchBanner />
         </div>
       </div>
 
-      {/* メインエリア */}
-      <div className="main-layout" style={{maxWidth:1200,margin:'0 auto',padding:'20px 32px',display:'flex',gap:20,alignItems:'flex-start'}}>
+      {/* ===== デスクトップ：メインエリア ===== */}
+      <div className="desktop-only main-layout" style={{maxWidth:1200,margin:'0 auto',padding:'20px 32px',display:'flex',gap:20,alignItems:'flex-start'}}>
         <div style={{flex:1,minWidth:0,display:'flex',flexDirection:'column',gap:16}}>
-
           {/* 週間ランキング */}
           <div style={{background:'#fff',border:'1px solid #F0D9C9',borderRadius:10,overflow:'hidden'}}>
             <div style={{padding:'10px 16px',borderBottom:'1px solid #F0D9C9',display:'flex',alignItems:'center',justifyContent:'space-between',background:'#FFF9F2'}}>
@@ -345,12 +413,10 @@ export default async function HomePage() {
             </div>
             <RankingSection rankingLong={rankingLong} rankingShort={rankingShort} />
             <div style={{padding:'9px 16px',textAlign:'center',borderTop:'1px solid #F0D9C9'}}>
-              <a href='/ranking' className='more-link' style={{fontSize:12,color:'#F26A21',textDecoration:'none',display:'inline-block'}}>もっと見る ›</a>
+              <Link href='/ranking' className='more-link' style={{fontSize:12,color:'#F26A21',textDecoration:'none',display:'inline-block'}}>もっと見る ›</Link>
             </div>
           </div>
-
           <RecommendedNovels novels={recommended} />
-
           {/* 最新話更新 */}
           <div style={{background:'#fff',border:'1px solid #F0D9C9',borderRadius:10,overflow:'hidden'}}>
             <div style={{padding:'10px 16px',borderBottom:'1px solid #F0D9C9',display:'flex',alignItems:'center',justifyContent:'space-between',background:'#FFF9F2'}}>
@@ -358,10 +424,9 @@ export default async function HomePage() {
             </div>
             <LatestEpisodesSection episodes={latestEpisodes} />
             <div style={{padding:'9px 16px',textAlign:'center',borderTop:'1px solid #F0D9C9'}}>
-              <a href='/ranking' className='more-link' style={{fontSize:12,color:'#F26A21',textDecoration:'none',display:'inline-block'}}>もっと見る ›</a>
+              <Link href='/ranking' className='more-link' style={{fontSize:12,color:'#F26A21',textDecoration:'none',display:'inline-block'}}>もっと見る ›</Link>
             </div>
           </div>
-
           {/* 新着作品 */}
           <div id="novels" style={{background:'#fff',border:'1px solid #F0D9C9',borderRadius:10,overflow:'hidden'}}>
             <div style={{padding:'10px 16px',borderBottom:'1px solid #F0D9C9',background:'#FFF9F2'}}>
@@ -369,11 +434,26 @@ export default async function HomePage() {
             </div>
             <NovelList novels={latestNovels} />
           </div>
-
         </div>
-
-        <div className="desktop-only"><HomeSidebar announcements={sidebarAnnouncements||[]} contests={sidebarContests} /></div>
+        <div><HomeSidebar announcements={sidebarAnnouncements||[]} contests={sidebarContests} /></div>
       </div>
+
+      {/* ===== モバイル：週間ランキング ===== */}
+      <div className="mobile-only" style={{padding:'12px 16px 0'}}>
+        <div style={{background:'#fff',borderRadius:12,overflow:'hidden',border:'1px solid #F0D9C9'}}>
+          <div style={{padding:'10px 16px',borderBottom:'1px solid #F0D9C9',display:'flex',alignItems:'center',justifyContent:'space-between',background:'#FFF9F2'}}>
+            <div style={{display:'flex',alignItems:'center',gap:6}}>
+              <span style={{fontSize:14,fontWeight:700,color:'#2B211B'}}>週間ランキング</span>
+              <span style={{fontSize:10,color:'#B8AEA8'}}>更新日：{new Date().toLocaleDateString('ja-JP',{month:'numeric',day:'numeric'})}</span>
+            </div>
+            <Link href="/ranking" style={{fontSize:12,color:'#F26A21',textDecoration:'none'}}>もっと見る ›</Link>
+          </div>
+          <RankingSection rankingLong={rankingLong} rankingShort={rankingShort} />
+        </div>
+      </div>
+
+      {/* モバイルボトムナビ分の余白 */}
+      <div className="mobile-only" style={{height:72}}/>
 
       <AdBanner />
       <Footer user={user} />
@@ -391,7 +471,7 @@ function WelcomeToast({ profile }: { profile: any }) {
         if (!sessionStorage.getItem(key)) {
           sessionStorage.setItem(key, '1');
           var toast = document.createElement('div');
-          toast.style.cssText = 'position:fixed;bottom:24px;right:24px;background:#F26A21;color:#fff;padding:12px 20px;border-radius:12px;font-size:14px;font-weight:600;z-index:9999;box-shadow:0 4px 16px rgba(242,106,33,.35);animation:slideUp .3s ease';
+          toast.style.cssText = 'position:fixed;bottom:80px;right:24px;background:#F26A21;color:#fff;padding:12px 20px;border-radius:12px;font-size:14px;font-weight:600;z-index:9999;box-shadow:0 4px 16px rgba(242,106,33,.35);animation:slideUp .3s ease';
           toast.textContent = '${profile?.display_name ?? ''}さん、ようこそ！';
           var style = document.createElement('style');
           style.textContent = '@keyframes slideUp{from{transform:translateY(12px);opacity:0}to{transform:translateY(0);opacity:1}}';

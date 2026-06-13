@@ -1,7 +1,7 @@
 'use client'
 
 import Link from 'next/link'
-import { useRouter } from 'next/navigation'
+import { useRouter, usePathname } from 'next/navigation'
 import { useState, useEffect, useRef } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import SettingsModal from '@/components/SettingsModal'
@@ -14,6 +14,7 @@ interface Props {
 
 export default function Header({ profile, user, activeGenre }: Props) {
   const router = useRouter()
+  const pathname = usePathname()
   const [q, setQ] = useState('')
   const [notifications, setNotifications] = useState<any[]>([])
   const [showNotif, setShowNotif] = useState(false)
@@ -23,7 +24,6 @@ export default function Header({ profile, user, activeGenre }: Props) {
   const [showSettings, setShowSettings] = useState(false)
   const [showSettingsModal, setShowSettingsModal] = useState(false)
   const [showMobileMenu, setShowMobileMenu] = useState(false)
-  const [showMobileSearch, setShowMobileSearch] = useState(false)
   const notifRef = useRef<HTMLDivElement>(null)
   const userMenuRef = useRef<HTMLDivElement>(null)
   const supabase = createClient()
@@ -50,6 +50,16 @@ export default function Header({ profile, user, activeGenre }: Props) {
     document.addEventListener('mousedown', handleClick)
     return () => document.removeEventListener('mousedown', handleClick)
   }, [])
+
+  // モバイルメニュー開いたらスクロールロック
+  useEffect(() => {
+    if (showMobileMenu) {
+      document.body.style.overflow = 'hidden'
+    } else {
+      document.body.style.overflow = ''
+    }
+    return () => { document.body.style.overflow = '' }
+  }, [showMobileMenu])
 
   const userNumber = profile?.user_number
     ? '#' + String(profile.user_number).padStart(4, '0')
@@ -81,19 +91,73 @@ export default function Header({ profile, user, activeGenre }: Props) {
 
   function handleSearch(e: React.FormEvent) {
     e.preventDefault()
-    if (q.trim()) {
-      router.push(`/search?q=${encodeURIComponent(q.trim())}`)
-    } else {
-      router.push('/search')
-    }
-    setShowMobileSearch(false)
+    router.push(q.trim() ? `/search?q=${encodeURIComponent(q.trim())}` : '/search')
+    setShowMobileMenu(false)
   }
+
+  // ボトムナビのアクティブ判定
+  function isActive(href: string) {
+    if (href === '/') return pathname === '/'
+    return pathname.startsWith(href)
+  }
+
+  const bottomNavItems = [
+    {
+      href: '/',
+      label: 'ホーム',
+      icon: (active: boolean) => (
+        <svg width="22" height="22" viewBox="0 0 24 24" fill={active ? '#F26A21' : 'none'} stroke={active ? '#F26A21' : '#77706A'} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+          <polyline points="9 22 9 12 15 12 15 22"/>
+        </svg>
+      )
+    },
+    {
+      href: '/search',
+      label: '探す',
+      icon: (active: boolean) => (
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke={active ? '#F26A21' : '#77706A'} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+          <circle cx="11" cy="11" r="7"/><line x1="16.5" y1="16.5" x2="22" y2="22"/>
+        </svg>
+      )
+    },
+    {
+      href: '/ranking',
+      label: 'ランキング',
+      icon: (active: boolean) => (
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke={active ? '#F26A21' : '#77706A'} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+          <polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/>
+          <polyline points="17 6 23 6 23 12"/>
+        </svg>
+      )
+    },
+    {
+      href: '/contests',
+      label: 'コンテスト',
+      icon: (active: boolean) => (
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke={active ? '#F26A21' : '#77706A'} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+          <circle cx="12" cy="8" r="6"/>
+          <path d="M15.477 12.89 17 22l-5-3-5 3 1.523-9.11"/>
+        </svg>
+      )
+    },
+    {
+      href: user ? '/mypage' : '/auth/login',
+      label: 'マイページ',
+      icon: (active: boolean) => (
+        <svg width="22" height="22" viewBox="0 0 24 24" fill={active ? '#FFF1E6' : 'none'} stroke={active ? '#F26A21' : '#77706A'} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+          <circle cx="12" cy="7" r="4"/>
+        </svg>
+      )
+    },
+  ]
 
   return (
     <>
-      <header style={{background:'#fff',borderBottom:'1px solid #F0D9C9',position:'sticky',top:0,zIndex:50,boxShadow:'0 1px 4px rgba(242,106,33,.07)'}}>
-        {/* デスクトップヘッダー */}
-        <div className="desktop-header" style={{maxWidth:1200,margin:'0 auto',padding:'0 32px',display:'flex',alignItems:'center',gap:16,height:66,position:'relative'}}>
+      {/* ===== デスクトップヘッダー ===== */}
+      <header className="desktop-header-wrap" style={{background:'#fff',borderBottom:'1px solid #F0D9C9',position:'sticky',top:0,zIndex:50,boxShadow:'0 1px 4px rgba(242,106,33,.07)'}}>
+        <div style={{maxWidth:1200,margin:'0 auto',padding:'0 32px',display:'flex',alignItems:'center',gap:16,height:66,position:'relative'}}>
           <Link href="/" style={{flexShrink:0}}>
             <img src="/logo.png" alt="原石航路" style={{height:90,width:'auto',display:'block',objectFit:'contain'}}/>
           </Link>
@@ -125,8 +189,9 @@ export default function Header({ profile, user, activeGenre }: Props) {
                         <span style={{fontSize:13,fontWeight:700,color:'#2B211B'}}>通知</span>
                         <button onClick={()=>setShowAllNotif(!showAllNotif)} style={{fontSize:11,color:'#F26A21',background:'none',border:'none',cursor:'pointer'}}>{showAllNotif?'‹ 閉じる':'もっと見る ›'}</button>
                       </div>
-                      {notifications.length === 0 ? <div style={{padding:'24px',textAlign:'center',fontSize:12,color:'#B8AEA8'}}>通知はありません</div>
-                        : <div style={{overflowY:'auto',flex:1}}>{(showAllNotif?notifications:notifications.slice(0,5)).map(n=>(
+                      {notifications.length === 0
+                        ? <div style={{padding:'24px',textAlign:'center',fontSize:12,color:'#B8AEA8'}}>通知はありません</div>
+                        : <div style={{overflowY:'auto',flex:1}}>{(showAllNotif?notifications:notifications.slice(0,5)).map((n:any)=>(
                           <a key={n.id} href={n.link||'#'} onClick={()=>setShowNotif(false)} style={{display:'block',padding:'10px 14px',borderBottom:'1px solid #FFF1E6',textDecoration:'none',background:n.is_read?'#fff':'#FFF9F2'}}>
                             <div style={{fontSize:12,color:'#2B211B',lineHeight:1.6,marginBottom:2}}>{n.message}</div>
                             <div style={{fontSize:10,color:'#B8AEA8'}}>{fmtDate(n.created_at)}</div>
@@ -170,148 +235,191 @@ export default function Header({ profile, user, activeGenre }: Props) {
             )}
           </div>
         </div>
+        {/* デスクトップNAV */}
+        <nav style={{borderTop:'1px solid #F0D9C9'}}>
+          <div style={{maxWidth:1200,margin:'0 auto',padding:'0 32px',display:'flex',gap:0}}>
+            {[
+              {label:'ホーム',href:'/'},
+              {label:'ランキング',href:'/ranking'},
+              {label:'作品を探す',href:'/search'},
+              {label:'コンテスト',href:'/contests'},
+            ].map(item=>(
+              <Link key={item.href} href={item.href}
+                style={{padding:'9px 16px',fontSize:13,whiteSpace:'nowrap',textDecoration:'none',display:'inline-block',fontWeight:500,color:isActive(item.href)?'#F26A21':'#77706A',borderBottom:isActive(item.href)?'2px solid #F26A21':'2px solid transparent',transition:'all .15s'}}>
+                {item.label}
+              </Link>
+            ))}
+            <div style={{flex:1}}/>
+            {[
+              {label:'閲覧履歴',href:'/history'},
+              {label:'マイページ',href:'/mypage'},
+            ].map(item=>(
+              <Link key={item.href} href={item.href}
+                style={{padding:'9px 16px',fontSize:13,whiteSpace:'nowrap',textDecoration:'none',display:'inline-block',fontWeight:500,color:isActive(item.href)?'#F26A21':'#77706A',borderBottom:isActive(item.href)?'2px solid #F26A21':'2px solid transparent',transition:'all .15s'}}>
+                {item.label}
+              </Link>
+            ))}
+          </div>
+        </nav>
+      </header>
 
-        {/* モバイルヘッダー */}
-        <div className="mobile-header" style={{display:'none',alignItems:'center',justifyContent:'center',padding:'0 16px',height:78,position:'relative',background:'#fff'}}>
-          {/* ロゴ中央 */}
+      {/* ===== モバイルヘッダー（上部） ===== */}
+      <header className="mobile-header-wrap" style={{background:'#fff',borderBottom:'1px solid #F0D9C9',position:'sticky',top:0,zIndex:50,boxShadow:'0 1px 4px rgba(242,106,33,.07)'}}>
+        <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',padding:'0 16px',height:56}}>
+          {/* ベルアイコン（左） */}
+          <div style={{width:36}}>
+            {user && (
+              <div ref={notifRef} style={{position:'relative'}}>
+                <button onClick={handleOpenNotif}
+                  style={{position:'relative',width:36,height:36,borderRadius:'50%',border:'none',background:'transparent',cursor:'pointer',display:'flex',alignItems:'center',justifyContent:'center'}}>
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#77706A" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/>
+                  </svg>
+                  {unreadCount > 0 && <span style={{position:'absolute',top:2,right:2,width:14,height:14,background:'#F26A21',borderRadius:'50%',fontSize:8,color:'#fff',fontWeight:700,display:'flex',alignItems:'center',justifyContent:'center'}}>{unreadCount > 9 ? '9+' : unreadCount}</span>}
+                </button>
+                {/* 通知ドロップダウン */}
+                {showNotif && (
+                  <div style={{position:'absolute',left:0,top:'calc(100% + 8px)',width:300,background:'#fff',border:'1px solid #F0D9C9',borderRadius:12,boxShadow:'0 8px 32px rgba(0,0,0,0.15)',zIndex:200,overflow:'hidden',maxHeight:'70vh',display:'flex',flexDirection:'column'}}>
+                    <div style={{padding:'10px 14px',borderBottom:'1px solid #F0D9C9',display:'flex',alignItems:'center',justifyContent:'space-between'}}>
+                      <span style={{fontSize:13,fontWeight:700,color:'#2B211B'}}>通知</span>
+                      <button onClick={()=>setShowNotif(false)} style={{fontSize:18,color:'#B8AEA8',background:'none',border:'none',cursor:'pointer',lineHeight:1}}>×</button>
+                    </div>
+                    {notifications.length === 0
+                      ? <div style={{padding:'24px',textAlign:'center',fontSize:12,color:'#B8AEA8'}}>通知はありません</div>
+                      : <div style={{overflowY:'auto',flex:1}}>{notifications.map((n:any)=>(
+                        <a key={n.id} href={n.link||'#'} onClick={()=>setShowNotif(false)} style={{display:'block',padding:'10px 14px',borderBottom:'1px solid #FFF1E6',textDecoration:'none',background:n.is_read?'#fff':'#FFF9F2'}}>
+                          <div style={{fontSize:12,color:'#2B211B',lineHeight:1.6,marginBottom:2}}>{n.message}</div>
+                          <div style={{fontSize:10,color:'#B8AEA8'}}>{fmtDate(n.created_at)}</div>
+                        </a>
+                      ))}</div>}
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+
+          {/* ロゴ（中央） */}
           <Link href="/" style={{position:'absolute',left:'50%',transform:'translateX(-50%)'}}>
-            <img src="/logo.png" alt="原石航路" style={{height:92,width:'auto',display:'block',objectFit:'contain'}}/>
+            <img src="/logo.png" alt="原石航路" style={{height:44,width:'auto',display:'block',objectFit:'contain'}}/>
           </Link>
-          {/* 右上にボタン */}
-          <div style={{display:'flex',alignItems:'center',gap:8,marginLeft:'auto',paddingTop:18}}>
-            <Link href="/search"
-              style={{width:34,height:34,borderRadius:'50%',border:'1.5px solid #F0D9C9',background:'#FFF9F2',cursor:'pointer',display:'flex',alignItems:'center',justifyContent:'center',textDecoration:'none'}}>
+
+          {/* ハンバーガー（右） */}
+          <button onClick={()=>setShowMobileMenu(!showMobileMenu)}
+            style={{width:36,height:36,borderRadius:8,border:'1px solid #F0D9C9',background:'#FFF9F2',cursor:'pointer',display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',gap:4.5,flexShrink:0}}>
+            <span style={{display:'block',width:16,height:1.5,background:showMobileMenu?'#F26A21':'#77706A',borderRadius:1,transition:'all .2s'}}/>
+            <span style={{display:'block',width:16,height:1.5,background:showMobileMenu?'#F26A21':'#77706A',borderRadius:1,transition:'all .2s'}}/>
+            <span style={{display:'block',width:16,height:1.5,background:showMobileMenu?'#F26A21':'#77706A',borderRadius:1,transition:'all .2s'}}/>
+          </button>
+        </div>
+
+        {/* モバイル検索バー（常時表示） */}
+        <div style={{padding:'0 16px 10px'}}>
+          <form onSubmit={handleSearch} style={{display:'flex',alignItems:'center',border:'1.5px solid #F0D9C9',borderRadius:24,background:'#FFF9F2',overflow:'hidden'}}>
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#B8AEA8" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{marginLeft:12,flexShrink:0}}>
+              <circle cx="11" cy="11" r="7"/><line x1="16.5" y1="16.5" x2="22" y2="22"/>
+            </svg>
+            <input value={q} onChange={e=>setQ(e.target.value)} placeholder="作品名・あらすじ・タグを検索"
+              style={{flex:1,padding:'9px 12px',border:'none',background:'transparent',fontSize:14,color:'#2B211B',outline:'none'}}/>
+            <button type="submit" style={{padding:'9px 14px',background:'none',border:'none',borderLeft:'1px solid #F0D9C9',cursor:'pointer',flexShrink:0}}>
               <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#F26A21" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                 <circle cx="11" cy="11" r="7"/><line x1="16.5" y1="16.5" x2="22" y2="22"/>
               </svg>
-            </Link>
-            <button onClick={()=>setShowMobileMenu(!showMobileMenu)}
-              style={{width:34,height:34,borderRadius:'50%',border:'1.5px solid #F0D9C9',background:'#FFF9F2',cursor:'pointer',display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',gap:4}}>
-              <span style={{display:'block',width:15,height:1.5,background:'#77706A',borderRadius:1}}/>
-              <span style={{display:'block',width:15,height:1.5,background:'#77706A',borderRadius:1}}/>
-              <span style={{display:'block',width:15,height:1.5,background:'#77706A',borderRadius:1}}/>
             </button>
-          </div>
+          </form>
         </div>
-
-        {/* モバイル検索バー */}
-        {showMobileSearch && (
-          <div className="mobile-header" style={{display:'none',padding:'0 16px 10px'}}>
-            <form onSubmit={handleSearch} style={{display:'flex',alignItems:'center',border:'1.5px solid #F0D9C9',borderRadius:24,background:'#FFF9F2',overflow:'hidden'}}>
-              <input value={q} onChange={e=>setQ(e.target.value)} placeholder="検索..." autoFocus
-                style={{flex:1,padding:'8px 16px',border:'none',background:'transparent',fontSize:13,color:'#2B211B',outline:'none'}}/>
-              <button type="submit" style={{padding:'8px 14px',background:'none',border:'none',borderLeft:'1px solid #F0D9C9',cursor:'pointer'}}>
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#F26A21" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                  <circle cx="11" cy="11" r="7"/><line x1="16.5" y1="16.5" x2="22" y2="22"/>
-                </svg>
-              </button>
-            </form>
-          </div>
-        )}
-
-        {/* モバイルメニュー */}
-        {showMobileMenu && (
-          <div className="mobile-header" style={{display:'none',borderTop:'1px solid #F0D9C9',background:'#fff'}}>
-            {user ? (
-              <>
-                <div style={{padding:'12px 16px',borderBottom:'1px solid #FFF1E6',background:'#FFF9F2',display:'flex',alignItems:'center',justifyContent:'space-between'}}>
-                  <div>
-                    <div style={{fontSize:13,fontWeight:700,color:'#2B211B'}}>{profile?.display_name}</div>
-                    {userNumber && <div style={{fontSize:11,color:'#B8AEA8'}}>{userNumber}</div>}
-                  </div>
-                </div>
-                {[
-                  {label:'ホーム',href:'/'},
-                  {label:'ランキング',href:'/ranking'},
-                  {label:'作品を探す',href:'/search'},
-                  {label:'コンテスト',href:'/contests'},
-                  {label:'投稿する',href:'/post'},
-                  {label:'閲覧履歴',href:'/history'},
-                  {label:'マイページ',href:'/mypage'},
-                ].map(item=>(
-                  <Link key={item.href} href={item.href} onClick={()=>setShowMobileMenu(false)}
-                    style={{display:'block',padding:'12px 16px',borderBottom:'1px solid #FFF1E6',textDecoration:'none',color:'#2B211B',fontSize:14}}>
-                    {item.label}
-                  </Link>
-                ))}
-                <button onClick={()=>{setShowSettingsModal(true);setShowMobileMenu(false)}}
-                  style={{display:'block',width:'100%',padding:'12px 16px',borderBottom:'1px solid #FFF1E6',background:'#fff',border:'none',cursor:'pointer',fontSize:14,color:'#2B211B',textAlign:'left'}}>
-                  設定
-                </button>
-                <button onClick={handleLogout}
-                  style={{display:'block',width:'100%',padding:'12px 16px',background:'#fff',border:'none',cursor:'pointer',fontSize:14,color:'#dc2626',textAlign:'left'}}>
-                  ログアウト
-                </button>
-              </>
-            ) : (
-              <>
-                {[
-                  {label:'ホーム',href:'/'},
-                  {label:'ランキング',href:'/ranking'},
-                  {label:'作品を探す',href:'/search'},
-                  {label:'コンテスト',href:'/contests'},
-                ].map(item=>(
-                  <Link key={item.href} href={item.href} onClick={()=>setShowMobileMenu(false)}
-                    style={{display:'block',padding:'12px 16px',borderBottom:'1px solid #FFF1E6',textDecoration:'none',color:'#2B211B',fontSize:14}}>
-                    {item.label}
-                  </Link>
-                ))}
-                <div style={{display:'flex',gap:8,padding:'12px 16px'}}>
-                  <Link href="/auth/login" onClick={()=>setShowMobileMenu(false)}
-                    style={{flex:1,padding:'10px',border:'1.5px solid #F26A21',borderRadius:8,color:'#F26A21',fontSize:14,fontWeight:600,textDecoration:'none',textAlign:'center'}}>
-                    ログイン
-                  </Link>
-                  <Link href="/auth/register" onClick={()=>setShowMobileMenu(false)}
-                    style={{flex:1,padding:'10px',background:'#F26A21',borderRadius:8,color:'#fff',fontSize:14,fontWeight:700,textDecoration:'none',textAlign:'center'}}>
-                    新規登録
-                  </Link>
-                </div>
-              </>
-            )}
-          </div>
-        )}
       </header>
 
-      {/* デスクトップNAV */}
-      <nav className="desktop-header" style={{display:'flex',background:'#fff',borderBottom:'2px solid #F0D9C9'}}>
-        <div style={{maxWidth:1200,margin:'0 auto',padding:'0 32px',display:'flex',gap:0,width:'100%'}}>
-          {[
-            {label:'ホーム',href:'/'},
-            {label:'ランキング',href:'/ranking'},
-            {label:'作品を探す',href:'/search'},
-            {label:'コンテスト',href:'/contests'},
-          ].map(item=>(
-            <Link key={item.href} href={item.href}
-              style={{padding:'9px 16px',fontSize:13,whiteSpace:'nowrap',textDecoration:'none',display:'inline-block',fontWeight:500,color:'#77706A',borderBottom:'2px solid transparent',transition:'all .15s'}}>
-              {item.label}
-            </Link>
-          ))}
-          <div style={{flex:1}}/>
-          {[
-            {label:'閲覧履歴',href:'/history'},
-            {label:'マイページ',href:'/mypage'},
-          ].map(item=>(
-            <Link key={item.href} href={item.href}
-              style={{padding:'9px 16px',fontSize:13,whiteSpace:'nowrap',textDecoration:'none',display:'inline-block',fontWeight:500,color:'#77706A',borderBottom:'2px solid transparent',transition:'all .15s'}}>
-              {item.label}
-            </Link>
-          ))}
+      {/* ===== モバイルメニュー（ドロワー） ===== */}
+      {showMobileMenu && (
+        <div className="mobile-header-wrap" style={{position:'fixed',inset:0,zIndex:100}}>
+          {/* オーバーレイ */}
+          <div onClick={()=>setShowMobileMenu(false)} style={{position:'absolute',inset:0,background:'rgba(0,0,0,0.4)'}}/>
+          {/* ドロワー本体 */}
+          <div style={{position:'absolute',top:0,right:0,width:'80%',maxWidth:320,height:'100%',background:'#fff',boxShadow:'-4px 0 24px rgba(0,0,0,0.15)',display:'flex',flexDirection:'column',overflowY:'auto'}}>
+            <div style={{padding:'16px',borderBottom:'1px solid #F0D9C9',display:'flex',alignItems:'center',justifyContent:'space-between',background:'#FFF9F2'}}>
+              <img src="/logo.png" alt="原石航路" style={{height:36,width:'auto',objectFit:'contain'}}/>
+              <button onClick={()=>setShowMobileMenu(false)} style={{width:32,height:32,border:'none',background:'none',cursor:'pointer',fontSize:20,color:'#77706A',display:'flex',alignItems:'center',justifyContent:'center'}}>×</button>
+            </div>
+            {user && (
+              <div style={{padding:'14px 20px',borderBottom:'1px solid #F0D9C9',background:'#FFF9F2'}}>
+                <div style={{fontSize:14,fontWeight:700,color:'#2B211B'}}>{profile?.display_name}</div>
+                {userNumber && <div style={{fontSize:11,color:'#B8AEA8',marginTop:2}}>{userNumber}</div>}
+              </div>
+            )}
+            <div style={{flex:1}}>
+              {[
+                {label:'ホーム',href:'/'},
+                {label:'ランキング',href:'/ranking'},
+                {label:'作品を探す',href:'/search'},
+                {label:'コンテスト',href:'/contests'},
+                {label:'閲覧履歴',href:'/history'},
+                ...(user ? [{label:'投稿する',href:'/post'},{label:'マイページ',href:'/mypage'}] : []),
+              ].map(item=>(
+                <Link key={item.href} href={item.href} onClick={()=>setShowMobileMenu(false)}
+                  style={{display:'flex',alignItems:'center',justifyContent:'space-between',padding:'14px 20px',borderBottom:'1px solid #FFF1E6',textDecoration:'none',color:isActive(item.href)?'#F26A21':'#2B211B',fontSize:15,fontWeight:isActive(item.href)?700:400,background:isActive(item.href)?'#FFF9F2':'#fff'}}>
+                  {item.label}
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#B8AEA8" strokeWidth="2"><polyline points="9 18 15 12 9 6"/></svg>
+                </Link>
+              ))}
+              {user && (
+                <button onClick={()=>{setShowSettingsModal(true);setShowMobileMenu(false)}}
+                  style={{display:'flex',alignItems:'center',justifyContent:'space-between',width:'100%',padding:'14px 20px',borderBottom:'1px solid #FFF1E6',background:'#fff',border:'none',cursor:'pointer',fontSize:15,color:'#2B211B',textAlign:'left'}}>
+                  設定
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#B8AEA8" strokeWidth="2"><polyline points="9 18 15 12 9 6"/></svg>
+                </button>
+              )}
+            </div>
+            {user ? (
+              <div style={{padding:'16px 20px',borderTop:'1px solid #F0D9C9'}}>
+                <button onClick={handleLogout} style={{width:'100%',padding:'12px',border:'1px solid #fca5a5',borderRadius:8,background:'#fff',color:'#dc2626',fontSize:14,cursor:'pointer',fontWeight:500}}>
+                  ログアウト
+                </button>
+              </div>
+            ) : (
+              <div style={{padding:'16px 20px',borderTop:'1px solid #F0D9C9',display:'flex',gap:8}}>
+                <Link href="/auth/login" onClick={()=>setShowMobileMenu(false)}
+                  style={{flex:1,padding:'12px',border:'1.5px solid #F26A21',borderRadius:8,color:'#F26A21',fontSize:14,fontWeight:600,textDecoration:'none',textAlign:'center',display:'block'}}>
+                  ログイン
+                </Link>
+                <Link href="/auth/register" onClick={()=>setShowMobileMenu(false)}
+                  style={{flex:1,padding:'12px',background:'#F26A21',borderRadius:8,color:'#fff',fontSize:14,fontWeight:700,textDecoration:'none',textAlign:'center',display:'block'}}>
+                  新規登録
+                </Link>
+              </div>
+            )}
+          </div>
         </div>
+      )}
+
+      {/* ===== ボトムナビ（モバイルのみ） ===== */}
+      <nav className="mobile-header-wrap" style={{position:'fixed',bottom:0,left:0,right:0,zIndex:49,background:'#fff',borderTop:'1px solid #F0D9C9',boxShadow:'0 -2px 12px rgba(0,0,0,0.06)'}}>
+        <div style={{display:'flex',alignItems:'stretch'}}>
+          {bottomNavItems.map(item => {
+            const active = isActive(item.href)
+            return (
+              <Link key={item.href} href={item.href}
+                style={{flex:1,display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',padding:'8px 4px 6px',textDecoration:'none',gap:3,minHeight:56,color:active?'#F26A21':'#77706A',background:'#fff'}}>
+                {item.icon(active)}
+                <span style={{fontSize:10,fontWeight:active?700:400,color:active?'#F26A21':'#77706A',lineHeight:1}}>{item.label}</span>
+              </Link>
+            )
+          })}
+        </div>
+        {/* iOS SafeAreaの分だけ余白 */}
+        <div style={{height:'env(safe-area-inset-bottom,0px)'}}/>
       </nav>
 
       <SettingsModal show={showSettingsModal} onClose={()=>setShowSettingsModal(false)} profile={profile} userId={user?.id||''} />
 
       <style>{`
-        .desktop-header { display: flex !important; }
-        .mobile-header { display: none !important; }
-        .header-post-btn:hover { background: #fff8f5 !important; transform: translateY(-1px); transition: all .15s; box-shadow: 0 2px 8px rgba(242,106,33,.12); }
+        .desktop-header-wrap { display: block !important; }
+        .mobile-header-wrap  { display: none !important; }
         @media (max-width: 768px) {
-          .desktop-header { display: none !important; }
-          .mobile-header { display: block !important; }
+          .desktop-header-wrap { display: none !important; }
+          .mobile-header-wrap  { display: block !important; }
         }
-        @media (min-width: 769px) and (max-width: 1024px) {
-          .desktop-header form { width: 380px !important; left: calc(50% - 60px) !important; }
-        }
+        nav a:hover { color: #F26A21 !important; opacity: 1; }
+        .header-post-btn:hover { background: #fff8f5 !important; transform: translateY(-1px); box-shadow: 0 2px 8px rgba(242,106,33,.12); }
       `}</style>
     </>
   )
