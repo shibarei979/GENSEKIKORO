@@ -1,5 +1,5 @@
 'use client'
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useRef } from 'react'
 import ReadingSettings, { Settings } from './ReadingSettings'
 import MobileEpisodeBody from './MobileEpisodeBody'
 
@@ -20,14 +20,11 @@ function renderBodyH(text: string): string {
   return r
 }
 
-// 縦書き用：横向き文字かどうか
 function isHorizontalChar(ch: string): boolean {
   return ['ー','〜','…','‥','─','—','－','〰','ｰ'].includes(ch)
 }
 
-// 縦書き本文を1文字ずつspanでレンダリング
-function VerticalText({ text, fontSize, fontFamily }: { text: string; fontSize: number; fontFamily: string }) {
-  // 数字を全角化
+function VerticalText({ text }: { text: string }) {
   const processed = text.replace(/[0-9]/g, (c) => String.fromCharCode(c.charCodeAt(0) + 0xFEE0))
   const chars = processed.split('')
   return (
@@ -35,11 +32,15 @@ function VerticalText({ text, fontSize, fontFamily }: { text: string; fontSize: 
       {chars.map((ch, i) =>
         ch === '\n'
           ? <br key={i}/>
-          : <span key={i} style={{
+          : (
+            <span key={i} style={{
               display: 'inline-block',
               transform: isHorizontalChar(ch) ? 'rotate(90deg)' : 'none',
               lineHeight: 1.2,
-            }}>{ch}</span>
+            }}>
+              {ch}
+            </span>
+          )
       )}
     </>
   )
@@ -79,7 +80,6 @@ export default function EpisodeBody({ title, body, preface, afterword, authorNam
     ? "'Noto Serif JP', serif"
     : "'Noto Sans JP', sans-serif"
 
-  // モバイル
   if (isMobile) {
     return (
       <>
@@ -101,7 +101,6 @@ export default function EpisodeBody({ title, body, preface, afterword, authorNam
     )
   }
 
-  // PC
   return (
     <div style={{background:'#fff',border:'1px solid #F0D9C9',borderRadius:12,overflow:'hidden',marginBottom:16}}>
       <div style={{padding:'8px 16px',borderBottom:'1px solid #FFF1E6',background:'#FFF9F2',display:'flex',justifyContent:'space-between',alignItems:'center'}}>
@@ -156,15 +155,15 @@ interface VerticalProps {
 }
 
 function VerticalBody({ title, body, preface, afterword, authorName, fontSize, fontFamily }: VerticalProps) {
-  const scrollRef = React.useRef<HTMLDivElement>(null)
-  React.useEffect(() => {
+  const scrollRef = useRef<HTMLDivElement>(null)
+  useEffect(() => {
     if (scrollRef.current) {
       scrollRef.current.scrollLeft = scrollRef.current.scrollWidth
     }
   }, [body])
+
   return (
     <div>
-      {/* 前書き（横書き） */}
       {preface && (
         <div style={{padding:'12px 32px',background:'#FFF9F2',borderBottom:'1px solid #FFF1E6'}}>
           <div style={{fontSize:13,color:'#77706A',lineHeight:1.9,padding:'10px 14px',background:'#fff',borderLeft:'3px solid #F0D9C9',borderRadius:4,whiteSpace:'pre-wrap'}}>
@@ -173,7 +172,6 @@ function VerticalBody({ title, body, preface, afterword, authorName, fontSize, f
         </div>
       )}
 
-      {/* 本文（縦書き・横スクロール）スクロールバー太め */}
       <style>{`
         .v-scroll::-webkit-scrollbar { height: 14px; }
         .v-scroll::-webkit-scrollbar-track { background: #FFF1E6; border-radius: 7px; }
@@ -188,22 +186,18 @@ function VerticalBody({ title, body, preface, afterword, authorName, fontSize, f
           padding:'32px 24px 32px 48px',
           height:'calc(100% - 18px)',
           boxSizing:'border-box',
-          direction:'ltr',
         }}>
-          {/* タイトルと本文を別カラムとして横に並べる */}
           <div style={{display:'inline-block',marginRight:'2em',verticalAlign:'top'}}>
             <div style={{fontSize:fontSize+4,fontWeight:700,color:'#2B211B',fontFamily,lineHeight:1.8}}>
               {title}
             </div>
           </div>
-          <div
           <div style={{display:'inline-block',fontSize,lineHeight:2.1,color:'#2B211B',fontFamily,wordBreak:'break-all',verticalAlign:'top'}}>
-            <VerticalText text={body} fontSize={fontSize} fontFamily={fontFamily}/>
+            <VerticalText text={body}/>
           </div>
         </div>
       </div>
 
-      {/* あとがき（横書き） */}
       {afterword && (
         <div style={{borderTop:'1px solid #F0D9C9'}}>
           <div style={{padding:'10px 16px',borderBottom:'1px solid #F0D9C9',background:'#FFF9F2',display:'flex',alignItems:'center',gap:8}}>
