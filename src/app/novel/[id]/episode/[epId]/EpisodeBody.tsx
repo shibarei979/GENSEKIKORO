@@ -21,7 +21,7 @@ function renderBodyH(text: string): string {
 }
 
 function isHorizontalChar(ch: string): boolean {
-  return ['ー','〜','…','‥','─','—','－','〰','ｰ'].includes(ch)
+  return ['ー','〜','…','‥','─','—','－','〰','ｰ','｜','|'].includes(ch)
 }
 
 function VerticalText({ text }: { text: string }) {
