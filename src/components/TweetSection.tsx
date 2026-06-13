@@ -33,6 +33,7 @@ interface Props {
   currentUserName: string | null
   currentUserIconUrl: string | null
   isOwner: boolean
+  compact?: boolean
 }
 
 function fmtDate(s: string) {
@@ -229,8 +230,8 @@ export default function TweetSection({ authorId, currentUserId, currentUserName,
   if (!isOwner && tweets.length === 0 && !loading) return null
 
   return (
-    <div style={{marginTop:20,borderTop:'1px solid #F0D9C9',paddingTop:20}}>
-      <div style={{fontSize:15,fontWeight:700,color:'#2B211B',marginBottom:12}}>つぶやき</div>
+    <div style={{marginTop:isOwner?0:20,borderTop:isOwner?'none':'1px solid #F0D9C9',paddingTop:isOwner?0:20}}>
+      {!compact && <div style={{fontSize:15,fontWeight:700,color:'#2B211B',marginBottom:12}}>つぶやき</div>}
       {/* 投稿フォーム（マイページからのみ） */}
       {isOwner && (
         <div style={{background:'#fff',border:'1px solid #F0D9C9',borderRadius:12,padding:'14px',marginBottom:16}}>
@@ -271,8 +272,8 @@ export default function TweetSection({ authorId, currentUserId, currentUserName,
         </div>
       )}
 
-      {/* つぶやき一覧 */}
-      {loading ? (
+      {/* つぶやき一覧（compactモードでは非表示） */}
+      {!compact && (loading ? (
         <div style={{textAlign:'center',padding:'24px',color:'#B8AEA8',fontSize:13}}>読み込み中...</div>
       ) : tweets.length === 0 ? (
         isOwner ? (

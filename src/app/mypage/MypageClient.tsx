@@ -483,12 +483,12 @@ export default function MypageClient({ profile, novels: initialNovels, bookmarke
         </div>
 
         {/* コンテスト応募 */}
-        <ContestEntry
+        <div style={{marginTop:12}}><ContestEntry
           novels={myNovels}
           contests={contests}
           initialEntries={initialEntries}
           userId={profile.user_id}
-        />
+        /></div>
 
         {/* フォロー中の作者 */}
         {followingAuthors.length > 0 && (
@@ -761,7 +761,7 @@ export default function MypageClient({ profile, novels: initialNovels, bookmarke
       )}
 
       {/* つぶやき投稿 */}
-      <div style={{marginTop:12}}>
+      <div style={{marginTop:0}}>
         <TweetSection
           authorId={profile.user_id}
           currentUserId={profile.user_id}
