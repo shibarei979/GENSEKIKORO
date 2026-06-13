@@ -226,13 +226,12 @@ export default function TweetSection({ authorId, currentUserId, currentUserName,
     reader.readAsDataURL(file)
   }
 
-  return (
-    <div style={{marginTop:20}}>
-      <div style={{fontSize:15,fontWeight:700,color:'#2B211B',marginBottom:12,display:'flex',alignItems:'center',gap:8}}>
-        <span>📢</span> つぶやき
-      </div>
+  if (!isOwner && tweets.length === 0 && !loading) return null
 
-      {/* 投稿フォーム（オーナーのみ） */}
+  return (
+    <div style={{marginTop:20,borderTop:'1px solid #F0D9C9',paddingTop:20}}>
+      <div style={{fontSize:15,fontWeight:700,color:'#2B211B',marginBottom:12}}>つぶやき</div>
+      {/* 投稿フォーム（マイページからのみ） */}
       {isOwner && (
         <div style={{background:'#fff',border:'1px solid #F0D9C9',borderRadius:12,padding:'14px',marginBottom:16}}>
           <div style={{display:'flex',gap:10}}>
@@ -276,9 +275,11 @@ export default function TweetSection({ authorId, currentUserId, currentUserName,
       {loading ? (
         <div style={{textAlign:'center',padding:'24px',color:'#B8AEA8',fontSize:13}}>読み込み中...</div>
       ) : tweets.length === 0 ? (
-        <div style={{textAlign:'center',padding:'32px',color:'#B8AEA8',fontSize:13}}>
-          {isOwner ? 'まだつぶやきがありません。最初のつぶやきを投稿しましょう！' : 'まだつぶやきがありません'}
-        </div>
+        isOwner ? (
+          <div style={{textAlign:'center',padding:'32px',color:'#B8AEA8',fontSize:13}}>
+            まだつぶやきがありません。マイページから投稿できます。
+          </div>
+        ) : null
       ) : tweets.map(tweet => (
         <div key={tweet.id} style={{background:'#fff',border:'1px solid #F0D9C9',borderRadius:12,marginBottom:12,overflow:'hidden'}}>
           <div style={{padding:'14px 16px'}}>

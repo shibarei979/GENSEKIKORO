@@ -9,6 +9,7 @@ import Footer from '@/components/layout/Footer'
 import AdBanner from '@/components/layout/AdBanner'
 import type { Profile, Novel } from '@/types'
 import ContestEntry from './ContestEntry'
+import TweetSection from '@/components/TweetSection'
 
 interface Contest { id: string; title: string; deadline: string | null; is_site_contest: boolean }
 interface Entry { contest_id: string; novel_id: string }
@@ -758,6 +759,17 @@ export default function MypageClient({ profile, novels: initialNovels, bookmarke
           {toast}
         </div>
       )}
+
+      {/* つぶやき投稿 */}
+      <div style={{marginTop:12}}>
+        <TweetSection
+          authorId={profile.user_id}
+          currentUserId={profile.user_id}
+          currentUserName={profile.display_name}
+          currentUserIconUrl={profile.icon_url||null}
+          isOwner={true}
+        />
+      </div>
 
       <AdBanner />
       <Footer user={true} />
