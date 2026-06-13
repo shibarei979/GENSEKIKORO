@@ -229,7 +229,7 @@ export default function TweetSection({ authorId, currentUserId, currentUserName,
   if (!isOwner && tweets.length === 0 && !loading) return null
 
   return (
-    <div style={{marginTop:isOwner?0:20,borderTop:isOwner?'none':'1px solid #F0D9C9',paddingTop:isOwner?0:20}}>
+    <div>
       {!isOwner && <div style={{fontSize:15,fontWeight:700,color:'#2B211B',marginBottom:12}}>つぶやき</div>}
       {/* 投稿フォーム（マイページからのみ） */}
       {isOwner && (

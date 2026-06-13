@@ -490,6 +490,22 @@ export default function MypageClient({ profile, novels: initialNovels, bookmarke
           userId={profile.user_id}
         /></div>
 
+        {/* つぶやき投稿 */}
+        <div style={{background:'#fff',border:'1px solid #F0D9C9',borderRadius:16,overflow:'hidden',marginTop:12}}>
+          <div style={{padding:'14px 20px',borderBottom:'1px solid #F0D9C9',background:'#FFF9F2'}}>
+            <span style={{fontSize:14,fontWeight:700,color:'#2B211B'}}>つぶやく</span>
+          </div>
+          <div style={{padding:'12px 20px'}}>
+            <TweetSection
+              authorId={profile.user_id}
+              currentUserId={profile.user_id}
+              currentUserName={profile.display_name}
+              currentUserIconUrl={profile.icon_url||null}
+              isOwner={true}
+            />
+          </div>
+        </div>
+
         {/* フォロー中の作者 */}
         {followingAuthors.length > 0 && (
           <div style={{marginTop:12}}>
@@ -759,17 +775,6 @@ export default function MypageClient({ profile, novels: initialNovels, bookmarke
           {toast}
         </div>
       )}
-
-      {/* つぶやき投稿 */}
-      <div style={{marginTop:0}}>
-        <TweetSection
-          authorId={profile.user_id}
-          currentUserId={profile.user_id}
-          currentUserName={profile.display_name}
-          currentUserIconUrl={profile.icon_url||null}
-          isOwner={true}
-        />
-      </div>
 
       <AdBanner />
       <Footer user={true} />
