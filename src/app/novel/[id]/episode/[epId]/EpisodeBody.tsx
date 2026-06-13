@@ -194,7 +194,7 @@ function VerticalBody({ title, body, preface, afterword, authorName, fontSize, f
           writingMode: 'vertical-rl', textOrientation: 'mixed',
           wordBreak: 'break-all',
         }}
-        dangerouslySetInnerHTML={{__html: renderBodyVertical(body)}}
+        dangerouslySetInnerHTML={{__html: renderBody(body)}}
       />
 
       {/* あとがき */}
