@@ -64,8 +64,8 @@ export default function NovelPreviewPopup({ novel, children }: Props) {
   }
   const textCells = Array.from({ length: ROWS * TEXT_COLS }, (_, i) => processedChars[i] ?? null)
 
-  // モバイル枠幅：5列 × 18px + 左右空白列 + 余白
-  const mobileWidth = CELL * TEXT_COLS + 36 + 24 + 32  // テキスト幅 + 空白列 + margin + padding
+  // モバイル枠幅：5列 × 18px + 左右空白列 + 余白（×1.3）
+  const mobileWidth = Math.round((CELL * TEXT_COLS + 36 + 24 + 32) * 1.3)
 
   function handleCardClick(e: React.MouseEvent) {
     e.preventDefault()
