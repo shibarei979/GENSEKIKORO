@@ -271,8 +271,8 @@ export default function TweetSection({ authorId, currentUserId, currentUserName,
         </div>
       )}
 
-      {/* つぶやき一覧（compactモードでは非表示） */}
-      {!compact && (loading ? (
+      {/* つぶやき一覧 */}
+      {loading ? (
         <div style={{textAlign:'center',padding:'24px',color:'#B8AEA8',fontSize:13}}>読み込み中...</div>
       ) : tweets.length === 0 ? (
         isOwner ? (
@@ -360,5 +360,4 @@ export default function TweetSection({ authorId, currentUserId, currentUserName,
       ))}
     </div>
   )
-)
 }
