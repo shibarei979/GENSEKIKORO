@@ -148,7 +148,11 @@ function VerticalBody({ title, body, preface, afterword, authorName, fontSize, f
   function renderBody(text: string): string {
     let result = text.replace(/｜([^《]+)《([^》]+)》/g, '<ruby>$1<rt>$2</rt></ruby>')
     result = result.replace(/《《([^》]+)》》/g, '<em style="font-style:normal;font-weight:700;border-bottom:2px solid #F26A21">$1</em>')
-    // 縦書き用：改行を段落区切りに
+    // 数字を全角化
+    result = result.replace(/[0-9]/g, (c: string) => String.fromCharCode(c.charCodeAt(0) + 0xFEE0))
+    // ー・〜を90度回転
+    result = result.replace(/ー/g, '<span style="display:inline-block;transform:rotate(90deg)">ー</span>')
+    result = result.replace(/〜/g, '<span style="display:inline-block;transform:rotate(90deg)">〜</span>')
     result = result.replace(/\n/g, '<br/>')
     return result
   }
@@ -157,11 +161,12 @@ function VerticalBody({ title, body, preface, afterword, authorName, fontSize, f
     <div style={{
       writingMode: 'vertical-rl',
       textOrientation: 'mixed',
-      overflowX: 'auto',
+      overflowX: 'scroll',
       overflowY: 'hidden',
-      padding: '32px 48px',
-      height: 'calc(100vh - 200px)',
+      padding: '32px 48px 48px',
+      height: 'calc(100vh - 180px)',
       direction: 'rtl',
+      display: 'flex',
       alignItems: 'flex-start',
     }}>
       {/* タイトル */}
