@@ -88,17 +88,17 @@ export default function SearchForm({
 
   function handleSearch() {
     const params = new URLSearchParams()
-    if (q)               params.set('q',      q)
-    if (author)          params.set('author', author)
+    if (q)               params.set('q',       q)
+    if (author)          params.set('author',  author)
     if (likeMin)         params.set('likeMin', likeMin)
     if (likeMax)         params.set('likeMax', likeMax)
     if (exclude)         params.set('exclude', exclude)
-    if (genre)           params.set('genre',  genre)
-    if (type)            params.set('type',   type)
-    if (serial)          params.set('serial', serial)
-    if (tags.length > 0) params.set('tag',    tags.join(','))
-    if (discoverMode)    params.set('sort',   'discover')
-    else if (sort)       params.set('sort',   sort)
+    if (genre)           params.set('genre',   genre)
+    if (type)            params.set('type',    type)
+    if (serial)          params.set('serial',  serial)
+    if (tags.length > 0) params.set('tag',     tags.join(','))
+    if (discoverMode)    params.set('sort',    'discover')
+    else if (sort)       params.set('sort',    sort)
     if (q.trim()) {
       try {
         const nh = [q.trim(), ...history.filter(h => h !== q.trim())].slice(0, MAX_HISTORY)
@@ -299,7 +299,7 @@ export default function SearchForm({
         style={{display:'flex',alignItems:'center',gap:6,padding:'7px 14px',border:'1.5px solid #F0D9C9',
           borderRadius:8,background:'#FFF9F2',color:'#77706A',fontSize:12,fontWeight:600,cursor:'pointer',
           marginBottom:showDetail?12:0,width:'100%',justifyContent:'space-between'}}>
-        <span>詳細条件設定{(genre||type||serial||tags.length>0) ? ' ●' : ''}</span>
+        <span>詳細条件設定{(genre||type||serial||tags.length>0||author||likeMin) ? ' ●' : ''}</span>
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"
           style={{transition:'transform .2s',transform:showDetail?'rotate(180deg)':'rotate(0deg)'}}>
           <polyline points="6 9 12 15 18 9"/>
@@ -335,7 +335,7 @@ export default function SearchForm({
               </div>
             </div>
           </div>
-          <div>
+          <div style={{marginBottom:12}}>
             <div style={{fontSize:11,color:'#77706A',fontWeight:600,marginBottom:6}}>タグ</div>
             <div style={{display:'flex',gap:6,marginBottom:8,alignItems:'center'}}>
               <input
@@ -370,38 +370,34 @@ export default function SearchForm({
               ))}
             </div>
           </div>
-        </div>
-
-        {/* 作者名検索 */}
-        <div style={{marginTop:12}}>
-          <div style={{fontSize:11,color:'#77706A',fontWeight:600,marginBottom:6}}>作者名で検索</div>
-          <input value={author} onChange={e=>setAuthor(e.target.value)}
-            placeholder="作者名を入力..."
-            style={{width:'100%',padding:'7px 10px',border:'1.5px solid #F0D9C9',borderRadius:8,fontSize:12,outline:'none'}}/>
-        </div>
-
-        {/* いいね数バー */}
-        <div style={{marginTop:12}}>
-          <div style={{fontSize:11,color:'#77706A',fontWeight:600,marginBottom:6}}>
-            いいね数 {likeMin||likeMax ? `(${likeMin||'0'}〜${likeMax||'∞'})` : ''}
+          <div style={{marginBottom:12}}>
+            <div style={{fontSize:11,color:'#77706A',fontWeight:600,marginBottom:6}}>作者名で検索</div>
+            <input value={author} onChange={e=>setAuthor(e.target.value)}
+              placeholder="作者名を入力..."
+              style={{width:'100%',padding:'7px 10px',border:'1.5px solid #F0D9C9',borderRadius:8,fontSize:12,outline:'none'}}/>
           </div>
-          <div style={{display:'flex',gap:6,flexWrap:'wrap'}}>
-            {[
-              {label:'指定なし', min:'', max:''},
-              {label:'10以上',  min:'10', max:''},
-              {label:'50以上',  min:'50', max:''},
-              {label:'100以上', min:'100', max:''},
-              {label:'200以上', min:'200', max:''},
-              {label:'500以上', min:'500', max:''},
-            ].map(r => (
-              <button key={r.label} onClick={()=>{setLikeMin(r.min);setLikeMax(r.max)}}
-                style={{padding:'4px 10px',borderRadius:14,fontSize:11,fontWeight:500,border:'1px solid',cursor:'pointer',
-                  background:likeMin===r.min&&likeMax===r.max?'#F26A21':'#FFF1E6',
-                  color:likeMin===r.min&&likeMax===r.max?'#fff':'#F26A21',
-                  borderColor:likeMin===r.min&&likeMax===r.max?'#F26A21':'#f5b080'}}>
-                {r.label}
-              </button>
-            ))}
+          <div>
+            <div style={{fontSize:11,color:'#77706A',fontWeight:600,marginBottom:6}}>
+              いいね数 {likeMin||likeMax ? `(${likeMin||'0'}〜${likeMax||'∞'})` : ''}
+            </div>
+            <div style={{display:'flex',gap:6,flexWrap:'wrap'}}>
+              {[
+                {label:'指定なし', min:'', max:''},
+                {label:'10以上',  min:'10', max:''},
+                {label:'50以上',  min:'50', max:''},
+                {label:'100以上', min:'100', max:''},
+                {label:'200以上', min:'200', max:''},
+                {label:'500以上', min:'500', max:''},
+              ].map(r => (
+                <button key={r.label} onClick={()=>{setLikeMin(r.min);setLikeMax(r.max)}}
+                  style={{padding:'4px 10px',borderRadius:14,fontSize:11,fontWeight:500,border:'1px solid',cursor:'pointer',
+                    background:likeMin===r.min&&likeMax===r.max?'#F26A21':'#FFF1E6',
+                    color:likeMin===r.min&&likeMax===r.max?'#fff':'#F26A21',
+                    borderColor:likeMin===r.min&&likeMax===r.max?'#F26A21':'#f5b080'}}>
+                  {r.label}
+                </button>
+              ))}
+            </div>
           </div>
         </div>
       )}
@@ -413,8 +409,8 @@ export default function SearchForm({
           <button onClick={()=>setSort('like')} style={pill(sort==='like'&&!discoverMode)}>いいね順</button>
         </div>
         <div style={{display:'flex',gap:8,alignItems:'center'}}>
-          {(q||exclude||genre||type||serial||tags.length>0) && (
-            <button onClick={()=>{setQ('');setExclude('');setGenre('');setType('');setSerial('');setTags([]);setSort('new');setDiscoverMode(false);router.push('/search')}}
+          {(q||exclude||genre||type||serial||tags.length>0||author||likeMin) && (
+            <button onClick={()=>{setQ('');setExclude('');setGenre('');setType('');setSerial('');setTags([]);setSort('new');setDiscoverMode(false);setAuthor('');setLikeMin('');setLikeMax('');router.push('/search')}}
               style={{fontSize:12,color:'#B8AEA8',background:'none',border:'none',cursor:'pointer'}}>
               条件クリア ×
             </button>
