@@ -58,37 +58,6 @@ export default async function RankingPage({ searchParams }: Props) {
       }
       const risingWithAuthor = risingItems.map((n:any) => ({...n, display_name: authorMap2[n.author_id]||''}))
       return { items: risingWithAuthor, total: risingWithAuthor.length }
-    } else if (period === 'newbie') {
-      const since30 = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString()
-      const { data: newAuthors } = await supabase.from('novels')
-        .select('author_id, created_at')
-        .eq('published', true)
-        .gte('created_at', since30)
-      const newAuthorIds = Array.from(new Set((newAuthors||[]).map((n: any) => n.author_id)))
-      if (newAuthorIds.length === 0) return { items: [], total: 0 }
-
-      const { data: newNovels } = await supabase.from('novels')
-        .select('id, title, genre, novel_type, is_serial, author_id, summary, tags, created_at')
-        .in('author_id', newAuthorIds as string[])
-        .eq('published', true).eq('is_r18', false).neq('genre', '官能')
-      const novelIds2 = (newNovels||[]).map((n: any) => n.id)
-      const { data: likes2 } = await supabase.from('likes').select('novel_id').in('novel_id', novelIds2)
-      const lm2: Record<string,number> = {}
-      likes2?.forEach((l: any) => { lm2[l.novel_id] = (lm2[l.novel_id]||0)+1 })
-      const sorted2 = (newNovels||[]).sort((a: any,b: any) => (lm2[b.id]||0)-(lm2[a.id]||0))
-      const total2 = sorted2.length
-      const paginated2 = showMore ? sorted2 : sorted2.slice(0, PAGE_SIZE)
-      const aIds2 = Array.from(new Set(paginated2.map((n: any) => n.author_id)))
-      const aMap2: Record<string,string> = {}
-      if (aIds2.length > 0) {
-        const { data: auths2 } = await supabase.from('profiles').select('user_id, display_name').in('user_id', aIds2 as string[])
-        auths2?.forEach((a: any) => { aMap2[a.user_id] = a.display_name })
-      }
-      return { items: paginated2.map((n: any) => ({ ...n, display_name: aMap2[n.author_id]||'', likeCount: lm2[n.id]||0 })), total: total2 }
-    } else if (period === 'discover') {
-      const { data: discData } = await supabase.from('discovers').select('novel_id').eq('is_pending', false)
-      discData?.forEach((d: any) => { likeMap[d.novel_id] = (likeMap[d.novel_id]||0)+1 })
-      likeIds = Object.entries(likeMap).sort((a,b)=>b[1]-a[1]).map(([id])=>id)
     } else if (period === 'daily') {
       const today = new Date(); today.setHours(0,0,0,0)
       const { data: dl } = await supabase.from('likes').select('novel_id').gte('created_at', today.toISOString())
@@ -110,6 +79,15 @@ export default async function RankingPage({ searchParams }: Props) {
     if (serial === 'serial')   q = (q as any).eq('is_serial', true)
     if (serial === 'complete') q = (q as any).eq('is_serial', false)
     if (serial === 'new')      q = (q as any).gte('created_at', new Date(Date.now()-30*24*60*60*1000).toISOString())
+    if (serial === 'newbie') {
+      // 新人：投稿作品数が3件以下の作者
+      const { data: newbieAuthors } = await supabase
+        .from('novels').select('author_id').eq('published', true)
+      const authorCount: Record<string,number> = {}
+      newbieAuthors?.forEach((n:any) => { authorCount[n.author_id] = (authorCount[n.author_id]||0)+1 })
+      const newbieIds = Object.entries(authorCount).filter(([,c])=>c<=3).map(([id])=>id)
+      q = (q as any).in('author_id', newbieIds)
+    }
     const { data: novels } = await q
 
     const sorted = (novels||[]).sort((a: any,b: any) => likeIds.indexOf(a.id) - likeIds.indexOf(b.id))
@@ -181,19 +159,17 @@ export default async function RankingPage({ searchParams }: Props) {
     { value:'weekly',   label:'週間' },
     { value:'monthly',  label:'月間' },
     { value:'yearly',   label:'年間' },
-    { value:'newbie',   label:'新人' },
-    { value:'discover', label:'拡散' },
-    { value:'rising',   label:'🔥 急上昇' },
+    { value:'rising',   label:'急上昇' },
   ]
   const typeOptions   = [{ value:'全て',label:'全て' },{ value:'長編',label:'長編' },{ value:'短編',label:'短編' }]
-  const serialOptions = [{ value:'all',label:'すべて' },{ value:'serial',label:'連載中' },{ value:'complete',label:'完結' },{ value:'new',label:'新作（1ヶ月以内）' }]
+  const serialOptions = [{ value:'all',label:'すべて' },{ value:'serial',label:'連載中' },{ value:'complete',label:'完結' },{ value:'new',label:'新作（1ヶ月以内）' },{ value:'newbie',label:'新人作家' }]
 
   function buildUrl(p: string, t: string, s: string, pg = 1) {
     return `/ranking?period=${p}&type=${encodeURIComponent(t)}&serial=${s}&page=${pg}`
   }
 
   const periodLabel = periodOptions.find(o=>o.value===period)?.label||'週間'
-  const scoreLabel  = period === 'discover' ? '⛏' : period === 'rising' ? '🔥' : '♡'
+  const scoreLabel  = period === 'rising' ? '↑' : '♡'
 
   return (
     <div style={{minHeight:'100vh',background:'#fff',fontFamily:"'Noto Sans JP',sans-serif"}}>
