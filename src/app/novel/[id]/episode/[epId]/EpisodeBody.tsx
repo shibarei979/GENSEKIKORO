@@ -167,18 +167,20 @@ function VerticalBody({ title, body, preface, afterword, authorName, fontSize, f
           textOrientation:'mixed',
           display:'inline-block',
           padding:'32px 48px 32px',
-          minHeight:'calc(100% - 18px)',
+          height:'calc(100% - 18px)',
           boxSizing:'border-box',
+          direction:'ltr',
         }}>
-          {/* タイトル＋本文を1つのdivに（縦書きで右→左に流れる） */}
-          <div style={{fontSize,lineHeight:2.1,color:'#2B211B',fontFamily,wordBreak:'break-all'}}>
-            <span style={{
-              fontSize:fontSize+4,fontWeight:700,
-              paddingBottom:'2em',
-              display:'inline',
-            }}>{title}　　</span>
-            <span dangerouslySetInnerHTML={{__html: renderBodyV(body)}}/>
+          {/* タイトルと本文を別カラムとして横に並べる */}
+          <div style={{display:'inline-block',marginRight:'3em',verticalAlign:'top'}}>
+            <div style={{fontSize:fontSize+4,fontWeight:700,color:'#2B211B',fontFamily,lineHeight:1.8}}>
+              {title}
+            </div>
           </div>
+          <div
+            style={{display:'inline-block',fontSize,lineHeight:2.1,color:'#2B211B',fontFamily,wordBreak:'break-all',verticalAlign:'top'}}
+            dangerouslySetInnerHTML={{__html: renderBodyV(body)}}
+          />
         </div>
       </div>
 
