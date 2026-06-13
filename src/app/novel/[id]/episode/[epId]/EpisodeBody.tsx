@@ -119,7 +119,7 @@ export default function EpisodeBody({ title, body, preface, afterword, authorNam
             )}
             <div
               style={{fontSize:settings.fontSize,lineHeight:settings.lineHeight,color:'#2B211B',fontFamily,wordBreak:'break-all'}}
-              dangerouslySetInnerHTML={{__html: renderBody(body)}}
+              dangerouslySetInnerHTML={{__html: renderBodyVertical(body)}}
             />
           </div>
           {afterword && (
@@ -160,15 +160,15 @@ function VerticalBody({ title, body, preface, afterword, authorName, fontSize, f
       overflowX: 'auto',
       overflowY: 'hidden',
       padding: '32px 48px',
-      minHeight: 400,
-      maxHeight: 'calc(100vh - 200px)',
+      height: 'calc(100vh - 200px)',
       direction: 'rtl',
+      alignItems: 'flex-start',
     }}>
       {/* タイトル */}
       <h1 style={{
         fontFamily, fontSize: fontSize + 4,
         fontWeight: 700, color: '#2B211B',
-        marginBottom: 48, lineHeight: 1.6,
+        marginLeft: 48, lineHeight: 1.6,
         writingMode: 'vertical-rl',
       }}>
         {title}
@@ -180,7 +180,7 @@ function VerticalBody({ title, body, preface, afterword, authorName, fontSize, f
           fontSize: 13, color: '#77706A', lineHeight: 1.9,
           padding: '12px 16px', background: '#FFF9F2',
           borderTop: '3px solid #F0D9C9', borderRadius: 4,
-          marginBottom: 48, whiteSpace: 'pre-wrap',
+          marginLeft: 48, whiteSpace: 'pre-wrap',
           writingMode: 'vertical-rl',
         }}>
           {preface}
@@ -194,7 +194,7 @@ function VerticalBody({ title, body, preface, afterword, authorName, fontSize, f
           writingMode: 'vertical-rl', textOrientation: 'mixed',
           wordBreak: 'break-all',
         }}
-        dangerouslySetInnerHTML={{__html: renderBody(body)}}
+        dangerouslySetInnerHTML={{__html: renderBodyVertical(body)}}
       />
 
       {/* あとがき */}
