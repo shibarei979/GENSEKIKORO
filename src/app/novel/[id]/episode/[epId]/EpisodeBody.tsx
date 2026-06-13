@@ -25,7 +25,15 @@ function isHorizontalChar(ch: string): boolean {
 }
 
 function VerticalText({ text }: { text: string }) {
-  const processed = text.replace(/[0-9]/g, (c) => String.fromCharCode(c.charCodeAt(0) + 0xFEE0))
+  let processed = text.replace(/[0-9]/g, (c) => String.fromCharCode(c.charCodeAt(0) + 0xFEE0))
+  // …を・・・に変換
+  processed = processed.replace(/…/g, '・・・')
+  processed = processed.replace(/‥/g, '・・')
+  // －を｜に変換
+  processed = processed.replace(/－/g, '｜')
+  processed = processed.replace(/—/g, '｜')
+  processed = processed.replace(/―/g, '｜')
+  processed = processed.replace(/─/g, '｜')
   const chars = processed.split('')
   return (
     <>
