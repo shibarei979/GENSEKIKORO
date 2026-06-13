@@ -25,8 +25,11 @@ function renderBodyV(text: string): string {
   r = r.replace(/《《([^》]+)》》/g, '<em style="font-style:normal;font-weight:700;border-bottom:2px solid #F26A21">$1</em>')
   // 数字を全角化
   r = r.replace(/[0-9]/g, (c: string) => String.fromCharCode(c.charCodeAt(0) + 0xFEE0))
-  // 縦書きで横向きになる文字をtext-combine-uprightで縦に
-  const rotStyle = 'display:inline-block;transform:rotate(90deg);line-height:1'
+  // 縦書きモードで横向きになる文字を縦向きに修正
+  // writing-mode:vertical-rl内ではtext-orientation:uprightで正立、
+  // ーのような記号はglyph-orientation-verticalで縦にするが
+  // CSSではwriting-mode内でtransform:rotate(-90deg)が正解
+  const rotStyle = 'display:inline-block;transform:rotate(-90deg);line-height:1'
   r = r.replace(/ー/g, `<span style="${rotStyle}">ー</span>`)
   r = r.replace(/〜/g, `<span style="${rotStyle}">〜</span>`)
   r = r.replace(/－/g, `<span style="${rotStyle}">－</span>`)
