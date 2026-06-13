@@ -144,36 +144,59 @@ interface VerticalProps {
 
 function VerticalBody({ title, body, preface, afterword, authorName, fontSize, fontFamily }: VerticalProps) {
   return (
-    <div style={{overflowX:'scroll',overflowY:'hidden',height:'calc(100vh - 180px)'}}>
-      <div style={{
-        writingMode:'vertical-rl',
-        textOrientation:'mixed',
-        display:'inline-flex',
-        flexDirection:'row',
-        alignItems:'flex-start',
-        padding:'32px 48px 48px',
-        minHeight:'100%',
-        boxSizing:'border-box',
-      }}>
-        <h1 style={{fontFamily,fontSize:fontSize+4,fontWeight:700,color:'#2B211B',marginRight:48,lineHeight:1.6}}>
-          {title}
-        </h1>
-        {preface && (
-          <div style={{fontSize:13,color:'#77706A',lineHeight:1.9,padding:'12px 16px',background:'#FFF9F2',borderRight:'3px solid #F0D9C9',borderRadius:4,marginRight:48,whiteSpace:'pre-wrap'}}>
+    <div>
+      {/* 前書き（横書き） */}
+      {preface && (
+        <div style={{padding:'12px 32px',background:'#FFF9F2',borderBottom:'1px solid #FFF1E6'}}>
+          <div style={{fontSize:13,color:'#77706A',lineHeight:1.9,padding:'10px 14px',background:'#fff',borderLeft:'3px solid #F0D9C9',borderRadius:4,whiteSpace:'pre-wrap'}}>
             {preface}
           </div>
-        )}
-        <div
-          style={{fontSize,lineHeight:2.1,color:'#2B211B',fontFamily,wordBreak:'break-all'}}
-          dangerouslySetInnerHTML={{__html: renderBodyV(body)}}
-        />
-        {afterword && (
-          <div style={{marginLeft:48}}>
-            <div style={{fontSize:13,fontWeight:700,color:'#2B211B',marginBottom:12}}>あとがき</div>
-            <div style={{fontSize:14,color:'#2B211B',lineHeight:1.9,whiteSpace:'pre-wrap'}}>{afterword}</div>
-          </div>
-        )}
+        </div>
+      )}
+
+      {/* 本文（縦書き・横スクロール）スクロールバー太め */}
+      <style>{`
+        .v-scroll::-webkit-scrollbar { height: 14px; }
+        .v-scroll::-webkit-scrollbar-track { background: #FFF1E6; border-radius: 7px; }
+        .v-scroll::-webkit-scrollbar-thumb { background: #F26A21; border-radius: 7px; border: 2px solid #FFF1E6; }
+        .v-scroll { scrollbar-width: thick; scrollbar-color: #F26A21 #FFF1E6; }
+      `}</style>
+      <div className="v-scroll" style={{overflowX:'scroll',overflowY:'hidden',height:'calc(100vh - 180px)',paddingBottom:4}}>
+        <div style={{
+          writingMode:'vertical-rl',
+          textOrientation:'mixed',
+          display:'inline-flex',
+          flexDirection:'row',
+          alignItems:'flex-start',
+          padding:'32px 48px 32px',
+          minHeight:'calc(100% - 18px)',
+          boxSizing:'border-box',
+          gap:40,
+        }}>
+          {/* タイトルを本文の横に */}
+          <h1 style={{fontFamily,fontSize:fontSize+4,fontWeight:700,color:'#2B211B',lineHeight:1.8,margin:0,flexShrink:0}}>
+            {title}
+          </h1>
+          <div
+            style={{fontSize,lineHeight:2.1,color:'#2B211B',fontFamily,wordBreak:'break-all',margin:0}}
+            dangerouslySetInnerHTML={{__html: renderBodyV(body)}}
+          />
+        </div>
       </div>
+
+      {/* あとがき（横書き） */}
+      {afterword && (
+        <div style={{borderTop:'1px solid #F0D9C9'}}>
+          <div style={{padding:'10px 16px',borderBottom:'1px solid #F0D9C9',background:'#FFF9F2',display:'flex',alignItems:'center',gap:8}}>
+            <span style={{width:3,height:14,background:'#F26A21',borderRadius:2,display:'inline-block'}}/>
+            <span style={{fontSize:13,fontWeight:700,color:'#2B211B'}}>あとがき</span>
+            {authorName && <span style={{fontSize:11,color:'#77706A',marginLeft:'auto'}}>{authorName}</span>}
+          </div>
+          <div style={{padding:'16px 20px',fontSize:14,color:'#2B211B',lineHeight:1.9,whiteSpace:'pre-wrap'}}>
+            {afterword}
+          </div>
+        </div>
+      )}
     </div>
   )
 }
