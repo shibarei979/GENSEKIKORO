@@ -165,22 +165,20 @@ function VerticalBody({ title, body, preface, afterword, authorName, fontSize, f
         <div style={{
           writingMode:'vertical-rl',
           textOrientation:'mixed',
-          display:'inline-flex',
-          flexDirection:'row',
-          alignItems:'flex-start',
+          display:'inline-block',
           padding:'32px 48px 32px',
           minHeight:'calc(100% - 18px)',
           boxSizing:'border-box',
-          gap:40,
         }}>
-          {/* タイトルを本文の横に */}
-          <h1 style={{fontFamily,fontSize:fontSize+4,fontWeight:700,color:'#2B211B',lineHeight:1.8,margin:0,flexShrink:0}}>
-            {title}
-          </h1>
-          <div
-            style={{fontSize,lineHeight:2.1,color:'#2B211B',fontFamily,wordBreak:'break-all',margin:0}}
-            dangerouslySetInnerHTML={{__html: renderBodyV(body)}}
-          />
+          {/* タイトル＋本文を1つのdivに（縦書きで右→左に流れる） */}
+          <div style={{fontSize,lineHeight:2.1,color:'#2B211B',fontFamily,wordBreak:'break-all'}}>
+            <span style={{
+              fontSize:fontSize+4,fontWeight:700,
+              paddingBottom:'2em',
+              display:'inline',
+            }}>{title}　　</span>
+            <span dangerouslySetInnerHTML={{__html: renderBodyV(body)}}/>
+          </div>
         </div>
       </div>
 
