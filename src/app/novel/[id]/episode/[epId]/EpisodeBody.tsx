@@ -25,12 +25,13 @@ function renderBodyV(text: string): string {
   r = r.replace(/《《([^》]+)》》/g, '<em style="font-style:normal;font-weight:700;border-bottom:2px solid #F26A21">$1</em>')
   // 数字を全角化
   r = r.replace(/[0-9]/g, (c: string) => String.fromCharCode(c.charCodeAt(0) + 0xFEE0))
-  // ー・〜を90度回転
   // 縦書きで横向きになる文字を90度回転
-  const rotateChars = ['ー', '〜', '－', 'ｰ', '─', '―', 'ﾞ', 'ﾟ']
-  rotateChars.forEach(ch => {
-    r = r.replace(new RegExp(ch, 'g'), `<span style="display:inline-block;transform:rotate(90deg)">${ch}</span>`)
-  })
+  const rotStyle = 'display:inline-block;transform:rotate(90deg)'
+  r = r.replace(/ー/g, `<span style="${rotStyle}">ー</span>`)
+  r = r.replace(/〜/g, `<span style="${rotStyle}">〜</span>`)
+  r = r.replace(/－/g, `<span style="${rotStyle}">－</span>`)
+  r = r.replace(/─/g, `<span style="${rotStyle}">─</span>`)
+  r = r.replace(/―/g, `<span style="${rotStyle}">―</span>`)
   r = r.replace(/\n/g, '<br/>')
   return r
 }
