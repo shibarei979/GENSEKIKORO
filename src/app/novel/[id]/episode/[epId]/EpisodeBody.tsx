@@ -1,5 +1,5 @@
 'use client'
-import { useState, useEffect } from 'react'
+import React, { useState, useEffect } from 'react'
 import ReadingSettings, { Settings } from './ReadingSettings'
 import MobileEpisodeBody from './MobileEpisodeBody'
 
@@ -143,6 +143,12 @@ interface VerticalProps {
 }
 
 function VerticalBody({ title, body, preface, afterword, authorName, fontSize, fontFamily }: VerticalProps) {
+  const scrollRef = React.useRef<HTMLDivElement>(null)
+  React.useEffect(() => {
+    if (scrollRef.current) {
+      scrollRef.current.scrollLeft = scrollRef.current.scrollWidth
+    }
+  }, [body])
   return (
     <div>
       {/* 前書き（横書き） */}
@@ -161,7 +167,7 @@ function VerticalBody({ title, body, preface, afterword, authorName, fontSize, f
         .v-scroll::-webkit-scrollbar-thumb { background: #F26A21; border-radius: 7px; border: 2px solid #FFF1E6; }
         .v-scroll { scrollbar-width: thick; scrollbar-color: #F26A21 #FFF1E6; }
       `}</style>
-      <div className="v-scroll" style={{overflowX:'scroll',overflowY:'hidden',height:'calc(100vh - 180px)',paddingBottom:4}}>
+      <div ref={scrollRef} className="v-scroll" style={{overflowX:'scroll',overflowY:'hidden',height:'calc(100vh - 180px)',paddingBottom:4}}>
         <div style={{
           writingMode:'vertical-rl',
           textOrientation:'mixed',
