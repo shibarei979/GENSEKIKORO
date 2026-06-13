@@ -10,7 +10,7 @@ import NovelPreviewPopup from '@/components/NovelPreviewPopup'
 const PAGE_SIZE = 50
 
 interface Props {
-  searchParams: { period?: string; type?: string; serial?: string; page?: string }
+  searchParams: { period?: string; type?: string; serial?: string; page?: string; genre?: string }
 }
 
 export default async function RankingPage({ searchParams }: Props) {
@@ -23,6 +23,7 @@ export default async function RankingPage({ searchParams }: Props) {
   }
 
   const period    = searchParams.period || 'weekly'
+  const genre     = searchParams.genre  || '全て'
   const showMore  = searchParams.page === 'all'
   const novelType = searchParams.type   || '長編'
   const serial    = searchParams.serial || 'all'
@@ -64,7 +65,7 @@ export default async function RankingPage({ searchParams }: Props) {
       dl?.forEach((l: any) => { likeMap[l.novel_id] = (likeMap[l.novel_id]||0)+1 })
       likeIds = Object.entries(likeMap).sort((a,b)=>b[1]-a[1]).map(([id])=>id)
     } else {
-      const viewMap: Record<string,string> = { weekly:'weekly_likes', monthly:'monthly_likes', yearly:'yearly_likes' }
+      const viewMap: Record<string,string> = { weekly:'weekly_likes', monthly:'monthly_likes', quarterly:'quarterly_likes', yearly:'yearly_likes' }
       const { data: likes } = await supabase.from(viewMap[period]).select('novel_id, like_count').order('like_count',{ascending:false}).limit(500)
       likes?.forEach((l: any) => { likeMap[l.novel_id] = l.like_count })
       likeIds = (likes||[]).map((l: any) => l.novel_id)
@@ -76,6 +77,7 @@ export default async function RankingPage({ searchParams }: Props) {
       .select('id, title, genre, novel_type, is_serial, author_id, summary, tags, created_at')
       .in('id', likeIds).eq('published', true).eq('is_r18', false).neq('genre', '官能')
     if (novelType !== '全て') q = (q as any).eq('novel_type', novelType)
+    if (genre !== '全て') q = (q as any).eq('genre', genre)
     if (serial === 'serial')   q = (q as any).eq('is_serial', true)
     if (serial === 'complete') q = (q as any).eq('is_serial', false)
     if (serial === 'new')      q = (q as any).gte('created_at', new Date(Date.now()-30*24*60*60*1000).toISOString())
@@ -155,17 +157,19 @@ export default async function RankingPage({ searchParams }: Props) {
   }
 
   const periodOptions = [
-    { value:'daily',    label:'日間' },
-    { value:'weekly',   label:'週間' },
-    { value:'monthly',  label:'月間' },
-    { value:'yearly',   label:'年間' },
-    { value:'rising',   label:'急上昇' },
+    { value:'daily',     label:'日間' },
+    { value:'weekly',    label:'週間' },
+    { value:'monthly',   label:'月間' },
+    { value:'quarterly', label:'四半期' },
+    { value:'yearly',    label:'年間' },
+    { value:'rising',    label:'急上昇' },
   ]
+  const genres = ['全て','異世界','ファンタジー','SF','恋愛','学園','ミステリー','ホラー','歴史・時代','日常','アクション','コメディ','その他']
   const typeOptions   = [{ value:'全て',label:'全て' },{ value:'長編',label:'長編' },{ value:'短編',label:'短編' }]
   const serialOptions = [{ value:'all',label:'すべて' },{ value:'serial',label:'連載中' },{ value:'complete',label:'完結' },{ value:'new',label:'新作（1ヶ月以内）' },{ value:'newbie',label:'新人作家' }]
 
   function buildUrl(p: string, t: string, s: string, pg = 1) {
-    return `/ranking?period=${p}&type=${encodeURIComponent(t)}&serial=${s}&page=${pg}`
+    return `/ranking?period=${p}&type=${encodeURIComponent(t)}&serial=${s}&genre=${encodeURIComponent(genre)}&page=${pg}`
   }
 
   const periodLabel = periodOptions.find(o=>o.value===period)?.label||'週間'
@@ -212,6 +216,18 @@ export default async function RankingPage({ searchParams }: Props) {
               </div>
             </div>
             <div>
+              <div style={{fontSize:11,color:'#77706A',fontWeight:600,marginBottom:5}}>ジャンル</div>
+              <div style={{display:'flex',gap:5,flexWrap:'wrap',marginBottom:10}}>
+                {genres.map(g => (
+                  <Link key={g} href={`/ranking?period=${period}&type=${encodeURIComponent(novelType)}&serial=${serial}&genre=${encodeURIComponent(g)}&page=1`}
+                    style={{padding:'4px 10px',borderRadius:14,fontSize:11,fontWeight:500,textDecoration:'none',
+                      background:genre===g?'#F26A21':'#FFF1E6',
+                      color:genre===g?'#fff':'#F26A21',
+                      border:`1px solid ${genre===g?'#F26A21':'#f5b080'}`}}>
+                    {g}
+                  </Link>
+                ))}
+              </div>
               <div style={{fontSize:11,color:'#77706A',fontWeight:600,marginBottom:5}}>絞り込み</div>
               <div style={{display:'flex',gap:6,flexWrap:'wrap'}}>
                 {serialOptions.map(o => (

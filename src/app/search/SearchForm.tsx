@@ -33,16 +33,21 @@ interface Props {
   defaultQ?: string; defaultExclude?: string; defaultGenre?: string
   defaultType?: string; defaultSerial?: string; defaultTag?: string
   defaultSort?: string; ageVerified?: boolean; defaultDiscover?: boolean
+  defaultAuthor?: string; defaultLikeMin?: string; defaultLikeMax?: string
 }
 
 export default function SearchForm({
   defaultQ='', defaultExclude='', defaultGenre='', defaultType='',
-  defaultSerial='', defaultTag='', defaultSort='new', ageVerified=false, defaultDiscover=false
+  defaultSerial='', defaultTag='', defaultSort='new', ageVerified=false, defaultDiscover=false,
+  defaultAuthor='', defaultLikeMin='', defaultLikeMax=''
 }: Props) {
   const router = useRouter()
   const GENRES = ageVerified ? [...GENRES_BASE, '官能'] : GENRES_BASE
 
   const [q,                  setQ]                  = useState(defaultQ)
+  const [author,             setAuthor]             = useState(defaultAuthor)
+  const [likeMin,            setLikeMin]            = useState(defaultLikeMin)
+  const [likeMax,            setLikeMax]            = useState(defaultLikeMax)
   const [exclude,            setExclude]            = useState(defaultExclude)
   const [genre,              setGenre]              = useState(defaultGenre)
   const [type,               setType]               = useState(defaultType)
@@ -84,6 +89,9 @@ export default function SearchForm({
   function handleSearch() {
     const params = new URLSearchParams()
     if (q)               params.set('q',      q)
+    if (author)          params.set('author', author)
+    if (likeMin)         params.set('likeMin', likeMin)
+    if (likeMax)         params.set('likeMax', likeMax)
     if (exclude)         params.set('exclude', exclude)
     if (genre)           params.set('genre',  genre)
     if (type)            params.set('type',   type)
@@ -361,6 +369,39 @@ export default function SearchForm({
                 </button>
               ))}
             </div>
+          </div>
+        </div>
+
+        {/* 作者名検索 */}
+        <div style={{marginTop:12}}>
+          <div style={{fontSize:11,color:'#77706A',fontWeight:600,marginBottom:6}}>作者名で検索</div>
+          <input value={author} onChange={e=>setAuthor(e.target.value)}
+            placeholder="作者名を入力..."
+            style={{width:'100%',padding:'7px 10px',border:'1.5px solid #F0D9C9',borderRadius:8,fontSize:12,outline:'none',boxSizing:'border-box' as const}}/>
+        </div>
+
+        {/* いいね数バー */}
+        <div style={{marginTop:12}}>
+          <div style={{fontSize:11,color:'#77706A',fontWeight:600,marginBottom:6}}>
+            いいね数 {likeMin||likeMax ? `(${likeMin||'0'}〜${likeMax||'∞'})` : ''}
+          </div>
+          <div style={{display:'flex',gap:6,flexWrap:'wrap'}}>
+            {[
+              {label:'指定なし', min:'', max:''},
+              {label:'10以上',  min:'10', max:''},
+              {label:'50以上',  min:'50', max:''},
+              {label:'100以上', min:'100', max:''},
+              {label:'200以上', min:'200', max:''},
+              {label:'500以上', min:'500', max:''},
+            ].map(r => (
+              <button key={r.label} onClick={()=>{setLikeMin(r.min);setLikeMax(r.max)}}
+                style={{padding:'4px 10px',borderRadius:14,fontSize:11,fontWeight:500,border:'1px solid',cursor:'pointer',
+                  background:likeMin===r.min&&likeMax===r.max?'#F26A21':'#FFF1E6',
+                  color:likeMin===r.min&&likeMax===r.max?'#fff':'#F26A21',
+                  borderColor:likeMin===r.min&&likeMax===r.max?'#F26A21':'#f5b080'}}>
+                {r.label}
+              </button>
+            ))}
           </div>
         </div>
       )}

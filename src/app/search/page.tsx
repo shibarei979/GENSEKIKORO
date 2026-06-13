@@ -14,6 +14,7 @@ interface Props {
   searchParams: {
     q?: string; exclude?: string; genre?: string; type?: string
     serial?: string; tag?: string; sort?: string; page?: string
+    author?: string; likeMin?: string; likeMax?: string
   }
 }
 
@@ -36,7 +37,10 @@ export default async function SearchPage({ searchParams }: Props) {
   const page     = Number(searchParams.page || 1)
   const offset   = (page - 1) * PAGE_SIZE
   const tags     = tagParam ? tagParam.split(',').filter(Boolean) : []
-  const hasSearch = !!(q || exclude || genre || type || serial || tags.length > 0)
+  const authorQ  = searchParams.author  || ''
+  const likeMin  = Number(searchParams.likeMin || 0)
+  const likeMax  = Number(searchParams.likeMax || 0)
+  const hasSearch = !!(q || exclude || genre || type || serial || tags.length > 0 || authorQ || likeMin)
 
   const isAgeVerified = profile?.age_verified || false
 
@@ -64,8 +68,22 @@ export default async function SearchPage({ searchParams }: Props) {
     if (!user || !isAgeVerified) {
       query = (query as any).eq('is_r18', false).neq('genre', '官能')
     }
-    if (q)      query = (query as any).ilike('title', `%${q}%`)
+    if (q) {
+      // タイトル・あらすじ・キャッチコピーを検索対象に
+      query = (query as any).or(`title.ilike.%${q}%,summary.ilike.%${q}%,catchcopy.ilike.%${q}%`)
+    }
     if (exclude) query = (query as any).not('title', 'ilike', `%${exclude}%`)
+    if (authorQ) {
+      // 作者名で検索
+      const { data: matchedAuthors } = await supabase
+        .from('profiles').select('user_id').ilike('display_name', `%${authorQ}%`)
+      const authorIds2 = (matchedAuthors||[]).map((a:any) => a.user_id)
+      if (authorIds2.length > 0) {
+        query = (query as any).in('author_id', authorIds2)
+      } else {
+        results = []; count = 0
+      }
+    }
     if (genre)  query = (query as any).eq('genre', genre)
     if (type)   query = (query as any).eq('novel_type', type)
     if (serial === 'serial')   query = (query as any).eq('is_serial', true)
@@ -105,6 +123,10 @@ export default async function SearchPage({ searchParams }: Props) {
     const { data: likes } = await supabase.from('likes').select('novel_id').in('novel_id', novelIds)
     likes?.forEach((l: any) => { likeMap[l.novel_id] = (likeMap[l.novel_id] || 0) + 1 })
   }
+
+  // いいね数フィルター
+  if (likeMin > 0) results = results.filter((n: any) => (likeMap[n.id]||0) >= likeMin)
+  if (likeMax > 0) results = results.filter((n: any) => (likeMap[n.id]||0) <= likeMax)
 
   const novels = results.map((n: any) => ({
     ...n,
