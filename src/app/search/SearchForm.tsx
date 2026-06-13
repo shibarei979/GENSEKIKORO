@@ -377,7 +377,7 @@ export default function SearchForm({
           <div style={{fontSize:11,color:'#77706A',fontWeight:600,marginBottom:6}}>作者名で検索</div>
           <input value={author} onChange={e=>setAuthor(e.target.value)}
             placeholder="作者名を入力..."
-            style={{width:'100%',padding:'7px 10px',border:'1.5px solid #F0D9C9',borderRadius:8,fontSize:12,outline:'none',boxSizing:'border-box' as const}}/>
+            style={{width:'100%',padding:'7px 10px',border:'1.5px solid #F0D9C9',borderRadius:8,fontSize:12,outline:'none'}}/>
         </div>
 
         {/* いいね数バー */}
