@@ -197,7 +197,6 @@ footer a:hover { color: #F26A21 !important; opacity: 1; }
 /* ===== スライダー モバイル縮小 ===== */
 @media (max-width: 768px) {
   .hero-flex { gap: 8px !important; }
-  /* スライダーコンテナを小さく */
   .hero-flex > div:last-child {
     max-height: 60px !important;
     overflow: hidden !important;
@@ -218,7 +217,6 @@ footer a:hover { color: #F26A21 !important; opacity: 1; }
 @media (max-width: 768px) {
   .gem-desktop { display: none !important; }
   .gem-mobile  { display: block !important; }
-  /* ユーザーの推しセクションのパディング */
   .gem-layout { padding: 0 16px !important; }
 }
 
@@ -229,11 +227,9 @@ footer a:hover { color: #F26A21 !important; opacity: 1; }
 
 /* ===== おすすめ・最新話・新着 モバイル1列 ===== */
 @media (max-width: 768px) {
-  /* 2列グリッドを1列に */
   div[style*="gridTemplateColumns:'1fr 1fr'"] {
     grid-template-columns: 1fr !important;
   }
-  /* borderRightを消す */
   div[style*="borderRight:'1px solid #FFF1E6'"] {
     border-right: none !important;
   }
@@ -241,12 +237,10 @@ footer a:hover { color: #F26A21 !important; opacity: 1; }
     border-right: none !important;
   }
 
-  /* モバイルヘッダー高さ2.5倍 */
   .mobile-header-bar {
     height: 120px !important;
   }
 
-  /* コンテスト・お知らせ画像を小さく */
   .hero-slider-img {
     height: 31px !important;
   }
@@ -258,7 +252,6 @@ footer a:hover { color: #F26A21 !important; opacity: 1; }
   .mobile-1col {
     grid-template-columns: 1fr !important;
   }
-  /* borderRight除去 */
   .mobile-1col > * {
     border-right: none !important;
   }
@@ -274,17 +267,14 @@ footer a:hover { color: #F26A21 !important; opacity: 1; }
 
 /* ===== 全ページ共通 モバイル ===== */
 @media (max-width: 768px) {
-  /* 右サイドバー非表示 */
   .sidebar, aside { display: none !important; }
 
-  /* flex横並びを縦に（サイドバー付きレイアウト） */
   .page-layout {
     flex-direction: column !important;
     padding: 12px 16px !important;
     gap: 12px !important;
   }
 
-  /* ランキングページ左サイドバーをコンパクトに */
   .ranking-filter {
     width: 100% !important;
     min-width: unset !important;
@@ -296,14 +286,12 @@ footer a:hover { color: #F26A21 !important; opacity: 1; }
     flex-direction: row !important;
   }
 
-  /* コンテスト・お知らせ画像を全幅に */
   .contest-image img {
     max-height: 160px !important;
     width: 100% !important;
     object-fit: cover !important;
   }
 
-  /* マイページ プロフィール */
   .profile-stats {
     display: flex !important;
     flex-direction: row !important;
@@ -316,10 +304,8 @@ footer a:hover { color: #F26A21 !important; opacity: 1; }
     min-width: 60px !important;
   }
 
-  /* テキスト縦書き防止 */
   * { writing-mode: horizontal-tb !important; }
 
-  /* maxWidth制限でのpadding */
   div[style*="maxWidth:900"],
   div[style*="maxWidth:1200"],
   div[style*="maxWidth:860"] {
@@ -327,7 +313,6 @@ footer a:hover { color: #F26A21 !important; opacity: 1; }
     padding-right: 16px !important;
   }
 
-  /* flex横並びで幅が固定されているものを解除 */
   div[style*="width:240"],
   div[style*="width:200"],
   div[style*="width:220"],
@@ -352,7 +337,6 @@ footer a:hover { color: #F26A21 !important; opacity: 1; }
     white-space: nowrap !important;
   }
 
-  /* コンテスト画像 */
   .contest-img-wrap {
     padding: 12px 12px 0 !important;
   }
@@ -361,7 +345,6 @@ footer a:hover { color: #F26A21 !important; opacity: 1; }
     border-radius: 8px !important;
   }
 
-  /* マイページ */
   .mypage-container { padding: 16px !important; }
   .profile-card {
     flex-direction: column !important;
@@ -370,7 +353,6 @@ footer a:hover { color: #F26A21 !important; opacity: 1; }
     padding: 16px !important;
   }
 
-  /* 閲覧履歴カード */
   .history-card {
     flex-direction: row !important;
     writing-mode: horizontal-tb !important;
@@ -379,7 +361,6 @@ footer a:hover { color: #F26A21 !important; opacity: 1; }
     writing-mode: horizontal-tb !important;
   }
 
-  /* main-layout モバイル */
   .main-layout {
     flex-direction: column !important;
     padding: 12px 16px !important;
@@ -436,8 +417,6 @@ footer a:hover { color: #F26A21 !important; opacity: 1; }
   }
 }
 
-
-
 /* ===== ユーザーの推し モバイル全幅 ===== */
 @media (max-width: 768px) {
   .gem-inner {
@@ -448,59 +427,16 @@ footer a:hover { color: #F26A21 !important; opacity: 1; }
   }
 }
 
-/* ===================================================
-   globals.css 追記・変更箇所のみ
-   既存ファイルの末尾に追加 OR 該当箇所を置き換え
-   =================================================== */
-
-/* ===== ボトムナビ対応：コンテンツ下余白 ===== */
+/* ===== ボトムナビ分の余白 ===== */
 @media (max-width: 768px) {
-  /* ボトムナビ分（56px + safe-area）の余白をbodyに */
   body {
-    padding-bottom: calc(56px + env(safe-area-inset-bottom, 0px));
-  }
-
-  /* Footerはモバイルで非表示（ボトムナビがある） */
-  footer {
-    display: none !important;
+    padding-bottom: calc(54px + env(safe-area-inset-bottom, 0px));
   }
 }
 
-/* ===== モバイルヘッダー検索バー ===== */
+/* ===== モバイルのタップハイライト ===== */
 @media (max-width: 768px) {
-  /* 検索バーのiOS zoom防止（font-sizeを14px以上に） */
-  .mobile-header-wrap input {
-    font-size: 14px !important;
-  }
-}
-
-/* ===== 急上昇横スクロール：スクロールバー非表示 ===== */
-.rising-scroll::-webkit-scrollbar {
-  display: none;
-}
-.rising-scroll {
-  -ms-overflow-style: none;
-  scrollbar-width: none;
-}
-
-/* ===== モバイル：カードホバー ===== */
-@media (max-width: 768px) {
-  /* タップ時のフラッシュを抑制 */
   a, button {
     -webkit-tap-highlight-color: rgba(242,106,33,0.08);
   }
-}
-
-/* ===== ランキングモバイル表示（既存クラスの補強） ===== */
-@media (max-width: 768px) {
-  .ranking-desktop { display: none !important; }
-  .ranking-mobile  { display: block !important; }
-}
-
-/* ===== GemSection モバイル（既存クラスの補強） ===== */
-@media (max-width: 768px) {
-  .gem-desktop { display: none !important; }
-  .gem-mobile  { display: block !important; }
-  .gem-inner   { padding: 0 16px !important; }
-  .gem-section-wrap { padding: 12px 0 0 !important; }
 }
