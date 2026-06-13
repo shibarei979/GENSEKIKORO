@@ -169,7 +169,7 @@ export default function TweetSection({ authorId, currentUserId, currentUserName,
       display_name: currentUserName || '',
       icon_url: currentUserIconUrl || null,
       like_count: 0, comment_count: 0,
-      liked: false, comments: [], showComments: false,
+      liked: false, comments: [], showComments: false, showCount: 5,
     }
     setTweets(prev => [newTweet, ...prev])
     setBody('')
