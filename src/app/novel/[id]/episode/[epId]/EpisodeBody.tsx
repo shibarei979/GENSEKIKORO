@@ -172,13 +172,13 @@ function VerticalBody({ title, body, preface, afterword, authorName, fontSize, f
           writingMode:'vertical-rl',
           textOrientation:'mixed',
           display:'inline-block',
-          padding:'32px 48px 32px',
+          padding:'32px 24px 32px 48px',
           height:'calc(100% - 18px)',
           boxSizing:'border-box',
           direction:'ltr',
         }}>
           {/* タイトルと本文を別カラムとして横に並べる */}
-          <div style={{display:'inline-block',marginRight:'3em',verticalAlign:'top'}}>
+          <div style={{display:'inline-block',marginRight:'2em',verticalAlign:'top'}}>
             <div style={{fontSize:fontSize+4,fontWeight:700,color:'#2B211B',fontFamily,lineHeight:1.8}}>
               {title}
             </div>
