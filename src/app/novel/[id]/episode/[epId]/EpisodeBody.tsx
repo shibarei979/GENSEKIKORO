@@ -20,21 +20,29 @@ function renderBodyH(text: string): string {
   return r
 }
 
-function renderBodyV(text: string): string {
-  let r = text.replace(/｜([^《]+)《([^》]+)》/g, '<ruby>$1<rt>$2</rt></ruby>')
-  r = r.replace(/《《([^》]+)》》/g, '<em style="font-style:normal;font-weight:700;border-bottom:2px solid #F26A21">$1</em>')
+// 縦書き用：横向き文字かどうか
+function isHorizontalChar(ch: string): boolean {
+  return ['ー','〜','…','‥','─','—','－','〰','ｰ'].includes(ch)
+}
+
+// 縦書き本文を1文字ずつspanでレンダリング
+function VerticalText({ text, fontSize, fontFamily }: { text: string; fontSize: number; fontFamily: string }) {
   // 数字を全角化
-  r = r.replace(/[0-9]/g, (c: string) => String.fromCharCode(c.charCodeAt(0) + 0xFEE0))
-  // ーなど横向き文字をrotate(90deg)で縦に
-  const hStyle = 'display:inline-block;transform:rotate(90deg);line-height:1;width:1em;text-align:center'
-  r = r.replace(/ー/g, `<span style="${hStyle}">ー</span>`)
-  r = r.replace(/〜/g, `<span style="${hStyle}">〜</span>`)
-  r = r.replace(/－/g, `<span style="${hStyle}">－</span>`)
-  r = r.replace(/─/g, `<span style="${hStyle}">─</span>`)
-  r = r.replace(/―/g, `<span style="${hStyle}">―</span>`)
-  r = r.replace(/—/g, `<span style="${hStyle}">—</span>`)
-  r = r.replace(/\n/g, '<br/>')
-  return r
+  const processed = text.replace(/[0-9]/g, (c) => String.fromCharCode(c.charCodeAt(0) + 0xFEE0))
+  const chars = processed.split('')
+  return (
+    <>
+      {chars.map((ch, i) =>
+        ch === '\n'
+          ? <br key={i}/>
+          : <span key={i} style={{
+              display: 'inline-block',
+              transform: isHorizontalChar(ch) ? 'rotate(90deg)' : 'none',
+              lineHeight: 1.2,
+            }}>{ch}</span>
+      )}
+    </>
+  )
 }
 
 export default function EpisodeBody({ title, body, preface, afterword, authorName }: Props) {
@@ -189,9 +197,9 @@ function VerticalBody({ title, body, preface, afterword, authorName, fontSize, f
             </div>
           </div>
           <div
-            style={{display:'inline-block',fontSize,lineHeight:2.1,color:'#2B211B',fontFamily,wordBreak:'break-all',verticalAlign:'top'}}
-            dangerouslySetInnerHTML={{__html: renderBodyV(body)}}
-          />
+          <div style={{display:'inline-block',fontSize,lineHeight:2.1,color:'#2B211B',fontFamily,wordBreak:'break-all',verticalAlign:'top'}}>
+            <VerticalText text={body} fontSize={fontSize} fontFamily={fontFamily}/>
+          </div>
         </div>
       </div>
 
