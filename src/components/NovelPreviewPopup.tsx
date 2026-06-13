@@ -44,7 +44,7 @@ export default function NovelPreviewPopup({ novel, children }: Props) {
     return ['ー','〜','…','‥','─','—','－'].includes(ch)
   }
 
-  const ROWS      = isMobile ? 12 : 20
+  const ROWS      = isMobile ? 16 : 20
   const TEXT_COLS = 5  // モバイルも5列
   const CELL      = isMobile ? 18 : 27  // モバイルはセル小さめ
 
