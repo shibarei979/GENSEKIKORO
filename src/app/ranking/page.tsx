@@ -41,16 +41,23 @@ export default async function RankingPage({ searchParams }: Props) {
         .limit(100)
       const risingIds = (risingData || []).map((r:any) => r.id)
       const scoreMap = Object.fromEntries((risingData||[]).map((r:any) => [r.id, r.rising_score]))
-      if (risingIds.length > 0) {
-        const { data: risingNovelData } = await supabase
-          .from('novels')
-          .select('id, title, genre, novel_type, is_serial, author_id, summary, catchcopy, tags')
-          .in('id', risingIds)
-          .eq('published', true)
-        novels = (risingNovelData || [])
-          .sort((a:any, b:any) => (scoreMap[b.id]||0) - (scoreMap[a.id]||0))
-          .map((n:any) => ({...n, like_count: scoreMap[n.id]||0}))
+      if (risingIds.length === 0) return { items: [], total: 0 }
+      const { data: risingNovelData } = await supabase
+        .from('novels')
+        .select('id, title, genre, novel_type, is_serial, author_id, summary, catchcopy, tags')
+        .in('id', risingIds)
+        .eq('published', true)
+      const risingItems = (risingNovelData || [])
+        .sort((a:any, b:any) => (scoreMap[b.id]||0) - (scoreMap[a.id]||0))
+        .map((n:any) => ({...n, like_count: scoreMap[n.id]||0}))
+      const authorIds2 = Array.from(new Set(risingItems.map((n:any) => n.author_id)))
+      const authorMap2: Record<string,string> = {}
+      if (authorIds2.length > 0) {
+        const { data: authors2 } = await supabase.from('profiles').select('user_id, display_name').in('user_id', authorIds2 as string[])
+        authors2?.forEach((a:any) => { authorMap2[a.user_id] = a.display_name })
       }
+      const risingWithAuthor = risingItems.map((n:any) => ({...n, display_name: authorMap2[n.author_id]||''}))
+      return { items: risingWithAuthor, total: risingWithAuthor.length }
     } else if (period === 'newbie') {
       const since30 = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString()
       const { data: newAuthors } = await supabase.from('novels')
