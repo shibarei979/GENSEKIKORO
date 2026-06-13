@@ -20,12 +20,18 @@ interface Props {
 export default function NovelPreviewPopup({ novel, children }: Props) {
   const [show, setShow] = useState(false)
   const [mounted, setMounted] = useState(false)
+  const [isMobile, setIsMobile] = useState(false)
 
-  useEffect(() => { setMounted(true) }, [])
+  useEffect(() => {
+    setMounted(true)
+    const check = () => setIsMobile(window.innerWidth <= 768)
+    check()
+    window.addEventListener('resize', check)
+    return () => window.removeEventListener('resize', check)
+  }, [])
 
   const rawText = novel.catchcopy || novel.summary || ''
 
-  // 縦書き用文字変換：数字を全角に、ーはそのまま（回転で対応）
   function toVertical(text: string): string {
     return text
       .replace(/0/g, '０').replace(/1/g, '１').replace(/2/g, '２')
@@ -34,18 +40,15 @@ export default function NovelPreviewPopup({ novel, children }: Props) {
       .replace(/9/g, '９')
   }
 
-  // 横向きにすべき文字（rotate90deg）
   function isHorizontalChar(ch: string): boolean {
     return ['ー','〜','…','‥','─','—','－'].includes(ch)
   }
 
   const ROWS = 20
-  const TOTAL_COLS = 7   // 表示上の総列数
-  const TEXT_COLS = 5    // 文章が入る列数（中央）
-  const BLANK_COLS = 1   // 左右の空白列数
+  const TOTAL_COLS = 7
+  const TEXT_COLS = 5
   const CELL = 27
 
-  // 改行で列を区切る
   const lines = rawText.split('\n').map(toVertical)
   const processedChars: (string | null)[] = []
   for (const line of lines) {
@@ -70,7 +73,7 @@ export default function NovelPreviewPopup({ novel, children }: Props) {
 
   const modal = show && mounted ? createPortal(
     <div
-      style={{position:'fixed',inset:0,background:'rgba(0,0,0,0.5)',zIndex:9999,display:'flex',alignItems:'center',justifyContent:'center',padding:20}}
+      style={{position:'fixed',inset:0,background:'rgba(0,0,0,0.5)',zIndex:9999,display:'flex',alignItems:'center',justifyContent:'center',padding:isMobile?'12px':20}}
       onClick={()=>setShow(false)}>
       <div
         onClick={e=>e.stopPropagation()}
@@ -81,12 +84,16 @@ export default function NovelPreviewPopup({ novel, children }: Props) {
           boxShadow:'0 8px 24px rgba(0,0,0,0.15)',
           overflow:'hidden',
           animation:'modalIn .2s ease',
-          width: CELL * (TOTAL_COLS + 5) + 56,
-          maxWidth:'95vw',
+          width: isMobile ? '100%' : CELL * (TOTAL_COLS + 5) + 56,
+          maxWidth: isMobile ? '100%' : '95vw',
+          // モバイル：画面高さの85%以内に収める・flex構造でボタンを固定
+          maxHeight: isMobile ? '85vh' : '90vh',
+          display:'flex',
+          flexDirection:'column',
         }}>
 
-        {/* ヘッダー */}
-        <div style={{background:'#FFF1E6',padding:'12px 16px',borderBottom:'1px solid #F0D9C9',position:'relative'}}>
+        {/* ヘッダー（固定） */}
+        <div style={{background:'#FFF1E6',padding:'12px 16px',borderBottom:'1px solid #F0D9C9',position:'relative',flexShrink:0}}>
           <button onClick={()=>setShow(false)}
             style={{position:'absolute',top:8,right:12,background:'none',border:'none',fontSize:18,color:'#B8AEA8',cursor:'pointer'}}>
             ×
@@ -113,93 +120,87 @@ export default function NovelPreviewPopup({ novel, children }: Props) {
           )}
         </div>
 
-        {/* マス目 */}
-        {rawText ? (
-          <div style={{padding:'16px 0',background:'#fff'}}>
-            <div style={{fontSize:10,color:'#999',marginBottom:8,textAlign:'center',letterSpacing:'0.1em'}}>
-              {novel.catchcopy ? '― キャッチコピー ―' : '― あらすじ ―'}
-            </div>
-            <div style={{margin:'0 28px'}}>
-              {/* 7列のグリッド：左1列空白 + 中央5列文章 + 右1列空白 */}
-              <div style={{
-                display:'flex',
-                flexDirection:'row',
-                border:'1px solid #ccc',
-                borderRadius:3,
-                overflow:'hidden',
-                padding:'12px 0',
-              }}>
-                {/* 右の空白地帯 */}
-                <div style={{flex:1,display:'flex',flexDirection:'column'}}>
-                  {Array.from({length: ROWS}, (_, row) => (
-                    <div key={row} style={{flex:1,height:CELL,borderBottom:row<ROWS-1?'1px solid #eee':'none',borderRight:'1px solid #ddd'}}/>
-                  ))}
-                </div>
-
-                {/* 中央5列（右から左の順で文章） */}
-                {Array.from({length: TEXT_COLS}, (_, col) => {
-                  const actualCol = TEXT_COLS - 1 - col
-                  return (
-                    <div key={col} style={{
-                      display:'flex',
-                      flexDirection:'column',
-                      borderRight:'1px solid #ddd',
-                    }}>
-                      {Array.from({length: ROWS}, (_, row) => {
-                        const char = textCells[actualCol * ROWS + row]
-                        return (
-                          <div key={row} style={{
-                            width:CELL,
-                            height:CELL,
-                            borderBottom:row<ROWS-1?'1px solid #eee':'none',
-                            display:'flex',
-                            alignItems:'center',
-                            justifyContent:'center',
-                            fontSize:15,
-                            color: char ? '#111' : 'transparent',
-                            fontFamily:"'Noto Serif JP',serif",
-                            lineHeight:1,
-                            flexShrink:0,
-                          }}>
-                            <span style={{
-                              display:'inline-block',
-                              transform: isHorizontalChar(char || '') ? 'rotate(90deg)' : 'none',
-                              lineHeight: 1,
-                            }}>{char || '　'}</span>
-                          </div>
-                        )
-                      })}
-                    </div>
-                  )
-                })}
-
-                {/* 左の空白地帯 */}
-                <div style={{flex:1,display:'flex',flexDirection:'column'}}>
-                  {Array.from({length: ROWS}, (_, row) => (
-                    <div key={row} style={{flex:1,height:CELL,borderBottom:row<ROWS-1?'1px solid #eee':'none'}}/>
-                  ))}
-                </div>
+        {/* 本文エリア（スクロール可能） */}
+        <div style={{flex:1,overflowY:'auto',minHeight:0}}>
+          {rawText ? (
+            <div style={{padding:'16px 0',background:'#fff'}}>
+              <div style={{fontSize:10,color:'#999',marginBottom:8,textAlign:'center',letterSpacing:'0.1em'}}>
+                {novel.catchcopy ? '― キャッチコピー ―' : '― あらすじ ―'}
               </div>
-            </div>
-            {rawText.replace(/\n/g,'').length > ROWS * TEXT_COLS && (
-              <div style={{fontSize:11,color:'#B8AEA8',textAlign:'center',marginTop:6}}>…続く</div>
-            )}
-          </div>
-        ) : (
-          <div style={{padding:'20px',textAlign:'center',color:'#B8AEA8',fontSize:13}}>
-            あらすじがありません
-          </div>
-        )}
 
-        {/* ボタン */}
-        <div style={{padding:'12px 16px',borderTop:'1px solid #F0D9C9',background:'#FFF9F2',display:'flex',gap:8}}>
+              {/* モバイル：横書きあらすじ */}
+              {isMobile ? (
+                <div style={{padding:'0 16px'}}>
+                  <p style={{fontSize:13,color:'#2B211B',lineHeight:1.9,fontFamily:"'Noto Serif JP',serif",margin:0,whiteSpace:'pre-wrap'}}>
+                    {rawText.length > 200 ? rawText.slice(0, 200) + '…' : rawText}
+                  </p>
+                </div>
+              ) : (
+                /* デスクトップ：縦書きマス目 */
+                <div style={{margin:'0 28px'}}>
+                  <div style={{
+                    display:'flex',
+                    flexDirection:'row',
+                    border:'1px solid #ccc',
+                    borderRadius:3,
+                    overflow:'hidden',
+                    padding:'12px 0',
+                  }}>
+                    <div style={{flex:1,display:'flex',flexDirection:'column'}}>
+                      {Array.from({length: ROWS}, (_, row) => (
+                        <div key={row} style={{flex:1,height:CELL,borderBottom:row<ROWS-1?'1px solid #eee':'none',borderRight:'1px solid #ddd'}}/>
+                      ))}
+                    </div>
+                    {Array.from({length: TEXT_COLS}, (_, col) => {
+                      const actualCol = TEXT_COLS - 1 - col
+                      return (
+                        <div key={col} style={{display:'flex',flexDirection:'column',borderRight:'1px solid #ddd'}}>
+                          {Array.from({length: ROWS}, (_, row) => {
+                            const char = textCells[actualCol * ROWS + row]
+                            return (
+                              <div key={row} style={{
+                                width:CELL,height:CELL,
+                                borderBottom:row<ROWS-1?'1px solid #eee':'none',
+                                display:'flex',alignItems:'center',justifyContent:'center',
+                                fontSize:15,color:char?'#111':'transparent',
+                                fontFamily:"'Noto Serif JP',serif",lineHeight:1,flexShrink:0,
+                              }}>
+                                <span style={{display:'inline-block',transform:isHorizontalChar(char||'')?'rotate(90deg)':'none',lineHeight:1}}>{char||'　'}</span>
+                              </div>
+                            )
+                          })}
+                        </div>
+                      )
+                    })}
+                    <div style={{flex:1,display:'flex',flexDirection:'column'}}>
+                      {Array.from({length: ROWS}, (_, row) => (
+                        <div key={row} style={{flex:1,height:CELL,borderBottom:row<ROWS-1?'1px solid #eee':'none'}}/>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {rawText.replace(/\n/g,'').length > (isMobile ? 200 : ROWS * TEXT_COLS) && (
+                <div style={{fontSize:11,color:'#B8AEA8',textAlign:'center',marginTop:6}}>…続く</div>
+              )}
+            </div>
+          ) : (
+            <div style={{padding:'20px',textAlign:'center',color:'#B8AEA8',fontSize:13}}>
+              あらすじがありません
+            </div>
+          )}
+        </div>
+
+        {/* ボタン（常に下部固定） */}
+        <div style={{padding:'12px 16px',borderTop:'1px solid #F0D9C9',background:'#FFF9F2',display:'flex',gap:8,flexShrink:0}}>
           <button onClick={()=>setShow(false)}
-            style={{flex:1,padding:'8px',border:'1px solid #F0D9C9',borderRadius:8,background:'#fff',color:'#77706A',fontSize:13,cursor:'pointer'}}>
+            style={{flex:1,padding:'10px',border:'1px solid #F0D9C9',borderRadius:8,background:'#fff',color:'#77706A',fontSize:13,cursor:'pointer'}}>
             閉じる
           </button>
           <a href={`/novel/${novel.id}`}
-            style={{flex:2,display:'block',padding:'8px 0',background:'#F26A21',color:'#fff',
-              fontWeight:700,fontSize:13,borderRadius:8,textDecoration:'none',textAlign:'center'}}>
+            style={{flex:2,display:'block',padding:'10px 0',background:'#F26A21',color:'#fff',
+              fontWeight:700,fontSize:14,borderRadius:8,textDecoration:'none',textAlign:'center'}}>
             作品を読む →
           </a>
         </div>

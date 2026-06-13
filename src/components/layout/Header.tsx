@@ -101,8 +101,9 @@ export default function Header({ profile, user, activeGenre }: Props) {
 
   return (
     <>
-      {/* ===== デスクトップヘッダー（既存そのまま） ===== */}
       <header style={{background:'#fff',borderBottom:'1px solid #F0D9C9',position:'sticky',top:0,zIndex:50,boxShadow:'0 1px 4px rgba(242,106,33,.07)'}}>
+
+        {/* ===== デスクトップヘッダー ===== */}
         <div className="desktop-header" style={{maxWidth:1200,margin:'0 auto',padding:'0 32px',display:'flex',alignItems:'center',gap:16,height:66,position:'relative'}}>
           <Link href="/" style={{flexShrink:0}}>
             <img src="/logo.png" alt="原石航路" style={{height:90,width:'auto',display:'block',objectFit:'contain'}}/>
@@ -181,17 +182,16 @@ export default function Header({ profile, user, activeGenre }: Props) {
           </div>
         </div>
 
-        {/* ===== モバイルヘッダー ===== */}
+        {/* ===== モバイルヘッダー（検索バーなし・ロゴ大きめ） ===== */}
         <div className="mobile-header">
-          {/* 上段：ベル・ロゴ・ハンバーガー */}
-          <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',padding:'0 16px',height:52}}>
+          <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',padding:'0 16px',height:64}}>
             {/* 左：ベルアイコン */}
             <div style={{width:36}}>
               {user ? (
                 <div ref={notifRef} style={{position:'relative'}}>
                   <button onClick={handleOpenNotif}
                     style={{width:36,height:36,border:'none',background:'transparent',cursor:'pointer',display:'flex',alignItems:'center',justifyContent:'center',position:'relative'}}>
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#77706A" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#77706A" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
                       <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/>
                     </svg>
                     {unreadCount > 0 && <span style={{position:'absolute',top:4,right:4,width:13,height:13,background:'#F26A21',borderRadius:'50%',fontSize:8,color:'#fff',fontWeight:700,display:'flex',alignItems:'center',justifyContent:'center'}}>{unreadCount > 9 ? '9+' : unreadCount}</span>}
@@ -215,10 +215,12 @@ export default function Header({ profile, user, activeGenre }: Props) {
                 </div>
               ) : <div/>}
             </div>
-            {/* 中央：ロゴ */}
+
+            {/* 中央：ロゴ（大きめ） */}
             <Link href="/" style={{position:'absolute',left:'50%',transform:'translateX(-50%)'}}>
-              <img src="/logo.png" alt="原石航路" style={{height:44,width:'auto',display:'block',objectFit:'contain'}}/>
+              <img src="/logo.png" alt="原石航路" style={{height:58,width:'auto',display:'block',objectFit:'contain'}}/>
             </Link>
+
             {/* 右：ハンバーガー */}
             <button onClick={()=>setShowMobileMenu(!showMobileMenu)}
               style={{width:36,height:36,borderRadius:8,border:'1px solid #F0D9C9',background:'#FFF9F2',cursor:'pointer',display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',gap:4.5}}>
@@ -226,21 +228,6 @@ export default function Header({ profile, user, activeGenre }: Props) {
               <span style={{display:'block',width:16,height:1.5,background:'#77706A',borderRadius:1}}/>
               <span style={{display:'block',width:16,height:1.5,background:'#77706A',borderRadius:1}}/>
             </button>
-          </div>
-          {/* 下段：検索バー常時表示 */}
-          <div style={{padding:'0 16px 10px'}}>
-            <form onSubmit={handleSearch} style={{display:'flex',alignItems:'center',border:'1.5px solid #F0D9C9',borderRadius:22,background:'#FFF9F2',overflow:'hidden'}}>
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#B8AEA8" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{marginLeft:12,flexShrink:0}}>
-                <circle cx="11" cy="11" r="7"/><line x1="16.5" y1="16.5" x2="22" y2="22"/>
-              </svg>
-              <input value={q} onChange={e=>setQ(e.target.value)} placeholder="作品名・あらすじ・タグを検索"
-                style={{flex:1,padding:'8px 10px',border:'none',background:'transparent',fontSize:14,color:'#2B211B',outline:'none'}}/>
-              <button type="submit" style={{padding:'8px 12px',background:'none',border:'none',borderLeft:'1px solid #F0D9C9',cursor:'pointer',flexShrink:0}}>
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#F26A21" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                  <circle cx="11" cy="11" r="7"/><line x1="16.5" y1="16.5" x2="22" y2="22"/>
-                </svg>
-              </button>
-            </form>
           </div>
         </div>
 
@@ -250,7 +237,7 @@ export default function Header({ profile, user, activeGenre }: Props) {
             <div onClick={()=>setShowMobileMenu(false)} style={{position:'absolute',inset:0,background:'rgba(0,0,0,0.4)'}}/>
             <div style={{position:'absolute',top:0,right:0,width:'78%',maxWidth:300,height:'100%',background:'#fff',display:'flex',flexDirection:'column',overflowY:'auto'}}>
               <div style={{padding:'14px 16px',borderBottom:'1px solid #F0D9C9',display:'flex',alignItems:'center',justifyContent:'space-between',background:'#FFF9F2'}}>
-                <img src="/logo.png" alt="原石航路" style={{height:34,width:'auto',objectFit:'contain'}}/>
+                <img src="/logo.png" alt="原石航路" style={{height:36,width:'auto',objectFit:'contain'}}/>
                 <button onClick={()=>setShowMobileMenu(false)} style={{width:30,height:30,border:'none',background:'none',cursor:'pointer',fontSize:18,color:'#77706A'}}>×</button>
               </div>
               {user && (
@@ -305,7 +292,7 @@ export default function Header({ profile, user, activeGenre }: Props) {
         )}
       </header>
 
-      {/* ===== デスクトップNAV（既存そのまま） ===== */}
+      {/* ===== デスクトップNAV ===== */}
       <nav className="desktop-header" style={{display:'flex',background:'#fff',borderBottom:'2px solid #F0D9C9'}}>
         <div style={{maxWidth:1200,margin:'0 auto',padding:'0 32px',display:'flex',gap:0,width:'100%'}}>
           {[
