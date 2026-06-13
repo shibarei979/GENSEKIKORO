@@ -14,7 +14,7 @@ interface Props {
   searchParams: {
     q?: string; exclude?: string; genre?: string; type?: string
     serial?: string; tag?: string; sort?: string; page?: string
-    author?: string; likeMin?: string; likeMax?: string
+    author?: string
   }
 }
 
@@ -38,9 +38,7 @@ export default async function SearchPage({ searchParams }: Props) {
   const offset   = (page - 1) * PAGE_SIZE
   const tags     = tagParam ? tagParam.split(',').filter(Boolean) : []
   const authorQ  = searchParams.author  || ''
-  const likeMin  = Number(searchParams.likeMin || 0)
-  const likeMax  = Number(searchParams.likeMax || 0)
-  const hasSearch = !!(q || exclude || genre || type || serial || tags.length > 0 || authorQ || likeMin)
+  const hasSearch = !!(q || exclude || genre || type || serial || tags.length > 0 || authorQ)
 
   const isAgeVerified = profile?.age_verified || false
 
@@ -124,13 +122,21 @@ export default async function SearchPage({ searchParams }: Props) {
     likes?.forEach((l: any) => { likeMap[l.novel_id] = (likeMap[l.novel_id] || 0) + 1 })
   }
 
-  // いいね数フィルター
-  if (likeMin > 0) results = results.filter((n: any) => (likeMap[n.id]||0) >= likeMin)
-  if (likeMax > 0) results = results.filter((n: any) => (likeMap[n.id]||0) <= likeMax)
+  // 新人バッジ用：作者ごとの投稿数を取得
+  const allAuthorIds = Array.from(new Set(results.map((n: any) => n.author_id)))
+  const newbieSet = new Set<string>()
+  if (allAuthorIds.length > 0) {
+    const { data: authorNovels } = await supabase
+      .from('novels').select('author_id').eq('published', true).in('author_id', allAuthorIds as string[])
+    const authorCount: Record<string,number> = {}
+    authorNovels?.forEach((n: any) => { authorCount[n.author_id] = (authorCount[n.author_id]||0)+1 })
+    Object.entries(authorCount).forEach(([id, cnt]) => { if (cnt <= 3) newbieSet.add(id) })
+  }
 
   const novels = results.map((n: any) => ({
     ...n,
     display_name: authorMap[n.author_id] || '',
+    is_newbie: newbieSet.has(n.author_id),
     likeCount: likeMap[n.id] || 0,
     charCount: charCountMap[n.id] || 0,
   }))
@@ -190,6 +196,7 @@ export default async function SearchPage({ searchParams }: Props) {
                 <span style={{display:'flex',gap:5,marginBottom:6,flexWrap:'wrap',alignItems:'center'}}>
                   <span style={{fontSize:10,background:'#FFF1E6',color:'#F26A21',border:'1px solid #f5b080',padding:'1px 6px',borderRadius:3}}>{n.genre}</span>
                   <span style={{fontSize:10,background:'#eff6ff',color:'#2563eb',border:'1px solid #bfdbfe',padding:'1px 6px',borderRadius:3}}>{n.novel_type}</span>
+                  {n.is_newbie && <span style={{fontSize:10,background:'#f0fdf4',color:'#16a34a',border:'1px solid #86efac',padding:'1px 6px',borderRadius:3,fontWeight:700}}>新人</span>}
                   {n.is_serial
                     ? <span style={{fontSize:10,background:'#f0fdf4',color:'#15803d',border:'1px solid #86efac',padding:'1px 6px',borderRadius:3}}>連載中</span>
                     : <span style={{fontSize:10,background:'#f5f5f5',color:'#757575',border:'1px solid #e0e0e0',padding:'1px 6px',borderRadius:3}}>完結</span>}
