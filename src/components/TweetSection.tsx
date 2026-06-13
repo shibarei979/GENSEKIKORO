@@ -33,7 +33,6 @@ interface Props {
   currentUserName: string | null
   currentUserIconUrl: string | null
   isOwner: boolean
-  compact?: boolean
 }
 
 function fmtDate(s: string) {
@@ -231,7 +230,7 @@ export default function TweetSection({ authorId, currentUserId, currentUserName,
 
   return (
     <div style={{marginTop:isOwner?0:20,borderTop:isOwner?'none':'1px solid #F0D9C9',paddingTop:isOwner?0:20}}>
-      {!compact && <div style={{fontSize:15,fontWeight:700,color:'#2B211B',marginBottom:12}}>つぶやき</div>}
+      {!isOwner && <div style={{fontSize:15,fontWeight:700,color:'#2B211B',marginBottom:12}}>つぶやき</div>}
       {/* 投稿フォーム（マイページからのみ） */}
       {isOwner && (
         <div style={{background:'#fff',border:'1px solid #F0D9C9',borderRadius:12,padding:'14px',marginBottom:16}}>
@@ -361,4 +360,5 @@ export default function TweetSection({ authorId, currentUserId, currentUserName,
       ))}
     </div>
   )
+)
 }
