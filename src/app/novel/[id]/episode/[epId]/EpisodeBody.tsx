@@ -26,8 +26,11 @@ function renderBodyV(text: string): string {
   // 数字を全角化
   r = r.replace(/[0-9]/g, (c: string) => String.fromCharCode(c.charCodeAt(0) + 0xFEE0))
   // ー・〜を90度回転
-  r = r.replace(/ー/g, '<span style="display:inline-block;transform:rotate(90deg)">ー</span>')
-  r = r.replace(/〜/g, '<span style="display:inline-block;transform:rotate(90deg)">〜</span>')
+  // 縦書きで横向きになる文字を90度回転
+  const rotateChars = ['ー', '〜', '－', 'ｰ', '─', '―', 'ﾞ', 'ﾟ']
+  rotateChars.forEach(ch => {
+    r = r.replace(new RegExp(ch, 'g'), `<span style="display:inline-block;transform:rotate(90deg)">${ch}</span>`)
+  })
   r = r.replace(/\n/g, '<br/>')
   return r
 }
