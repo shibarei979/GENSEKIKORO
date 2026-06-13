@@ -219,30 +219,10 @@ export default function CommentSection({ novelId, episodeId, userId, userName, u
           <>
             {/* ワンクリックリアクション */}
             <div style={{display:'flex',gap:6,marginBottom:8,flexWrap:'wrap'}}>
-              {[
-                {label:'最高だった', emoji:'🌟'},
-                {label:'続きが気になる', emoji:'👀'},
-                {label:'うぽつ', emoji:'👋'},
-              ].map(r => (
-                <button key={r.label} onClick={async () => {
-                  if (!userId) return
-                  setLoading(true)
-                  const { data, error } = await supabase.from('comments')
-                    .insert({ novel_id: novelId, episode_id: episodeId, user_id: userId, body: r.label, parent_id: null })
-                    .select('id,body,created_at,user_id').single()
-                  setLoading(false)
-                  if (error || !data) return
-                  const newComment = { ...data, display_name: userName||'', icon_url: userIconUrl||'', like_count:0, replies:[] }
-                  setComments(prev => [...prev, newComment])
-                  if (userId !== authorId) {
-                    fetch('/api/notify', { method:'POST', headers:{'Content-Type':'application/json'},
-                      body: JSON.stringify({ user_id: authorId, type:'comment',
-                        message: `${userName||'読者'}さんがコメントしました：「${r.label}」`,
-                        link: window.location.pathname }) })
-                  }
-                }}
-                  style={{padding:'5px 12px',background:'#FFF9F2',border:'1.5px solid #F0D9C9',borderRadius:16,fontSize:12,cursor:'pointer',color:'#2B211B',fontWeight:500,display:'flex',alignItems:'center',gap:4}}>
-                  {r.emoji} {r.label}
+              {['最高だった','続きが気になる','うぽつ'].map(label => (
+                <button key={label} onClick={()=>setBody(label)}
+                  style={{padding:'5px 12px',background:body===label?'#FFF1E6':'#FFF9F2',border:`1.5px solid ${body===label?'#F26A21':'#F0D9C9'}`,borderRadius:16,fontSize:12,cursor:'pointer',color:body===label?'#F26A21':'#2B211B',fontWeight:500}}>
+                  {label}
                 </button>
               ))}
             </div>
