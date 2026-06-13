@@ -13,11 +13,23 @@ interface Props {
 
 const DEFAULTS: Settings = { font: 'serif', fontSize: 16, lineHeight: 2.1, writingMode: 'horizontal' }
 
-function renderBody(text: string): string {
-  let result = text.replace(/｜([^《]+)《([^》]+)》/g, '<ruby>$1<rt>$2</rt></ruby>')
-  result = result.replace(/《《([^》]+)》》/g, '<em style="font-style:normal;font-weight:700;border-bottom:2px solid #F26A21">$1</em>')
-  result = result.replace(/\n/g, '<br/>')
-  return result
+function renderBodyH(text: string): string {
+  let r = text.replace(/｜([^《]+)《([^》]+)》/g, '<ruby>$1<rt>$2</rt></ruby>')
+  r = r.replace(/《《([^》]+)》》/g, '<em style="font-style:normal;font-weight:700;border-bottom:2px solid #F26A21">$1</em>')
+  r = r.replace(/\n/g, '<br/>')
+  return r
+}
+
+function renderBodyV(text: string): string {
+  let r = text.replace(/｜([^《]+)《([^》]+)》/g, '<ruby>$1<rt>$2</rt></ruby>')
+  r = r.replace(/《《([^》]+)》》/g, '<em style="font-style:normal;font-weight:700;border-bottom:2px solid #F26A21">$1</em>')
+  // 数字を全角化
+  r = r.replace(/[0-9]/g, (c: string) => String.fromCharCode(c.charCodeAt(0) + 0xFEE0))
+  // ー・〜を90度回転
+  r = r.replace(/ー/g, '<span style="display:inline-block;transform:rotate(90deg)">ー</span>')
+  r = r.replace(/〜/g, '<span style="display:inline-block;transform:rotate(90deg)">〜</span>')
+  r = r.replace(/\n/g, '<br/>')
+  return r
 }
 
 export default function EpisodeBody({ title, body, preface, afterword, authorName }: Props) {
@@ -37,7 +49,6 @@ export default function EpisodeBody({ title, body, preface, afterword, authorNam
     return () => window.removeEventListener('resize', check)
   }, [])
 
-  // 縦書きモード切替（localStorageに保存）
   useEffect(() => {
     try {
       const saved = localStorage.getItem('reading_vertical')
@@ -51,61 +62,47 @@ export default function EpisodeBody({ title, body, preface, afterword, authorNam
     try { localStorage.setItem('reading_vertical', JSON.stringify(next)) } catch {}
   }
 
-  // モバイルは専用コンポーネント
+  const fontFamily = settings.font === 'serif'
+    ? "'Noto Serif JP', serif"
+    : "'Noto Sans JP', sans-serif"
+
+  // モバイル
   if (isMobile) {
     return (
       <>
-        {/* モバイル縦書きボタン */}
         <div style={{display:'flex',justifyContent:'flex-end',marginBottom:8}}>
           <button onClick={toggleVertical}
             style={{fontSize:12,padding:'5px 14px',borderRadius:16,border:'1.5px solid #F0D9C9',
-              background:vertical?'#F26A21':'#fff',
-              color:vertical?'#fff':'#77706A',
-              cursor:'pointer',fontWeight:vertical?700:400}}>
+              background:vertical?'#F26A21':'#fff',color:vertical?'#fff':'#77706A',cursor:'pointer'}}>
             {vertical ? '横書きに戻す' : '縦書きで読む'}
           </button>
         </div>
         {vertical ? (
-          <VerticalBody
-            title={title} body={body} preface={preface}
-            afterword={afterword} authorName={authorName}
-            fontSize={settings.fontSize} fontFamily={settings.font==='serif'?"'Noto Serif JP',serif":"'Noto Sans JP',sans-serif"}
-          />
+          <VerticalBody title={title} body={body} preface={preface} afterword={afterword}
+            authorName={authorName} fontSize={settings.fontSize} fontFamily={fontFamily}/>
         ) : (
-          <MobileEpisodeBody
-            title={title} body={body} preface={preface}
-            afterword={afterword} authorName={authorName}
-          />
+          <MobileEpisodeBody title={title} body={body} preface={preface}
+            afterword={afterword} authorName={authorName}/>
         )}
       </>
     )
   }
 
-  const fontFamily = settings.font === 'serif'
-    ? "'Noto Serif JP', serif"
-    : "'Noto Sans JP', sans-serif"
-
+  // PC
   return (
     <div style={{background:'#fff',border:'1px solid #F0D9C9',borderRadius:12,overflow:'hidden',marginBottom:16}}>
-      {/* 設定バー */}
       <div style={{padding:'8px 16px',borderBottom:'1px solid #FFF1E6',background:'#FFF9F2',display:'flex',justifyContent:'space-between',alignItems:'center'}}>
-        {/* 縦書きボタン */}
         <button onClick={toggleVertical}
           style={{fontSize:12,padding:'4px 14px',borderRadius:14,border:'1.5px solid #F0D9C9',
-            background:vertical?'#F26A21':'#fff',
-            color:vertical?'#fff':'#77706A',
-            cursor:'pointer',fontWeight:vertical?700:400}}>
+            background:vertical?'#F26A21':'#fff',color:vertical?'#fff':'#77706A',cursor:'pointer'}}>
           {vertical ? '横書きに戻す' : '縦書きで読む'}
         </button>
-        <ReadingSettings onChange={setSettings} isMobile={false} />
+        <ReadingSettings onChange={setSettings} isMobile={false}/>
       </div>
 
       {vertical ? (
-        <VerticalBody
-          title={title} body={body} preface={preface}
-          afterword={afterword} authorName={authorName}
-          fontSize={settings.fontSize} fontFamily={fontFamily}
-        />
+        <VerticalBody title={title} body={body} preface={preface} afterword={afterword}
+          authorName={authorName} fontSize={settings.fontSize} fontFamily={fontFamily}/>
       ) : (
         <>
           <div style={{padding:'32px 48px 40px'}}>
@@ -119,7 +116,7 @@ export default function EpisodeBody({ title, body, preface, afterword, authorNam
             )}
             <div
               style={{fontSize:settings.fontSize,lineHeight:settings.lineHeight,color:'#2B211B',fontFamily,wordBreak:'break-all'}}
-              dangerouslySetInnerHTML={{__html: renderBody(body)}}
+              dangerouslySetInnerHTML={{__html: renderBodyH(body)}}
             />
           </div>
           {afterword && (
@@ -136,86 +133,46 @@ export default function EpisodeBody({ title, body, preface, afterword, authorNam
           )}
         </>
       )}
-      </div>
     </div>
   )
 }
 
-// 縦書きコンポーネント
-function VerticalBody({ title, body, preface, afterword, authorName, fontSize, fontFamily }: {
+interface VerticalProps {
   title: string; body: string; preface?: string|null; afterword?: string|null
   authorName?: string; fontSize: number; fontFamily: string
-}) {
-  function renderBody(text: string): string {
-    let result = text.replace(/｜([^《]+)《([^》]+)》/g, '<ruby>$1<rt>$2</rt></ruby>')
-    result = result.replace(/《《([^》]+)》》/g, '<em style="font-style:normal;font-weight:700;border-bottom:2px solid #F26A21">$1</em>')
-    // 数字を全角化
-    result = result.replace(/[0-9]/g, (c: string) => String.fromCharCode(c.charCodeAt(0) + 0xFEE0))
-    // ー・〜を90度回転
-    result = result.replace(/ー/g, '<span style="display:inline-block;transform:rotate(90deg)">ー</span>')
-    result = result.replace(/〜/g, '<span style="display:inline-block;transform:rotate(90deg)">〜</span>')
-    result = result.replace(/\n/g, '<br/>')
-    return result
-  }
+}
 
+function VerticalBody({ title, body, preface, afterword, authorName, fontSize, fontFamily }: VerticalProps) {
   return (
-    <div style={{
-      overflowX: 'scroll',
-      overflowY: 'hidden',
-      padding: '0',
-      height: 'calc(100vh - 180px)',
-    }}>
+    <div style={{overflowX:'scroll',overflowY:'hidden',height:'calc(100vh - 180px)'}}>
       <div style={{
-        writingMode: 'vertical-rl',
-        textOrientation: 'mixed',
-        display: 'inline-flex',
-        flexDirection: 'row',
-        alignItems: 'flex-start',
-        padding: '32px 48px 48px',
-        minHeight: '100%',
+        writingMode:'vertical-rl',
+        textOrientation:'mixed',
+        display:'inline-flex',
+        flexDirection:'row',
+        alignItems:'flex-start',
+        padding:'32px 48px 48px',
+        minHeight:'100%',
+        boxSizing:'border-box',
       }}>
-      {/* タイトル */}
-      <h1 style={{
-        fontFamily, fontSize: fontSize + 4,
-        fontWeight: 700, color: '#2B211B',
-        marginRight: 48, lineHeight: 1.6,
-        writingMode: 'vertical-rl',
-      }}>
-        {title}
-      </h1>
-
-      {/* 前書き */}
-      {preface && (
-        <div style={{
-          fontSize: 13, color: '#77706A', lineHeight: 1.9,
-          padding: '12px 16px', background: '#FFF9F2',
-          borderTop: '3px solid #F0D9C9', borderRadius: 4,
-          marginRight: 48, whiteSpace: 'pre-wrap',
-          writingMode: 'vertical-rl',
-        }}>
-          {preface}
-        </div>
-      )}
-
-      {/* 本文 */}
-      <div
-        style={{
-          fontSize, lineHeight: 2.1, color: '#2B211B', fontFamily,
-          writingMode: 'vertical-rl', textOrientation: 'mixed',
-          wordBreak: 'break-all',
-        }}
-        dangerouslySetInnerHTML={{__html: renderBody(body)}}
-      />
-
-      {/* あとがき */}
-      {afterword && (
-        <div style={{marginTop: 48, writingMode: 'vertical-rl'}}>
-          <div style={{fontSize:13,fontWeight:700,color:'#2B211B',marginBottom:12}}>あとがき</div>
-          <div style={{fontSize:14,color:'#2B211B',lineHeight:1.9,whiteSpace:'pre-wrap'}}>
-            {afterword}
+        <h1 style={{fontFamily,fontSize:fontSize+4,fontWeight:700,color:'#2B211B',marginRight:48,lineHeight:1.6}}>
+          {title}
+        </h1>
+        {preface && (
+          <div style={{fontSize:13,color:'#77706A',lineHeight:1.9,padding:'12px 16px',background:'#FFF9F2',borderRight:'3px solid #F0D9C9',borderRadius:4,marginRight:48,whiteSpace:'pre-wrap'}}>
+            {preface}
           </div>
-        </div>
-      )}
+        )}
+        <div
+          style={{fontSize,lineHeight:2.1,color:'#2B211B',fontFamily,wordBreak:'break-all'}}
+          dangerouslySetInnerHTML={{__html: renderBodyV(body)}}
+        />
+        {afterword && (
+          <div style={{marginLeft:48}}>
+            <div style={{fontSize:13,fontWeight:700,color:'#2B211B',marginBottom:12}}>あとがき</div>
+            <div style={{fontSize:14,color:'#2B211B',lineHeight:1.9,whiteSpace:'pre-wrap'}}>{afterword}</div>
+          </div>
+        )}
       </div>
     </div>
   )
