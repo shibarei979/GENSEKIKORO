@@ -114,8 +114,17 @@ export default async function AuthorPage({ params }: Props) {
             </div>
           </div>
 
+          {/* つぶやき */}
+          <TweetSection
+            authorId={author.user_id}
+            currentUserId={user?.id || null}
+            currentUserName={profile?.display_name || null}
+            currentUserIconUrl={profile?.icon_url || null}
+            isOwner={isMe}
+          />
+
           {/* 作品一覧 */}
-          <div style={{marginBottom:12,display:'flex',alignItems:'center',justifyContent:'space-between'}}>
+          <div style={{marginBottom:12,marginTop:20,display:'flex',alignItems:'center',justifyContent:'space-between'}}>
             <h2 style={{fontSize:17,fontWeight:700,color:'#2B211B',margin:0}}>
               投稿作品 <span style={{fontSize:13,fontWeight:400,color:'#77706A'}}>（{filteredNovels.length}作品）</span>
             </h2>
@@ -154,13 +163,6 @@ export default async function AuthorPage({ params }: Props) {
       </div>
 
       <AdBanner />
-      <TweetSection
-        authorId={authorProfile?.user_id||''}
-        currentUserId={user?.id||null}
-        currentUserName={profile?.display_name||null}
-        currentUserIconUrl={profile?.icon_url||null}
-        isOwner={user?.id === authorProfile?.user_id}
-      />
       <Footer user={user} />
     </div>
   )
