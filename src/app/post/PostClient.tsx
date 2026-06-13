@@ -270,9 +270,9 @@ export default function PostClient({ profile, userId }: Props) {
         setTimeout(() => router.push(`/novel/${novelId}`), 1500)
       } else {
         setDraftSaved(true)
-        setToast('連載中（下書き）として保存しました')
+        setToast('下書き保存しました！反映まで1分前後かかります')
         setLoading(false)
-        setTimeout(() => setToast(''), 3000)
+        setTimeout(() => router.push('/mypage'), 1500)
       }
     } catch (e: any) {
       setErrors({ submit: '保存に失敗しました: ' + e.message })
