@@ -247,7 +247,7 @@ export default function TweetSection({ authorId, currentUserId, currentUserName,
               />
               {imagePreview && (
                 <div style={{position:'relative',display:'inline-block',marginTop:6}}>
-                  <img src={imagePreview} style={{maxHeight:200,maxWidth:'100%',borderRadius:8,display:'block'}} alt="preview"/>
+                  <img src={imagePreview} style={{maxHeight:120,maxWidth:240,borderRadius:8,display:'block',objectFit:'cover'}} alt="preview"/>
                   <button onClick={()=>{setImageFile(null);setImagePreview(null)}}
                     style={{position:'absolute',top:4,right:4,width:22,height:22,borderRadius:'50%',background:'rgba(0,0,0,0.6)',color:'#fff',border:'none',cursor:'pointer',fontSize:14,display:'flex',alignItems:'center',justifyContent:'center'}}>×</button>
                 </div>
@@ -305,7 +305,7 @@ export default function TweetSection({ authorId, currentUserId, currentUserName,
 
             {/* 画像 */}
             {tweet.image_url && (
-              <img src={tweet.image_url} style={{width:'100%',maxHeight:400,objectFit:'cover',borderRadius:8,display:'block',marginBottom:10}} alt=""/>
+              <img src={tweet.image_url} style={{maxWidth:'100%',maxHeight:280,objectFit:'contain',borderRadius:8,display:'block',marginBottom:10}} alt=""/>
             )}
 
             {/* アクション */}
