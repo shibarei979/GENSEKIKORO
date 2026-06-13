@@ -119,7 +119,7 @@ export default function EpisodeBody({ title, body, preface, afterword, authorNam
             )}
             <div
               style={{fontSize:settings.fontSize,lineHeight:settings.lineHeight,color:'#2B211B',fontFamily,wordBreak:'break-all'}}
-              dangerouslySetInnerHTML={{__html: renderBodyVertical(body)}}
+              dangerouslySetInnerHTML={{__html: renderBody(body)}}
             />
           </div>
           {afterword && (
