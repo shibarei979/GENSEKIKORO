@@ -29,7 +29,10 @@ function VerticalText({ text }: { text: string }) {
   // …を・・・に変換
   processed = processed.replace(/…/g, '・・・')
   processed = processed.replace(/‥/g, '・・')
-  // －を｜に変換
+  // ーと各種ダッシュを｜に変換
+  processed = processed.replace(/ー/g, '｜')
+  processed = processed.replace(/ｰ/g, '｜')
+  processed = processed.replace(/〜/g, '｜')
   processed = processed.replace(/－/g, '｜')
   processed = processed.replace(/—/g, '｜')
   processed = processed.replace(/―/g, '｜')
