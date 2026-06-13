@@ -34,7 +34,24 @@ export default async function RankingPage({ searchParams }: Props) {
     const likeMap: Record<string,number> = {}
     let likeIds: string[] = []
 
-    if (period === 'newbie') {
+    if (period === 'rising') {
+      const { data: risingData } = await supabase
+        .from('rising_novels')
+        .select('id, rising_score')
+        .limit(100)
+      const ids = (risingData || []).map((r:any) => r.id)
+      const scoreMap = Object.fromEntries((risingData||[]).map((r:any) => [r.id, r.rising_score]))
+      if (ids.length > 0) {
+        const { data: novelData } = await supabase
+          .from('novels')
+          .select('id, title, genre, novel_type, is_serial, author_id, summary, catchcopy, tags')
+          .in('id', ids)
+          .eq('published', true)
+        novels = (novelData || [])
+          .sort((a:any, b:any) => (scoreMap[b.id]||0) - (scoreMap[a.id]||0))
+          .map((n:any) => ({...n, like_count: scoreMap[n.id]||0}))
+      }
+    } else if (period === 'newbie') {
       const since30 = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString()
       const { data: newAuthors } = await supabase.from('novels')
         .select('author_id, created_at')
@@ -159,6 +176,7 @@ export default async function RankingPage({ searchParams }: Props) {
     { value:'yearly',   label:'年間' },
     { value:'newbie',   label:'新人' },
     { value:'discover', label:'拡散' },
+    { value:'rising',   label:'🔥 急上昇' },
   ]
   const typeOptions   = [{ value:'全て',label:'全て' },{ value:'長編',label:'長編' },{ value:'短編',label:'短編' }]
   const serialOptions = [{ value:'all',label:'すべて' },{ value:'serial',label:'連載中' },{ value:'complete',label:'完結' },{ value:'new',label:'新作（1ヶ月以内）' }]
@@ -168,7 +186,7 @@ export default async function RankingPage({ searchParams }: Props) {
   }
 
   const periodLabel = periodOptions.find(o=>o.value===period)?.label||'週間'
-  const scoreLabel  = period === 'discover' ? '⛏' : '♡'
+  const scoreLabel  = period === 'discover' ? '⛏' : period === 'rising' ? '🔥' : '♡'
 
   return (
     <div style={{minHeight:'100vh',background:'#fff',fontFamily:"'Noto Sans JP',sans-serif"}}>

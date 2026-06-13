@@ -250,12 +250,6 @@ export default async function HomePage() {
   const rankingLong  = (await addAuthorNames(supabase, rankingLongRaw  || [])).map((n: any) => ({...n, like_count: weeklyLikeMap[n.id]||0}))
   const rankingShort = (await addAuthorNames(supabase, rankingShortRaw || [])).map((n: any) => ({...n, like_count: weeklyLikeMap[n.id]||0}))
 
-  // 急上昇
-  const { data: risingRaw } = await supabase
-    .from('rising_novels')
-    .select('id, title, genre, novel_type, author_id, rising_score')
-    .limit(5)
-  const risingNovels = await addAuthorNames(supabase, risingRaw || [])
 
   return (
     <div style={{minHeight:'100vh',background:'#fff',fontFamily:"'Noto Sans JP',sans-serif"}}>
@@ -349,7 +343,7 @@ export default async function HomePage() {
             <div style={{padding:'10px 16px',borderBottom:'1px solid #F0D9C9',display:'flex',alignItems:'center',justifyContent:'space-between',background:'#FFF9F2'}}>
               <span style={{fontSize:14,fontWeight:700,color:'#2B211B'}}>週間ランキング</span>
             </div>
-            <RankingSection rankingLong={rankingLong} rankingShort={rankingShort} risingNovels={risingNovels} />
+            <RankingSection rankingLong={rankingLong} rankingShort={rankingShort} />
             <div style={{padding:'9px 16px',textAlign:'center',borderTop:'1px solid #F0D9C9'}}>
               <a href='/ranking' className='more-link' style={{fontSize:12,color:'#F26A21',textDecoration:'none',display:'inline-block'}}>もっと見る ›</a>
             </div>
