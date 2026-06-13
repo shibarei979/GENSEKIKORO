@@ -8,7 +8,7 @@ import Sidebar from '@/components/layout/Sidebar'
 import Link from 'next/link'
 import FollowButton from '@/components/FollowButton'
 
-interface Props { params: { authorId: string } }
+interface Props { params: { id: string } }
 
 export default async function AuthorPage({ params }: Props) {
   const supabase = await createClient()
@@ -22,7 +22,7 @@ export default async function AuthorPage({ params }: Props) {
   const { data: author } = await supabase
     .from('profiles')
     .select('user_id, display_name, icon_url, bio, user_number, created_at')
-    .eq('user_id', params.authorId)
+    .eq('user_id', params.id)
     .single()
 
   if (!author) notFound()
@@ -30,7 +30,7 @@ export default async function AuthorPage({ params }: Props) {
   const { data: novels } = await supabase
     .from('novels')
     .select('id, title, genre, summary, tags, novel_type, is_serial, created_at, is_r18')
-    .eq('author_id', params.authorId)
+    .eq('author_id', params.id)
     .eq('published', true)
     .order('created_at', { ascending: false })
 
@@ -47,17 +47,17 @@ export default async function AuthorPage({ params }: Props) {
 
   const { count: followerCount } = await supabase
     .from('follows').select('*', { count: 'exact', head: true })
-    .eq('following_id', params.authorId)
+    .eq('following_id', params.id)
 
   let isFollowing = false
-  if (user && user.id !== params.authorId) {
+  if (user && user.id !== params.id) {
     const { data: myFollow } = await supabase
       .from('follows').select('id')
-      .eq('follower_id', user.id).eq('following_id', params.authorId).maybeSingle()
+      .eq('follower_id', user.id).eq('following_id', params.id).maybeSingle()
     isFollowing = !!myFollow
   }
 
-  const isMe = user?.id === params.authorId
+  const isMe = user?.id === params.id
   const joinDate = new Date(author.created_at)
   const joinStr = `${joinDate.getFullYear()}年${joinDate.getMonth() + 1}月`
   const totalLikes = Object.values(likeMap).reduce((a, b) => a + b, 0)
@@ -85,7 +85,7 @@ export default async function AuthorPage({ params }: Props) {
                   <h1 style={{fontSize:22,fontWeight:700,color:'#2B211B',margin:0}}>{author.display_name}</h1>
                   {!isMe && user && (
                     <FollowButton
-                      authorId={params.authorId}
+                      authorId={params.id}
                       userId={user.id}
                       initialFollowing={isFollowing}
                       followerCount={followerCount || 0}
