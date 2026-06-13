@@ -39,15 +39,15 @@ export default async function RankingPage({ searchParams }: Props) {
         .from('rising_novels')
         .select('id, rising_score')
         .limit(100)
-      const ids = (risingData || []).map((r:any) => r.id)
+      const risingIds = (risingData || []).map((r:any) => r.id)
       const scoreMap = Object.fromEntries((risingData||[]).map((r:any) => [r.id, r.rising_score]))
-      if (ids.length > 0) {
-        const { data: novelData } = await supabase
+      if (risingIds.length > 0) {
+        const { data: risingNovelData } = await supabase
           .from('novels')
           .select('id, title, genre, novel_type, is_serial, author_id, summary, catchcopy, tags')
-          .in('id', ids)
+          .in('id', risingIds)
           .eq('published', true)
-        novels = (novelData || [])
+        novels = (risingNovelData || [])
           .sort((a:any, b:any) => (scoreMap[b.id]||0) - (scoreMap[a.id]||0))
           .map((n:any) => ({...n, like_count: scoreMap[n.id]||0}))
       }
