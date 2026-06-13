@@ -81,7 +81,12 @@ export default function Header({ profile, user, activeGenre }: Props) {
 
   function handleSearch(e: React.FormEvent) {
     e.preventDefault()
-    if (q.trim()) { router.push(`/search?q=${encodeURIComponent(q.trim())}`); setShowMobileSearch(false) }
+    if (q.trim()) {
+      router.push(`/search?q=${encodeURIComponent(q.trim())}`)
+    } else {
+      router.push('/search')
+    }
+    setShowMobileSearch(false)
   }
 
   return (
