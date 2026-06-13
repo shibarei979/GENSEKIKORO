@@ -16,6 +16,7 @@ interface Tweet {
   liked: boolean
   comments: TweetComment[]
   showComments: boolean
+  showCount: number
 }
 
 interface TweetComment {
@@ -134,6 +135,7 @@ export default function TweetSection({ authorId, currentUserId, currentUserName,
       liked: likedSet.has(t.id),
       comments: commentMap[t.id] || [],
       showComments: false,
+      showCount: 5,
     })))
     setLoading(false)
   }
@@ -205,7 +207,7 @@ export default function TweetSection({ authorId, currentUserId, currentUserName,
       icon_url: currentUserIconUrl || null,
     }
     setTweets(prev => prev.map(t => t.id === tweetId
-      ? { ...t, comments: [...t.comments, newComment], comment_count: t.comment_count+1 }
+      ? { ...t, comments: [...t.comments, newComment], comment_count: t.comment_count+1, showComments: true }
       : t
     ))
     setCommentBody(prev => ({...prev, [tweetId]: ''}))
@@ -318,8 +320,8 @@ export default function TweetSection({ authorId, currentUserId, currentUserName,
                 {tweet.liked ? '♥' : '♡'} {tweet.like_count}
               </button>
               <button onClick={()=>setTweets(prev=>prev.map(t=>t.id===tweet.id?{...t,showComments:!t.showComments}:t))}
-                style={{display:'flex',alignItems:'center',gap:4,padding:'4px 8px',borderRadius:16,border:'1px solid #F0D9C9',fontSize:12,cursor:'pointer',background:'#fff',color:'#77706A'}}>
-                💬 {tweet.comment_count}
+                style={{display:'flex',alignItems:'center',gap:4,padding:'4px 8px',borderRadius:16,border:'1px solid #F0D9C9',fontSize:12,cursor:'pointer',background:tweet.showComments?'#FFF1E6':'#fff',color:tweet.showComments?'#F26A21':'#77706A'}}>
+                コメント {tweet.comment_count}
               </button>
             </div>
           </div>
@@ -327,18 +329,9 @@ export default function TweetSection({ authorId, currentUserId, currentUserName,
           {/* コメント */}
           {tweet.showComments && (
             <div style={{borderTop:'1px solid #F0D9C9',background:'#FFF9F2'}}>
-              {tweet.comments.map(c => (
-                <div key={c.id} style={{display:'flex',gap:8,padding:'10px 16px',borderBottom:'1px solid #FFF1E6'}}>
-                  <Avatar name={c.display_name} iconUrl={c.icon_url} size={24}/>
-                  <div>
-                    <span style={{fontSize:12,fontWeight:600,color:'#2B211B',marginRight:6}}>{c.display_name}</span>
-                    <span style={{fontSize:11,color:'#B8AEA8'}}>{fmtDate(c.created_at)}</span>
-                    <div style={{fontSize:12,color:'#2B211B',marginTop:2}}>{c.body}</div>
-                  </div>
-                </div>
-              ))}
+              {/* コメント入力欄（一番上） */}
               {currentUserId && (
-                <div style={{display:'flex',gap:8,padding:'10px 16px',alignItems:'center'}}>
+                <div style={{display:'flex',gap:8,padding:'10px 16px',alignItems:'center',borderBottom:'1px solid #F0D9C9',background:'#fff'}}>
                   <Avatar name={currentUserName||''} iconUrl={currentUserIconUrl} size={24}/>
                   <input
                     value={commentBody[tweet.id]||''}
@@ -351,6 +344,27 @@ export default function TweetSection({ authorId, currentUserId, currentUserName,
                   <button onClick={()=>handleComment(tweet.id)} disabled={commentPosting[tweet.id]||!commentBody[tweet.id]?.trim()}
                     style={{padding:'6px 12px',background:'#F26A21',color:'#fff',border:'none',borderRadius:16,fontSize:12,cursor:'pointer',opacity:commentPosting[tweet.id]||!commentBody[tweet.id]?.trim()?0.5:1}}>
                     送信
+                  </button>
+                </div>
+              )}
+              {/* コメント一覧（5件まで） */}
+              {tweet.comments.slice(0, tweet.showCount||5).map(c => (
+                <div key={c.id} style={{display:'flex',gap:8,padding:'10px 16px',borderBottom:'1px solid #FFF1E6'}}>
+                  <Avatar name={c.display_name} iconUrl={c.icon_url} size={24}/>
+                  <div>
+                    <span style={{fontSize:12,fontWeight:600,color:'#2B211B',marginRight:6}}>{c.display_name}</span>
+                    <span style={{fontSize:11,color:'#B8AEA8'}}>{fmtDate(c.created_at)}</span>
+                    <div style={{fontSize:12,color:'#2B211B',marginTop:2}}>{c.body}</div>
+                  </div>
+                </div>
+              ))}
+              {/* もっと表示する */}
+              {tweet.comments.length > (tweet.showCount||5) && (
+                <div style={{padding:'8px 16px',textAlign:'center'}}>
+                  <button
+                    onClick={()=>setTweets(prev=>prev.map(t=>t.id===tweet.id?{...t,showCount:(t.showCount||5)+5}:t))}
+                    style={{fontSize:12,color:'#F26A21',background:'none',border:'none',cursor:'pointer'}}>
+                    もっと表示する（残り{tweet.comments.length-(tweet.showCount||5)}件）
                   </button>
                 </div>
               )}
