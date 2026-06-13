@@ -136,6 +136,7 @@ export default function EpisodeBody({ title, body, preface, afterword, authorNam
           )}
         </>
       )}
+      </div>
     </div>
   )
 }
@@ -159,21 +160,25 @@ function VerticalBody({ title, body, preface, afterword, authorName, fontSize, f
 
   return (
     <div style={{
-      writingMode: 'vertical-rl',
-      textOrientation: 'mixed',
       overflowX: 'scroll',
       overflowY: 'hidden',
-      padding: '32px 48px 48px',
+      padding: '0',
       height: 'calc(100vh - 180px)',
-      direction: 'rtl',
-      display: 'flex',
-      alignItems: 'flex-start',
     }}>
+      <div style={{
+        writingMode: 'vertical-rl',
+        textOrientation: 'mixed',
+        display: 'inline-flex',
+        flexDirection: 'row',
+        alignItems: 'flex-start',
+        padding: '32px 48px 48px',
+        minHeight: '100%',
+      }}>
       {/* タイトル */}
       <h1 style={{
         fontFamily, fontSize: fontSize + 4,
         fontWeight: 700, color: '#2B211B',
-        marginLeft: 48, lineHeight: 1.6,
+        marginRight: 48, lineHeight: 1.6,
         writingMode: 'vertical-rl',
       }}>
         {title}
@@ -185,7 +190,7 @@ function VerticalBody({ title, body, preface, afterword, authorName, fontSize, f
           fontSize: 13, color: '#77706A', lineHeight: 1.9,
           padding: '12px 16px', background: '#FFF9F2',
           borderTop: '3px solid #F0D9C9', borderRadius: 4,
-          marginLeft: 48, whiteSpace: 'pre-wrap',
+          marginRight: 48, whiteSpace: 'pre-wrap',
           writingMode: 'vertical-rl',
         }}>
           {preface}
@@ -211,6 +216,7 @@ function VerticalBody({ title, body, preface, afterword, authorName, fontSize, f
           </div>
         </div>
       )}
+      </div>
     </div>
   )
 }
