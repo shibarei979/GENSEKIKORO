@@ -20,10 +20,10 @@ function renderBody(text: string): string {
 }
 
 function isHorizontalChar(ch: string): boolean {
-  return ['ー','〜','…','‥','─','—','－','〰','ｰ','｜','|'].includes(ch)
+  return ['ー','〜','‥','─','—','－','〰','ｰ','｜','|'].includes(ch)
 }
 
-function VerticalText({ text }: { text: string }) {
+function VerticalText({ text, fontSize, lineHeight, fontFamily }: { text: string; fontSize: number; lineHeight: number; fontFamily: string }) {
   let processed = text.replace(/[0-9]/g, (c) => String.fromCharCode(c.charCodeAt(0) + 0xFEE0))
   processed = processed.replace(/…/g, '・・・')
   processed = processed.replace(/‥/g, '・・')
@@ -34,9 +34,19 @@ function VerticalText({ text }: { text: string }) {
   processed = processed.replace(/—/g, '｜')
   processed = processed.replace(/―/g, '｜')
   processed = processed.replace(/─/g, '｜')
+
   const chars = processed.split('')
   return (
-    <>
+    <div style={{
+      writingMode: 'vertical-rl',
+      textOrientation: 'mixed',
+      fontSize,
+      lineHeight,
+      fontFamily,
+      color: '#2B211B',
+      wordBreak: 'break-all',
+      height: '100%',
+    }}>
       {chars.map((ch, i) =>
         ch === '\n'
           ? <br key={i}/>
@@ -50,7 +60,7 @@ function VerticalText({ text }: { text: string }) {
             </span>
           )
       )}
-    </>
+    </div>
   )
 }
 
@@ -70,14 +80,14 @@ export default function MobileEpisodeBody({ title, body, preface, afterword, aut
     } catch {}
   }, [])
 
-  // 縦書き時：右端（冒頭）からスタート
+  // 縦書き時：右端（冒頭）にスクロール
   useEffect(() => {
     if (isVertical && scrollRef.current) {
       setTimeout(() => {
         if (scrollRef.current) {
           scrollRef.current.scrollLeft = scrollRef.current.scrollWidth
         }
-      }, 100)
+      }, 150)
     }
   }, [isVertical, body])
 
@@ -111,11 +121,14 @@ export default function MobileEpisodeBody({ title, body, preface, afterword, aut
     </div>
   ) : null
 
-  // ===== 縦書き（パソコン版と同じ実装） =====
+  // ===== 縦書き =====
   if (isVertical) {
+    // 画面高さの固定ピクセル値（vh は iOS で信頼性が低いので固定値を使う）
+    const containerH = 580
+
     return (
       <div style={{background:'#fff',border:'1px solid #F0D9C9',borderRadius:12,overflow:'hidden',marginBottom:16}}>
-        {/* 設定バー */}
+        {/* バー */}
         <div style={{padding:'8px 12px',borderBottom:'1px solid #FFF1E6',background:'#FFF9F2',display:'flex',justifyContent:'space-between',alignItems:'center'}}>
           <button onClick={toggleVertical}
             style={{fontSize:12,padding:'5px 12px',borderRadius:14,border:'1.5px solid #F26A21',background:'#F26A21',color:'#fff',cursor:'pointer'}}>
@@ -132,56 +145,55 @@ export default function MobileEpisodeBody({ title, body, preface, afterword, aut
           </div>
         )}
 
-        {/* パソコン版と同じスクロールコンテナ */}
+        {/*
+          縦書きの仕組み：
+          1. 外側のdiv: 高さ固定 + overflowX:scroll
+          2. 内側のdiv: writing-mode:vertical-rl + height:100% で縦に文字を流す
+          → 縦に収まらない分が右から左へ列を作り、横スクロールで読み進める
+        */}
         <style>{`
-          .v-scroll-m::-webkit-scrollbar { height: 10px; }
-          .v-scroll-m::-webkit-scrollbar-track { background: #FFF1E6; border-radius: 5px; }
-          .v-scroll-m::-webkit-scrollbar-thumb { background: #F26A21; border-radius: 5px; border: 2px solid #FFF1E6; }
-          .v-scroll-m { scrollbar-width: thin; scrollbar-color: #F26A21 #FFF1E6; }
+          .v-scroll-m::-webkit-scrollbar { height: 8px; }
+          .v-scroll-m::-webkit-scrollbar-track { background: #FFF1E6; }
+          .v-scroll-m::-webkit-scrollbar-thumb { background: #F26A21; border-radius: 4px; }
         `}</style>
         <div
           ref={scrollRef}
           className="v-scroll-m"
           style={{
+            height: containerH,
             overflowX: 'scroll',
             overflowY: 'hidden',
-            height: 'calc(100vh - 220px)',
-            paddingBottom: 4,
           }}
         >
-          {/* パソコン版と全く同じ構造 */}
           <div style={{
-            writingMode: 'vertical-rl',
-            textOrientation: 'mixed',
-            display: 'inline-block',
-            padding: '24px 16px 24px 32px',
-            height: 'calc(100% - 18px)',
+            display: 'flex',
+            flexDirection: 'row',
+            height: '100%',
+            padding: '20px 16px 20px 24px',
             boxSizing: 'border-box',
+            gap: '1.5em',
           }}>
-            {/* タイトル */}
-            <div style={{display:'inline-block', marginRight:'2em', verticalAlign:'top'}}>
-              <div style={{
-                fontSize: settings.fontSize + 4,
-                fontWeight: 700,
-                color: '#2B211B',
-                fontFamily,
-                lineHeight: 1.8,
-              }}>
-                {title}
-              </div>
-            </div>
-            {/* 本文：VerticalText で1文字ずつspan */}
+            {/* タイトル列 */}
             <div style={{
-              display: 'inline-block',
-              fontSize: settings.fontSize,
-              lineHeight: settings.lineHeight,
+              writingMode: 'vertical-rl',
+              textOrientation: 'mixed',
+              fontSize: settings.fontSize + 4,
+              fontWeight: 700,
               color: '#2B211B',
               fontFamily,
-              wordBreak: 'break-all',
-              verticalAlign: 'top',
+              lineHeight: 1.8,
+              flexShrink: 0,
+              height: '100%',
             }}>
-              <VerticalText text={body}/>
+              {title}
             </div>
+            {/* 本文列 */}
+            <VerticalText
+              text={body}
+              fontSize={settings.fontSize}
+              lineHeight={settings.lineHeight}
+              fontFamily={fontFamily}
+            />
           </div>
         </div>
 
