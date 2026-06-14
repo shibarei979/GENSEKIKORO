@@ -56,45 +56,56 @@ function VerticalText({ text }: { text: string }) {
   )
 }
 
+// テキストのクリーニング（ルビ・装飾記法を除去して自然な読み上げテキストに）
+function cleanForSpeech(text: string): string {
+  return text
+    .replace(/｜([^《]+)《[^》]+》/g, '$1')   // ルビ：漢字だけ残す
+    .replace(/《《([^》]+)》》/g, '$1')         // 強調記法除去
+    .replace(/<[^>]+>/g, '')                    // HTMLタグ除去
+    .replace(/[#*`]/g, '')                      // Markdown記号除去
+    .replace(/\n{3,}/g, '\n\n')                 // 連続改行を圧縮
+    .replace(/　/g, '')                         // 全角スペース除去（読み上げでの「ぜんかくすぺーす」防止）
+    .trim()
+}
+
 // ===== 読み上げフック =====
 function useSpeech(text: string, episodeId?: string) {
-  const [isPlaying, setIsPlaying]   = useState(false)
-  const [isPaused,  setIsPaused]    = useState(false)
-  const [rate,      setRate]        = useState(1.0)
-  const [progress,  setProgress]    = useState(0)   // 0〜1
-  const [supported, setSupported]   = useState(false)
-  const [chunkIdx,  setChunkIdx]    = useState(0)
-  const utterRef  = useRef<SpeechSynthesisUtterance | null>(null)
-  const chunksRef = useRef<string[]>([])
-  const rateRef   = useRef(1.0)
-  const pausedRef = useRef(false)
+  const [isPlaying, setIsPlaying] = useState(false)
+  const [isPaused,  setIsPaused]  = useState(false)
+  const [rate,      setRate]      = useState(1.0)
+  const [progress,  setProgress]  = useState(0)
+  const [supported, setSupported] = useState(false)
+  const [chunkIdx,  setChunkIdx]  = useState(0)
 
-  // テキストを文単位に分割（〜250文字ずつ）
+  const chunksRef  = useRef<string[]>([])
+  const rateRef    = useRef(1.0)
+  const pausedRef  = useRef(false)
+  const playingRef = useRef(false)
+
+  // テキストを段落単位に分割（500〜800文字）
+  // → チャンクを大きくするほどつなぎ目が減り滑らかになる
   useEffect(() => {
-    const sentences = text
-      .replace(/　/g, ' ')
-      .split(/(?<=[。！？\n])/)
-      .filter(s => s.trim().length > 0)
-    // 短い文は結合して250文字以内のチャンクにまとめる
+    const clean = cleanForSpeech(text)
+    // 段落（空行）で分割してから結合
+    const paras = clean.split(/\n\n+/).filter(p => p.trim().length > 0)
     const chunks: string[] = []
     let cur = ''
-    for (const s of sentences) {
-      if ((cur + s).length > 250 && cur.length > 0) {
-        chunks.push(cur)
-        cur = s
+    for (const p of paras) {
+      if ((cur + p).length > 600 && cur.length > 0) {
+        chunks.push(cur.trim())
+        cur = p
       } else {
-        cur += s
+        cur = cur ? cur + '\n' + p : p
       }
     }
-    if (cur.length > 0) chunks.push(cur)
-    chunksRef.current = chunks
+    if (cur.trim().length > 0) chunks.push(cur.trim())
+    chunksRef.current = chunks.length > 0 ? chunks : [clean]
   }, [text])
 
   useEffect(() => {
     setSupported(typeof window !== 'undefined' && 'speechSynthesis' in window)
   }, [])
 
-  // localStorageから再開位置を復元
   useEffect(() => {
     if (!episodeId) return
     try {
@@ -108,50 +119,98 @@ function useSpeech(text: string, episodeId?: string) {
     try { localStorage.setItem(`speech_pos_${episodeId}`, String(idx)) } catch {}
   }, [episodeId])
 
-  const speakChunk = useCallback((idx: number, currentRate: number) => {
+  const speakChunk = useCallback((idx: number) => {
     const chunks = chunksRef.current
-    if (idx >= chunks.length) {
-      setIsPlaying(false)
-      setIsPaused(false)
-      setProgress(1)
-      savePos(0) // 完了したらリセット
+    if (idx >= chunks.length || pausedRef.current) {
+      if (idx >= chunks.length) {
+        playingRef.current = false
+        setIsPlaying(false)
+        setIsPaused(false)
+        setProgress(1)
+        savePos(0)
+      }
       return
     }
+
     const utter = new SpeechSynthesisUtterance(chunks[idx])
-    utter.lang = 'ja-JP'
-    utter.rate = currentRate
+    utter.lang  = 'ja-JP'
+    utter.rate  = rateRef.current
+
+    // 日本語音声を優先して選択（より自然な音声）
+    const voices = window.speechSynthesis.getVoices()
+    const jaVoice = voices.find(v =>
+      v.lang.startsWith('ja') && (v.name.includes('Kyoko') || v.name.includes('Otoya') || v.name.includes('Google'))
+    ) || voices.find(v => v.lang.startsWith('ja'))
+    if (jaVoice) utter.voice = jaVoice
 
     utter.onstart = () => {
-      setProgress(idx / chunks.length)
       setChunkIdx(idx)
+      setProgress(idx / chunks.length)
       savePos(idx)
     }
+
     utter.onend = () => {
-      if (!pausedRef.current) {
-        speakChunk(idx + 1, rateRef.current)
+      if (!pausedRef.current && playingRef.current) {
+        // 次チャンクをわずかに遅延して自然なつなぎに
+        setTimeout(() => speakChunk(idx + 1), 20)
       }
     }
-    utter.onerror = () => {
+
+    utter.onerror = (e) => {
+      // interrupted は一時停止時に発生するので無視
+      if (e.error === 'interrupted') return
+      playingRef.current = false
       setIsPlaying(false)
       setIsPaused(false)
     }
-    utterRef.current = utter
+
     window.speechSynthesis.speak(utter)
   }, [savePos])
+
+  // iOSのspeechSynthesis 15秒で止まるバグの対策
+  // → 定期的にresume()を呼ぶ
+  useEffect(() => {
+    if (!supported) return
+    const timer = setInterval(() => {
+      if (playingRef.current && window.speechSynthesis.paused) {
+        window.speechSynthesis.resume()
+      }
+    }, 10000)
+    return () => clearInterval(timer)
+  }, [supported])
+
+  // ページ離脱時に停止
+  useEffect(() => {
+    return () => {
+      if (typeof window !== 'undefined') {
+        pausedRef.current = true
+        playingRef.current = false
+        window.speechSynthesis.cancel()
+      }
+    }
+  }, [])
 
   function play(startIdx?: number) {
     if (!supported) return
     window.speechSynthesis.cancel()
-    pausedRef.current = false
+    pausedRef.current  = false
+    playingRef.current = true
     const idx = startIdx ?? chunkIdx
     setIsPlaying(true)
     setIsPaused(false)
-    speakChunk(idx, rateRef.current)
+    // 音声一覧が読み込まれてから開始
+    const go = () => speakChunk(idx)
+    if (window.speechSynthesis.getVoices().length === 0) {
+      window.speechSynthesis.onvoiceschanged = go
+    } else {
+      go()
+    }
   }
 
   function pause() {
     if (!supported) return
-    pausedRef.current = true
+    pausedRef.current  = true
+    playingRef.current = false
     window.speechSynthesis.cancel()
     setIsPaused(true)
     setIsPlaying(false)
@@ -159,7 +218,8 @@ function useSpeech(text: string, episodeId?: string) {
 
   function stop() {
     if (!supported) return
-    pausedRef.current = true
+    pausedRef.current  = true
+    playingRef.current = false
     window.speechSynthesis.cancel()
     setIsPlaying(false)
     setIsPaused(false)
@@ -169,29 +229,26 @@ function useSpeech(text: string, episodeId?: string) {
   }
 
   function resume() {
-    pausedRef.current = false
+    pausedRef.current  = false
+    playingRef.current = true
     play(chunkIdx)
   }
 
   function changeRate(newRate: number) {
     rateRef.current = newRate
     setRate(newRate)
-    if (isPlaying) {
-      // 速度変更：現在位置から再開
+    if (playingRef.current) {
       const idx = chunkIdx
       window.speechSynthesis.cancel()
-      setTimeout(() => speakChunk(idx, newRate), 50)
+      setTimeout(() => speakChunk(idx), 50)
     }
   }
 
-  // ページ離脱時に停止
-  useEffect(() => {
-    return () => {
-      if (typeof window !== 'undefined') window.speechSynthesis.cancel()
-    }
-  }, [])
-
-  return { isPlaying, isPaused, rate, progress, supported, chunkIdx, totalChunks: chunksRef.current.length, play, pause, stop, resume, changeRate }
+  return {
+    isPlaying, isPaused, rate, progress, supported,
+    chunkIdx, totalChunks: chunksRef.current.length,
+    play, pause, stop, resume, changeRate,
+  }
 }
 
 // ===== 読み上げパネル UI =====
