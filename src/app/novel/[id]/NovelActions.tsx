@@ -40,10 +40,7 @@ export default function NovelActions({ novelId, userId, authorId, novelTitle, is
   const [showLogin,   setShowLogin]   = useState(false)
   const [loginMsg,    setLoginMsg]    = useState('')
 
-  function requireLogin(msg: string) {
-    setLoginMsg(msg)
-    setShowLogin(true)
-  }
+  function requireLogin(msg: string) { setLoginMsg(msg); setShowLogin(true) }
 
   async function toggleLike() {
     if (!userId) return requireLogin('いいねするにはログインが必要です')
@@ -94,42 +91,31 @@ export default function NovelActions({ novelId, userId, authorId, novelTitle, is
   async function submitDiscover() {
     if (!userId || !comment.trim()) return
     setSubmitting(true)
-
-    let isPending = false
-    let pendingReason = ''
+    let isPending = false, pendingReason = ''
     try {
       const checkRes = await fetch('/api/check-discover', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ comment: comment.trim() }),
       })
       const checkData = await checkRes.json()
       isPending = checkData.pending || false
       pendingReason = checkData.reason || ''
     } catch (_) {}
-
     await supabase.from('discovers').insert({
-      novel_id: novelId,
-      user_id: userId,
-      comment: comment.trim(),
-      display_name: userDisplayName || '',
-      is_pending: isPending,
+      novel_id: novelId, user_id: userId, comment: comment.trim(),
+      display_name: userDisplayName || '', is_pending: isPending,
       pending_reason: pendingReason || null,
     })
-
     setDiscovered(true)
     if (!isPending) setDiscovers(c => c + 1)
-    setShowComment(false); setComment('')
-    setSubmitting(false)
-
+    setShowComment(false); setComment(''); setSubmitting(false)
     if (isPending) {
       alert('コメントの内容を確認中です。審査通過後に公開されます。')
     } else {
       if (authorId && userId !== authorId) {
         fetch('/api/notify', { method:'POST', headers:{'Content-Type':'application/json'},
           body: JSON.stringify({ user_id: authorId, type:'discover',
-            message: `「${novelTitle||'作品'}」が拡散されました`,
-            link: `/novel/${novelId}` }) })
+            message: `「${novelTitle||'作品'}」が拡散されました`, link: `/novel/${novelId}` }) })
       }
     }
   }
@@ -141,8 +127,8 @@ export default function NovelActions({ novelId, userId, authorId, novelTitle, is
   }
 
   const btn = (active: boolean, color: string) => ({
-    display:'inline-flex' as const, alignItems:'center' as const, gap:6,
-    padding:'8px 16px', borderRadius:20, border:'1.5px solid', cursor:'pointer' as const,
+    display:'inline-flex' as const, alignItems:'center' as const, gap:5,
+    padding:'8px 14px', borderRadius:20, border:'1.5px solid', cursor:'pointer' as const,
     fontSize:13, fontWeight:500 as const,
     background: active ? (color==='#dc2626'?'#fef2f2':'#FFF1E6') : '#fff',
     borderColor: active ? color : '#F0D9C9',
@@ -160,7 +146,7 @@ export default function NovelActions({ novelId, userId, authorId, novelTitle, is
           {liked?'♥':'♡'} {fmtNum(likes)}
         </button>
         <button onClick={toggleBookmark} style={btn(bookmarked,'#F26A21')}>
-          <svg width="14" height="14" viewBox="0 0 24 24" fill={bookmarked?'#F26A21':'none'} stroke={bookmarked?'#F26A21':'#B8AEA8'} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill={bookmarked?'#F26A21':'none'} stroke={bookmarked?'#F26A21':'#B8AEA8'} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
             <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/>
           </svg>
           {fmtNum(bookmarks)}
@@ -169,13 +155,13 @@ export default function NovelActions({ novelId, userId, authorId, novelTitle, is
           disabled={isAuthor}
           style={isAuthor ? {...btn(false,'#B8AEA8'), cursor:'not-allowed' as const, opacity:0.4} : btn(discovered,'#F26A21')}
           title={isAuthor ? '自分の作品は拡散できません' : 'この作品をもっと広めたい！という気持ちを伝える'}>
-          拡散する
+          拡散する {discovers > 0 && fmtNum(discovers)}
         </button>
         <button onClick={handleXShare}
-          style={{display:'inline-flex',alignItems:'center',gap:6,padding:'8px 16px',borderRadius:20,
+          style={{display:'inline-flex',alignItems:'center',gap:5,padding:'8px 14px',borderRadius:20,
             border:'1.5px solid #e2e8f0',background:'#fff',color:'#374151',
             fontSize:13,fontWeight:500,cursor:'pointer',transition:'all .15s'}}>
-          <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor">
             <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.748l7.73-8.835L1.254 2.25H8.08l4.253 5.622 5.911-5.622zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
           </svg>
           シェア
@@ -184,8 +170,8 @@ export default function NovelActions({ novelId, userId, authorId, novelTitle, is
 
       {/* 拡散コメント入力 */}
       {showComment && (
-        <div style={{marginTop:12,background:'#FFF1E6',border:'1.5px solid #f5b080',borderRadius:12,padding:'16px'}}>
-          <div style={{fontSize:13,fontWeight:700,color:'#F26A21',marginBottom:8}}>この作品の魅力を伝えよう！</div>
+        <div style={{marginTop:12,background:'#FFF1E6',border:'1.5px solid #f5b080',borderRadius:12,padding:'14px'}}>
+          <div style={{fontSize:13,fontWeight:700,color:'#F26A21',marginBottom:6}}>この作品の魅力を伝えよう！</div>
           <div style={{fontSize:11,color:'#2B211B',marginBottom:8,lineHeight:1.6}}>紹介コメントを書いてください。作品ページに表示されます。</div>
           <textarea value={comment} onChange={e=>setComment(e.target.value)}
             placeholder="例：世界観が独特で、主人公の成長が胸に刺さります！続きが気になりすぎる作品です。"
@@ -193,7 +179,7 @@ export default function NovelActions({ novelId, userId, authorId, novelTitle, is
             style={{width:'100%',padding:'10px 12px',border:'1.5px solid #c4b5fd',borderRadius:8,
               fontSize:13,resize:'none',outline:'none',fontFamily:'inherit',boxSizing:'border-box',
               background:'#fff',lineHeight:1.7}}/>
-          <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginTop:8}}>
+          <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginTop:8,flexWrap:'wrap',gap:8}}>
             <span style={{fontSize:11,color:'#77706A'}}>{comment.length}/200文字</span>
             <div style={{display:'flex',gap:8}}>
               <button onClick={()=>{setShowComment(false);setComment('')}}

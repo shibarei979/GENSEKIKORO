@@ -1,5 +1,5 @@
 import { createClient } from '@/lib/supabase/server'
-export const revalidate = 10 // 10秒キャッシュ
+export const revalidate = 10
 
 export async function generateMetadata({ params }: { params: { id: string } }) {
   const { createClient } = await import('@/lib/supabase/server')
@@ -23,6 +23,7 @@ export async function generateMetadata({ params }: { params: { id: string } }) {
     },
   }
 }
+
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
 import Header from '@/components/layout/Header'
@@ -46,22 +47,17 @@ export default async function NovelPage({ params }: { params: { id: string } }) 
   const { data: novel, error: novelError } = await supabase
     .from('novels')
     .select('id, title, summary, genre, tags, is_serial, published, views, author_id, created_at, novel_type')
-    .eq('id', params.id)
-    .maybeSingle()
+    .eq('id', params.id).maybeSingle()
 
   if (!novel || novelError) notFound()
 
   const { data: authorProfile } = await supabase
-    .from('profiles')
-    .select('display_name, user_id')
-    .eq('user_id', novel.author_id)
-    .maybeSingle()
+    .from('profiles').select('display_name, user_id')
+    .eq('user_id', novel.author_id).maybeSingle()
 
   const { data: episodes } = await supabase
-    .from('episodes')
-    .select('id, title, ep_number, created_at, illust_url')
-    .eq('novel_id', params.id)
-    .order('ep_number', { ascending: true })
+    .from('episodes').select('id, title, ep_number, created_at, illust_url')
+    .eq('novel_id', params.id).order('ep_number', { ascending: true })
 
   const epIds = (episodes || []).map(e => e.id)
   let epLikeCounts: Record<string,number>    = {}
@@ -75,22 +71,17 @@ export default async function NovelPage({ params }: { params: { id: string } }) 
     ])
     elData.data?.forEach((el: any) => { epLikeCounts[el.episode_id] = (epLikeCounts[el.episode_id] || 0) + 1 })
     ecData.data?.forEach((ec: any) => { if (ec.episode_id) epCommentCounts[ec.episode_id] = (epCommentCounts[ec.episode_id] || 0) + 1 })
-
-    // 既読情報取得
     if (user) {
       const { data: readData } = await supabase
-        .from('read_episodes')
-        .select('episode_id')
-        .eq('user_id', user.id)
-        .in('episode_id', epIds)
+        .from('read_episodes').select('episode_id')
+        .eq('user_id', user.id).in('episode_id', epIds)
       readData?.forEach((r: any) => readEpisodeIds.add(r.episode_id))
     }
   }
 
   const { count: likeCount }     = await supabase.from('likes').select('*',{count:'exact',head:true}).eq('novel_id', params.id)
-  // 閲覧数取得
-  const { data: viewData } = await supabase.from('novel_views').select('view_count').eq('novel_id', params.id).maybeSingle()
-  const viewCount = viewData?.view_count || 0
+  const { data: viewData }       = await supabase.from('novel_views').select('view_count').eq('novel_id', params.id).maybeSingle()
+  const viewCount                = viewData?.view_count || 0
   const { count: discoverCount } = await supabase.from('discovers').select('*',{count:'exact',head:true}).eq('novel_id', params.id).eq('is_pending', false)
   const { count: bookmarkCount } = await supabase.from('bookmarks').select('*',{count:'exact',head:true}).eq('novel_id', params.id)
 
@@ -121,20 +112,13 @@ export default async function NovelPage({ params }: { params: { id: string } }) 
   }
 
   const { data: discoverComments } = await supabase
-    .from('discovers')
-    .select('id, comment, display_name, created_at, user_id')
-    .eq('novel_id', params.id)
-    .not('comment', 'is', null)
-    .eq('is_pending', false)
-    .order('created_at', { ascending: false })
-    .limit(5)
+    .from('discovers').select('id, comment, display_name, created_at, user_id')
+    .eq('novel_id', params.id).not('comment', 'is', null).eq('is_pending', false)
+    .order('created_at', { ascending: false }).limit(5)
 
   const { data: rawNovelComments } = await supabase
-    .from('comments')
-    .select('id, body, created_at, user_id, is_pinned, profiles(display_name, icon_url)')
-    .eq('novel_id', params.id)
-    .order('created_at', { ascending: false })
-    .limit(50)
+    .from('comments').select('id, body, created_at, user_id, is_pinned, profiles(display_name, icon_url)')
+    .eq('novel_id', params.id).order('created_at', { ascending: false }).limit(50)
 
   const novelCommentIds = (rawNovelComments || []).map((c: any) => c.id)
   let novelCommentLikes: Record<string, number> = {}
@@ -161,8 +145,7 @@ export default async function NovelPage({ params }: { params: { id: string } }) 
     return `${dt.getFullYear()}/${dt.getMonth()+1}/${dt.getDate()}`
   }
 
-  // 既読数
-  const readCount = readEpisodeIds.size
+  const readCount  = readEpisodeIds.size
   const totalCount = episodes?.length ?? 0
 
   return (
@@ -171,50 +154,48 @@ export default async function NovelPage({ params }: { params: { id: string } }) 
 
       <div style={{maxWidth:1200,margin:'0 auto',padding:'20px 32px',display:'flex',gap:20,alignItems:'flex-start'}}>
         <div style={{flex:1,minWidth:0}}>
+
           {/* パンくず */}
           <div style={{fontSize:12,color:'#77706A',marginBottom:12,display:'flex',alignItems:'center',gap:4,flexWrap:'wrap'}}>
             <Link href="/" style={{color:'#F26A21',textDecoration:'none'}}>ホーム</Link>
             <span>›</span>
             <Link href={`/genre/${encodeURIComponent(novel.genre)}`} style={{color:'#F26A21',textDecoration:'none'}}>{novel.genre}</Link>
             <span>›</span>
-            <span style={{color:'#2B211B'}}>{novel.title}</span>
+            <span style={{color:'#2B211B',overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap',maxWidth: '60vw'}}>{novel.title}</span>
           </div>
 
           {/* 作品情報カード */}
-          <div style={{background:'#fff',border:'1px solid #F0D9C9',borderRadius:12,padding:'20px',marginBottom:14}}>
+          <div style={{background:'#fff',border:'1px solid #F0D9C9',borderRadius:12,padding:'16px',marginBottom:14}}>
             <div style={{display:'flex',gap:6,marginBottom:8,flexWrap:'wrap'}}>
               <span style={{fontSize:10,background:'#FFF1E6',color:'#F26A21',border:'1px solid #f5b080',padding:'2px 8px',borderRadius:4}}>{novel.genre}</span>
               <span style={{fontSize:10,background:novel.is_serial?'#e8f5e9':'#f5f5f5',color:novel.is_serial?'#2e7d32':'#757575',border:`1px solid ${novel.is_serial?'#a5d6a7':'#e0e0e0'}`,padding:'2px 8px',borderRadius:4}}>
                 {novel.is_serial?'連載中':'完結'}
               </span>
               {novel.novel_type && (
-                <span style={{fontSize:10,background:'#eff6ff',color:'#2563eb',border:'1px solid #bfdbfe',padding:'2px 8px',borderRadius:4}}>
-                  {novel.novel_type}
-                </span>
+                <span style={{fontSize:10,background:'#eff6ff',color:'#2563eb',border:'1px solid #bfdbfe',padding:'2px 8px',borderRadius:4}}>{novel.novel_type}</span>
               )}
               {(novel.tags||[]).map((t: string) => (
                 <span key={t} style={{fontSize:10,background:'#FFF9F2',color:'#77706A',border:'1px solid #F0D9C9',padding:'2px 8px',borderRadius:4}}>#{t}</span>
               ))}
             </div>
-            <h1 style={{fontSize:22,fontWeight:700,color:'#2B211B',lineHeight:1.4,marginBottom:8,fontFamily:"'Noto Serif JP',serif"}}>{novel.title}</h1>
-            <div style={{fontSize:13,color:'#77706A',marginBottom:12,display:'flex',alignItems:'center',gap:6}}>
-              <img src="/author_icon.png" alt="作者" style={{width:18,height:18,objectFit:'contain',opacity:0.7}}/>
+            <h1 style={{fontSize:20,fontWeight:700,color:'#2B211B',lineHeight:1.4,marginBottom:8,fontFamily:"'Noto Serif JP',serif"}}>{novel.title}</h1>
+            <div style={{fontSize:13,color:'#77706A',marginBottom:12,display:'flex',alignItems:'center',gap:6,flexWrap:'wrap'}}>
               作者：
               <a href={`/author/${author?.user_id}`} style={{color:'#F26A21',textDecoration:'none',fontWeight:600}}>{author?.display_name}</a>
               {!isAuthor && user && author?.user_id && (
                 <FollowButton authorId={author.user_id} userId={user.id} initialFollowing={isFollowing} followerCount={followerCount}/>
               )}
               {!user && author?.user_id && (
-                <span style={{fontSize:11,color:'#B8AEA8',marginLeft:8}}>フォロワー {followerCount}</span>
+                <span style={{fontSize:11,color:'#B8AEA8'}}>フォロワー {followerCount}</span>
               )}
             </div>
             {novel.summary && (
-              <div style={{fontSize:13,color:'#5a3a20',lineHeight:1.85,padding:'12px 14px',background:'#FFF9F2',borderRadius:8,borderLeft:'3px solid #f5a060',marginBottom:14,whiteSpace:'pre-wrap'}}>
+              <div style={{fontSize:13,color:'#5a3a20',lineHeight:1.85,padding:'10px 12px',background:'#FFF9F2',borderRadius:8,borderLeft:'3px solid #f5a060',marginBottom:14,whiteSpace:'pre-wrap'}}>
                 {novel.summary}
               </div>
             )}
             {discoverComments && discoverComments.length > 0 && (
-              <div style={{margin:'12px 0',borderRadius:10,overflow:'hidden',border:'1.5px solid #a78bfa'}}>
+              <div style={{margin:'10px 0',borderRadius:10,overflow:'hidden',border:'1.5px solid #a78bfa'}}>
                 <div style={{background:'#7c3aed',padding:'6px 14px',fontSize:11,fontWeight:700,color:'#fff'}}>読者の声</div>
                 {discoverComments.map((d: any) => d.comment && (
                   <div key={d.id} style={{padding:'10px 14px',borderBottom:'1px solid #ede9fe',background:'#faf5ff'}}>
@@ -242,17 +223,17 @@ export default async function NovelPage({ params }: { params: { id: string } }) 
 
           {/* 目次 */}
           <div style={{background:'#fff',border:'1px solid #F0D9C9',borderRadius:12,overflow:'hidden'}}>
-            <div style={{padding:'12px 16px',borderBottom:'1px solid #F0D9C9',display:'flex',alignItems:'center',justifyContent:'space-between',background:'#FFF9F2'}}>
-              <span style={{fontSize:14,fontWeight:700,color:'#2B211B'}}>目次（{totalCount}話）</span>
-              <div style={{display:'flex',alignItems:'center',gap:12}}>
-                {user && totalCount > 0 && (
-                  <span style={{fontSize:11,color:'#10b981',fontWeight:600}}>
-                    ✓ {fmtNum(readCount)}/{fmtNum(totalCount)}話 既読
+            <div style={{padding:'10px 14px',borderBottom:'1px solid #F0D9C9',background:'#FFF9F2'}}>
+              <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',flexWrap:'wrap',gap:4}}>
+                <span style={{fontSize:14,fontWeight:700,color:'#2B211B'}}>目次（{totalCount}話）</span>
+                <div style={{display:'flex',alignItems:'center',gap:8,flexWrap:'wrap'}}>
+                  {user && totalCount > 0 && (
+                    <span style={{fontSize:11,color:'#10b981',fontWeight:600}}>✓ {fmtNum(readCount)}/{fmtNum(totalCount)}話 既読</span>
+                  )}
+                  <span style={{fontSize:11,color:'#77706A'}}>
+                    最終更新：{episodes?.length ? fmtDate(episodes[episodes.length-1].created_at) : '—'}
                   </span>
-                )}
-                <span style={{fontSize:11,color:'#77706A'}}>
-                  最終更新：{episodes?.length ? fmtDate(episodes[episodes.length-1].created_at) : '—'}
-                </span>
+                </div>
               </div>
             </div>
             {!episodes || episodes.length === 0 ? (
@@ -261,24 +242,18 @@ export default async function NovelPage({ params }: { params: { id: string } }) 
               const isReadEp = readEpisodeIds.has(ep.id)
               return (
                 <Link key={ep.id} href={`/novel/${params.id}/episode/${ep.id}`} style={{textDecoration:'none',display:'block'}}>
-                  <div style={{display:'flex',alignItems:'center',gap:12,padding:'12px 16px',borderBottom:'1px solid #FFF1E6',background: isReadEp ? '#e5e7eb' : '#fff'}}>
+                  <div style={{display:'flex',alignItems:'center',gap:10,padding:'11px 14px',borderBottom:'1px solid #FFF1E6',background: isReadEp ? '#e5e7eb' : '#fff'}}>
                     {ep.illust_url && (
-                      <img src={ep.illust_url} alt="" style={{width:40,height:40,objectFit:'cover',borderRadius:4,flexShrink:0}}/>
+                      <img src={ep.illust_url} alt="" style={{width:36,height:36,objectFit:'cover',borderRadius:4,flexShrink:0}}/>
                     )}
-                    <div style={{flex:1,minWidth:0,display:'flex',alignItems:'center',gap:6}}>
-                      {isReadEp && (
-                        <span style={{fontSize:10,color:'#10b981',fontWeight:700,flexShrink:0}}>✓</span>
-                      )}
-                      <span style={{fontSize:14,fontWeight:500,color: isReadEp ? '#4b5563' : '#2B211B'}}>{ep.title}</span>
+                    <div style={{flex:1,minWidth:0,display:'flex',alignItems:'center',gap:5}}>
+                      {isReadEp && <span style={{fontSize:10,color:'#10b981',fontWeight:700,flexShrink:0}}>✓</span>}
+                      <span style={{fontSize:13,fontWeight:500,color: isReadEp ? '#4b5563' : '#2B211B',overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap'}}>{ep.title}</span>
                     </div>
-                    <div style={{display:'flex',alignItems:'center',gap:8,flexShrink:0}}>
-                      {epLikeCounts[ep.id] > 0 && (
-                        <span style={{fontSize:11,color:'#77706A'}}>♡ {fmtNum(epLikeCounts[ep.id])}</span>
-                      )}
-                      {epCommentCounts[ep.id] > 0 && (
-                        <span style={{fontSize:11,color:'#77706A'}}>💬 {fmtNum(epCommentCounts[ep.id])}</span>
-                      )}
-                      <span style={{fontSize:11,color:'#B8AEA8'}}>{fmtDate(ep.created_at)}</span>
+                    <div style={{display:'flex',alignItems:'center',gap:6,flexShrink:0}}>
+                      {epLikeCounts[ep.id] > 0 && <span style={{fontSize:10,color:'#77706A'}}>♡ {fmtNum(epLikeCounts[ep.id])}</span>}
+                      {epCommentCounts[ep.id] > 0 && <span style={{fontSize:10,color:'#77706A'}}>💬 {fmtNum(epCommentCounts[ep.id])}</span>}
+                      <span style={{fontSize:10,color:'#B8AEA8'}}>{fmtDate(ep.created_at)}</span>
                     </div>
                   </div>
                 </Link>
@@ -295,7 +270,7 @@ export default async function NovelPage({ params }: { params: { id: string } }) 
           </div>
 
           {/* 作品コメント */}
-          <div style={{marginTop:24}}>
+          <div style={{marginTop:20}}>
             <NovelCommentSection
               novelId={params.id}
               userId={user?.id || null}
@@ -305,10 +280,13 @@ export default async function NovelPage({ params }: { params: { id: string } }) 
               comments={novelComments}
             />
           </div>
+
+          <div className="mobile-only" style={{height:80}}/>
         </div>
 
-        <Sidebar />
+        <div className="desktop-only"><Sidebar /></div>
       </div>
+
       <AdBanner />
       <Footer user={user} />
     </div>

@@ -22,6 +22,14 @@ export default function PostClient({ profile, userId }: Props) {
   const [illustFile, setIllustFile] = useState<File|null>(null)
   const [illustPreview, setIllustPreview] = useState<string>('')
   const [illustUploading, setIllustUploading] = useState(false)
+  const [isMobile, setIsMobile] = useState(false)
+
+  useEffect(() => {
+    const check = () => setIsMobile(window.innerWidth <= 768)
+    check()
+    window.addEventListener('resize', check)
+    return () => window.removeEventListener('resize', check)
+  }, [])
 
   const [mode, setMode] = useState<'new'|'existing'>('new')
   const [myNovels, setMyNovels] = useState<any[]>([])
@@ -293,13 +301,12 @@ export default function PostClient({ profile, userId }: Props) {
     <div style={{minHeight:'100vh',background:'#fff'}}>
       <Header profile={profile} user={true} />
 
-      <div style={{maxWidth:760,margin:'0 auto',padding:'24px 24px 60px'}}>
+      <div style={{maxWidth:760,margin:'0 auto',padding: isMobile ? '16px 16px 80px' : '24px 24px 60px'}}>
 
+        {/* 編集：話選択 */}
         {editMode && (
-          <div style={{background:'#fff',border:'1px solid #F0D9C9',borderRadius:10,marginBottom:12,overflow:'hidden'}}>
-            <div style={{padding:'10px 14px',fontSize:13,fontWeight:700,color:'#2B211B',borderBottom:'1px solid #F0D9C9',background:'#FFF9F2'}}>
-              編集する話を選択
-            </div>
+          <div style={sec}>
+            <div style={sh}>編集する話を選択</div>
             <div style={{padding:'14px 18px'}}>
               <div style={{fontSize:12,color:'#77706A',marginBottom:10}}>編集したい話を選んでください</div>
               <div style={{display:'flex',flexDirection:'column',gap:6}}>
@@ -312,32 +319,35 @@ export default function PostClient({ profile, userId }: Props) {
                     {ep.title}
                   </button>
                 ))}
-                {editEpisodes.length === 0 && (
-                  <div style={{fontSize:12,color:'#B8AEA8'}}>話がありません</div>
-                )}
+                {editEpisodes.length === 0 && <div style={{fontSize:12,color:'#B8AEA8'}}>話がありません</div>}
               </div>
             </div>
           </div>
         )}
 
-        {!editMode && (<div style={sec}>
-          <div style={sh}>投稿タイプ</div>
-          <div style={sb}>
-            <div style={{display:'flex',gap:12}}>
-              {[{v:'new' as const,l:'新連載',d:'新しい作品の第1話を投稿する'},
-                {v:'existing' as const,l:'連載中の作品に追加',d:'既存の連載作品に新しい話を追加する'}].map(({v,l,d})=>(
-                <button key={v} type="button" onClick={()=>setMode(v)}
-                  style={{flex:1,padding:'14px',borderRadius:10,border:'2px solid',cursor:'pointer',textAlign:'left',
-                    background:mode===v?'#FFF1E6':'#fff',
-                    borderColor:mode===v?'#F26A21':'#F0D9C9'}}>
-                  <div style={{fontSize:14,fontWeight:700,color:mode===v?'#F26A21':'#2B211B',marginBottom:4}}>{l}</div>
-                  <div style={{fontSize:11,color:'#77706A'}}>{d}</div>
-                </button>
-              ))}
+        {/* 投稿タイプ */}
+        {!editMode && (
+          <div style={sec}>
+            <div style={sh}>投稿タイプ</div>
+            <div style={sb}>
+              {/* モバイル：縦並び / デスクトップ：横並び */}
+              <div style={{display:'flex',flexDirection: isMobile ? 'column' : 'row',gap:12}}>
+                {[{v:'new' as const,l:'新連載',d:'新しい作品の第1話を投稿する'},
+                  {v:'existing' as const,l:'連載中の作品に追加',d:'既存の連載作品に新しい話を追加する'}].map(({v,l,d})=>(
+                  <button key={v} type="button" onClick={()=>setMode(v)}
+                    style={{flex:1,padding:'14px',borderRadius:10,border:'2px solid',cursor:'pointer',textAlign:'left',
+                      background:mode===v?'#FFF1E6':'#fff',
+                      borderColor:mode===v?'#F26A21':'#F0D9C9'}}>
+                    <div style={{fontSize:14,fontWeight:700,color:mode===v?'#F26A21':'#2B211B',marginBottom:4}}>{l}</div>
+                    <div style={{fontSize:11,color:'#77706A'}}>{d}</div>
+                  </button>
+                ))}
+              </div>
             </div>
           </div>
-        </div>)}
+        )}
 
+        {/* 作品情報 */}
         {(mode === 'new' || editMode) && (
           <div style={sec}>
             <div style={sh}>作品情報</div>
@@ -354,7 +364,7 @@ export default function PostClient({ profile, userId }: Props) {
               <div style={fg}>
                 <label style={lbl}>
                   キャッチコピー
-                  <span style={{fontWeight:400,color:'#B8AEA8',fontSize:11,marginLeft:6}}>作品カードに表示されます（省略可・100文字以内）</span>
+                  <span style={{fontWeight:400,color:'#B8AEA8',fontSize:11,marginLeft:6}}>作品カードに表示（省略可・100文字以内）</span>
                 </label>
                 <textarea style={{...inp,resize:'vertical',minHeight:60}} value={catchcopy}
                   onChange={e=>setCatchcopy(e.target.value.slice(0,100))}
@@ -415,6 +425,7 @@ export default function PostClient({ profile, userId }: Props) {
           </div>
         )}
 
+        {/* 既存作品選択 */}
         {mode === 'existing' && (
           <div style={sec}>
             <div style={sh}>作品を選択</div>
@@ -440,6 +451,7 @@ export default function PostClient({ profile, userId }: Props) {
           </div>
         )}
 
+        {/* 年齢制限 */}
         <div style={sec}>
           <div style={sh}>年齢制限</div>
           <div style={{padding:'14px 18px'}}>
@@ -463,133 +475,141 @@ export default function PostClient({ profile, userId }: Props) {
           </div>
         </div>
 
-        {(!editMode || editEpId) && (<div style={sec}>
-          <div style={sh}>話の内容</div>
-          <div style={sb}>
-            <div style={fg}>
-              <label style={lbl}>
-                タイトル <span style={{color:'#dc2626'}}>*</span>
-                <span style={{fontWeight:400,color:'#B8AEA8',fontSize:11,marginLeft:6}}>例：第1話 始まりの朝</span>
-              </label>
-              <input style={{...inp,borderColor:errors.ep?'#dc2626':'#F0D9C9'}} value={epTitle} onChange={e=>setEpTitle(e.target.value)} placeholder="例：第1話 始まりの朝"/>
-              {errors.ep && <div style={er}>{errors.ep}</div>}
-            </div>
-
-            <div style={fg}>
-              <label style={lbl}>前書き<span style={{fontWeight:400,color:'#B8AEA8',fontSize:11,marginLeft:6}}>{prefaceLen.toLocaleString()} / 20,000文字</span></label>
-              <textarea style={{...inp,resize:'vertical',minHeight:60,borderColor:errors.preface?'#dc2626':'#F0D9C9'}}
-                value={preface} onChange={e=>setPreface(e.target.value)} placeholder="前書き（省略可）"/>
-              {errors.preface && <div style={er}>{errors.preface}</div>}
-            </div>
-
-            <div style={fg}>
-              <label style={lbl}>挿絵（本文の上に表示）</label>
-              <div style={{border:'2px dashed #F0D9C9',borderRadius:10,padding:'16px',textAlign:'center',background:'#FFF9F2',cursor:'pointer',position:'relative'}}
-                onClick={()=>illustRef.current?.click()}
-                onDragOver={e=>{e.preventDefault();e.currentTarget.style.borderColor='#F26A21'}}
-                onDragLeave={e=>{e.currentTarget.style.borderColor='#F0D9C9'}}
-                onDrop={e=>{e.preventDefault();const f=e.dataTransfer.files[0];if(f&&f.type.startsWith('image/')){handleIllustUpload(f);e.currentTarget.style.borderColor='#F0D9C9'}}}>
-                <input ref={illustRef} type="file" accept="image/*" style={{display:'none'}}
-                  onChange={e=>{const f=e.target.files?.[0];if(f)handleIllustUpload(f)}}/>
-                {illustPreview ? (
-                  <div>
-                    <img src={illustPreview} alt="挿絵プレビュー" style={{maxWidth:'100%',maxHeight:300,borderRadius:8,objectFit:'contain'}}/>
-                    <div style={{marginTop:8,display:'flex',gap:8,justifyContent:'center'}}>
-                      <button type="button" onClick={e=>{e.stopPropagation();setIllustPreview('');setIllustFile(null)}}
-                        style={{padding:'4px 12px',fontSize:11,border:'1px solid #F0D9C9',borderRadius:8,background:'#fff',color:'#77706A',cursor:'pointer'}}>
-                        削除
-                      </button>
-                      <button type="button" onClick={e=>{e.stopPropagation();illustRef.current?.click()}}
-                        style={{padding:'4px 12px',fontSize:11,border:'1px solid #F26A21',borderRadius:8,background:'#fff',color:'#F26A21',cursor:'pointer'}}>
-                        変更
-                      </button>
-                    </div>
-                  </div>
-                ) : illustUploading ? (
-                  <div style={{color:'#F26A21',fontSize:13}}>アップロード中...</div>
-                ) : (
-                  <div>
-                    <div style={{fontSize:32,marginBottom:8}}></div>
-                    <div style={{fontSize:13,color:'#77706A',marginBottom:4}}>クリックまたはドラッグ＆ドロップで画像を追加</div>
-                    <div style={{fontSize:11,color:'#B8AEA8'}}>JPG・PNG・GIF・WEBP対応</div>
-                  </div>
-                )}
-              </div>
-            </div>
-
-            <div style={fg}>
-              <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',marginBottom:6}}>
-                <label style={{...lbl,marginBottom:0}}>
-                  本文 <span style={{color:'#dc2626'}}>*</span>
-                  <span style={{fontWeight:400,color:'#B8AEA8',fontSize:11,marginLeft:6}}>（公開時は500文字以上）</span>
+        {/* 話の内容 */}
+        {(!editMode || editEpId) && (
+          <div style={sec}>
+            <div style={sh}>話の内容</div>
+            <div style={sb}>
+              <div style={fg}>
+                <label style={lbl}>
+                  タイトル <span style={{color:'#dc2626'}}>*</span>
+                  <span style={{fontWeight:400,color:'#B8AEA8',fontSize:11,marginLeft:6}}>例：第1話 始まりの朝</span>
                 </label>
-                <div style={{display:'flex',gap:3,alignItems:'center'}}>
-                  <span style={{fontSize:11,color:'#77706A',marginRight:3}}>文字サイズ：</span>
-                  {FONT_SIZES.map(f=>(
-                    <button key={f.label} type="button" onClick={()=>setFontSize(f.size)}
-                      style={{padding:'2px 7px',fontSize:11,border:'1px solid',cursor:'pointer',borderRadius:4,
-                        background:fontSize===f.size?'#F26A21':'#fff',
-                        color:fontSize===f.size?'#fff':'#77706A',
-                        borderColor:fontSize===f.size?'#F26A21':'#F0D9C9'}}>
-                      {f.label}
-                    </button>
-                  ))}
-                </div>
+                <input style={{...inp,borderColor:errors.ep?'#dc2626':'#F0D9C9'}} value={epTitle} onChange={e=>setEpTitle(e.target.value)} placeholder="例：第1話 始まりの朝"/>
+                {errors.ep && <div style={er}>{errors.ep}</div>}
               </div>
 
-              <div style={{display:'flex',flexWrap:'wrap',gap:3,marginBottom:5,padding:5,background:'#FFF9F2',border:'1px solid #F0D9C9',borderRadius:6}}>
-                <button type="button" onClick={insertRuby} style={toolBtn}>ルビ　｜漢字《かんじ》</button>
-                <button type="button" onClick={()=>insertText('《《','》》')} style={toolBtn}>《《強調》》</button>
-                <button type="button" onClick={()=>insertText('\n────────────\n')} style={toolBtn}>─ 区切り線</button>
-                <button type="button" onClick={indentNonDialogue} style={toolBtn} title="「」以外の行頭に全角スペースを追加">一文字下げ（「」以外）</button>
-                <button type="button" onClick={()=>insertText('\n\n')} style={toolBtn}>改行</button>
-                <div style={{width:1,background:'#F0D9C9',margin:'0 2px'}}/>
-                <button type="button" onClick={()=>setShowReplace(!showReplace)}
-                  style={{...toolBtn,background:showReplace?'#F26A21':'#fff',color:showReplace?'#fff':'#77706A',borderColor:showReplace?'#F26A21':'#F0D9C9'}}>
-                  一括置換
-                </button>
+              <div style={fg}>
+                <label style={lbl}>前書き<span style={{fontWeight:400,color:'#B8AEA8',fontSize:11,marginLeft:6}}>{prefaceLen.toLocaleString()} / 20,000文字</span></label>
+                <textarea style={{...inp,resize:'vertical',minHeight:60,borderColor:errors.preface?'#dc2626':'#F0D9C9'}}
+                  value={preface} onChange={e=>setPreface(e.target.value)} placeholder="前書き（省略可）"/>
+                {errors.preface && <div style={er}>{errors.preface}</div>}
               </div>
 
-              {showReplace && (
-                <div style={{background:'#FFF9F2',border:'1px solid #F0D9C9',borderRadius:6,padding:'10px 12px',marginBottom:6,display:'flex',gap:8,alignItems:'center',flexWrap:'wrap'}}>
-                  <input value={replaceFrom} onChange={e=>setReplaceFrom(e.target.value)} placeholder="置換前のテキスト"
-                    style={{...inp,flex:1,minWidth:120,fontSize:12}}/>
-                  <span style={{color:'#77706A'}}>→</span>
-                  <input value={replaceTo} onChange={e=>setReplaceTo(e.target.value)} placeholder="置換後のテキスト"
-                    style={{...inp,flex:1,minWidth:120,fontSize:12}}/>
-                  <button type="button" onClick={handleReplace}
-                    style={{padding:'7px 14px',background:'#F26A21',color:'#fff',border:'none',borderRadius:6,fontSize:12,fontWeight:600,cursor:'pointer',whiteSpace:'nowrap'}}>
-                    置換する
-                  </button>
-                  {replaceCount !== null && (
-                    <span style={{fontSize:11,color:'#2e7d32',fontWeight:600}}>{replaceCount}箇所を置換しました</span>
+              <div style={fg}>
+                <label style={lbl}>挿絵（本文の上に表示）</label>
+                <div style={{border:'2px dashed #F0D9C9',borderRadius:10,padding:'16px',textAlign:'center',background:'#FFF9F2',cursor:'pointer'}}
+                  onClick={()=>illustRef.current?.click()}
+                  onDragOver={e=>{e.preventDefault();e.currentTarget.style.borderColor='#F26A21'}}
+                  onDragLeave={e=>{e.currentTarget.style.borderColor='#F0D9C9'}}
+                  onDrop={e=>{e.preventDefault();const f=e.dataTransfer.files[0];if(f&&f.type.startsWith('image/')){handleIllustUpload(f);e.currentTarget.style.borderColor='#F0D9C9'}}}>
+                  <input ref={illustRef} type="file" accept="image/*" style={{display:'none'}}
+                    onChange={e=>{const f=e.target.files?.[0];if(f)handleIllustUpload(f)}}/>
+                  {illustPreview ? (
+                    <div>
+                      <img src={illustPreview} alt="挿絵プレビュー" style={{maxWidth:'100%',maxHeight:300,borderRadius:8,objectFit:'contain'}}/>
+                      <div style={{marginTop:8,display:'flex',gap:8,justifyContent:'center'}}>
+                        <button type="button" onClick={e=>{e.stopPropagation();setIllustPreview('');setIllustFile(null)}}
+                          style={{padding:'4px 12px',fontSize:11,border:'1px solid #F0D9C9',borderRadius:8,background:'#fff',color:'#77706A',cursor:'pointer'}}>削除</button>
+                        <button type="button" onClick={e=>{e.stopPropagation();illustRef.current?.click()}}
+                          style={{padding:'4px 12px',fontSize:11,border:'1px solid #F26A21',borderRadius:8,background:'#fff',color:'#F26A21',cursor:'pointer'}}>変更</button>
+                      </div>
+                    </div>
+                  ) : illustUploading ? (
+                    <div style={{color:'#F26A21',fontSize:13}}>アップロード中...</div>
+                  ) : (
+                    <div>
+                      <div style={{fontSize:32,marginBottom:8}}>🖼</div>
+                      <div style={{fontSize:13,color:'#77706A',marginBottom:4}}>クリックまたはドラッグで画像を追加</div>
+                      <div style={{fontSize:11,color:'#B8AEA8'}}>JPG・PNG・GIF・WEBP対応</div>
+                    </div>
                   )}
                 </div>
-              )}
-
-              <textarea ref={bodyRef}
-                style={{...inp,resize:'vertical',minHeight:400,fontSize,lineHeight:1.95,
-                  fontFamily:"'Noto Serif JP',serif",borderColor:errors.body?'#dc2626':'#F0D9C9'}}
-                value={body} onChange={e=>setBody(e.target.value)}
-                placeholder="本文を入力してください"/>
-
-              <div style={{display:'flex',alignItems:'center',gap:8,marginTop:4}}>
-                <div style={{flex:1,height:4,background:'#F0D9C9',borderRadius:2,overflow:'hidden'}}>
-                  <div style={{height:'100%',borderRadius:2,background:bodyColor,width:`${bodyPct}%`,transition:'width .2s'}}/>
-                </div>
-                <span style={{fontSize:11,color:bodyColor,fontWeight:600,whiteSpace:'nowrap'}}>{bodyLen.toLocaleString()} / 100,000文字</span>
               </div>
-              {errors.body && <div style={er}>{errors.body}</div>}
-            </div>
 
-            <div>
-              <label style={lbl}>あとがき<span style={{fontWeight:400,color:'#B8AEA8',fontSize:11,marginLeft:6}}>{afterLen.toLocaleString()} / 20,000文字</span></label>
-              <textarea style={{...inp,resize:'vertical',minHeight:60,borderColor:errors.afterword?'#dc2626':'#F0D9C9'}}
-                value={afterword} onChange={e=>setAfterword(e.target.value)} placeholder="あとがき（省略可）"/>
-              {errors.afterword && <div style={er}>{errors.afterword}</div>}
+              <div style={fg}>
+                {/* 本文ヘッダー：モバイルは縦並び */}
+                <div style={{marginBottom:6}}>
+                  <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',flexWrap:'wrap',gap:6}}>
+                    <label style={{...lbl,marginBottom:0}}>
+                      本文 <span style={{color:'#dc2626'}}>*</span>
+                      <span style={{fontWeight:400,color:'#B8AEA8',fontSize:11,marginLeft:6}}>（公開時は500文字以上）</span>
+                    </label>
+                    <div style={{display:'flex',gap:3,alignItems:'center',flexWrap:'wrap'}}>
+                      <span style={{fontSize:11,color:'#77706A',marginRight:3}}>文字サイズ：</span>
+                      {FONT_SIZES.map(f=>(
+                        <button key={f.label} type="button" onClick={()=>setFontSize(f.size)}
+                          style={{padding:'2px 7px',fontSize:11,border:'1px solid',cursor:'pointer',borderRadius:4,
+                            background:fontSize===f.size?'#F26A21':'#fff',
+                            color:fontSize===f.size?'#fff':'#77706A',
+                            borderColor:fontSize===f.size?'#F26A21':'#F0D9C9'}}>
+                          {f.label}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+
+                {/* ツールバー：横スクロール対応 */}
+                <div style={{overflowX:'auto',scrollbarWidth:'none' as any,marginBottom:5}}>
+                  <div style={{display:'flex',gap:3,padding:5,background:'#FFF9F2',border:'1px solid #F0D9C9',borderRadius:6,minWidth:'max-content'}}>
+                    <button type="button" onClick={insertRuby} style={toolBtn}>ルビ</button>
+                    <button type="button" onClick={()=>insertText('《《','》》')} style={toolBtn}>《《強調》》</button>
+                    <button type="button" onClick={()=>insertText('\n────────────\n')} style={toolBtn}>区切り線</button>
+                    <button type="button" onClick={indentNonDialogue} style={toolBtn}>一文字下げ</button>
+                    <button type="button" onClick={()=>insertText('\n\n')} style={toolBtn}>改行</button>
+                    <div style={{width:1,background:'#F0D9C9',margin:'0 2px'}}/>
+                    <button type="button" onClick={()=>setShowReplace(!showReplace)}
+                      style={{...toolBtn,background:showReplace?'#F26A21':'#fff',color:showReplace?'#fff':'#77706A',borderColor:showReplace?'#F26A21':'#F0D9C9'}}>
+                      一括置換
+                    </button>
+                  </div>
+                </div>
+
+                {showReplace && (
+                  <div style={{background:'#FFF9F2',border:'1px solid #F0D9C9',borderRadius:6,padding:'10px 12px',marginBottom:6}}>
+                    {/* モバイルは縦並び */}
+                    <div style={{display:'flex',flexDirection: isMobile ? 'column' : 'row',gap:8,alignItems: isMobile ? 'stretch' : 'center',flexWrap:'wrap'}}>
+                      <input value={replaceFrom} onChange={e=>setReplaceFrom(e.target.value)} placeholder="置換前のテキスト"
+                        style={{...inp,flex:1,minWidth:120,fontSize:12}}/>
+                      {!isMobile && <span style={{color:'#77706A'}}>→</span>}
+                      <input value={replaceTo} onChange={e=>setReplaceTo(e.target.value)} placeholder="置換後のテキスト"
+                        style={{...inp,flex:1,minWidth:120,fontSize:12}}/>
+                      <button type="button" onClick={handleReplace}
+                        style={{padding:'7px 14px',background:'#F26A21',color:'#fff',border:'none',borderRadius:6,fontSize:12,fontWeight:600,cursor:'pointer',whiteSpace:'nowrap'}}>
+                        置換する
+                      </button>
+                      {replaceCount !== null && (
+                        <span style={{fontSize:11,color:'#2e7d32',fontWeight:600}}>{replaceCount}箇所を置換しました</span>
+                      )}
+                    </div>
+                  </div>
+                )}
+
+                <textarea ref={bodyRef}
+                  style={{...inp,resize:'vertical',minHeight: isMobile ? 300 : 400,fontSize,lineHeight:1.95,
+                    fontFamily:"'Noto Serif JP',serif",borderColor:errors.body?'#dc2626':'#F0D9C9'}}
+                  value={body} onChange={e=>setBody(e.target.value)}
+                  placeholder="本文を入力してください"/>
+
+                <div style={{display:'flex',alignItems:'center',gap:8,marginTop:4}}>
+                  <div style={{flex:1,height:4,background:'#F0D9C9',borderRadius:2,overflow:'hidden'}}>
+                    <div style={{height:'100%',borderRadius:2,background:bodyColor,width:`${bodyPct}%`,transition:'width .2s'}}/>
+                  </div>
+                  <span style={{fontSize:11,color:bodyColor,fontWeight:600,whiteSpace:'nowrap'}}>{bodyLen.toLocaleString()} / 100,000文字</span>
+                </div>
+                {errors.body && <div style={er}>{errors.body}</div>}
+              </div>
+
+              <div>
+                <label style={lbl}>あとがき<span style={{fontWeight:400,color:'#B8AEA8',fontSize:11,marginLeft:6}}>{afterLen.toLocaleString()} / 20,000文字</span></label>
+                <textarea style={{...inp,resize:'vertical',minHeight:60,borderColor:errors.afterword?'#dc2626':'#F0D9C9'}}
+                  value={afterword} onChange={e=>setAfterword(e.target.value)} placeholder="あとがき（省略可）"/>
+                {errors.afterword && <div style={er}>{errors.afterword}</div>}
+              </div>
             </div>
           </div>
-        </div>)}
+        )}
 
         {errors.submit && (
           <div style={{background:'#fff0f0',border:'1px solid #f5c0c0',borderRadius:8,padding:'10px 14px',fontSize:13,color:'#dc2626',marginBottom:12}}>
@@ -597,23 +617,40 @@ export default function PostClient({ profile, userId }: Props) {
           </div>
         )}
 
-        <div style={{display:'flex',gap:8,justifyContent:'flex-end'}}>
-          <Link href="/mypage" style={{border:'1px solid #F0D9C9',color:'#77706A',padding:'9px 20px',borderRadius:20,fontSize:13,background:'#fff'}}>キャンセル</Link>
-          <button onClick={()=>handleSubmit(false)} disabled={loading||draftSaved}
-            style={{border:'1.5px solid #F26A21',color:draftSaved?'#2e7d32':'#F26A21',padding:'9px 20px',borderRadius:20,fontSize:13,background:draftSaved?'#e8f5e9':'#fff',cursor:draftSaved?'default':'pointer',opacity:loading?.5:1,transition:'all .3s'}}>
-            {draftSaved?'✓ 保存しました':'下書き保存'}
-          </button>
-          <button onClick={()=>handleSubmit(true)} disabled={loading}
-            style={{background:'#F26A21',color:'#fff',padding:'10px 24px',borderRadius:20,fontSize:13,fontWeight:700,border:'none',cursor:'pointer',opacity:loading?.5:1}}>
-            {loading?'保存中...':(editMode?'変更を保存':'投稿する')}
-          </button>
-        </div>
+        {/* ボタン行：モバイルは縦並び全幅 */}
+        {isMobile ? (
+          <div style={{display:'flex',flexDirection:'column',gap:10}}>
+            <button onClick={()=>handleSubmit(true)} disabled={loading}
+              style={{width:'100%',background:'#F26A21',color:'#fff',padding:'14px',borderRadius:10,fontSize:15,fontWeight:700,border:'none',cursor:'pointer',opacity:loading?.5:1}}>
+              {loading?'保存中...':(editMode?'変更を保存':'投稿する')}
+            </button>
+            <button onClick={()=>handleSubmit(false)} disabled={loading||draftSaved}
+              style={{width:'100%',border:'1.5px solid #F26A21',color:draftSaved?'#2e7d32':'#F26A21',padding:'12px',borderRadius:10,fontSize:14,background:draftSaved?'#e8f5e9':'#fff',cursor:draftSaved?'default':'pointer',opacity:loading?.5:1}}>
+              {draftSaved?'✓ 保存しました':'下書き保存'}
+            </button>
+            <Link href="/mypage" style={{display:'block',textAlign:'center',border:'1px solid #F0D9C9',color:'#77706A',padding:'11px',borderRadius:10,fontSize:14,background:'#fff',textDecoration:'none'}}>
+              キャンセル
+            </Link>
+          </div>
+        ) : (
+          <div style={{display:'flex',gap:8,justifyContent:'flex-end'}}>
+            <Link href="/mypage" style={{border:'1px solid #F0D9C9',color:'#77706A',padding:'9px 20px',borderRadius:20,fontSize:13,background:'#fff'}}>キャンセル</Link>
+            <button onClick={()=>handleSubmit(false)} disabled={loading||draftSaved}
+              style={{border:'1.5px solid #F26A21',color:draftSaved?'#2e7d32':'#F26A21',padding:'9px 20px',borderRadius:20,fontSize:13,background:draftSaved?'#e8f5e9':'#fff',cursor:draftSaved?'default':'pointer',opacity:loading?.5:1,transition:'all .3s'}}>
+              {draftSaved?'✓ 保存しました':'下書き保存'}
+            </button>
+            <button onClick={()=>handleSubmit(true)} disabled={loading}
+              style={{background:'#F26A21',color:'#fff',padding:'10px 24px',borderRadius:20,fontSize:13,fontWeight:700,border:'none',cursor:'pointer',opacity:loading?.5:1}}>
+              {loading?'保存中...':(editMode?'変更を保存':'投稿する')}
+            </button>
+          </div>
+        )}
       </div>
 
       <Footer user={true} />
 
       {toast && (
-        <div style={{position:'fixed',bottom:24,right:24,background:'#F26A21',color:'#fff',padding:'12px 20px',borderRadius:12,fontSize:14,fontWeight:600,zIndex:9999,boxShadow:'0 4px 16px rgba(242,106,33,.35)'}}>
+        <div style={{position:'fixed',bottom: isMobile ? 80 : 24,right:24,background:'#F26A21',color:'#fff',padding:'12px 20px',borderRadius:12,fontSize:14,fontWeight:600,zIndex:9999,boxShadow:'0 4px 16px rgba(242,106,33,.35)'}}>
           {toast}
         </div>
       )}
