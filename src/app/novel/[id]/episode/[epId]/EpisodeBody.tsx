@@ -56,7 +56,6 @@ function VerticalText({ text }: { text: string }) {
   )
 }
 
-// テキストのクリーニング（ルビ・装飾記法を除去して自然な読み上げテキストに）
 // テキストのクリーニング
 function cleanForSpeech(text: string): string {
   return text
@@ -69,18 +68,18 @@ function cleanForSpeech(text: string): string {
     .trim()
 }
 
-// ===== 読み上げフック（1つのUtteranceで全文→カクカクなし） =====
+// ===== 読み上げフック（全文を1つのUtteranceで → カクカクなし） =====
 function useSpeech(text: string) {
   const [isPlaying, setIsPlaying] = useState(false)
   const [isPaused,  setIsPaused]  = useState(false)
   const [rate,      setRate]      = useState(1.0)
   const [supported, setSupported] = useState(false)
   const [voices,    setVoices]    = useState<SpeechSynthesisVoice[]>([])
-  const [voiceIdx,  setVoiceIdx]  = useState(-1) // -1=デフォルト
+  const [voiceIdx,  setVoiceIdx]  = useState(-1)
 
-  const rateRef    = useRef(1.0)
-  const voiceRef   = useRef<SpeechSynthesisVoice | null>(null)
-  const timerRef   = useRef<ReturnType<typeof setInterval> | null>(null)
+  const rateRef  = useRef(1.0)
+  const voiceRef = useRef<SpeechSynthesisVoice | null>(null)
+  const timerRef = useRef<ReturnType<typeof setInterval> | null>(null)
 
   useEffect(() => {
     if (typeof window === 'undefined' || !('speechSynthesis' in window)) return
@@ -89,7 +88,6 @@ function useSpeech(text: string) {
       const all   = window.speechSynthesis.getVoices()
       const jaVox = all.filter(v => v.lang.startsWith('ja'))
       setVoices(jaVox)
-      // 初回：自然な日本語音声を自動選択
       if (voiceRef.current === null && jaVox.length > 0) {
         const prefer = jaVox.findIndex(v =>
           v.name.includes('Kyoko') || v.name.includes('Otoya') ||
@@ -104,35 +102,30 @@ function useSpeech(text: string) {
     window.speechSynthesis.onvoiceschanged = load
   }, [])
 
-  // iOS: paused状態を定期的にresume
-  const startTimer = () => {
+  const startTimer = useCallback(() => {
     if (timerRef.current) return
     timerRef.current = setInterval(() => {
       if (window.speechSynthesis.paused) window.speechSynthesis.resume()
     }, 10000)
-  }
-  const stopTimer = () => {
+  }, [])
+
+  const stopTimer = useCallback(() => {
     if (timerRef.current) { clearInterval(timerRef.current); timerRef.current = null }
-  }
+  }, [])
 
   useEffect(() => () => {
     stopTimer()
     if (typeof window !== 'undefined') window.speechSynthesis.cancel()
-  }, [])
+  }, [stopTimer])
 
-  function buildUtter(): SpeechSynthesisUtterance {
-    const clean = cleanForSpeech(text)
-    const utter = new SpeechSynthesisUtterance(clean)
-    utter.lang  = 'ja-JP'
-    utter.rate  = rateRef.current
-    if (voiceRef.current) utter.voice = voiceRef.current
-    return utter
-  }
-
-  function play() {
+  const play = useCallback(() => {
     if (!supported) return
     window.speechSynthesis.cancel()
-    const utter = buildUtter()
+    const clean = cleanForSpeech(text)
+    const utter = new SpeechSynthesisUtterance(clean)
+    utter.lang = 'ja-JP'
+    utter.rate = rateRef.current
+    if (voiceRef.current) utter.voice = voiceRef.current
     utter.onstart = () => { setIsPlaying(true); setIsPaused(false) }
     utter.onend   = () => { setIsPlaying(false); setIsPaused(false); stopTimer() }
     utter.onerror = (e) => {
@@ -141,7 +134,7 @@ function useSpeech(text: string) {
     }
     window.speechSynthesis.speak(utter)
     startTimer()
-  }
+  }, [supported, text, startTimer, stopTimer])
 
   function pause() {
     if (!supported) return
@@ -186,7 +179,7 @@ function SpeechPanel({ title, body, isMobile }: { title: string; body: string; i
   const RATES = [0.8, 1.0, 1.25, 1.5, 2.0]
 
   return (
-    <div style={{background:'#fff',border:'1.5px solid #F0D9C9',borderRadius:12,padding: isMobile ? '12px 14px' : '14px 18px',marginBottom:12}}>
+    <div style={{background:'#fff',border:'1.5px solid #F0D9C9',borderRadius:12,padding:isMobile?'12px 14px':'14px 18px',marginBottom:12}}>
       {/* 1行目：ラベル＋速度 */}
       <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',marginBottom:10}}>
         <div style={{display:'flex',alignItems:'center',gap:7}}>
@@ -197,21 +190,18 @@ function SpeechPanel({ title, body, isMobile }: { title: string; body: string; i
           </svg>
           <span style={{fontSize:13,fontWeight:700,color:'#2B211B'}}>聴く β</span>
         </div>
-        {/* 速度ボタン */}
         <div style={{display:'flex',gap:3}}>
           {RATES.map(r => (
             <button key={r} onClick={()=>changeRate(r)} style={{
               padding:'2px 7px',fontSize:10,borderRadius:6,border:'1px solid',cursor:'pointer',
-              background:rate===r?'#F26A21':'#fff',
-              color:rate===r?'#fff':'#77706A',
-              borderColor:rate===r?'#F26A21':'#F0D9C9',
-              fontWeight:rate===r?700:400,
+              background:rate===r?'#F26A21':'#fff',color:rate===r?'#fff':'#77706A',
+              borderColor:rate===r?'#F26A21':'#F0D9C9',fontWeight:rate===r?700:400,
             }}>{r}x</button>
           ))}
         </div>
       </div>
 
-      {/* 2行目：操作ボタン＋状態 */}
+      {/* 2行目：操作ボタン＋状態＋音声選択 */}
       <div style={{display:'flex',alignItems:'center',gap:10}}>
         {/* 停止 */}
         <button onClick={stop} disabled={!isPlaying && !isPaused}
@@ -222,11 +212,10 @@ function SpeechPanel({ title, body, isMobile }: { title: string; body: string; i
         {/* 再生/一時停止/再開 */}
         <button onClick={()=>{ if(isPlaying) pause(); else if(isPaused) resumeSpeech(); else play() }}
           style={{width:46,height:46,borderRadius:'50%',border:'none',background:'#F26A21',cursor:'pointer',display:'flex',alignItems:'center',justifyContent:'center',boxShadow:'0 2px 10px rgba(242,106,33,.35)'}}>
-          {isPlaying ? (
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="#fff"><rect x="6" y="4" width="4" height="16" rx="1"/><rect x="14" y="4" width="4" height="16" rx="1"/></svg>
-          ) : (
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="#fff"><polygon points="5 3 19 12 5 21 5 3"/></svg>
-          )}
+          {isPlaying
+            ? <svg width="14" height="14" viewBox="0 0 24 24" fill="#fff"><rect x="6" y="4" width="4" height="16" rx="1"/><rect x="14" y="4" width="4" height="16" rx="1"/></svg>
+            : <svg width="14" height="14" viewBox="0 0 24 24" fill="#fff"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+          }
         </button>
 
         {/* 状態テキスト */}
@@ -236,32 +225,23 @@ function SpeechPanel({ title, body, isMobile }: { title: string; body: string; i
           {!isPlaying && !isPaused && <div style={{fontSize:11,color:'#B8AEA8'}}>▶ を押して読み上げ開始</div>}
         </div>
 
-        {/* 音声選択ボタン */}
+        {/* 音声選択 */}
         {voices.length > 0 && (
           <div style={{position:'relative'}}>
             <button onClick={()=>setShowVoice(!showVoice)}
-              style={{fontSize:11,padding:'4px 10px',border:'1px solid #F0D9C9',borderRadius:8,background:showVoice?'#FFF1E6':'#fff',color:'#77706A',cursor:'pointer',display:'flex',alignItems:'center',gap:4}}>
-              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="3"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
+              style={{fontSize:11,padding:'5px 10px',border:'1px solid #F0D9C9',borderRadius:8,background:showVoice?'#FFF1E6':'#fff',color:'#77706A',cursor:'pointer',display:'flex',alignItems:'center',gap:4}}>
               音声
               <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><polyline points="6 9 12 15 18 9"/></svg>
             </button>
             {showVoice && (
               <>
                 <div style={{position:'fixed',inset:0,zIndex:98}} onClick={()=>setShowVoice(false)}/>
-                <div style={{position:'absolute',right:0,top:'calc(100% + 6px)',background:'#fff',border:'1px solid #F0D9C9',borderRadius:10,boxShadow:'0 4px 20px rgba(0,0,0,0.12)',minWidth:200,maxHeight:240,overflowY:'auto',zIndex:99}}>
-                  <div style={{padding:'8px 12px',fontSize:11,color:'#B8AEA8',borderBottom:'1px solid #F0D9C9',fontWeight:600}}>
-                    日本語音声を選択
-                  </div>
+                <div style={{position:'absolute',right:0,top:'calc(100% + 6px)',background:'#fff',border:'1px solid #F0D9C9',borderRadius:10,boxShadow:'0 4px 20px rgba(0,0,0,0.12)',minWidth:200,maxHeight:220,overflowY:'auto',zIndex:99}}>
+                  <div style={{padding:'8px 12px',fontSize:11,color:'#B8AEA8',borderBottom:'1px solid #F0D9C9',fontWeight:600}}>日本語音声を選択</div>
                   {voices.map((v, i) => (
                     <button key={i} onClick={()=>{changeVoice(i);setShowVoice(false)}}
-                      style={{
-                        width:'100%',padding:'9px 14px',textAlign:'left',background:voiceIdx===i?'#FFF1E6':'#fff',
-                        border:'none',borderBottom:'1px solid #FFF1E6',fontSize:12,
-                        color:voiceIdx===i?'#F26A21':'#2B211B',cursor:'pointer',
-                        fontWeight:voiceIdx===i?700:400,
-                      }}>
-                      {v.name}
-                      {voiceIdx===i && <span style={{marginLeft:6,fontSize:10}}>✓</span>}
+                      style={{width:'100%',padding:'9px 14px',textAlign:'left',background:voiceIdx===i?'#FFF1E6':'#fff',border:'none',borderBottom:'1px solid #FFF1E6',fontSize:12,color:voiceIdx===i?'#F26A21':'#2B211B',cursor:'pointer',fontWeight:voiceIdx===i?700:400}}>
+                      {v.name}{voiceIdx===i && <span style={{marginLeft:6,fontSize:10}}>✓</span>}
                     </button>
                   ))}
                 </div>
@@ -274,6 +254,13 @@ function SpeechPanel({ title, body, isMobile }: { title: string; body: string; i
   )
 }
 
+export default function EpisodeBody({ title, body, preface, afterword, authorName, episodeId }: Props) {
+  const [isMobile, setIsMobile] = useState(false)
+  const [vertical, setVertical] = useState(false)
+  const [settings, setSettings] = useState<Settings>(() => {
+    try {
+      const saved = typeof window !== 'undefined' ? localStorage.getItem('reading_settings') : null
+      return saved ? { ...DEFAULTS, ...JSON.parse(saved) } : DEFAULTS
     } catch { return DEFAULTS }
   })
 
