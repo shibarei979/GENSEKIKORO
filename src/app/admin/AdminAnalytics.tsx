@@ -89,7 +89,7 @@ export default function AdminAnalytics({
               <div style={{fontSize:11,fontWeight:600,color:'#94a3b8',marginBottom:8}}>作品数</div>
               <ResponsiveContainer width="100%" height={220}>
                 <PieChart>
-                  <Pie data={genreStats} dataKey="count" nameKey="genre" cx="50%" cy="50%" outerRadius={80} label={({name,percent})=>`${name} ${(percent*100).toFixed(0)}%`} labelLine={false}>
+                  <Pie data={genreStats} dataKey="count" nameKey="genre" cx="50%" cy="50%" outerRadius={80} label={({name,percent})=>`${name} ${((percent??0)*100).toFixed(0)}%`} labelLine={false}>
                     {genreStats.map((_,i)=><Cell key={i} fill={COLORS[i%COLORS.length]}/>)}
                   </Pie>
                   <Tooltip formatter={(v:any,n:any)=>[v,n]}/>
@@ -305,7 +305,7 @@ export default function AdminAnalytics({
                       {name:'未利用',value:Math.max(0,speechStats.total-speechStats.used)},
                     ]}
                     dataKey="value" cx="50%" cy="50%" outerRadius={80} innerRadius={50}
-                    label={({name,percent})=>`${name} ${(percent*100).toFixed(0)}%`}
+                    label={({name,percent})=>`${name} ${((percent??0)*100).toFixed(0)}%`}
                   >
                     <Cell fill="#F26A21"/>
                     <Cell fill="#e2e8f0"/>
