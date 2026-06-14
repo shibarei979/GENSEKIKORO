@@ -1,5 +1,5 @@
 import { createClient } from '@/lib/supabase/server'
-export const revalidate = 10 // 10秒キャッシュ
+export const revalidate = 10
 import Header from '@/components/layout/Header'
 import Footer from '@/components/layout/Footer'
 import AdBanner from '@/components/layout/AdBanner'
@@ -82,7 +82,6 @@ export default async function RankingPage({ searchParams }: Props) {
     if (serial === 'complete') q = (q as any).eq('is_serial', false)
     if (serial === 'new')      q = (q as any).gte('created_at', new Date(Date.now()-30*24*60*60*1000).toISOString())
     if (serial === 'newbie') {
-      // 新人：投稿作品数が3件以下の作者
       const { data: newbieAuthors } = await supabase
         .from('novels').select('author_id').eq('published', true)
       const authorCount: Record<string,number> = {}
@@ -175,18 +174,32 @@ export default async function RankingPage({ searchParams }: Props) {
   const periodLabel = periodOptions.find(o=>o.value===period)?.label||'週間'
   const scoreLabel  = period === 'rising' ? '↑' : '♡'
 
+  // モバイル用フィルターピルのスタイル
+  const filterPill = (active: boolean) => ({
+    padding:'6px 14px',
+    borderRadius:20,
+    fontSize:13,
+    fontWeight:600 as const,
+    textDecoration:'none' as const,
+    whiteSpace:'nowrap' as const,
+    flexShrink:0 as const,
+    background: active ? '#F26A21' : '#FFF1E6',
+    color: active ? '#fff' : '#F26A21',
+    border:`1px solid ${active ? '#F26A21' : '#f5b080'}`,
+  })
+
   return (
     <div style={{minHeight:'100vh',background:'#fff',fontFamily:"'Noto Sans JP',sans-serif"}}>
       <Header profile={profile} user={user} />
 
-      <div className="main-layout" style={{maxWidth:1200,margin:'0 auto',padding:'28px 32px',display:'flex',gap:20,alignItems:'flex-start'}}>
+      <div className="main-layout" style={{maxWidth:1200,margin:'0 auto',padding:'20px 32px',display:'flex',gap:20,alignItems:'flex-start'}}>
         <div style={{flex:1,minWidth:0}}>
-          <div style={{marginBottom:16}}>
-            <h1 style={{fontSize:22,fontWeight:700,color:'#2B211B',marginBottom:4}}>ランキング</h1>
+          <div style={{marginBottom:12}}>
+            <h1 style={{fontSize:20,fontWeight:700,color:'#2B211B',marginBottom:0}}>ランキング</h1>
           </div>
 
-          {/* フィルターバー */}
-          <div className="ranking-filter" style={{background:'#FFF9F2',border:'1px solid #F0D9C9',borderRadius:12,padding:'14px 18px',marginBottom:16}}>
+          {/* ===== デスクトップ：フィルターバー（既存） ===== */}
+          <div className="desktop-only ranking-filter" style={{background:'#FFF9F2',border:'1px solid #F0D9C9',borderRadius:12,padding:'14px 18px',marginBottom:16}}>
             <div style={{marginBottom:10}}>
               <div style={{fontSize:11,color:'#77706A',fontWeight:600,marginBottom:5}}>期間</div>
               <div style={{display:'flex',gap:6,flexWrap:'wrap'}}>
@@ -243,11 +256,52 @@ export default async function RankingPage({ searchParams }: Props) {
             </div>
           </div>
 
+          {/* ===== モバイル：フィルター（横スクロールピル） ===== */}
+          <div className="mobile-only" style={{marginBottom:12}}>
+            {/* 期間 */}
+            <div style={{overflowX:'auto',WebkitOverflowScrolling:'touch' as any,scrollbarWidth:'none' as any,marginBottom:8}}>
+              <div style={{display:'flex',gap:8,paddingBottom:4,width:'max-content'}}>
+                {periodOptions.map(o => (
+                  <Link key={o.value} href={buildUrl(o.value,novelType,serial)} style={filterPill(period===o.value)}>
+                    {o.label}
+                  </Link>
+                ))}
+              </div>
+            </div>
+            {/* 作品の長さ */}
+            <div style={{overflowX:'auto',WebkitOverflowScrolling:'touch' as any,scrollbarWidth:'none' as any,marginBottom:8}}>
+              <div style={{display:'flex',gap:8,paddingBottom:4,width:'max-content'}}>
+                {typeOptions.map(o => (
+                  <Link key={o.value} href={buildUrl(period,o.value,serial)} style={filterPill(novelType===o.value)}>
+                    {o.label}
+                  </Link>
+                ))}
+                <span style={{color:'#E0D0C0',padding:'6px 4px',flexShrink:0}}>|</span>
+                {serialOptions.map(o => (
+                  <Link key={o.value} href={buildUrl(period,novelType,o.value)} style={filterPill(serial===o.value)}>
+                    {o.label}
+                  </Link>
+                ))}
+              </div>
+            </div>
+            {/* ジャンル */}
+            <div style={{overflowX:'auto',WebkitOverflowScrolling:'touch' as any,scrollbarWidth:'none' as any}}>
+              <div style={{display:'flex',gap:8,paddingBottom:4,width:'max-content'}}>
+                {genres.map(g => (
+                  <Link key={g} href={`/ranking?period=${period}&type=${encodeURIComponent(novelType)}&serial=${serial}&genre=${encodeURIComponent(g)}&page=1`}
+                    style={filterPill(genre===g)}>
+                    {g}
+                  </Link>
+                ))}
+              </div>
+            </div>
+          </div>
+
           {/* ランキング本体 */}
           <div style={{background:'#fff',border:'1px solid #F0D9C9',borderRadius:12,overflow:'hidden'}}>
-            <div style={{padding:'12px 16px',borderBottom:'1px solid #F0D9C9',background:'#FFF9F2',display:'flex',alignItems:'center',justifyContent:'space-between'}}>
+            <div style={{padding:'10px 14px',borderBottom:'1px solid #F0D9C9',background:'#FFF9F2',display:'flex',alignItems:'center',justifyContent:'space-between'}}>
               <div style={{display:'flex',alignItems:'center',gap:8}}>
-                <span style={{fontSize:16,fontWeight:700,color:'#2B211B'}}>{periodLabel}ランキング</span>
+                <span style={{fontSize:15,fontWeight:700,color:'#2B211B'}}>{periodLabel}ランキング</span>
                 <span style={{fontSize:11,color:'#77706A'}}>{novelType!=='全て'&&novelType}{serial==='serial'?' 連載中':serial==='complete'?' 完結':serial==='new'?' 新作':''}</span>
               </div>
               <span style={{fontSize:12,color:'#77706A'}}>{total}件</span>
@@ -262,33 +316,33 @@ export default async function RankingPage({ searchParams }: Props) {
               return (
                 <div key={n.id} style={{borderBottom:'1px solid #FFF1E6'}}>
                   <NovelPreviewPopup novel={{...n, like_count: n.like_count||0}}>
-                  <div style={{display:'flex',gap:14,padding:'16px 20px',alignItems:'flex-start',cursor:'pointer'}}>
-                    <div style={{width:32,textAlign:'center',flexShrink:0,paddingTop:2}}>
+                  <div style={{display:'flex',gap:12,padding:'12px 14px',alignItems:'flex-start',cursor:'pointer'}}>
+                    <div style={{width:28,textAlign:'center',flexShrink:0,paddingTop:2}}>
                       <span style={{fontSize:rankSize(abs),fontWeight:800,color:rankColor(abs),fontFamily:"'Noto Serif JP',serif"}}>{abs+1}</span>
                     </div>
                     <div style={{flex:1,minWidth:0}}>
-                      <div style={{display:'flex',gap:6,marginBottom:4,flexWrap:'wrap',alignItems:'center'}}>
-                        <span style={{fontSize:10,background:'#FFF1E6',color:'#F26A21',border:'1px solid #f5b080',padding:'1px 6px',borderRadius:3}}>{n.genre}</span>
-                        <span style={{fontSize:10,background:'#eff6ff',color:'#2563eb',border:'1px solid #bfdbfe',padding:'1px 6px',borderRadius:3}}>{n.novel_type}</span>
-                        {n.is_serial && <span style={{fontSize:10,background:'#f0fdf4',color:'#15803d',border:'1px solid #86efac',padding:'1px 6px',borderRadius:3}}>連載中</span>}
+                      <div style={{display:'flex',gap:4,marginBottom:3,flexWrap:'wrap',alignItems:'center'}}>
+                        <span style={{fontSize:10,background:'#FFF1E6',color:'#F26A21',border:'1px solid #f5b080',padding:'1px 5px',borderRadius:3}}>{n.genre}</span>
+                        <span style={{fontSize:10,background:'#eff6ff',color:'#2563eb',border:'1px solid #bfdbfe',padding:'1px 5px',borderRadius:3}}>{n.novel_type}</span>
+                        {n.is_serial && <span style={{fontSize:10,background:'#f0fdf4',color:'#15803d',border:'1px solid #86efac',padding:'1px 5px',borderRadius:3}}>連載中</span>}
                       </div>
-                      <div style={{fontSize:16,fontWeight:700,color:'#2B211B',marginBottom:3,lineHeight:1.4}}>{n.title}</div>
-                      <div style={{fontSize:12,color:'#77706A',marginBottom:6}}>作者：{n.display_name}</div>
+                      <div style={{fontSize:14,fontWeight:700,color:'#2B211B',marginBottom:2,lineHeight:1.4}}>{n.title}</div>
+                      <div style={{fontSize:11,color:'#77706A',marginBottom:4}}>作者：{n.display_name}</div>
                       {n.summary && (
-                        <div style={{fontSize:12,color:'#5a3a20',lineHeight:1.7,marginBottom:7,overflow:'hidden',display:'-webkit-box',WebkitLineClamp:6,WebkitBoxOrient:'vertical' as any}}>
+                        <div style={{fontSize:12,color:'#5a3a20',lineHeight:1.7,marginBottom:5,overflow:'hidden',display:'-webkit-box',WebkitLineClamp:3,WebkitBoxOrient:'vertical' as any}}>
                           {n.summary}
                         </div>
                       )}
                       {(n.tags||[]).length > 0 && (
-                        <div style={{display:'flex',gap:4,flexWrap:'wrap',marginBottom:7}}>
-                          {(n.tags as string[]).map((tag: string) => (
-                            <span key={tag} style={{fontSize:10,background:'#FFF9F2',color:'#77706A',border:'1px solid #F0D9C9',padding:'1px 6px',borderRadius:3}}>#{tag}</span>
+                        <div style={{display:'flex',gap:4,flexWrap:'wrap',marginBottom:5}}>
+                          {(n.tags as string[]).slice(0,4).map((tag: string) => (
+                            <span key={tag} style={{fontSize:10,background:'#FFF9F2',color:'#77706A',border:'1px solid #F0D9C9',padding:'1px 5px',borderRadius:3}}>#{tag}</span>
                           ))}
                         </div>
                       )}
-                      <div style={{display:'flex',gap:12,fontSize:11,color:'#B8AEA8'}}>
+                      <div style={{display:'flex',gap:10,fontSize:11,color:'#B8AEA8',flexWrap:'wrap'}}>
                         {n.char_count > 0 && <span>{fmtChar(n.char_count)}</span>}
-                        <span>最終更新：{fmtDate(n.last_updated)}</span>
+                        <span>更新：{fmtDate(n.last_updated)}</span>
                         <span style={{color:'#77706A',fontWeight:600}}>{scoreLabel} {fmtNum(n.score)}</span>
                       </div>
                     </div>
@@ -299,7 +353,6 @@ export default async function RankingPage({ searchParams }: Props) {
             })}
           </div>
 
-          {/* もっと見る */}
           {!showMore && total > PAGE_SIZE && (
             <div style={{textAlign:'center',padding:'16px'}}>
               <Link href={`/ranking?period=${period}&type=${encodeURIComponent(novelType)}&serial=${serial}&page=all`}
@@ -309,7 +362,6 @@ export default async function RankingPage({ searchParams }: Props) {
             </div>
           )}
 
-          {/* ページネーション */}
           {totalPages > 1 && (
             <div style={{display:'flex',justifyContent:'center',gap:8,marginTop:20,flexWrap:'wrap'}}>
               {page > 1 && (
@@ -339,12 +391,22 @@ export default async function RankingPage({ searchParams }: Props) {
               )}
             </div>
           )}
+
+          {/* モバイルボトムナビ余白 */}
+          <div className="mobile-only" style={{height:80}}/>
         </div>
         <div className="desktop-only"><Sidebar /></div>
       </div>
 
       <AdBanner />
       <Footer user={user} />
+
+      <style>{`
+        /* モバイルフィルター横スクロールバー非表示 */
+        @media (max-width: 768px) {
+          .mobile-only div::-webkit-scrollbar { display: none; }
+        }
+      `}</style>
     </div>
   )
 }

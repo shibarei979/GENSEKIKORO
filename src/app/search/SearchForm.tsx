@@ -62,7 +62,15 @@ export default function SearchForm({
   const [showExHistory,      setShowExHistory]      = useState(false)
   const [showMoods,          setShowMoods]          = useState(false)
   const [activeMood,         setActiveMood]         = useState<string|null>(null)
+  const [isMobile,           setIsMobile]           = useState(false)
   const MAX_HISTORY = 10
+
+  useEffect(() => {
+    const check = () => setIsMobile(window.innerWidth <= 768)
+    check()
+    window.addEventListener('resize', check)
+    return () => window.removeEventListener('resize', check)
+  }, [])
 
   useEffect(() => {
     try {
@@ -131,15 +139,16 @@ export default function SearchForm({
   } as const
 
   return (
-    <div style={{background:'#fff',border:'1px solid #F0D9C9',borderRadius:12,padding:'20px',marginBottom:16}}>
+    <div style={{background:'#fff',border:'1px solid #F0D9C9',borderRadius:12,padding: isMobile ? '16px' : '20px',marginBottom:16}}>
       <div style={{fontSize:15,fontWeight:700,color:'#2B211B',marginBottom:14,display:'flex',alignItems:'center',gap:8}}>
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#F26A21" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
           <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
         </svg>
-        作品を探す
+        探す
       </div>
 
-      <div style={{display:'flex',gap:10,marginBottom:12}}>
+      {/* キーワード・除外：モバイルは1列、デスクトップは2列 */}
+      <div style={{display:'flex',flexDirection: isMobile ? 'column' : 'row',gap:10,marginBottom:12}}>
         <div style={{flex:1}}>
           <div style={{fontSize:11,color:'#77706A',fontWeight:600,marginBottom:4}}>キーワード</div>
           <input value={q} onChange={e=>setQ(e.target.value)} onKeyDown={handleKeyDown}
@@ -313,7 +322,8 @@ export default function SearchForm({
               ))}
             </div>
           </div>
-          <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:12,marginBottom:12}}>
+          {/* モバイルは1列、デスクトップは2列 */}
+          <div style={{display:'grid',gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr',gap:12,marginBottom:12}}>
             <div>
               <div style={{fontSize:11,color:'#77706A',fontWeight:600,marginBottom:6}}>作品の長さ</div>
               <div style={{display:'flex',gap:6}}>
@@ -324,7 +334,7 @@ export default function SearchForm({
             </div>
             <div>
               <div style={{fontSize:11,color:'#77706A',fontWeight:600,marginBottom:6}}>連載状況</div>
-              <div style={{display:'flex',gap:6}}>
+              <div style={{display:'flex',gap:6,flexWrap:'wrap'}}>
                 <button onClick={()=>setSerial('')}                          style={pill(!serial)}>すべて</button>
                 <button onClick={()=>setSerial(serial==='serial'?'':'serial')}     style={pill(serial==='serial')}>連載中</button>
                 <button onClick={()=>setSerial(serial==='complete'?'':'complete')} style={pill(serial==='complete')}>完結</button>
@@ -333,7 +343,7 @@ export default function SearchForm({
           </div>
           <div style={{marginBottom:12}}>
             <div style={{fontSize:11,color:'#77706A',fontWeight:600,marginBottom:6}}>タグ</div>
-            <div style={{display:'flex',gap:6,marginBottom:8,alignItems:'center'}}>
+            <div style={{display:'flex',gap:6,marginBottom:8,alignItems:'center',flexWrap:'wrap'}}>
               <input
                 onKeyDown={e=>{
                   if(e.key==='Enter'&&(e.target as HTMLInputElement).value.trim()){
@@ -342,7 +352,7 @@ export default function SearchForm({
                     ;(e.target as HTMLInputElement).value=''
                   }
                 }}
-                placeholder="タグを入力してEnter" style={{...inp,width:'40%'}}/>
+                placeholder="タグを入力してEnter" style={{...inp,width: isMobile ? '100%' : '40%'}}/>
               {tags.length > 0 && (
                 <div style={{display:'flex',gap:4,flexWrap:'wrap'}}>
                   {tags.map(t => (
@@ -372,17 +382,23 @@ export default function SearchForm({
               placeholder="作者名を入力..."
               style={{width:'100%',padding:'7px 10px',border:'1.5px solid #F0D9C9',borderRadius:8,fontSize:12,outline:'none'}}/>
           </div>
-
         </div>
       )}
 
-      <div style={{display:'flex',gap:10,alignItems:'center',justifyContent:'space-between',marginTop:12}}>
+      <div style={{
+        display:'flex',
+        flexDirection: isMobile ? 'column' : 'row',
+        gap: isMobile ? 10 : 0,
+        alignItems: isMobile ? 'stretch' : 'center',
+        justifyContent: isMobile ? 'flex-start' : 'space-between',
+        marginTop:12,
+      }}>
         <div style={{display:'flex',alignItems:'center',gap:8}}>
           <span style={{fontSize:11,color:'#77706A',fontWeight:600}}>並び順</span>
           <button onClick={()=>setSort('new')}  style={pill(sort==='new'&&!discoverMode)}>新着順</button>
           <button onClick={()=>setSort('like')} style={pill(sort==='like'&&!discoverMode)}>いいね順</button>
         </div>
-        <div style={{display:'flex',gap:8,alignItems:'center'}}>
+        <div style={{display:'flex',gap:8,alignItems:'center',justifyContent: isMobile ? 'space-between' : 'flex-end'}}>
           {(q||exclude||genre||type||serial||tags.length>0||author) && (
             <button onClick={()=>{setQ('');setExclude('');setGenre('');setType('');setSerial('');setTags([]);setSort('new');setDiscoverMode(false);setAuthor('');router.push('/search')}}
               style={{fontSize:12,color:'#B8AEA8',background:'none',border:'none',cursor:'pointer'}}>
@@ -390,8 +406,12 @@ export default function SearchForm({
             </button>
           )}
           <button onClick={handleSearch}
-            style={{padding:'10px 32px',background:'#F26A21',color:'#fff',border:'none',borderRadius:8,fontSize:14,fontWeight:700,cursor:'pointer'}}>
-            検　索
+            style={{
+              padding:'10px 32px',
+              background:'#F26A21',color:'#fff',border:'none',borderRadius:8,fontSize:14,fontWeight:700,cursor:'pointer',
+              ...(isMobile ? {flex:1} : {}),
+            }}>
+            この条件で検索する
           </button>
         </div>
       </div>
