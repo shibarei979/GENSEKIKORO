@@ -304,7 +304,8 @@ footer a:hover { color: #F26A21 !important; opacity: 1; }
     min-width: 60px !important;
   }
 
-  * { writing-mode: horizontal-tb !important; }
+  /* ↓ vertical-body クラスを除外して縦書きを保護 */
+  *:not(.vertical-body):not(.vertical-body *) { writing-mode: horizontal-tb !important; }
 
   div[style*="maxWidth:900"],
   div[style*="maxWidth:1200"],

@@ -61,9 +61,7 @@ export default function MobileEpisodeBody({ title, body, preface, afterword, aut
   const scrollRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
-    // window.innerHeight でアドレスバーを除いた実際の高さを取得
     setContainerHeight(window.innerHeight - 200)
-
     try {
       const saved = localStorage.getItem('reading_settings')
       if (saved) {
@@ -74,7 +72,6 @@ export default function MobileEpisodeBody({ title, body, preface, afterword, aut
     } catch {}
   }, [])
 
-  // 縦書き切替時に右端（冒頭）へスクロール
   useEffect(() => {
     if (isVertical && scrollRef.current) {
       setTimeout(() => {
@@ -115,7 +112,7 @@ export default function MobileEpisodeBody({ title, body, preface, afterword, aut
     </div>
   ) : null
 
-  // ===== 縦書き：パソコン版VerticalBodyと全く同じ構造 =====
+  // ===== 縦書き =====
   if (isVertical) {
     return (
       <div style={{background:'#fff',border:'1px solid #F0D9C9',borderRadius:12,overflow:'hidden',marginBottom:16}}>
@@ -135,40 +132,57 @@ export default function MobileEpisodeBody({ title, body, preface, afterword, aut
           </div>
         )}
 
+        {/* vertical-body クラスで globals.css の * { writing-mode: horizontal-tb !important } を回避 */}
         <style>{`
+          .vertical-body, .vertical-body * {
+            writing-mode: vertical-rl !important;
+            text-orientation: mixed !important;
+          }
+          .vertical-body .v-char {
+            display: inline-block !important;
+            writing-mode: vertical-rl !important;
+          }
+          .vertical-body .v-char-rotate {
+            display: inline-block !important;
+            writing-mode: vertical-rl !important;
+            transform: rotate(90deg) !important;
+          }
           .v-scroll-m::-webkit-scrollbar { height: 10px; }
           .v-scroll-m::-webkit-scrollbar-track { background: #FFF1E6; border-radius: 5px; }
           .v-scroll-m::-webkit-scrollbar-thumb { background: #F26A21; border-radius: 5px; border: 2px solid #FFF1E6; }
           .v-scroll-m { scrollbar-width: thin; scrollbar-color: #F26A21 #FFF1E6; }
         `}</style>
 
-        {/* パソコン版と全く同じ構造：外側で高さ固定＋横スクロール、内側でvertical-rl */}
         <div
           ref={scrollRef}
           className="v-scroll-m"
           style={{
             overflowX: 'scroll',
             overflowY: 'hidden',
-            height: containerHeight,  // window.innerHeightから計算した実ピクセル値
+            height: containerHeight,
             paddingBottom: 4,
           }}
         >
-          <div style={{
-            writingMode: 'vertical-rl',
-            textOrientation: 'mixed',
-            display: 'inline-block',
-            padding: '24px 16px 24px 32px',
-            height: 'calc(100% - 18px)',  // パソコン版と同じ
-            boxSizing: 'border-box',
-          }}>
+          {/* vertical-body クラスを付けることで writing-mode の強制上書きを防ぐ */}
+          <div
+            className="vertical-body"
+            style={{
+              writingMode: 'vertical-rl',
+              textOrientation: 'mixed',
+              display: 'inline-block',
+              padding: '24px 16px 24px 32px',
+              height: 'calc(100% - 18px)',
+              boxSizing: 'border-box',
+            }}
+          >
             {/* タイトル */}
-            <div style={{display:'inline-block', marginRight:'2em', verticalAlign:'top'}}>
+            <div style={{display:'inline-block', marginRight:'2em', verticalAlign:'top', writingMode:'vertical-rl'}}>
               <div style={{fontSize: settings.fontSize + 4, fontWeight:700, color:'#2B211B', fontFamily, lineHeight:1.8}}>
                 {title}
               </div>
             </div>
             {/* 本文 */}
-            <div style={{display:'inline-block', fontSize: settings.fontSize, lineHeight: settings.lineHeight, color:'#2B211B', fontFamily, wordBreak:'break-all', verticalAlign:'top'}}>
+            <div style={{display:'inline-block', fontSize: settings.fontSize, lineHeight: settings.lineHeight, color:'#2B211B', fontFamily, wordBreak:'break-all', verticalAlign:'top', writingMode:'vertical-rl'}}>
               <VerticalText text={body}/>
             </div>
           </div>
