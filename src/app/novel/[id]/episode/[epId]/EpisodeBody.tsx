@@ -57,328 +57,216 @@ function VerticalText({ text }: { text: string }) {
 }
 
 // テキストのクリーニング（ルビ・装飾記法を除去して自然な読み上げテキストに）
+// テキストのクリーニング
 function cleanForSpeech(text: string): string {
   return text
-    .replace(/｜([^《]+)《[^》]+》/g, '$1')   // ルビ：漢字だけ残す
-    .replace(/《《([^》]+)》》/g, '$1')         // 強調記法除去
-    .replace(/<[^>]+>/g, '')                    // HTMLタグ除去
-    .replace(/[#*`]/g, '')                      // Markdown記号除去
-    .replace(/\n{3,}/g, '\n\n')                 // 連続改行を圧縮
-    .replace(/　/g, '')                         // 全角スペース除去（読み上げでの「ぜんかくすぺーす」防止）
+    .replace(/｜([^《]+)《[^》]+》/g, '$1')
+    .replace(/《《([^》]+)》》/g, '$1')
+    .replace(/<[^>]+>/g, '')
+    .replace(/[#*`]/g, '')
+    .replace(/　/g, '')
+    .replace(/\n{3,}/g, '\n\n')
     .trim()
 }
 
-// ===== 読み上げフック =====
-function useSpeech(text: string, episodeId?: string) {
+// ===== 読み上げフック（1つのUtteranceで全文→カクカクなし） =====
+function useSpeech(text: string) {
   const [isPlaying, setIsPlaying] = useState(false)
   const [isPaused,  setIsPaused]  = useState(false)
   const [rate,      setRate]      = useState(1.0)
-  const [progress,  setProgress]  = useState(0)
   const [supported, setSupported] = useState(false)
-  const [chunkIdx,  setChunkIdx]  = useState(0)
+  const [voices,    setVoices]    = useState<SpeechSynthesisVoice[]>([])
+  const [voiceIdx,  setVoiceIdx]  = useState(-1) // -1=デフォルト
 
-  const chunksRef  = useRef<string[]>([])
   const rateRef    = useRef(1.0)
-  const pausedRef  = useRef(false)
-  const playingRef = useRef(false)
+  const voiceRef   = useRef<SpeechSynthesisVoice | null>(null)
+  const timerRef   = useRef<ReturnType<typeof setInterval> | null>(null)
 
-  // テキストを段落単位に分割（500〜800文字）
-  // → チャンクを大きくするほどつなぎ目が減り滑らかになる
   useEffect(() => {
-    const clean = cleanForSpeech(text)
-    // 段落（空行）で分割してから結合
-    const paras = clean.split(/\n\n+/).filter(p => p.trim().length > 0)
-    const chunks: string[] = []
-    let cur = ''
-    for (const p of paras) {
-      if ((cur + p).length > 600 && cur.length > 0) {
-        chunks.push(cur.trim())
-        cur = p
-      } else {
-        cur = cur ? cur + '\n' + p : p
+    if (typeof window === 'undefined' || !('speechSynthesis' in window)) return
+    setSupported(true)
+    const load = () => {
+      const all   = window.speechSynthesis.getVoices()
+      const jaVox = all.filter(v => v.lang.startsWith('ja'))
+      setVoices(jaVox)
+      // 初回：自然な日本語音声を自動選択
+      if (voiceRef.current === null && jaVox.length > 0) {
+        const prefer = jaVox.findIndex(v =>
+          v.name.includes('Kyoko') || v.name.includes('Otoya') ||
+          v.name.includes('Google') || v.name.includes('Microsoft')
+        )
+        const idx = prefer >= 0 ? prefer : 0
+        voiceRef.current = jaVox[idx]
+        setVoiceIdx(idx)
       }
     }
-    if (cur.trim().length > 0) chunks.push(cur.trim())
-    chunksRef.current = chunks.length > 0 ? chunks : [clean]
-  }, [text])
-
-  useEffect(() => {
-    setSupported(typeof window !== 'undefined' && 'speechSynthesis' in window)
+    load()
+    window.speechSynthesis.onvoiceschanged = load
   }, [])
 
-  useEffect(() => {
-    if (!episodeId) return
-    try {
-      const saved = localStorage.getItem(`speech_pos_${episodeId}`)
-      if (saved) setChunkIdx(Math.max(0, parseInt(saved, 10)))
-    } catch {}
-  }, [episodeId])
+  // iOS: paused状態を定期的にresume
+  const startTimer = () => {
+    if (timerRef.current) return
+    timerRef.current = setInterval(() => {
+      if (window.speechSynthesis.paused) window.speechSynthesis.resume()
+    }, 10000)
+  }
+  const stopTimer = () => {
+    if (timerRef.current) { clearInterval(timerRef.current); timerRef.current = null }
+  }
 
-  const savePos = useCallback((idx: number) => {
-    if (!episodeId) return
-    try { localStorage.setItem(`speech_pos_${episodeId}`, String(idx)) } catch {}
-  }, [episodeId])
+  useEffect(() => () => {
+    stopTimer()
+    if (typeof window !== 'undefined') window.speechSynthesis.cancel()
+  }, [])
 
-  const speakChunk = useCallback((idx: number) => {
-    const chunks = chunksRef.current
-    if (idx >= chunks.length || pausedRef.current) {
-      if (idx >= chunks.length) {
-        playingRef.current = false
-        setIsPlaying(false)
-        setIsPaused(false)
-        setProgress(1)
-        savePos(0)
-      }
-      return
-    }
-
-    const utter = new SpeechSynthesisUtterance(chunks[idx])
+  function buildUtter(): SpeechSynthesisUtterance {
+    const clean = cleanForSpeech(text)
+    const utter = new SpeechSynthesisUtterance(clean)
     utter.lang  = 'ja-JP'
     utter.rate  = rateRef.current
+    if (voiceRef.current) utter.voice = voiceRef.current
+    return utter
+  }
 
-    // 日本語音声を優先して選択（より自然な音声）
-    const voices = window.speechSynthesis.getVoices()
-    const jaVoice = voices.find(v =>
-      v.lang.startsWith('ja') && (v.name.includes('Kyoko') || v.name.includes('Otoya') || v.name.includes('Google'))
-    ) || voices.find(v => v.lang.startsWith('ja'))
-    if (jaVoice) utter.voice = jaVoice
-
-    utter.onstart = () => {
-      setChunkIdx(idx)
-      setProgress(idx / chunks.length)
-      savePos(idx)
-    }
-
-    utter.onend = () => {
-      if (!pausedRef.current && playingRef.current) {
-        // 次チャンクをわずかに遅延して自然なつなぎに
-        setTimeout(() => speakChunk(idx + 1), 20)
-      }
-    }
-
-    utter.onerror = (e) => {
-      // interrupted は一時停止時に発生するので無視
-      if (e.error === 'interrupted') return
-      playingRef.current = false
-      setIsPlaying(false)
-      setIsPaused(false)
-    }
-
-    window.speechSynthesis.speak(utter)
-  }, [savePos])
-
-  // iOSのspeechSynthesis 15秒で止まるバグの対策
-  // → 定期的にresume()を呼ぶ
-  useEffect(() => {
-    if (!supported) return
-    const timer = setInterval(() => {
-      if (playingRef.current && window.speechSynthesis.paused) {
-        window.speechSynthesis.resume()
-      }
-    }, 10000)
-    return () => clearInterval(timer)
-  }, [supported])
-
-  // ページ離脱時に停止
-  useEffect(() => {
-    return () => {
-      if (typeof window !== 'undefined') {
-        pausedRef.current = true
-        playingRef.current = false
-        window.speechSynthesis.cancel()
-      }
-    }
-  }, [])
-
-  function play(startIdx?: number) {
+  function play() {
     if (!supported) return
     window.speechSynthesis.cancel()
-    pausedRef.current  = false
-    playingRef.current = true
-    const idx = startIdx ?? chunkIdx
-    setIsPlaying(true)
-    setIsPaused(false)
-    // 音声一覧が読み込まれてから開始
-    const go = () => speakChunk(idx)
-    if (window.speechSynthesis.getVoices().length === 0) {
-      window.speechSynthesis.onvoiceschanged = go
-    } else {
-      go()
+    const utter = buildUtter()
+    utter.onstart = () => { setIsPlaying(true); setIsPaused(false) }
+    utter.onend   = () => { setIsPlaying(false); setIsPaused(false); stopTimer() }
+    utter.onerror = (e) => {
+      if (e.error === 'interrupted' || e.error === 'canceled') return
+      setIsPlaying(false); setIsPaused(false); stopTimer()
     }
+    window.speechSynthesis.speak(utter)
+    startTimer()
   }
 
   function pause() {
     if (!supported) return
-    pausedRef.current  = true
-    playingRef.current = false
-    window.speechSynthesis.cancel()
-    setIsPaused(true)
-    setIsPlaying(false)
+    window.speechSynthesis.pause()
+    setIsPaused(true); setIsPlaying(false)
+  }
+
+  function resumeSpeech() {
+    if (!supported) return
+    window.speechSynthesis.resume()
+    setIsPaused(false); setIsPlaying(true)
   }
 
   function stop() {
     if (!supported) return
-    pausedRef.current  = true
-    playingRef.current = false
     window.speechSynthesis.cancel()
-    setIsPlaying(false)
-    setIsPaused(false)
-    setChunkIdx(0)
-    setProgress(0)
-    savePos(0)
+    stopTimer()
+    setIsPlaying(false); setIsPaused(false)
   }
 
-  function resume() {
-    pausedRef.current  = false
-    playingRef.current = true
-    play(chunkIdx)
+  function changeRate(r: number) {
+    rateRef.current = r; setRate(r)
+    if (isPlaying || isPaused) { window.speechSynthesis.cancel(); setTimeout(play, 80) }
   }
 
-  function changeRate(newRate: number) {
-    rateRef.current = newRate
-    setRate(newRate)
-    if (playingRef.current) {
-      const idx = chunkIdx
-      window.speechSynthesis.cancel()
-      setTimeout(() => speakChunk(idx), 50)
-    }
+  function changeVoice(idx: number) {
+    voiceRef.current = voices[idx] ?? null; setVoiceIdx(idx)
+    if (isPlaying || isPaused) { window.speechSynthesis.cancel(); setTimeout(play, 80) }
   }
 
-  return {
-    isPlaying, isPaused, rate, progress, supported,
-    chunkIdx, totalChunks: chunksRef.current.length,
-    play, pause, stop, resume, changeRate,
-  }
+  return { isPlaying, isPaused, rate, supported, voices, voiceIdx, play, pause, resumeSpeech, stop, changeRate, changeVoice }
 }
 
 // ===== 読み上げパネル UI =====
-function SpeechPanel({ title, body, episodeId, isMobile }: { title: string; body: string; episodeId?: string; isMobile: boolean }) {
-  const fullText = `${title}。${body.replace(/<[^>]+>/g, '')}`
-  const { isPlaying, isPaused, rate, progress, supported, play, pause, stop, resume, changeRate } = useSpeech(fullText, episodeId)
+function SpeechPanel({ title, body, isMobile }: { title: string; body: string; isMobile: boolean }) {
+  const fullText = `${title}。\n${body}`
+  const { isPlaying, isPaused, rate, supported, voices, voiceIdx, play, pause, resumeSpeech, stop, changeRate, changeVoice } = useSpeech(fullText)
+  const [showVoice, setShowVoice] = useState(false)
 
   if (!supported) return null
 
   const RATES = [0.8, 1.0, 1.25, 1.5, 2.0]
-  const pct = Math.round(progress * 100)
 
   return (
-    <div style={{
-      background:'#fff',
-      border:'1.5px solid #F0D9C9',
-      borderRadius:12,
-      padding: isMobile ? '12px 14px' : '14px 18px',
-      marginBottom:12,
-    }}>
-      {/* タイトル行 */}
+    <div style={{background:'#fff',border:'1.5px solid #F0D9C9',borderRadius:12,padding: isMobile ? '12px 14px' : '14px 18px',marginBottom:12}}>
+      {/* 1行目：ラベル＋速度 */}
       <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',marginBottom:10}}>
         <div style={{display:'flex',alignItems:'center',gap:7}}>
-          {/* スピーカーアイコン */}
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#F26A21" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#F26A21" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
             <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/>
             <path d="M19.07 4.93a10 10 0 0 1 0 14.14"/>
             <path d="M15.54 8.46a5 5 0 0 1 0 7.07"/>
           </svg>
           <span style={{fontSize:13,fontWeight:700,color:'#2B211B'}}>聴く β</span>
-          <span style={{fontSize:10,color:'#B8AEA8',background:'#FFF9F2',border:'1px solid #F0D9C9',borderRadius:6,padding:'1px 6px'}}>
-            ブラウザ音声
-          </span>
         </div>
-
         {/* 速度ボタン */}
-        <div style={{display:'flex',gap:4}}>
+        <div style={{display:'flex',gap:3}}>
           {RATES.map(r => (
-            <button key={r} onClick={()=>changeRate(r)}
-              style={{
-                padding:'2px 7px',fontSize:10,borderRadius:6,border:'1px solid',cursor:'pointer',
-                background: rate===r ? '#F26A21' : '#fff',
-                color: rate===r ? '#fff' : '#77706A',
-                borderColor: rate===r ? '#F26A21' : '#F0D9C9',
-                fontWeight: rate===r ? 700 : 400,
-              }}>
-              {r}x
-            </button>
+            <button key={r} onClick={()=>changeRate(r)} style={{
+              padding:'2px 7px',fontSize:10,borderRadius:6,border:'1px solid',cursor:'pointer',
+              background:rate===r?'#F26A21':'#fff',
+              color:rate===r?'#fff':'#77706A',
+              borderColor:rate===r?'#F26A21':'#F0D9C9',
+              fontWeight:rate===r?700:400,
+            }}>{r}x</button>
           ))}
         </div>
       </div>
 
-      {/* 進捗バー */}
-      <div style={{height:4,background:'#F0D9C9',borderRadius:2,overflow:'hidden',marginBottom:10,cursor:'pointer'}}
-        onClick={e => {
-          const rect = (e.currentTarget as HTMLDivElement).getBoundingClientRect()
-          const ratio = (e.clientX - rect.left) / rect.width
-          // チャンク位置にジャンプ（近似）
-        }}>
-        <div style={{
-          height:'100%',background:'#F26A21',borderRadius:2,
-          width:`${pct}%`,transition:'width .3s',
-        }}/>
-      </div>
-
-      {/* コントロールボタン */}
-      <div style={{display:'flex',alignItems:'center',gap:8}}>
+      {/* 2行目：操作ボタン＋状態 */}
+      <div style={{display:'flex',alignItems:'center',gap:10}}>
         {/* 停止 */}
         <button onClick={stop} disabled={!isPlaying && !isPaused}
-          style={{
-            width:32,height:32,borderRadius:'50%',
-            border:'1.5px solid #F0D9C9',background:'#fff',
-            cursor: isPlaying||isPaused ? 'pointer' : 'not-allowed',
-            display:'flex',alignItems:'center',justifyContent:'center',
-            opacity: isPlaying||isPaused ? 1 : 0.4,
-          }}>
-          <svg width="11" height="11" viewBox="0 0 24 24" fill="#77706A">
-            <rect x="3" y="3" width="18" height="18" rx="2"/>
-          </svg>
+          style={{width:34,height:34,borderRadius:'50%',border:'1.5px solid #F0D9C9',background:'#fff',cursor:isPlaying||isPaused?'pointer':'not-allowed',display:'flex',alignItems:'center',justifyContent:'center',opacity:isPlaying||isPaused?1:0.35}}>
+          <svg width="11" height="11" viewBox="0 0 24 24" fill="#77706A"><rect x="3" y="3" width="18" height="18" rx="2"/></svg>
         </button>
 
-        {/* 再生 / 一時停止 */}
-        <button
-          onClick={()=>{
-            if (isPlaying) pause()
-            else if (isPaused) resume()
-            else play()
-          }}
-          style={{
-            width:44,height:44,borderRadius:'50%',
-            border:'none',background:'#F26A21',
-            cursor:'pointer',
-            display:'flex',alignItems:'center',justifyContent:'center',
-            boxShadow:'0 2px 8px rgba(242,106,33,.35)',
-          }}>
+        {/* 再生/一時停止/再開 */}
+        <button onClick={()=>{ if(isPlaying) pause(); else if(isPaused) resumeSpeech(); else play() }}
+          style={{width:46,height:46,borderRadius:'50%',border:'none',background:'#F26A21',cursor:'pointer',display:'flex',alignItems:'center',justifyContent:'center',boxShadow:'0 2px 10px rgba(242,106,33,.35)'}}>
           {isPlaying ? (
-            // 一時停止アイコン
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="#fff">
-              <rect x="6" y="4" width="4" height="16" rx="1"/>
-              <rect x="14" y="4" width="4" height="16" rx="1"/>
-            </svg>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="#fff"><rect x="6" y="4" width="4" height="16" rx="1"/><rect x="14" y="4" width="4" height="16" rx="1"/></svg>
           ) : (
-            // 再生アイコン
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="#fff">
-              <polygon points="5 3 19 12 5 21 5 3"/>
-            </svg>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="#fff"><polygon points="5 3 19 12 5 21 5 3"/></svg>
           )}
         </button>
 
         {/* 状態テキスト */}
         <div style={{flex:1}}>
-          {isPlaying && (
-            <div style={{fontSize:11,color:'#F26A21',fontWeight:600}}>
-              読み上げ中… {pct > 0 ? `${pct}%` : ''}
-            </div>
-          )}
-          {isPaused && (
-            <div style={{fontSize:11,color:'#77706A'}}>一時停止中 — タップで再開</div>
-          )}
-          {!isPlaying && !isPaused && (
-            <div style={{fontSize:11,color:'#B8AEA8'}}>
-              {pct > 0 ? `${pct}% まで読みました` : '▶ を押して読み上げ開始'}
-            </div>
-          )}
+          {isPlaying  && <div style={{fontSize:11,color:'#F26A21',fontWeight:600}}>読み上げ中...</div>}
+          {isPaused   && <div style={{fontSize:11,color:'#77706A'}}>一時停止 — ▶ で再開</div>}
+          {!isPlaying && !isPaused && <div style={{fontSize:11,color:'#B8AEA8'}}>▶ を押して読み上げ開始</div>}
         </div>
 
-        {/* ブラウザ音声の注意 */}
-        {!isPlaying && !isPaused && (
-          <div style={{fontSize:10,color:'#B8AEA8',textAlign:'right',lineHeight:1.4}}>
-            端末の<br/>音声を使用
+        {/* 音声選択ボタン */}
+        {voices.length > 0 && (
+          <div style={{position:'relative'}}>
+            <button onClick={()=>setShowVoice(!showVoice)}
+              style={{fontSize:11,padding:'4px 10px',border:'1px solid #F0D9C9',borderRadius:8,background:showVoice?'#FFF1E6':'#fff',color:'#77706A',cursor:'pointer',display:'flex',alignItems:'center',gap:4}}>
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="3"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
+              音声
+              <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><polyline points="6 9 12 15 18 9"/></svg>
+            </button>
+            {showVoice && (
+              <>
+                <div style={{position:'fixed',inset:0,zIndex:98}} onClick={()=>setShowVoice(false)}/>
+                <div style={{position:'absolute',right:0,top:'calc(100% + 6px)',background:'#fff',border:'1px solid #F0D9C9',borderRadius:10,boxShadow:'0 4px 20px rgba(0,0,0,0.12)',minWidth:200,maxHeight:240,overflowY:'auto',zIndex:99}}>
+                  <div style={{padding:'8px 12px',fontSize:11,color:'#B8AEA8',borderBottom:'1px solid #F0D9C9',fontWeight:600}}>
+                    日本語音声を選択
+                  </div>
+                  {voices.map((v, i) => (
+                    <button key={i} onClick={()=>{changeVoice(i);setShowVoice(false)}}
+                      style={{
+                        width:'100%',padding:'9px 14px',textAlign:'left',background:voiceIdx===i?'#FFF1E6':'#fff',
+                        border:'none',borderBottom:'1px solid #FFF1E6',fontSize:12,
+                        color:voiceIdx===i?'#F26A21':'#2B211B',cursor:'pointer',
+                        fontWeight:voiceIdx===i?700:400,
+                      }}>
+                      {v.name}
+                      {voiceIdx===i && <span style={{marginLeft:6,fontSize:10}}>✓</span>}
+                    </button>
+                  ))}
+                </div>
+              </>
+            )}
           </div>
         )}
       </div>
@@ -386,13 +274,6 @@ function SpeechPanel({ title, body, episodeId, isMobile }: { title: string; body
   )
 }
 
-export default function EpisodeBody({ title, body, preface, afterword, authorName, episodeId }: Props) {
-  const [isMobile, setIsMobile] = useState(false)
-  const [vertical, setVertical] = useState(false)
-  const [settings, setSettings] = useState<Settings>(() => {
-    try {
-      const saved = typeof window !== 'undefined' ? localStorage.getItem('reading_settings') : null
-      return saved ? { ...DEFAULTS, ...JSON.parse(saved) } : DEFAULTS
     } catch { return DEFAULTS }
   })
 
@@ -424,7 +305,7 @@ export default function EpisodeBody({ title, body, preface, afterword, authorNam
   if (isMobile) {
     return (
       <>
-        <SpeechPanel title={title} body={body} episodeId={episodeId} isMobile={true}/>
+        <SpeechPanel title={title} body={body} isMobile={true}/>
         <MobileEpisodeBody title={title} body={body} preface={preface} afterword={afterword} authorName={authorName}/>
       </>
     )
@@ -433,7 +314,7 @@ export default function EpisodeBody({ title, body, preface, afterword, authorNam
   // ===== デスクトップ =====
   return (
     <>
-      <SpeechPanel title={title} body={body} episodeId={episodeId} isMobile={false}/>
+      <SpeechPanel title={title} body={body} isMobile={false}/>
       <div style={{background:'#fff',border:'1px solid #F0D9C9',borderRadius:12,overflow:'hidden',marginBottom:16}}>
         <div style={{padding:'8px 16px',borderBottom:'1px solid #FFF1E6',background:'#FFF9F2',display:'flex',justifyContent:'space-between',alignItems:'center'}}>
           <button onClick={toggleVertical}
