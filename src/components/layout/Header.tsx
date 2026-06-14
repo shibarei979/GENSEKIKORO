@@ -136,7 +136,8 @@ export default function Header({ profile, user, activeGenre }: Props) {
                         <span style={{fontSize:13,fontWeight:700,color:'#2B211B'}}>通知</span>
                         <button onClick={()=>setShowAllNotif(!showAllNotif)} style={{fontSize:11,color:'#F26A21',background:'none',border:'none',cursor:'pointer'}}>{showAllNotif?'‹ 閉じる':'もっと見る ›'}</button>
                       </div>
-                      {notifications.length === 0 ? <div style={{padding:'24px',textAlign:'center',fontSize:12,color:'#B8AEA8'}}>通知はありません</div>
+                      {notifications.length === 0
+                        ? <div style={{padding:'24px',textAlign:'center',fontSize:12,color:'#B8AEA8'}}>通知はありません</div>
                         : <div style={{overflowY:'auto',flex:1}}>{(showAllNotif?notifications:notifications.slice(0,5)).map(n=>(
                           <a key={n.id} href={n.link||'#'} onClick={()=>setShowNotif(false)} style={{display:'block',padding:'10px 14px',borderBottom:'1px solid #FFF1E6',textDecoration:'none',background:n.is_read?'#fff':'#FFF9F2'}}>
                             <div style={{fontSize:12,color:'#2B211B',lineHeight:1.6,marginBottom:2}}>{n.message}</div>
@@ -161,9 +162,6 @@ export default function Header({ profile, user, activeGenre }: Props) {
                       </div>
                       <Link href="/mypage" onClick={()=>setShowUserMenu(false)} style={{display:'flex',alignItems:'center',justifyContent:'space-between',padding:'11px 16px',borderBottom:'1px solid #FFF1E6',textDecoration:'none',color:'#2B211B',fontSize:13}}>
                         <span>マイページ</span><span style={{color:'#B8AEA8',fontSize:12}}>›</span>
-                      </Link>
-                      <Link href="/mission" onClick={()=>setShowUserMenu(false)} style={{display:'flex',alignItems:'center',justifyContent:'space-between',padding:'11px 16px',borderBottom:'1px solid #FFF1E6',textDecoration:'none',color:'#2B211B',fontSize:13}}>
-                        <span>🎯 ミッション</span><span style={{color:'#B8AEA8',fontSize:12}}>›</span>
                       </Link>
                       <button onClick={()=>{setShowSettingsModal(true);setShowUserMenu(false)}}
                         style={{display:'flex',alignItems:'center',justifyContent:'space-between',width:'100%',padding:'11px 16px',borderBottom:'1px solid #FFF1E6',background:'#fff',border:'none',cursor:'pointer',fontSize:13,color:'#2B211B'}}>
@@ -248,12 +246,12 @@ export default function Header({ profile, user, activeGenre }: Props) {
               )}
               <div style={{flex:1}}>
                 {[
-                  {label:'ホーム', href:'/'},
-                  {label:'ランキング', href:'/ranking'},
-                  {label:'作品を探す', href:'/search'},
-                  {label:'コンテスト', href:'/contests'},
-                  {label:'閲覧履歴', href:'/history'},
-                  {label:'🎯 ミッション', href:'/mission'},
+                  {label:'ホーム',       href:'/'},
+                  {label:'ランキング',    href:'/ranking'},
+                  {label:'作品を探す',    href:'/search'},
+                  {label:'コンテスト',    href:'/contests'},
+                  {label:'閲覧履歴',     href:'/history'},
+                  {label:'ミッション',    href:'/mission'},
                   ...(user ? [{label:'投稿する', href:'/post'},{label:'マイページ', href:'/mypage'}] : []),
                 ].map(item=>(
                   <Link key={item.href} href={item.href} onClick={()=>setShowMobileMenu(false)}
@@ -299,12 +297,12 @@ export default function Header({ profile, user, activeGenre }: Props) {
       {/* ===== デスクトップNAV ===== */}
       <nav className="desktop-header" style={{display:'flex',background:'#fff',borderBottom:'2px solid #F0D9C9'}}>
         <div style={{maxWidth:1200,margin:'0 auto',padding:'0 32px',display:'flex',gap:0,width:'100%'}}>
+          {/* 左側：メインナビ */}
           {[
-            {label:'ホーム', href:'/'},
+            {label:'ホーム',    href:'/'},
             {label:'ランキング', href:'/ranking'},
             {label:'作品を探す', href:'/search'},
             {label:'コンテスト', href:'/contests'},
-            {label:'🎯 ミッション', href:'/mission'},
           ].map(item=>(
             <Link key={item.href} href={item.href}
               style={{padding:'9px 16px',fontSize:13,whiteSpace:'nowrap',textDecoration:'none',display:'inline-block',fontWeight:500,color:'#77706A',borderBottom:'2px solid transparent',transition:'all .15s'}}>
@@ -312,8 +310,10 @@ export default function Header({ profile, user, activeGenre }: Props) {
             </Link>
           ))}
           <div style={{flex:1}}/>
+          {/* 右側：閲覧履歴・ミッション・マイページ */}
           {[
-            {label:'閲覧履歴', href:'/history'},
+            {label:'閲覧履歴',  href:'/history'},
+            {label:'ミッション', href:'/mission'},
             {label:'マイページ', href:'/mypage'},
           ].map(item=>(
             <Link key={item.href} href={item.href}
@@ -328,11 +328,11 @@ export default function Header({ profile, user, activeGenre }: Props) {
       <nav className="mobile-header" style={{position:'fixed',bottom:0,left:0,right:0,zIndex:49,background:'#fff',borderTop:'1px solid #F0D9C9',boxShadow:'0 -1px 8px rgba(0,0,0,0.06)'}}>
         <div style={{display:'flex',alignItems:'stretch'}}>
           {[
-            {href:'/',label:'ホーム',icon:(a:boolean)=><svg width="21" height="21" viewBox="0 0 24 24" fill={a?'#FFF1E6':'none'} stroke={a?'#F26A21':'#77706A'} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>},
-            {href:'/search',label:'探す',icon:(a:boolean)=><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke={a?'#F26A21':'#77706A'} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="7"/><line x1="16.5" y1="16.5" x2="22" y2="22"/></svg>},
-            {href:'/ranking',label:'ランキング',icon:(a:boolean)=><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke={a?'#F26A21':'#77706A'} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>},
-            {href:'/mission',label:'ミッション',icon:(a:boolean)=><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke={a?'#F26A21':'#77706A'} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>},
-            {href:user?'/mypage':'/auth/login',label:'マイページ',icon:(a:boolean)=><svg width="21" height="21" viewBox="0 0 24 24" fill={a?'#FFF1E6':'none'} stroke={a?'#F26A21':'#77706A'} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>},
+            {href:'/',      label:'ホーム',     icon:(a:boolean)=><svg width="21" height="21" viewBox="0 0 24 24" fill={a?'#FFF1E6':'none'} stroke={a?'#F26A21':'#77706A'} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>},
+            {href:'/search', label:'探す',      icon:(a:boolean)=><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke={a?'#F26A21':'#77706A'} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="7"/><line x1="16.5" y1="16.5" x2="22" y2="22"/></svg>},
+            {href:'/ranking',label:'ランキング', icon:(a:boolean)=><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke={a?'#F26A21':'#77706A'} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>},
+            {href:'/contests',label:'コンテスト',icon:(a:boolean)=><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke={a?'#F26A21':'#77706A'} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="8" r="6"/><path d="M15.477 12.89 17 22l-5-3-5 3 1.523-9.11"/></svg>},
+            {href:user?'/mypage':'/auth/login', label:'マイページ', icon:(a:boolean)=><svg width="21" height="21" viewBox="0 0 24 24" fill={a?'#FFF1E6':'none'} stroke={a?'#F26A21':'#77706A'} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>},
           ].map(({href,label,icon})=>{
             const active = href==='/'?pathname==='/':pathname.startsWith(href)
             return (
