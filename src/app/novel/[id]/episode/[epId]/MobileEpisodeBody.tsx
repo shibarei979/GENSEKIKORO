@@ -23,7 +23,7 @@ function isHorizontalChar(ch: string): boolean {
   return ['ー','〜','‥','─','—','－','〰','ｰ','｜','|'].includes(ch)
 }
 
-function VerticalText({ text, fontSize, lineHeight, fontFamily }: { text: string; fontSize: number; lineHeight: number; fontFamily: string }) {
+function VerticalText({ text }: { text: string }) {
   let processed = text.replace(/[0-9]/g, (c) => String.fromCharCode(c.charCodeAt(0) + 0xFEE0))
   processed = processed.replace(/…/g, '・・・')
   processed = processed.replace(/‥/g, '・・')
@@ -34,19 +34,9 @@ function VerticalText({ text, fontSize, lineHeight, fontFamily }: { text: string
   processed = processed.replace(/—/g, '｜')
   processed = processed.replace(/―/g, '｜')
   processed = processed.replace(/─/g, '｜')
-
   const chars = processed.split('')
   return (
-    <div style={{
-      writingMode: 'vertical-rl',
-      textOrientation: 'mixed',
-      fontSize,
-      lineHeight,
-      fontFamily,
-      color: '#2B211B',
-      wordBreak: 'break-all',
-      height: '100%',
-    }}>
+    <>
       {chars.map((ch, i) =>
         ch === '\n'
           ? <br key={i}/>
@@ -60,16 +50,20 @@ function VerticalText({ text, fontSize, lineHeight, fontFamily }: { text: string
             </span>
           )
       )}
-    </div>
+    </>
   )
 }
 
 export default function MobileEpisodeBody({ title, body, preface, afterword, authorName }: Props) {
   const [isVertical, setIsVertical] = useState(false)
   const [settings, setSettings] = useState<Settings>(DEFAULTS)
+  const [containerHeight, setContainerHeight] = useState(600)
   const scrollRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
+    // window.innerHeight でアドレスバーを除いた実際の高さを取得
+    setContainerHeight(window.innerHeight - 200)
+
     try {
       const saved = localStorage.getItem('reading_settings')
       if (saved) {
@@ -80,14 +74,14 @@ export default function MobileEpisodeBody({ title, body, preface, afterword, aut
     } catch {}
   }, [])
 
-  // 縦書き時：右端（冒頭）にスクロール
+  // 縦書き切替時に右端（冒頭）へスクロール
   useEffect(() => {
     if (isVertical && scrollRef.current) {
       setTimeout(() => {
         if (scrollRef.current) {
           scrollRef.current.scrollLeft = scrollRef.current.scrollWidth
         }
-      }, 150)
+      }, 100)
     }
   }, [isVertical, body])
 
@@ -121,14 +115,10 @@ export default function MobileEpisodeBody({ title, body, preface, afterword, aut
     </div>
   ) : null
 
-  // ===== 縦書き =====
+  // ===== 縦書き：パソコン版VerticalBodyと全く同じ構造 =====
   if (isVertical) {
-    // 画面高さの固定ピクセル値（vh は iOS で信頼性が低いので固定値を使う）
-    const containerH = 580
-
     return (
       <div style={{background:'#fff',border:'1px solid #F0D9C9',borderRadius:12,overflow:'hidden',marginBottom:16}}>
-        {/* バー */}
         <div style={{padding:'8px 12px',borderBottom:'1px solid #FFF1E6',background:'#FFF9F2',display:'flex',justifyContent:'space-between',alignItems:'center'}}>
           <button onClick={toggleVertical}
             style={{fontSize:12,padding:'5px 12px',borderRadius:14,border:'1.5px solid #F26A21',background:'#F26A21',color:'#fff',cursor:'pointer'}}>
@@ -145,55 +135,42 @@ export default function MobileEpisodeBody({ title, body, preface, afterword, aut
           </div>
         )}
 
-        {/*
-          縦書きの仕組み：
-          1. 外側のdiv: 高さ固定 + overflowX:scroll
-          2. 内側のdiv: writing-mode:vertical-rl + height:100% で縦に文字を流す
-          → 縦に収まらない分が右から左へ列を作り、横スクロールで読み進める
-        */}
         <style>{`
-          .v-scroll-m::-webkit-scrollbar { height: 8px; }
-          .v-scroll-m::-webkit-scrollbar-track { background: #FFF1E6; }
-          .v-scroll-m::-webkit-scrollbar-thumb { background: #F26A21; border-radius: 4px; }
+          .v-scroll-m::-webkit-scrollbar { height: 10px; }
+          .v-scroll-m::-webkit-scrollbar-track { background: #FFF1E6; border-radius: 5px; }
+          .v-scroll-m::-webkit-scrollbar-thumb { background: #F26A21; border-radius: 5px; border: 2px solid #FFF1E6; }
+          .v-scroll-m { scrollbar-width: thin; scrollbar-color: #F26A21 #FFF1E6; }
         `}</style>
+
+        {/* パソコン版と全く同じ構造：外側で高さ固定＋横スクロール、内側でvertical-rl */}
         <div
           ref={scrollRef}
           className="v-scroll-m"
           style={{
-            height: containerH,
             overflowX: 'scroll',
             overflowY: 'hidden',
+            height: containerHeight,  // window.innerHeightから計算した実ピクセル値
+            paddingBottom: 4,
           }}
         >
           <div style={{
-            display: 'flex',
-            flexDirection: 'row',
-            height: '100%',
-            padding: '20px 16px 20px 24px',
+            writingMode: 'vertical-rl',
+            textOrientation: 'mixed',
+            display: 'inline-block',
+            padding: '24px 16px 24px 32px',
+            height: 'calc(100% - 18px)',  // パソコン版と同じ
             boxSizing: 'border-box',
-            gap: '1.5em',
           }}>
-            {/* タイトル列 */}
-            <div style={{
-              writingMode: 'vertical-rl',
-              textOrientation: 'mixed',
-              fontSize: settings.fontSize + 4,
-              fontWeight: 700,
-              color: '#2B211B',
-              fontFamily,
-              lineHeight: 1.8,
-              flexShrink: 0,
-              height: '100%',
-            }}>
-              {title}
+            {/* タイトル */}
+            <div style={{display:'inline-block', marginRight:'2em', verticalAlign:'top'}}>
+              <div style={{fontSize: settings.fontSize + 4, fontWeight:700, color:'#2B211B', fontFamily, lineHeight:1.8}}>
+                {title}
+              </div>
             </div>
-            {/* 本文列 */}
-            <VerticalText
-              text={body}
-              fontSize={settings.fontSize}
-              lineHeight={settings.lineHeight}
-              fontFamily={fontFamily}
-            />
+            {/* 本文 */}
+            <div style={{display:'inline-block', fontSize: settings.fontSize, lineHeight: settings.lineHeight, color:'#2B211B', fontFamily, wordBreak:'break-all', verticalAlign:'top'}}>
+              <VerticalText text={body}/>
+            </div>
           </div>
         </div>
 
@@ -218,16 +195,16 @@ export default function MobileEpisodeBody({ title, body, preface, afterword, aut
       </div>
 
       <div style={{padding:'20px 16px 28px'}}>
-        <h1 style={{fontFamily,fontSize:settings.fontSize+2,fontWeight:700,color:'#2B211B',textAlign:'center',marginBottom:20,lineHeight:1.6}}>
+        <h1 style={{fontFamily, fontSize:settings.fontSize+2, fontWeight:700, color:'#2B211B', textAlign:'center', marginBottom:20, lineHeight:1.6}}>
           {title}
         </h1>
         {preface && (
-          <div style={{fontSize:settings.fontSize-2,color:'#77706A',lineHeight:1.9,padding:'10px 12px',background:'#FFF9F2',borderLeft:'3px solid #F0D9C9',borderRadius:4,marginBottom:20,whiteSpace:'pre-wrap'}}>
+          <div style={{fontSize:settings.fontSize-2, color:'#77706A', lineHeight:1.9, padding:'10px 12px', background:'#FFF9F2', borderLeft:'3px solid #F0D9C9', borderRadius:4, marginBottom:20, whiteSpace:'pre-wrap'}}>
             {preface}
           </div>
         )}
         <div
-          style={{fontSize:settings.fontSize,lineHeight:settings.lineHeight,color:'#2B211B',fontFamily,wordBreak:'break-all'}}
+          style={{fontSize:settings.fontSize, lineHeight:settings.lineHeight, color:'#2B211B', fontFamily, wordBreak:'break-all'}}
           dangerouslySetInnerHTML={{__html: renderBody(body)}}
         />
       </div>
