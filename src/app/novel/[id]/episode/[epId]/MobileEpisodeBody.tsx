@@ -12,11 +12,49 @@ interface Props {
 
 const DEFAULTS: Settings = { font: 'serif', fontSize: 16, lineHeight: 2.1, writingMode: 'horizontal' }
 
+// 横書き用レンダリング（ルビ・強調）
 function renderBody(text: string): string {
   let result = text.replace(/｜([^《]+)《([^》]+)》/g, '<ruby>$1<rt>$2</rt></ruby>')
   result = result.replace(/《《([^》]+)》》/g, '<em style="font-style:normal;font-weight:700;border-bottom:2px solid #F26A21">$1</em>')
   result = result.replace(/\n/g, '<br/>')
   return result
+}
+
+// デスクトップと同じ文字変換
+function isHorizontalChar(ch: string): boolean {
+  return ['ー','〜','…','‥','─','—','－','〰','ｰ','｜','|'].includes(ch)
+}
+
+// デスクトップと同じVerticalTextコンポーネント
+function VerticalText({ text }: { text: string }) {
+  let processed = text.replace(/[0-9]/g, (c) => String.fromCharCode(c.charCodeAt(0) + 0xFEE0))
+  processed = processed.replace(/…/g, '・・・')
+  processed = processed.replace(/‥/g, '・・')
+  processed = processed.replace(/ー/g, '｜')
+  processed = processed.replace(/ｰ/g, '｜')
+  processed = processed.replace(/〜/g, '｜')
+  processed = processed.replace(/－/g, '｜')
+  processed = processed.replace(/—/g, '｜')
+  processed = processed.replace(/―/g, '｜')
+  processed = processed.replace(/─/g, '｜')
+  const chars = processed.split('')
+  return (
+    <>
+      {chars.map((ch, i) =>
+        ch === '\n'
+          ? <br key={i}/>
+          : (
+            <span key={i} style={{
+              display: 'inline-block',
+              transform: isHorizontalChar(ch) ? 'rotate(90deg)' : 'none',
+              lineHeight: 1.2,
+            }}>
+              {ch}
+            </span>
+          )
+      )}
+    </>
+  )
 }
 
 export default function MobileEpisodeBody({ title, body, preface, afterword, authorName }: Props) {
@@ -27,156 +65,104 @@ export default function MobileEpisodeBody({ title, body, preface, afterword, aut
     } catch { return DEFAULTS }
   })
 
-  const containerRef = useRef<HTMLDivElement>(null)
-  const touchStartX = useRef(0)
-  const touchStartY = useRef(0)
-  const [scrollPos, setScrollPos] = useState(0)
+  const scrollRef = useRef<HTMLDivElement>(null)
 
-  // 修正：vertical設定のときに縦書き（横スクロール）表示
+  // vertical = 縦書き（横スクロール）、horizontal = 横書き（縦スクロール）
   const isVertical = settings.writingMode === 'vertical'
   const fontFamily = settings.font === 'serif'
     ? "'Noto Serif JP', serif"
     : "'Noto Sans JP', sans-serif"
 
-  const handleTouchStart = useCallback((e: React.TouchEvent) => {
-    touchStartX.current = e.touches[0].clientX
-    touchStartY.current = e.touches[0].clientY
-  }, [])
-
-  const handleTouchEnd = useCallback((e: React.TouchEvent) => {
-    if (!isVertical || !containerRef.current) return
-    const dx = e.changedTouches[0].clientX - touchStartX.current
-    const dy = Math.abs(e.changedTouches[0].clientY - touchStartY.current)
-    if (Math.abs(dx) < 30 || dy > Math.abs(dx)) return
-
-    const pageW = containerRef.current.clientWidth
-    const maxScroll = containerRef.current.scrollWidth - pageW
-    const newPos = Math.max(0, Math.min(maxScroll, scrollPos - dx * 1.5))
-    setScrollPos(newPos)
-    containerRef.current.scrollTo({ left: newPos, behavior: 'smooth' })
-  }, [isVertical, scrollPos])
-
-  const handleScroll = useCallback(() => {
-    if (containerRef.current) {
-      setScrollPos(containerRef.current.scrollLeft)
-    }
-  }, [])
-
+  // 縦書き時：デスクトップと同じく右端（冒頭）からスタート
   useEffect(() => {
-    if (containerRef.current) {
-      if (isVertical) {
-        // 縦書き：右端（冒頭）から開始
-        containerRef.current.scrollLeft = containerRef.current.scrollWidth
-      } else {
-        containerRef.current.scrollTo({ left: 0 })
-      }
-      setScrollPos(0)
+    if (isVertical && scrollRef.current) {
+      scrollRef.current.scrollLeft = scrollRef.current.scrollWidth
     }
-  }, [settings.writingMode])
+  }, [isVertical, body])
 
-  // ===== 縦書き（横スクロール） =====
+  const Afterword = afterword ? (
+    <div style={{borderTop:'1px solid #F0D9C9'}}>
+      <div style={{padding:'10px 14px',borderBottom:'1px solid #F0D9C9',background:'#FFF9F2',display:'flex',alignItems:'center',gap:8}}>
+        <span style={{width:3,height:14,background:'#F26A21',borderRadius:2,display:'inline-block'}}/>
+        <span style={{fontSize:13,fontWeight:700,color:'#2B211B'}}>あとがき</span>
+        {authorName && <span style={{fontSize:11,color:'#77706A',marginLeft:'auto'}}>{authorName}</span>}
+      </div>
+      <div style={{padding:'14px 16px',fontSize:14,color:'#2B211B',lineHeight:1.9,whiteSpace:'pre-wrap',fontFamily:"'Noto Sans JP',sans-serif"}}>
+        {afterword}
+      </div>
+    </div>
+  ) : null
+
+  // ===== 縦書き（横スクロール）：デスクトップのVerticalBodyと同じ実装 =====
   if (isVertical) {
     return (
       <div style={{background:'#fff',border:'1px solid #F0D9C9',borderRadius:12,overflow:'hidden',marginBottom:16}}>
         {/* 設定バー */}
         <div style={{padding:'8px 12px',borderBottom:'1px solid #FFF1E6',background:'#FFF9F2',display:'flex',justifyContent:'flex-end'}}>
-          <ReadingSettings onChange={setSettings} isMobile={true} />
+          <ReadingSettings onChange={setSettings} isMobile={true}/>
         </div>
 
-        {/* 縦書き本文 */}
+        {/* 前書き */}
+        {preface && (
+          <div style={{padding:'10px 16px',background:'#FFF9F2',borderBottom:'1px solid #FFF1E6'}}>
+            <div style={{fontSize:13,color:'#77706A',lineHeight:1.9,padding:'10px 12px',background:'#fff',borderLeft:'3px solid #F0D9C9',borderRadius:4,whiteSpace:'pre-wrap'}}>
+              {preface}
+            </div>
+          </div>
+        )}
+
+        {/* 縦書き本文：デスクトップと同じスタイル */}
+        <style>{`
+          .v-scroll-m::-webkit-scrollbar { height: 10px; }
+          .v-scroll-m::-webkit-scrollbar-track { background: #FFF1E6; border-radius: 5px; }
+          .v-scroll-m::-webkit-scrollbar-thumb { background: #F26A21; border-radius: 5px; border: 2px solid #FFF1E6; }
+          .v-scroll-m { scrollbar-width: thin; scrollbar-color: #F26A21 #FFF1E6; }
+        `}</style>
         <div
-          ref={containerRef}
-          onTouchStart={handleTouchStart}
-          onTouchEnd={handleTouchEnd}
-          onScroll={handleScroll}
+          ref={scrollRef}
+          className="v-scroll-m"
           style={{
-            overflowX:'auto',
+            overflowX:'scroll',
             overflowY:'hidden',
+            height:'70vh',
             WebkitOverflowScrolling:'touch' as any,
-            scrollbarWidth:'none' as any,
-            msOverflowStyle:'none' as any,
           }}
         >
           <div style={{
             writingMode:'vertical-rl',
             textOrientation:'mixed',
-            padding:'24px 20px',
-            minHeight:'60vh',
             display:'inline-block',
+            padding:'24px 16px 24px 32px',
+            height:'calc(100% - 16px)',
+            boxSizing:'border-box',
           }}>
             {/* タイトル */}
-            <h1 style={{
-              fontFamily,
-              fontSize: settings.fontSize + 4,
-              fontWeight:700,
-              color:'#2B211B',
-              marginLeft:24,
-              lineHeight:1.6,
-              writingMode:'vertical-rl',
-            }}>
-              {title}
-            </h1>
-
-            {/* 前書き */}
-            {preface && (
-              <div style={{
-                fontSize:settings.fontSize - 2,
-                color:'#77706A',
-                lineHeight:settings.lineHeight,
-                padding:'8px 12px',
-                background:'#FFF9F2',
-                borderTop:'3px solid #F0D9C9',
-                marginLeft:20,
-                whiteSpace:'pre-wrap',
-                writingMode:'vertical-rl',
-              }}>
-                {preface}
+            <div style={{display:'inline-block',marginRight:'1.5em',verticalAlign:'top'}}>
+              <div style={{fontSize:settings.fontSize+2,fontWeight:700,color:'#2B211B',fontFamily,lineHeight:1.8}}>
+                {title}
               </div>
-            )}
-
+            </div>
             {/* 本文 */}
-            <div
-              style={{
-                fontSize:settings.fontSize,
-                lineHeight:settings.lineHeight,
-                color:'#2B211B',
-                fontFamily,
-                writingMode:'vertical-rl',
-                textOrientation:'mixed',
-                letterSpacing:'0.05em',
-              }}
-              dangerouslySetInnerHTML={{__html: renderBody(body)}}
-            />
+            <div style={{display:'inline-block',fontSize:settings.fontSize,lineHeight:settings.lineHeight,color:'#2B211B',fontFamily,wordBreak:'break-all',verticalAlign:'top'}}>
+              <VerticalText text={body}/>
+            </div>
           </div>
         </div>
 
-        {/* スワイプヒント */}
-        <div style={{padding:'6px 12px',background:'#FFF9F2',borderTop:'1px solid #FFF1E6',textAlign:'center',fontSize:10,color:'#B8AEA8'}}>
+        <div style={{padding:'5px 12px',background:'#FFF9F2',borderTop:'1px solid #FFF1E6',textAlign:'center',fontSize:10,color:'#B8AEA8'}}>
           ← スワイプして読み進める
         </div>
 
-        {/* あとがき */}
-        {afterword && (
-          <div style={{borderTop:'1px solid #F0D9C9'}}>
-            <div style={{padding:'10px 16px',borderBottom:'1px solid #F0D9C9',background:'#FFF9F2',display:'flex',alignItems:'center',gap:8}}>
-              <span style={{width:3,height:14,background:'#F26A21',borderRadius:2,display:'inline-block'}}/>
-              <span style={{fontSize:13,fontWeight:700,color:'#2B211B'}}>あとがき</span>
-              {authorName && <span style={{fontSize:11,color:'#77706A',marginLeft:'auto'}}>{authorName}</span>}
-            </div>
-            <div style={{padding:'16px 20px',fontSize:14,color:'#2B211B',lineHeight:1.9,whiteSpace:'pre-wrap',fontFamily:"'Noto Sans JP',sans-serif"}}>
-              {afterword}
-            </div>
-          </div>
-        )}
+        {Afterword}
       </div>
     )
   }
 
-  // ===== 縦読み（横書き） =====
+  // ===== 横書き（縦スクロール） =====
   return (
     <div style={{background:'#fff',border:'1px solid #F0D9C9',borderRadius:12,overflow:'hidden',marginBottom:16}}>
       <div style={{padding:'8px 12px',borderBottom:'1px solid #FFF1E6',background:'#FFF9F2',display:'flex',justifyContent:'flex-end'}}>
-        <ReadingSettings onChange={setSettings} isMobile={true} />
+        <ReadingSettings onChange={setSettings} isMobile={true}/>
       </div>
 
       <div style={{padding:'20px 16px 28px'}}>
@@ -184,7 +170,7 @@ export default function MobileEpisodeBody({ title, body, preface, afterword, aut
           {title}
         </h1>
         {preface && (
-          <div style={{fontSize:settings.fontSize-2,color:'#77706A',lineHeight:1.9,padding:'10px 14px',background:'#FFF9F2',borderLeft:'3px solid #F0D9C9',borderRadius:4,marginBottom:20,whiteSpace:'pre-wrap'}}>
+          <div style={{fontSize:settings.fontSize-2,color:'#77706A',lineHeight:1.9,padding:'10px 12px',background:'#FFF9F2',borderLeft:'3px solid #F0D9C9',borderRadius:4,marginBottom:20,whiteSpace:'pre-wrap'}}>
             {preface}
           </div>
         )}
@@ -194,18 +180,7 @@ export default function MobileEpisodeBody({ title, body, preface, afterword, aut
         />
       </div>
 
-      {afterword && (
-        <div style={{borderTop:'1px solid #F0D9C9'}}>
-          <div style={{padding:'10px 16px',borderBottom:'1px solid #F0D9C9',background:'#FFF9F2',display:'flex',alignItems:'center',gap:8}}>
-            <span style={{width:3,height:14,background:'#F26A21',borderRadius:2,display:'inline-block'}}/>
-            <span style={{fontSize:13,fontWeight:700,color:'#2B211B'}}>あとがき</span>
-            {authorName && <span style={{fontSize:11,color:'#77706A',marginLeft:'auto'}}>{authorName}</span>}
-          </div>
-          <div style={{padding:'16px 20px',fontSize:14,color:'#2B211B',lineHeight:1.9,whiteSpace:'pre-wrap',fontFamily:"'Noto Sans JP',sans-serif"}}>
-            {afterword}
-          </div>
-        </div>
-      )}
+      {Afterword}
     </div>
   )
 }

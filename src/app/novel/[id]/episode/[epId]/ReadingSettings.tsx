@@ -90,16 +90,17 @@ export default function ReadingSettings({ onChange, isMobile = false }: Props) {
             boxShadow:'0 4px 20px rgba(0,0,0,0.12)',
             padding:'16px', minWidth:240, zIndex:99,
           }}>
-            {/* 縦書き/横書き（モバイルのみ表示） */}
+            {/* 縦書き/横書き（モバイルのみ） */}
             {isMobile && (
               <div style={{marginBottom:14}}>
                 <div style={{fontSize:11,color:'#77706A',fontWeight:600,marginBottom:6}}>読み方向</div>
                 <div style={{display:'flex',gap:6}}>
+                  {/* horizontal = 横書き（縦スクロール）、vertical = 縦書き（横スクロール） */}
                   <button onClick={()=>update({writingMode:'horizontal'})} style={btnBase(settings.writingMode==='horizontal')}>
-                    横読み（縦書き）
+                    横書き
                   </button>
                   <button onClick={()=>update({writingMode:'vertical'})} style={btnBase(settings.writingMode==='vertical')}>
-                    縦読み（横書き）
+                    縦書き
                   </button>
                 </div>
               </div>
