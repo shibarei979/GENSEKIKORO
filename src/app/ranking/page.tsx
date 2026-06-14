@@ -36,18 +36,13 @@ export default async function RankingPage({ searchParams }: Props) {
     let likeIds: string[] = []
 
     if (period === 'rising') {
-      const { data: risingData } = await supabase
-        .from('rising_novels')
-        .select('id, rising_score')
-        .limit(100)
+      const { data: risingData } = await supabase.from('rising_novels').select('id, rising_score').limit(100)
       const risingIds = (risingData || []).map((r:any) => r.id)
       const scoreMap = Object.fromEntries((risingData||[]).map((r:any) => [r.id, r.rising_score]))
       if (risingIds.length === 0) return { items: [], total: 0 }
       const { data: risingNovelData } = await supabase
-        .from('novels')
-        .select('id, title, genre, novel_type, is_serial, author_id, summary, catchcopy, tags')
-        .in('id', risingIds)
-        .eq('published', true)
+        .from('novels').select('id, title, genre, novel_type, is_serial, author_id, summary, catchcopy, tags')
+        .in('id', risingIds).eq('published', true)
       const risingItems = (risingNovelData || [])
         .sort((a:any, b:any) => (scoreMap[b.id]||0) - (scoreMap[a.id]||0))
         .map((n:any) => ({...n, like_count: scoreMap[n.id]||0}))
@@ -57,8 +52,7 @@ export default async function RankingPage({ searchParams }: Props) {
         const { data: authors2 } = await supabase.from('profiles').select('user_id, display_name').in('user_id', authorIds2 as string[])
         authors2?.forEach((a:any) => { authorMap2[a.user_id] = a.display_name })
       }
-      const risingWithAuthor = risingItems.map((n:any) => ({...n, display_name: authorMap2[n.author_id]||''}))
-      return { items: risingWithAuthor, total: risingWithAuthor.length }
+      return { items: risingItems.map((n:any) => ({...n, display_name: authorMap2[n.author_id]||''})), total: risingItems.length }
     } else if (period === 'daily') {
       const today = new Date(); today.setHours(0,0,0,0)
       const { data: dl } = await supabase.from('likes').select('novel_id').gte('created_at', today.toISOString())
@@ -82,26 +76,22 @@ export default async function RankingPage({ searchParams }: Props) {
     if (serial === 'complete') q = (q as any).eq('is_serial', false)
     if (serial === 'new')      q = (q as any).gte('created_at', new Date(Date.now()-30*24*60*60*1000).toISOString())
     if (serial === 'newbie') {
-      const { data: newbieAuthors } = await supabase
-        .from('novels').select('author_id').eq('published', true)
+      const { data: newbieAuthors } = await supabase.from('novels').select('author_id').eq('published', true)
       const authorCount: Record<string,number> = {}
       newbieAuthors?.forEach((n:any) => { authorCount[n.author_id] = (authorCount[n.author_id]||0)+1 })
       const newbieIds = Object.entries(authorCount).filter(([,c])=>c<=3).map(([id])=>id)
       q = (q as any).in('author_id', newbieIds)
     }
     const { data: novels } = await q
-
     const sorted = (novels||[]).sort((a: any,b: any) => likeIds.indexOf(a.id) - likeIds.indexOf(b.id))
     const total  = sorted.length
     const paged  = sorted.slice(offset, offset + PAGE_SIZE)
-
     const authorIds = Array.from(new Set(paged.map((n: any) => n.author_id)))
     const authorMap: Record<string,string> = {}
     if (authorIds.length > 0) {
       const { data: authors } = await supabase.from('profiles').select('user_id, display_name').in('user_id', authorIds as string[])
       authors?.forEach((a: any) => { authorMap[a.user_id] = a.display_name })
     }
-
     const novelIds = paged.map((n: any) => n.id)
     const charCountMap: Record<string,number> = {}
     const lastUpdateMap: Record<string,string> = {}
@@ -112,7 +102,6 @@ export default async function RankingPage({ searchParams }: Props) {
         if (!lastUpdateMap[ep.novel_id] || ep.created_at > lastUpdateMap[ep.novel_id]) lastUpdateMap[ep.novel_id] = ep.created_at
       })
     }
-
     return {
       total,
       items: paged.map((n: any) => ({
@@ -174,18 +163,18 @@ export default async function RankingPage({ searchParams }: Props) {
   const periodLabel = periodOptions.find(o=>o.value===period)?.label||'週間'
   const scoreLabel  = period === 'rising' ? '↑' : '♡'
 
-  // モバイル用フィルターピルのスタイル
-  const filterPill = (active: boolean) => ({
-    padding:'6px 14px',
-    borderRadius:20,
-    fontSize:13,
-    fontWeight:600 as const,
-    textDecoration:'none' as const,
-    whiteSpace:'nowrap' as const,
-    flexShrink:0 as const,
+  // 共通ピルスタイル
+  const pill = (active: boolean, small = false) => ({
+    padding: small ? '4px 10px' : '4px 11px',
+    borderRadius: 20,
+    fontSize: small ? 11 : 12,
+    fontWeight: 600 as const,
+    textDecoration: 'none' as const,
+    whiteSpace: 'nowrap' as const,
+    flexShrink: 0 as const,
     background: active ? '#F26A21' : '#FFF1E6',
     color: active ? '#fff' : '#F26A21',
-    border:`1px solid ${active ? '#F26A21' : '#f5b080'}`,
+    border: `1px solid ${active ? '#F26A21' : '#f5b080'}`,
   })
 
   return (
@@ -198,101 +187,63 @@ export default async function RankingPage({ searchParams }: Props) {
             <h1 style={{fontSize:20,fontWeight:700,color:'#2B211B',marginBottom:0}}>ランキング</h1>
           </div>
 
-          {/* ===== デスクトップ：フィルターバー（既存） ===== */}
-          <div className="desktop-only ranking-filter" style={{background:'#FFF9F2',border:'1px solid #F0D9C9',borderRadius:12,padding:'14px 18px',marginBottom:16}}>
+          {/* ===== フィルターバー（枠は共通・中身はデスクトップwrap／モバイル横スクロール） ===== */}
+          <div className="ranking-filter" style={{background:'#FFF9F2',border:'1px solid #F0D9C9',borderRadius:12,padding:'14px 18px',marginBottom:16}}>
+
+            {/* 期間 */}
             <div style={{marginBottom:10}}>
               <div style={{fontSize:11,color:'#77706A',fontWeight:600,marginBottom:5}}>期間</div>
-              <div style={{display:'flex',gap:6,flexWrap:'wrap'}}>
-                {periodOptions.map(o => (
-                  <Link key={o.value} href={buildUrl(o.value,novelType,serial)}
-                    style={{padding:'4px 11px',borderRadius:20,fontSize:12,fontWeight:600,textDecoration:'none',
-                      background:period===o.value?'#F26A21':'#FFF1E6',
-                      color:period===o.value?'#fff':'#F26A21',
-                      border:`1px solid ${period===o.value?'#F26A21':'#f5b080'}`}}>
-                    {o.label}
-                  </Link>
-                ))}
+              <div style={{overflowX:'auto',msOverflowStyle:'none',scrollbarWidth:'none'} as any}>
+                <div style={{display:'flex',gap:6,flexWrap:'wrap'}}>
+                  {periodOptions.map(o => (
+                    <Link key={o.value} href={buildUrl(o.value,novelType,serial)} style={pill(period===o.value)}>
+                      {o.label}
+                    </Link>
+                  ))}
+                </div>
               </div>
             </div>
+
+            {/* 作品の長さ */}
             <div style={{marginBottom:10}}>
               <div style={{fontSize:11,color:'#77706A',fontWeight:600,marginBottom:5}}>作品の長さ</div>
-              <div style={{display:'flex',gap:6}}>
-                {typeOptions.map(o => (
-                  <Link key={o.value} href={buildUrl(period,o.value,serial)}
-                    style={{padding:'4px 11px',borderRadius:20,fontSize:12,fontWeight:600,textDecoration:'none',
-                      background:novelType===o.value?'#F26A21':'#FFF1E6',
-                      color:novelType===o.value?'#fff':'#F26A21',
-                      border:`1px solid ${novelType===o.value?'#F26A21':'#f5b080'}`}}>
-                    {o.label}
-                  </Link>
-                ))}
+              <div style={{overflowX:'auto',msOverflowStyle:'none',scrollbarWidth:'none'} as any}>
+                <div style={{display:'flex',gap:6,flexWrap:'wrap'}}>
+                  {typeOptions.map(o => (
+                    <Link key={o.value} href={buildUrl(period,o.value,serial)} style={pill(novelType===o.value)}>
+                      {o.label}
+                    </Link>
+                  ))}
+                </div>
               </div>
             </div>
-            <div>
-              <div style={{fontSize:11,color:'#77706A',fontWeight:600,marginBottom:5}}>ジャンル</div>
-              <div style={{display:'flex',gap:5,flexWrap:'wrap',marginBottom:10}}>
-                {genres.map(g => (
-                  <Link key={g} href={`/ranking?period=${period}&type=${encodeURIComponent(novelType)}&serial=${serial}&genre=${encodeURIComponent(g)}&page=1`}
-                    style={{padding:'4px 10px',borderRadius:14,fontSize:11,fontWeight:500,textDecoration:'none',
-                      background:genre===g?'#F26A21':'#FFF1E6',
-                      color:genre===g?'#fff':'#F26A21',
-                      border:`1px solid ${genre===g?'#F26A21':'#f5b080'}`}}>
-                    {g}
-                  </Link>
-                ))}
-              </div>
-              <div style={{fontSize:11,color:'#77706A',fontWeight:600,marginBottom:5}}>絞り込み</div>
-              <div style={{display:'flex',gap:6,flexWrap:'wrap'}}>
-                {serialOptions.map(o => (
-                  <Link key={o.value} href={buildUrl(period,novelType,o.value)}
-                    style={{padding:'4px 11px',borderRadius:20,fontSize:12,fontWeight:600,textDecoration:'none',
-                      background:serial===o.value?'#F26A21':'#FFF1E6',
-                      color:serial===o.value?'#fff':'#F26A21',
-                      border:`1px solid ${serial===o.value?'#F26A21':'#f5b080'}`}}>
-                    {o.label}
-                  </Link>
-                ))}
-              </div>
-            </div>
-          </div>
 
-          {/* ===== モバイル：フィルター（横スクロールピル） ===== */}
-          <div className="mobile-only" style={{marginBottom:12}}>
-            {/* 期間 */}
-            <div style={{overflowX:'auto',WebkitOverflowScrolling:'touch' as any,scrollbarWidth:'none' as any,marginBottom:8}}>
-              <div style={{display:'flex',gap:8,paddingBottom:4,width:'max-content'}}>
-                {periodOptions.map(o => (
-                  <Link key={o.value} href={buildUrl(o.value,novelType,serial)} style={filterPill(period===o.value)}>
-                    {o.label}
-                  </Link>
-                ))}
-              </div>
-            </div>
-            {/* 作品の長さ */}
-            <div style={{overflowX:'auto',WebkitOverflowScrolling:'touch' as any,scrollbarWidth:'none' as any,marginBottom:8}}>
-              <div style={{display:'flex',gap:8,paddingBottom:4,width:'max-content'}}>
-                {typeOptions.map(o => (
-                  <Link key={o.value} href={buildUrl(period,o.value,serial)} style={filterPill(novelType===o.value)}>
-                    {o.label}
-                  </Link>
-                ))}
-                <span style={{color:'#E0D0C0',padding:'6px 4px',flexShrink:0}}>|</span>
-                {serialOptions.map(o => (
-                  <Link key={o.value} href={buildUrl(period,novelType,o.value)} style={filterPill(serial===o.value)}>
-                    {o.label}
-                  </Link>
-                ))}
-              </div>
-            </div>
             {/* ジャンル */}
-            <div style={{overflowX:'auto',WebkitOverflowScrolling:'touch' as any,scrollbarWidth:'none' as any}}>
-              <div style={{display:'flex',gap:8,paddingBottom:4,width:'max-content'}}>
-                {genres.map(g => (
-                  <Link key={g} href={`/ranking?period=${period}&type=${encodeURIComponent(novelType)}&serial=${serial}&genre=${encodeURIComponent(g)}&page=1`}
-                    style={filterPill(genre===g)}>
-                    {g}
-                  </Link>
-                ))}
+            <div style={{marginBottom:10}}>
+              <div style={{fontSize:11,color:'#77706A',fontWeight:600,marginBottom:5}}>ジャンル</div>
+              <div style={{overflowX:'auto',msOverflowStyle:'none',scrollbarWidth:'none'} as any}>
+                <div style={{display:'flex',gap:5,flexWrap:'wrap'}}>
+                  {genres.map(g => (
+                    <Link key={g} href={`/ranking?period=${period}&type=${encodeURIComponent(novelType)}&serial=${serial}&genre=${encodeURIComponent(g)}&page=1`}
+                      style={pill(genre===g, true)}>
+                      {g}
+                    </Link>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            {/* 絞り込み */}
+            <div>
+              <div style={{fontSize:11,color:'#77706A',fontWeight:600,marginBottom:5}}>絞り込み</div>
+              <div style={{overflowX:'auto',msOverflowStyle:'none',scrollbarWidth:'none'} as any}>
+                <div style={{display:'flex',gap:6,flexWrap:'wrap'}}>
+                  {serialOptions.map(o => (
+                    <Link key={o.value} href={buildUrl(period,novelType,o.value)} style={pill(serial===o.value)}>
+                      {o.label}
+                    </Link>
+                  ))}
+                </div>
               </div>
             </div>
           </div>
@@ -392,7 +343,6 @@ export default async function RankingPage({ searchParams }: Props) {
             </div>
           )}
 
-          {/* モバイルボトムナビ余白 */}
           <div className="mobile-only" style={{height:80}}/>
         </div>
         <div className="desktop-only"><Sidebar /></div>
@@ -402,9 +352,8 @@ export default async function RankingPage({ searchParams }: Props) {
       <Footer user={user} />
 
       <style>{`
-        /* モバイルフィルター横スクロールバー非表示 */
         @media (max-width: 768px) {
-          .mobile-only div::-webkit-scrollbar { display: none; }
+          .ranking-filter > div > div { flex-wrap: nowrap !important; }
         }
       `}</style>
     </div>
