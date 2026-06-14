@@ -58,28 +58,41 @@ function VerticalText({ text }: { text: string }) {
 
 // テキストのクリーニング
 function cleanForSpeech(text: string): string {
-  return text
+  let t = text
     .replace(/｜([^《]+)《[^》]+》/g, '$1')
     .replace(/《《([^》]+)》》/g, '$1')
     .replace(/<[^>]+>/g, '')
     .replace(/[#*`]/g, '')
     .replace(/　/g, '')
-    .replace(/\n{3,}/g, '\n\n')
-    .trim()
+  t = t.replace(/\n\n+/g, '。')
+  t = t.replace(/\n/g, '、')
+  t = t.replace(/「/g, '。「')
+  t = t.replace(/」/g, '」。')
+  t = t.replace(/『/g, '。『')
+  t = t.replace(/』/g, '』。')
+  t = t.replace(/。。+/g, '。')
+  t = t.replace(/、。/g, '。')
+  t = t.replace(/。、/g, '。')
+  t = t.replace(/――+/g, '。')
+  t = t.replace(/…+/g, '、')
+  t = t.replace(/‥+/g, '、')
+  return t.trim()
 }
 
-// ===== 読み上げフック（全文を1つのUtteranceで → カクカクなし） =====
+// ===== 読み上げフック =====
 function useSpeech(text: string) {
   const [isPlaying, setIsPlaying] = useState(false)
   const [isPaused,  setIsPaused]  = useState(false)
+  const [isStopped, setIsStopped] = useState(true)
   const [rate,      setRate]      = useState(1.0)
   const [supported, setSupported] = useState(false)
   const [voices,    setVoices]    = useState<SpeechSynthesisVoice[]>([])
   const [voiceIdx,  setVoiceIdx]  = useState(-1)
 
-  const rateRef  = useRef(1.0)
-  const voiceRef = useRef<SpeechSynthesisVoice | null>(null)
-  const timerRef = useRef<ReturnType<typeof setInterval> | null>(null)
+  const rateRef    = useRef(1.0)
+  const voiceRef   = useRef<SpeechSynthesisVoice | null>(null)
+  const timerRef   = useRef<ReturnType<typeof setInterval> | null>(null)
+  const stoppedRef = useRef(true)
 
   useEffect(() => {
     if (typeof window === 'undefined' || !('speechSynthesis' in window)) return
@@ -121,38 +134,46 @@ function useSpeech(text: string) {
   const play = useCallback(() => {
     if (!supported) return
     window.speechSynthesis.cancel()
+    stoppedRef.current = false
     const clean = cleanForSpeech(text)
     const utter = new SpeechSynthesisUtterance(clean)
-    utter.lang = 'ja-JP'
-    utter.rate = rateRef.current
+    utter.lang   = 'ja-JP'
+    utter.rate   = rateRef.current
+    utter.pitch  = 1.0
+    utter.volume = 1.0
     if (voiceRef.current) utter.voice = voiceRef.current
-    utter.onstart = () => { setIsPlaying(true); setIsPaused(false) }
-    utter.onend   = () => { setIsPlaying(false); setIsPaused(false); stopTimer() }
+    utter.onstart = () => { setIsPlaying(true); setIsPaused(false); setIsStopped(false) }
+    utter.onend   = () => {
+      if (!stoppedRef.current) {
+        setIsPlaying(false); setIsPaused(false); setIsStopped(true); stopTimer()
+      }
+    }
     utter.onerror = (e) => {
       if (e.error === 'interrupted' || e.error === 'canceled') return
-      setIsPlaying(false); setIsPaused(false); stopTimer()
+      setIsPlaying(false); setIsPaused(false); setIsStopped(true); stopTimer()
     }
     window.speechSynthesis.speak(utter)
     startTimer()
   }, [supported, text, startTimer, stopTimer])
 
   function pause() {
-    if (!supported) return
+    if (!supported || !isPlaying) return
     window.speechSynthesis.pause()
     setIsPaused(true); setIsPlaying(false)
   }
 
   function resumeSpeech() {
-    if (!supported) return
+    if (!supported || !isPaused) return
     window.speechSynthesis.resume()
     setIsPaused(false); setIsPlaying(true)
   }
 
   function stop() {
     if (!supported) return
+    stoppedRef.current = true
     window.speechSynthesis.cancel()
     stopTimer()
-    setIsPlaying(false); setIsPaused(false)
+    setIsPlaying(false); setIsPaused(false); setIsStopped(true)
   }
 
   function changeRate(r: number) {
@@ -165,13 +186,14 @@ function useSpeech(text: string) {
     if (isPlaying || isPaused) { window.speechSynthesis.cancel(); setTimeout(play, 80) }
   }
 
-  return { isPlaying, isPaused, rate, supported, voices, voiceIdx, play, pause, resumeSpeech, stop, changeRate, changeVoice }
+  return { isPlaying, isPaused, isStopped, rate, supported, voices, voiceIdx, play, pause, resumeSpeech, stop, changeRate, changeVoice }
 }
+
 
 // ===== 読み上げパネル UI =====
 function SpeechPanel({ title, body, isMobile }: { title: string; body: string; isMobile: boolean }) {
   const fullText = `${title}。\n${body}`
-  const { isPlaying, isPaused, rate, supported, voices, voiceIdx, play, pause, resumeSpeech, stop, changeRate, changeVoice } = useSpeech(fullText)
+  const { isPlaying, isPaused, isStopped, rate, supported, voices, voiceIdx, play, pause, resumeSpeech, stop, changeRate, changeVoice } = useSpeech(fullText)
   const [showVoice, setShowVoice] = useState(false)
 
   if (!supported) return null
@@ -210,7 +232,7 @@ function SpeechPanel({ title, body, isMobile }: { title: string; body: string; i
         </button>
 
         {/* 再生/一時停止/再開 */}
-        <button onClick={()=>{ if(isPlaying) pause(); else if(isPaused) resumeSpeech(); else play() }}
+        <button onClick={()=>{ if(isPlaying) pause(); else if(isPaused && !isStopped) resumeSpeech(); else if(!isPlaying && !isPaused) play() }}
           style={{width:46,height:46,borderRadius:'50%',border:'none',background:'#F26A21',cursor:'pointer',display:'flex',alignItems:'center',justifyContent:'center',boxShadow:'0 2px 10px rgba(242,106,33,.35)'}}>
           {isPlaying
             ? <svg width="14" height="14" viewBox="0 0 24 24" fill="#fff"><rect x="6" y="4" width="4" height="16" rx="1"/><rect x="14" y="4" width="4" height="16" rx="1"/></svg>
