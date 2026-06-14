@@ -600,7 +600,9 @@ export default function MypageClient({
         <div style={{position:'fixed',inset:0,zIndex:1000,display:'flex',alignItems:'center',justifyContent:'center',padding: isMobile ? 0 : 24}}>
           <div style={{position:'absolute',inset:0,background:'rgba(0,0,0,0.6)'}} onClick={()=>setShowBadgeBook(false)}/>
           <div style={{
-            position:'relative',zIndex:1,
+            position: isMobile ? 'absolute' : 'relative',
+            bottom: isMobile ? 0 : undefined,
+            zIndex:1,
             background:'#1a1a2e',
             borderRadius: isMobile ? '20px 20px 0 0' : 20,
             width: isMobile ? '100%' : '80%',
@@ -610,8 +612,6 @@ export default function MypageClient({
             display:'flex',flexDirection:'column',
             overflow:'hidden',
             boxShadow:'0 20px 60px rgba(0,0,0,0.5)',
-            position: isMobile ? 'absolute' : 'relative',
-            bottom: isMobile ? 0 : undefined,
           } as any}>
             {/* ヘッダー */}
             <div style={{padding:'16px 20px',borderBottom:'1px solid rgba(255,255,255,0.1)',display:'flex',alignItems:'center',justifyContent:'space-between',background:'rgba(255,255,255,0.05)'}}>
