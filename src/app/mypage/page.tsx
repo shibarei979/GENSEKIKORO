@@ -53,7 +53,6 @@ export default async function MypagePage() {
     .order('created_at', { ascending: false })
     .limit(20)
 
-  // 募集中コンテスト取得
   const now = new Date().toISOString()
   const { data: contests } = await supabase
     .from('contests')
@@ -63,11 +62,18 @@ export default async function MypagePage() {
     .or(`deadline.is.null,deadline.gt.${now}`)
     .order('created_at', { ascending: false })
 
-  // 自分の応募済みエントリー取得
   const { data: entries } = await supabase
     .from('contest_entries')
     .select('contest_id, novel_id')
     .eq('user_id', user.id)
+
+  // バッジ獲得済みIDを取得
+  const { data: claimedMissions } = await supabase
+    .from('user_missions')
+    .select('mission_id')
+    .eq('user_id', user.id)
+
+  const claimedMissionIds = (claimedMissions || []).map((r: any) => r.mission_id)
 
   const defaultProfile = {
     user_id: user.id,
@@ -91,6 +97,7 @@ export default async function MypagePage() {
       followingCount={followingCount2 || 0}
       contests={contests || []}
       initialEntries={entries || []}
+      claimedMissionIds={claimedMissionIds}
     />
   )
 }
