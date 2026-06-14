@@ -194,7 +194,7 @@ export default async function RankingPage({ searchParams }: Props) {
             <div style={{marginBottom:10}}>
               <div style={{fontSize:11,color:'#77706A',fontWeight:600,marginBottom:5}}>期間</div>
               <div style={{overflowX:'auto',msOverflowStyle:'none',scrollbarWidth:'none'} as any}>
-                <div style={{display:'flex',gap:6,flexWrap:'wrap'}}>
+                <div style={{display:'flex',gap:6,flexWrap:'nowrap'}}>
                   {periodOptions.map(o => (
                     <Link key={o.value} href={buildUrl(o.value,novelType,serial)} style={pill(period===o.value)}>
                       {o.label}
@@ -208,7 +208,7 @@ export default async function RankingPage({ searchParams }: Props) {
             <div style={{marginBottom:10}}>
               <div style={{fontSize:11,color:'#77706A',fontWeight:600,marginBottom:5}}>作品の長さ</div>
               <div style={{overflowX:'auto',msOverflowStyle:'none',scrollbarWidth:'none'} as any}>
-                <div style={{display:'flex',gap:6,flexWrap:'wrap'}}>
+                <div style={{display:'flex',gap:6,flexWrap:'nowrap'}}>
                   {typeOptions.map(o => (
                     <Link key={o.value} href={buildUrl(period,o.value,serial)} style={pill(novelType===o.value)}>
                       {o.label}
@@ -222,7 +222,7 @@ export default async function RankingPage({ searchParams }: Props) {
             <div style={{marginBottom:10}}>
               <div style={{fontSize:11,color:'#77706A',fontWeight:600,marginBottom:5}}>ジャンル</div>
               <div style={{overflowX:'auto',msOverflowStyle:'none',scrollbarWidth:'none'} as any}>
-                <div style={{display:'flex',gap:5,flexWrap:'wrap'}}>
+                <div style={{display:'flex',gap:5,flexWrap:'nowrap'}}>
                   {genres.map(g => (
                     <Link key={g} href={`/ranking?period=${period}&type=${encodeURIComponent(novelType)}&serial=${serial}&genre=${encodeURIComponent(g)}&page=1`}
                       style={pill(genre===g, true)}>
@@ -237,7 +237,7 @@ export default async function RankingPage({ searchParams }: Props) {
             <div>
               <div style={{fontSize:11,color:'#77706A',fontWeight:600,marginBottom:5}}>絞り込み</div>
               <div style={{overflowX:'auto',msOverflowStyle:'none',scrollbarWidth:'none'} as any}>
-                <div style={{display:'flex',gap:6,flexWrap:'wrap'}}>
+                <div style={{display:'flex',gap:6,flexWrap:'nowrap'}}>
                   {serialOptions.map(o => (
                     <Link key={o.value} href={buildUrl(period,novelType,o.value)} style={pill(serial===o.value)}>
                       {o.label}
