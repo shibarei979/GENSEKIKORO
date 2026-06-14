@@ -42,7 +42,7 @@ function VerticalText({ text }: { text: string }) {
           ? <br key={i}/>
           : (
             <span key={i} style={{
-              display:'inline-block',
+              display: 'inline-block',
               transform: isHorizontalChar(ch) ? 'rotate(90deg)' : 'none',
               lineHeight: 1.2,
             }}>
@@ -59,7 +59,6 @@ export default function MobileEpisodeBody({ title, body, preface, afterword, aut
   const [settings, setSettings] = useState<Settings>(DEFAULTS)
   const scrollRef = useRef<HTMLDivElement>(null)
 
-  // localStorage から設定を読み込む
   useEffect(() => {
     try {
       const saved = localStorage.getItem('reading_settings')
@@ -78,7 +77,7 @@ export default function MobileEpisodeBody({ title, body, preface, afterword, aut
         if (scrollRef.current) {
           scrollRef.current.scrollLeft = scrollRef.current.scrollWidth
         }
-      }, 50)
+      }, 100)
     }
   }, [isVertical, body])
 
@@ -112,7 +111,7 @@ export default function MobileEpisodeBody({ title, body, preface, afterword, aut
     </div>
   ) : null
 
-  // ===== 縦書き（横スクロール） =====
+  // ===== 縦書き（パソコン版と同じ実装） =====
   if (isVertical) {
     return (
       <div style={{background:'#fff',border:'1px solid #F0D9C9',borderRadius:12,overflow:'hidden',marginBottom:16}}>
@@ -133,53 +132,53 @@ export default function MobileEpisodeBody({ title, body, preface, afterword, aut
           </div>
         )}
 
-        {/* 縦書き本文：writing-mode: vertical-rl で横スクロール */}
+        {/* パソコン版と同じスクロールコンテナ */}
         <style>{`
-          .v-scroll-m { -webkit-overflow-scrolling: touch; }
-          .v-scroll-m::-webkit-scrollbar { height: 8px; }
-          .v-scroll-m::-webkit-scrollbar-track { background: #FFF1E6; }
-          .v-scroll-m::-webkit-scrollbar-thumb { background: #F26A21; border-radius: 4px; }
+          .v-scroll-m::-webkit-scrollbar { height: 10px; }
+          .v-scroll-m::-webkit-scrollbar-track { background: #FFF1E6; border-radius: 5px; }
+          .v-scroll-m::-webkit-scrollbar-thumb { background: #F26A21; border-radius: 5px; border: 2px solid #FFF1E6; }
+          .v-scroll-m { scrollbar-width: thin; scrollbar-color: #F26A21 #FFF1E6; }
         `}</style>
         <div
           ref={scrollRef}
           className="v-scroll-m"
           style={{
-            overflowX:'scroll',
-            overflowY:'hidden',
-            height:'72vh',
-            touchAction:'pan-x',
+            overflowX: 'scroll',
+            overflowY: 'hidden',
+            height: 'calc(100vh - 220px)',
+            paddingBottom: 4,
           }}
         >
+          {/* パソコン版と全く同じ構造 */}
           <div style={{
-            writingMode:'vertical-rl',
-            textOrientation:'mixed',
-            display:'inline-block',
-            padding:'20px 16px 20px 28px',
-            minHeight:'100%',
-            boxSizing:'border-box',
+            writingMode: 'vertical-rl',
+            textOrientation: 'mixed',
+            display: 'inline-block',
+            padding: '24px 16px 24px 32px',
+            height: 'calc(100% - 18px)',
+            boxSizing: 'border-box',
           }}>
             {/* タイトル */}
-            <div style={{
-              fontSize:settings.fontSize + 2,
-              fontWeight:700,
-              color:'#2B211B',
-              fontFamily,
-              lineHeight:1.8,
-              marginRight:'1.5em',
-              display:'inline-block',
-              verticalAlign:'top',
-            }}>
-              {title}
+            <div style={{display:'inline-block', marginRight:'2em', verticalAlign:'top'}}>
+              <div style={{
+                fontSize: settings.fontSize + 4,
+                fontWeight: 700,
+                color: '#2B211B',
+                fontFamily,
+                lineHeight: 1.8,
+              }}>
+                {title}
+              </div>
             </div>
-            {/* 本文 */}
+            {/* 本文：VerticalText で1文字ずつspan */}
             <div style={{
-              display:'inline-block',
-              fontSize:settings.fontSize,
-              lineHeight:settings.lineHeight,
-              color:'#2B211B',
+              display: 'inline-block',
+              fontSize: settings.fontSize,
+              lineHeight: settings.lineHeight,
+              color: '#2B211B',
               fontFamily,
-              wordBreak:'break-all',
-              verticalAlign:'top',
+              wordBreak: 'break-all',
+              verticalAlign: 'top',
             }}>
               <VerticalText text={body}/>
             </div>
@@ -195,7 +194,7 @@ export default function MobileEpisodeBody({ title, body, preface, afterword, aut
     )
   }
 
-  // ===== 横書き（縦スクロール） =====
+  // ===== 横書き =====
   return (
     <div style={{background:'#fff',border:'1px solid #F0D9C9',borderRadius:12,overflow:'hidden',marginBottom:16}}>
       <div style={{padding:'8px 12px',borderBottom:'1px solid #FFF1E6',background:'#FFF9F2',display:'flex',justifyContent:'space-between',alignItems:'center'}}>
