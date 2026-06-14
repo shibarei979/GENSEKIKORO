@@ -9,7 +9,6 @@ export async function generateMetadata({ params }: { params: { id: string; epId:
     supabase.from('novels').select('title').eq('id', params.id).maybeSingle(),
   ])
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://genseki-koro.vercel.app'
-  // 話の挿絵があればそれを、なければデフォルト画像
   const ogImage = episode?.illust_url || `${siteUrl}/og-image.png`
   const title = episode?.title && novel?.title
     ? `${novel.title}「${episode.title}」| 原石航路`
@@ -18,21 +17,12 @@ export async function generateMetadata({ params }: { params: { id: string; epId:
     ? `${novel.title} - ライトノベル投稿サイト「原石航路」`
     : 'ライトノベル投稿サイト「原石航路」'
   return {
-    title,
-    description,
-    openGraph: {
-      title,
-      description,
-      images: [ogImage],
-    },
-    twitter: {
-      card: 'summary_large_image',
-      title,
-      description,
-      images: [ogImage],
-    },
+    title, description,
+    openGraph: { title, description, images: [ogImage] },
+    twitter: { card: 'summary_large_image', title, description, images: [ogImage] },
   }
 }
+
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
 import Header from '@/components/layout/Header'
@@ -70,7 +60,6 @@ export default async function EpisodePage({ params }: Props) {
   const { data: allEps } = await supabase
     .from('episodes').select('id, ep_number, title').eq('novel_id', params.id).order('ep_number', { ascending: true })
 
-  // コメント取得
   const { data: rawComments } = await supabase
     .from('comments')
     .select('id, body, created_at, user_id, is_pinned')
@@ -108,7 +97,6 @@ export default async function EpisodePage({ params }: Props) {
     epLiked = !!el
   }
 
-  // 読了状態取得
   let isRead = false
   if (user) {
     const { data: rd } = await supabase.from('read_episodes')
@@ -137,7 +125,8 @@ export default async function EpisodePage({ params }: Props) {
     <div style={{minHeight:'100vh',background:'#FFF9F2'}}>
       <Header profile={profile} user={user} />
 
-      <div style={{maxWidth:1200,margin:'0 auto',padding:'20px 32px',display:'flex',gap:20,alignItems:'flex-start'}}>
+      {/* ===== デスクトップレイアウト（元のまま） ===== */}
+      <div className="desktop-only" style={{maxWidth:1200,margin:'0 auto',padding:'20px 32px',display:'flex',gap:20,alignItems:'flex-start'}}>
         <div style={{flex:1,minWidth:0}}>
           {/* パンくず */}
           <div style={{fontSize:12,color:'#77706A',marginBottom:14,display:'flex',alignItems:'center',gap:4,flexWrap:'wrap'}}>
@@ -147,58 +136,30 @@ export default async function EpisodePage({ params }: Props) {
             <span>›</span>
             <span style={{color:'#2B211B'}}>{episode.title}</span>
           </div>
-
           {/* 上ナビ */}
           <div style={{display:'flex',justifyContent:'space-between',marginBottom:16,gap:8}}>
             {prevEp ? <Link href={`/novel/${params.id}/episode/${prevEp.id}`} style={navBtn}>← 前の話</Link> : <div/>}
             <Link href={`/novel/${params.id}`} style={{...navBtn,color:'#77706A'}}>目次</Link>
             {nextEp ? <Link href={`/novel/${params.id}/episode/${nextEp.id}`} style={navBtn}>次の話 →</Link> : <div/>}
           </div>
-
           {/* 挿絵 */}
           {episode.illust_url && (
             <div style={{textAlign:'center',marginBottom:12}}>
               <img src={episode.illust_url} alt="挿絵" style={{maxWidth:'100%',maxHeight:480,objectFit:'contain',borderRadius:8}}/>
             </div>
           )}
-
-          {/* 本文・あとがき（読書設定付き） */}
-          <EpisodeBody
-            title={episode.title}
-            body={episode.body}
-            preface={episode.preface}
-            afterword={episode.afterword}
-            authorName={author?.display_name}
-          />
-
-          {/* 読了ボタン＋いいね＋シェア（横並び） */}
+          <EpisodeBody title={episode.title} body={episode.body} preface={episode.preface} afterword={episode.afterword} authorName={author?.display_name}/>
+          {/* いいね・読了・シェア */}
           <div style={{display:'flex',alignItems:'center',justifyContent:'center',gap:12,marginBottom:16,flexWrap:'wrap'}}>
             <EpisodeLikeButton episodeId={params.epId} userId={user?.id||null} initialLiked={epLiked} initialCount={epLikeCount??0}/>
-            {user && (
-              <ReadButton
-                novelId={params.id}
-                episodeId={params.epId}
-                userId={user.id}
-                initialRead={isRead}
-              />
-            )}
-            <a
-              href={`https://twitter.com/intent/tweet?text=${encodeURIComponent(`「${novel.title}」
-「${episode.title}」
-#原石航路 #ライトノベル
-`)}&url=${encodeURIComponent(`${process.env.NEXT_PUBLIC_SITE_URL||''}/novel/${params.id}/episode/${params.epId}`)}`}
-              target="_blank"
-              rel="noopener noreferrer"
-              style={{display:'inline-flex',alignItems:'center',gap:6,padding:'10px 20px',borderRadius:20,
-                border:'1.5px solid #e2e8f0',background:'#fff',color:'#374151',
-                fontSize:13,fontWeight:500,textDecoration:'none'}}>
-              <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor">
-                <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.748l7.73-8.835L1.254 2.25H8.08l4.253 5.622 5.911-5.622zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
-              </svg>
+            {user && <ReadButton novelId={params.id} episodeId={params.epId} userId={user.id} initialRead={isRead}/>}
+            <a href={`https://twitter.com/intent/tweet?text=${encodeURIComponent(`「${novel.title}」\n「${episode.title}」\n#原石航路 #ライトノベル\n`)}&url=${encodeURIComponent(`${process.env.NEXT_PUBLIC_SITE_URL||''}/novel/${params.id}/episode/${params.epId}`)}`}
+              target="_blank" rel="noopener noreferrer"
+              style={{display:'inline-flex',alignItems:'center',gap:6,padding:'10px 20px',borderRadius:20,border:'1.5px solid #e2e8f0',background:'#fff',color:'#374151',fontSize:13,fontWeight:500,textDecoration:'none'}}>
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.748l7.73-8.835L1.254 2.25H8.08l4.253 5.622 5.911-5.622zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
               シェア
             </a>
           </div>
-
           {/* 下ナビ */}
           <div style={{display:'flex',justifyContent:'space-between',gap:8,marginBottom:16}}>
             {prevEp ? (
@@ -219,7 +180,6 @@ export default async function EpisodePage({ params }: Props) {
               </div>
             )}
           </div>
-
           {/* 作品情報 */}
           <div style={{background:'#fff',border:'1px solid #F0D9C9',borderRadius:10,padding:'14px 16px',marginBottom:16,display:'flex',alignItems:'center',gap:12}}>
             <div style={{flex:1}}>
@@ -230,21 +190,95 @@ export default async function EpisodePage({ params }: Props) {
               目次を見る
             </Link>
           </div>
-
-          {/* コメント */}
-          <CommentSection
-            novelId={params.id}
-            episodeId={params.epId}
-            userId={user?.id || null}
-            userName={profile?.display_name || null}
-            userIconUrl={profile?.icon_url || null}
-            authorId={novel.author_id}
-            comments={comments}
-          />
+          <CommentSection novelId={params.id} episodeId={params.epId} userId={user?.id||null} userName={profile?.display_name||null} userIconUrl={profile?.icon_url||null} authorId={novel.author_id} comments={comments}/>
         </div>
-
         <Sidebar />
       </div>
+
+      {/* ===== モバイルレイアウト ===== */}
+      <div className="mobile-only" style={{padding:'12px 16px 0'}}>
+        {/* パンくず：コンパクト */}
+        <div style={{fontSize:11,color:'#77706A',marginBottom:10,display:'flex',alignItems:'center',gap:4,overflow:'hidden'}}>
+          <Link href="/" style={{color:'#F26A21',textDecoration:'none',flexShrink:0}}>ホーム</Link>
+          <span style={{flexShrink:0}}>›</span>
+          <Link href={`/novel/${params.id}`} style={{color:'#F26A21',textDecoration:'none',overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap'}}>{novel.title}</Link>
+          <span style={{flexShrink:0}}>›</span>
+          <span style={{color:'#2B211B',overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap'}}>{episode.title}</span>
+        </div>
+
+        {/* 上ナビ：3ボタン均等 */}
+        <div style={{display:'grid',gridTemplateColumns:'1fr auto 1fr',gap:6,marginBottom:12}}>
+          {prevEp
+            ? <Link href={`/novel/${params.id}/episode/${prevEp.id}`} style={{...navBtn,textAlign:'center',display:'block'}}>← 前の話</Link>
+            : <div/>
+          }
+          <Link href={`/novel/${params.id}`} style={{...navBtn,color:'#77706A',textAlign:'center',display:'block',whiteSpace:'nowrap'}}>目次</Link>
+          {nextEp
+            ? <Link href={`/novel/${params.id}/episode/${nextEp.id}`} style={{...navBtn,textAlign:'center',display:'block'}}>次の話 →</Link>
+            : <div/>
+          }
+        </div>
+
+        {/* 挿絵 */}
+        {episode.illust_url && (
+          <div style={{textAlign:'center',marginBottom:10}}>
+            <img src={episode.illust_url} alt="挿絵" style={{maxWidth:'100%',maxHeight:300,objectFit:'contain',borderRadius:8}}/>
+          </div>
+        )}
+
+        {/* 本文 */}
+        <EpisodeBody title={episode.title} body={episode.body} preface={episode.preface} afterword={episode.afterword} authorName={author?.display_name}/>
+
+        {/* いいね・読了・シェア */}
+        <div style={{display:'flex',alignItems:'center',justifyContent:'center',gap:8,marginBottom:14,flexWrap:'wrap'}}>
+          <EpisodeLikeButton episodeId={params.epId} userId={user?.id||null} initialLiked={epLiked} initialCount={epLikeCount??0}/>
+          {user && <ReadButton novelId={params.id} episodeId={params.epId} userId={user.id} initialRead={isRead}/>}
+          <a href={`https://twitter.com/intent/tweet?text=${encodeURIComponent(`「${novel.title}」\n「${episode.title}」\n#原石航路 #ライトノベル\n`)}&url=${encodeURIComponent(`${process.env.NEXT_PUBLIC_SITE_URL||''}/novel/${params.id}/episode/${params.epId}`)}`}
+            target="_blank" rel="noopener noreferrer"
+            style={{display:'inline-flex',alignItems:'center',gap:5,padding:'8px 14px',borderRadius:20,border:'1.5px solid #e2e8f0',background:'#fff',color:'#374151',fontSize:12,fontWeight:500,textDecoration:'none'}}>
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.748l7.73-8.835L1.254 2.25H8.08l4.253 5.622 5.911-5.622zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+            シェア
+          </a>
+        </div>
+
+        {/* 下ナビ */}
+        <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:8,marginBottom:14}}>
+          {prevEp ? (
+            <Link href={`/novel/${params.id}/episode/${prevEp.id}`}
+              style={{textAlign:'center',fontSize:12,color:'#F26A21',border:'1.5px solid #F0D9C9',padding:'10px 8px',borderRadius:10,background:'#fff',textDecoration:'none',display:'block'}}>
+              ← 前の話<br/><span style={{fontSize:10,color:'#77706A',display:'block',overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap'}}>{prevEp.title}</span>
+            </Link>
+          ) : <div/>}
+          {nextEp ? (
+            <Link href={`/novel/${params.id}/episode/${nextEp.id}`}
+              style={{textAlign:'center',fontSize:12,color:'#F26A21',border:'1.5px solid #F26A21',padding:'10px 8px',borderRadius:10,background:'#FFF1E6',textDecoration:'none',display:'block'}}>
+              次の話 →<br/><span style={{fontSize:10,color:'#77706A',display:'block',overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap'}}>{nextEp.title}</span>
+            </Link>
+          ) : (
+            <div style={{textAlign:'center',fontSize:12,color:'#77706A',border:'1px solid #F0D9C9',padding:'10px 8px',borderRadius:10,background:'#fff'}}>
+              最新話です<br/>
+              <Link href={`/novel/${params.id}`} style={{fontSize:11,color:'#F26A21',textDecoration:'none'}}>目次に戻る</Link>
+            </div>
+          )}
+        </div>
+
+        {/* 作品情報 */}
+        <div style={{background:'#fff',border:'1px solid #F0D9C9',borderRadius:10,padding:'12px 14px',marginBottom:14,display:'flex',alignItems:'center',gap:10}}>
+          <div style={{flex:1,minWidth:0}}>
+            <Link href={`/novel/${params.id}`} style={{fontSize:13,fontWeight:700,color:'#2B211B',textDecoration:'none',display:'block',marginBottom:2,overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap'}}>{novel.title}</Link>
+            <span style={{fontSize:11,color:'#2B211B'}}>作者：{author?.display_name}</span>
+          </div>
+          <Link href={`/novel/${params.id}`} style={{fontSize:11,border:'1px solid #F0D9C9',padding:'5px 10px',borderRadius:12,color:'#77706A',background:'#FFF9F2',textDecoration:'none',flexShrink:0}}>
+            目次
+          </Link>
+        </div>
+
+        {/* コメント */}
+        <CommentSection novelId={params.id} episodeId={params.epId} userId={user?.id||null} userName={profile?.display_name||null} userIconUrl={profile?.icon_url||null} authorId={novel.author_id} comments={comments}/>
+
+        <div style={{height:80}}/>
+      </div>
+
       <AdBanner />
       <Footer user={user} />
     </div>

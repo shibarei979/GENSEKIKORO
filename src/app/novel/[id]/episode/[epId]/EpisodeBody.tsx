@@ -26,10 +26,8 @@ function isHorizontalChar(ch: string): boolean {
 
 function VerticalText({ text }: { text: string }) {
   let processed = text.replace(/[0-9]/g, (c) => String.fromCharCode(c.charCodeAt(0) + 0xFEE0))
-  // …を・・・に変換
   processed = processed.replace(/…/g, '・・・')
   processed = processed.replace(/‥/g, '・・')
-  // ーと各種ダッシュを｜に変換
   processed = processed.replace(/ー/g, '｜')
   processed = processed.replace(/ｰ/g, '｜')
   processed = processed.replace(/〜/g, '｜')
@@ -105,13 +103,41 @@ export default function EpisodeBody({ title, body, preface, afterword, authorNam
           <VerticalBody title={title} body={body} preface={preface} afterword={afterword}
             authorName={authorName} fontSize={settings.fontSize} fontFamily={fontFamily}/>
         ) : (
-          <MobileEpisodeBody title={title} body={body} preface={preface}
-            afterword={afterword} authorName={authorName}/>
+          /* モバイル横書き：padding縮小 */
+          <div style={{background:'#fff',border:'1px solid #F0D9C9',borderRadius:12,overflow:'hidden',marginBottom:16}}>
+            <div style={{padding:'16px 16px 20px'}}>
+              <h1 style={{fontFamily,fontSize:17,fontWeight:700,color:'#2B211B',textAlign:'center',marginBottom:20,lineHeight:1.6}}>
+                {title}
+              </h1>
+              {preface && (
+                <div style={{fontSize:13,color:'#77706A',lineHeight:1.9,padding:'10px 12px',background:'#FFF9F2',borderLeft:'3px solid #F0D9C9',borderRadius:4,marginBottom:20,whiteSpace:'pre-wrap'}}>
+                  {preface}
+                </div>
+              )}
+              <div
+                style={{fontSize:settings.fontSize,lineHeight:settings.lineHeight,color:'#2B211B',fontFamily,wordBreak:'break-all'}}
+                dangerouslySetInnerHTML={{__html: renderBodyH(body)}}
+              />
+            </div>
+            {afterword && (
+              <div style={{borderTop:'1px solid #F0D9C9'}}>
+                <div style={{padding:'10px 14px',borderBottom:'1px solid #F0D9C9',background:'#FFF9F2',display:'flex',alignItems:'center',gap:8}}>
+                  <span style={{width:3,height:14,background:'#F26A21',borderRadius:2,display:'inline-block'}}/>
+                  <span style={{fontSize:13,fontWeight:700,color:'#2B211B'}}>あとがき</span>
+                  {authorName && <span style={{fontSize:11,color:'#77706A',marginLeft:'auto'}}>{authorName}</span>}
+                </div>
+                <div style={{padding:'14px 16px',fontSize:14,color:'#2B211B',lineHeight:1.9,whiteSpace:'pre-wrap',fontFamily:"'Noto Sans JP',sans-serif"}}>
+                  {afterword}
+                </div>
+              </div>
+            )}
+          </div>
         )}
       </>
     )
   }
 
+  // ===== デスクトップ（元のまま） =====
   return (
     <div style={{background:'#fff',border:'1px solid #F0D9C9',borderRadius:12,overflow:'hidden',marginBottom:16}}>
       <div style={{padding:'8px 16px',borderBottom:'1px solid #FFF1E6',background:'#FFF9F2',display:'flex',justifyContent:'space-between',alignItems:'center'}}>
@@ -182,7 +208,6 @@ function VerticalBody({ title, body, preface, afterword, authorName, fontSize, f
           </div>
         </div>
       )}
-
       <style>{`
         .v-scroll::-webkit-scrollbar { height: 14px; }
         .v-scroll::-webkit-scrollbar-track { background: #FFF1E6; border-radius: 7px; }
@@ -208,7 +233,6 @@ function VerticalBody({ title, body, preface, afterword, authorName, fontSize, f
           </div>
         </div>
       </div>
-
       {afterword && (
         <div style={{borderTop:'1px solid #F0D9C9'}}>
           <div style={{padding:'10px 16px',borderBottom:'1px solid #F0D9C9',background:'#FFF9F2',display:'flex',alignItems:'center',gap:8}}>
