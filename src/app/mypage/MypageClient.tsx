@@ -597,123 +597,263 @@ export default function MypageClient({
 
       {/* ===== バッジ図鑑モーダル ===== */}
       {showBadgeBook && (
-        <div style={{position:'fixed',inset:0,zIndex:1000,display:'flex',alignItems:'center',justifyContent:'center',padding: isMobile ? 0 : 24}}>
-          <div style={{position:'absolute',inset:0,background:'rgba(0,0,0,0.6)'}} onClick={()=>setShowBadgeBook(false)}/>
+        <div style={{position:'fixed',inset:0,zIndex:1000,display:'flex',alignItems:'center',justifyContent:'center',padding: isMobile ? 0 : 32,background:'rgba(0,0,0,0.75)'}}>
+          <div style={{position:'absolute',inset:0}} onClick={()=>setShowBadgeBook(false)}/>
+
+          {/* 本体：革張り風 */}
           <div style={{
             position: isMobile ? 'absolute' : 'relative',
             bottom: isMobile ? 0 : undefined,
             zIndex:1,
-            background:'#1a1a2e',
-            borderRadius: isMobile ? '20px 20px 0 0' : 20,
-            width: isMobile ? '100%' : '80%',
-            maxWidth:860,
-            height: isMobile ? '88vh' : 'auto',
-            maxHeight: isMobile ? '88vh' : '85vh',
-            display:'flex',flexDirection:'column',
+            width: isMobile ? '100%' : '90%',
+            maxWidth:900,
+            height: isMobile ? '90vh' : '82vh',
+            display:'flex', flexDirection:'column',
+            borderRadius: isMobile ? '24px 24px 0 0' : 16,
             overflow:'hidden',
-            boxShadow:'0 20px 60px rgba(0,0,0,0.5)',
+            boxShadow:'0 32px 80px rgba(0,0,0,0.7), 0 0 0 1px rgba(255,255,255,0.08)',
+            // 革張り風グラデーション背景
+            background:'linear-gradient(160deg, #1c1230 0%, #0f0a1e 40%, #1a1030 100%)',
           } as any}>
-            {/* ヘッダー */}
-            <div style={{padding:'16px 20px',borderBottom:'1px solid rgba(255,255,255,0.1)',display:'flex',alignItems:'center',justifyContent:'space-between',background:'rgba(255,255,255,0.05)'}}>
-              <div>
-                <div style={{fontSize:16,fontWeight:700,color:'#fff'}}>バッジ図鑑</div>
-                <div style={{fontSize:11,color:'rgba(255,255,255,0.5)',marginTop:2}}>
-                  {claimedSet.size} / {ALL_BADGES.filter(b=>!b.id.startsWith('_')).length} 獲得済み
+
+            {/* 上部：装飾ライン＋タイトル */}
+            <div style={{
+              padding: isMobile ? '16px 18px 12px' : '20px 28px 16px',
+              borderBottom:'1px solid rgba(255,255,255,0.12)',
+              background:'linear-gradient(180deg, rgba(255,255,255,0.06) 0%, rgba(255,255,255,0.02) 100%)',
+              position:'relative',
+            }}>
+              {/* 上部装飾ライン */}
+              <div style={{position:'absolute',top:0,left:0,right:0,height:3,background:'linear-gradient(90deg, transparent, rgba(255,215,0,0.6), rgba(255,255,255,0.8), rgba(255,215,0,0.6), transparent)'}}/>
+
+              <div style={{display:'flex',alignItems:'center',justifyContent:'space-between'}}>
+                <div style={{display:'flex',alignItems:'center',gap:12}}>
+                  {/* 本のアイコン装飾 */}
+                  <div style={{
+                    width: isMobile ? 36 : 44,
+                    height: isMobile ? 36 : 44,
+                    borderRadius:8,
+                    background:'linear-gradient(135deg, rgba(255,215,0,0.2), rgba(255,215,0,0.05))',
+                    border:'1px solid rgba(255,215,0,0.3)',
+                    display:'flex',alignItems:'center',justifyContent:'center',
+                    boxShadow:'inset 0 1px 0 rgba(255,255,255,0.2)',
+                  }}>
+                    <svg width={isMobile?18:22} height={isMobile?18:22} viewBox="0 0 24 24" fill="none" stroke="rgba(255,215,0,0.9)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/>
+                      <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>
+                    </svg>
+                  </div>
+                  <div>
+                    <div style={{
+                      fontSize: isMobile ? 15 : 18,
+                      fontWeight:700,
+                      color:'#fff',
+                      letterSpacing:'0.08em',
+                      textShadow:'0 1px 8px rgba(255,215,0,0.3)',
+                      fontFamily:"'Noto Serif JP',serif",
+                    }}>バッジ図鑑</div>
+                    <div style={{fontSize: isMobile ? 10 : 11,color:'rgba(255,215,0,0.7)',marginTop:2,letterSpacing:'0.05em'}}>
+                      {claimedSet.size} / {ALL_BADGES.filter(b=>!b.id.startsWith('_')).length} 獲得済み
+                    </div>
+                  </div>
+                </div>
+
+                {/* ページ表示＋閉じるボタン */}
+                <div style={{display:'flex',alignItems:'center',gap:10}}>
+                  {totalPages > 1 && (
+                    <div style={{fontSize: isMobile ? 10 : 11,color:'rgba(255,255,255,0.4)',letterSpacing:'0.05em'}}>
+                      {badgePage + 1} / {totalPages}
+                    </div>
+                  )}
+                  <button onClick={()=>setShowBadgeBook(false)}
+                    style={{
+                      width:30,height:30,border:'1px solid rgba(255,255,255,0.2)',
+                      background:'rgba(255,255,255,0.06)',borderRadius:'50%',
+                      color:'rgba(255,255,255,0.7)',cursor:'pointer',fontSize:14,
+                      display:'flex',alignItems:'center',justifyContent:'center',
+                      transition:'all .15s',
+                    }}>
+                    ×
+                  </button>
                 </div>
               </div>
-              <button onClick={()=>setShowBadgeBook(false)}
-                style={{width:32,height:32,border:'none',background:'rgba(255,255,255,0.1)',borderRadius:'50%',color:'#fff',cursor:'pointer',fontSize:16,display:'flex',alignItems:'center',justifyContent:'center'}}>
-                ×
-              </button>
-            </div>
 
-            {/* バッジグリッド */}
-            <div style={{flex:1,overflowY:'auto',padding: isMobile ? '16px 12px' : '24px 28px'}}>
-              <div style={{
-                display:'grid',
-                gridTemplateColumns: isMobile ? 'repeat(4, 1fr)' : 'repeat(6, 1fr)',
-                gap: isMobile ? 12 : 16,
-              }}>
-                {ALL_BADGES.slice(badgePage * perPage, (badgePage + 1) * perPage).map(badge => {
-                  const owned = claimedSet.has(badge.id)
-                  const isSlot = badge.id.startsWith('_')
-                  return (
-                    <div key={badge.id} style={{display:'flex',flexDirection:'column',alignItems:'center',gap:6}}>
-                      {/* メダル */}
-                      <div style={{
-                        width: isMobile ? 64 : 80,
-                        height: isMobile ? 64 : 80,
-                        borderRadius:'50%',
-                        background: owned
-                          ? `radial-gradient(circle at 35% 35%, ${badge.color}dd, ${badge.color}88)`
-                          : 'radial-gradient(circle at 35% 35%, #3a3a4a, #1a1a2a)',
-                        border: owned
-                          ? `3px solid ${badge.color}`
-                          : '3px solid rgba(255,255,255,0.1)',
-                        display:'flex',alignItems:'center',justifyContent:'center',
-                        boxShadow: owned
-                          ? `0 4px 16px ${badge.color}66, inset 0 1px 0 rgba(255,255,255,0.3)`
-                          : 'inset 0 1px 0 rgba(255,255,255,0.05)',
-                        position:'relative',
-                        transition:'all .2s',
-                        cursor: owned ? 'default' : 'not-allowed',
-                        opacity: isSlot ? 0.3 : 1,
-                      }}>
-                        {owned ? (
-                          // 獲得済み：光沢エフェクト
-                          <>
-                            <div style={{
-                              position:'absolute',top:'15%',left:'20%',
-                              width:'25%',height:'25%',
-                              background:'rgba(255,255,255,0.4)',
-                              borderRadius:'50%',filter:'blur(3px)',
-                            }}/>
-                            <span style={{fontSize: isMobile ? 10 : 12,fontWeight:700,color:'#fff',textAlign:'center',lineHeight:1.3,padding:'0 6px',zIndex:1}}>
-                              {badge.name.replace(' Lv.', '\nLv.')}
-                            </span>
-                          </>
-                        ) : (
-                          // 未獲得：?マーク
-                          <span style={{fontSize: isMobile ? 20 : 24,color:'rgba(255,255,255,0.2)',fontWeight:700}}>
-                            {isSlot ? '' : '?'}
-                          </span>
-                        )}
-                      </div>
-                      {/* バッジ名 */}
-                      <div style={{
-                        fontSize: isMobile ? 9 : 10,
-                        color: owned ? 'rgba(255,255,255,0.9)' : 'rgba(255,255,255,0.25)',
-                        textAlign:'center',
-                        lineHeight:1.3,
-                        maxWidth: isMobile ? 64 : 80,
-                        wordBreak:'break-all',
-                      }}>
-                        {isSlot ? '　' : owned ? badge.name : '未獲得'}
-                      </div>
-                    </div>
-                  )
-                })}
+              {/* 進捗バー */}
+              <div style={{marginTop:12,height:3,background:'rgba(255,255,255,0.08)',borderRadius:2,overflow:'hidden'}}>
+                <div style={{
+                  height:'100%',borderRadius:2,
+                  background:'linear-gradient(90deg, rgba(255,215,0,0.8), rgba(255,180,0,0.5))',
+                  width:`${(claimedSet.size / ALL_BADGES.filter(b=>!b.id.startsWith('_')).length)*100}%`,
+                  transition:'width .4s',
+                  boxShadow:'0 0 8px rgba(255,215,0,0.5)',
+                }}/>
               </div>
             </div>
 
-            {/* ページネーション */}
+            {/* 見開きページエリア */}
+            <div style={{flex:1,overflowY:'auto',position:'relative'}}>
+
+              {/* 中央の綴じ目（デスクトップのみ） */}
+              {!isMobile && (
+                <div style={{
+                  position:'absolute',top:0,bottom:0,left:'50%',transform:'translateX(-50%)',
+                  width:2,
+                  background:'linear-gradient(180deg, transparent, rgba(255,255,255,0.06) 20%, rgba(255,255,255,0.1) 50%, rgba(255,255,255,0.06) 80%, transparent)',
+                  zIndex:2,
+                  pointerEvents:'none',
+                }}/>
+              )}
+
+              <div style={{padding: isMobile ? '16px 14px' : '24px 32px'}}>
+                <div style={{
+                  display:'grid',
+                  gridTemplateColumns: isMobile ? 'repeat(4, 1fr)' : 'repeat(6, 1fr)',
+                  gap: isMobile ? 14 : 20,
+                }}>
+                  {ALL_BADGES.slice(badgePage * perPage, (badgePage + 1) * perPage).map((badge, idx) => {
+                    const owned = claimedSet.has(badge.id)
+                    const isSlot = badge.id.startsWith('_')
+                    const medalSize = isMobile ? 62 : 78
+
+                    return (
+                      <div key={badge.id} style={{
+                        display:'flex',flexDirection:'column',alignItems:'center',gap:8,
+                        opacity: isSlot ? 0.15 : 1,
+                      }}>
+                        {/* メダル外枠 */}
+                        <div style={{position:'relative'}}>
+                          {/* 外リング */}
+                          <div style={{
+                            width: medalSize + 8,
+                            height: medalSize + 8,
+                            borderRadius:'50%',
+                            background: owned
+                              ? `conic-gradient(from 0deg, ${badge.color}44, rgba(255,255,255,0.3), ${badge.color}44, rgba(255,255,255,0.1), ${badge.color}44)`
+                              : 'conic-gradient(from 0deg, rgba(255,255,255,0.06), rgba(255,255,255,0.02), rgba(255,255,255,0.06))',
+                            display:'flex',alignItems:'center',justifyContent:'center',
+                            boxShadow: owned ? `0 0 20px ${badge.color}44` : 'none',
+                          }}>
+                            {/* メダル本体 */}
+                            <div style={{
+                              width: medalSize,
+                              height: medalSize,
+                              borderRadius:'50%',
+                              background: owned
+                                ? `radial-gradient(circle at 30% 25%, ${badge.color}ff, ${badge.color}99 50%, ${badge.color}66)`
+                                : 'radial-gradient(circle at 30% 25%, #2a2a3a, #141420)',
+                              border: owned
+                                ? `2px solid rgba(255,255,255,0.35)`
+                                : '2px solid rgba(255,255,255,0.06)',
+                              display:'flex',alignItems:'center',justifyContent:'center',
+                              position:'relative',
+                              overflow:'hidden',
+                              boxShadow: owned
+                                ? `inset 0 2px 4px rgba(255,255,255,0.4), inset 0 -2px 4px rgba(0,0,0,0.3), 0 4px 12px ${badge.color}55`
+                                : 'inset 0 2px 4px rgba(255,255,255,0.05)',
+                            }}>
+                              {owned ? (
+                                <>
+                                  {/* ハイライト */}
+                                  <div style={{position:'absolute',top:'10%',left:'15%',width:'30%',height:'28%',background:'radial-gradient(circle, rgba(255,255,255,0.55), transparent)',borderRadius:'50%',filter:'blur(2px)'}}/>
+                                  {/* 下部暗部 */}
+                                  <div style={{position:'absolute',bottom:0,left:0,right:0,height:'35%',background:'rgba(0,0,0,0.2)',borderRadius:'0 0 50% 50%'}}/>
+                                  <span style={{fontSize: isMobile ? 9 : 11,fontWeight:700,color:'#fff',textAlign:'center',lineHeight:1.3,padding:'0 4px',zIndex:1,textShadow:'0 1px 3px rgba(0,0,0,0.5)'}}>
+                                    {badge.name.replace(' Lv.', '\nLv.').replace('バッジ', '\nバッジ')}
+                                  </span>
+                                </>
+                              ) : (
+                                <span style={{fontSize: isMobile ? 18 : 22,color:'rgba(255,255,255,0.1)',fontWeight:700,fontFamily:'serif'}}>
+                                  {isSlot ? '' : '?'}
+                                </span>
+                              )}
+                            </div>
+                          </div>
+
+                          {/* 獲得済みキラキラ */}
+                          {owned && (
+                            <div style={{
+                              position:'absolute',top:-2,right:-2,
+                              width:14,height:14,
+                              background:'linear-gradient(135deg,#ffd700,#fff)',
+                              borderRadius:'50%',
+                              border:'2px solid #1c1230',
+                              boxShadow:'0 0 6px rgba(255,215,0,0.8)',
+                            }}/>
+                          )}
+                        </div>
+
+                        {/* バッジ名 */}
+                        <div style={{
+                          fontSize: isMobile ? 9 : 10,
+                          color: owned ? 'rgba(255,255,255,0.85)' : 'rgba(255,255,255,0.18)',
+                          textAlign:'center',
+                          lineHeight:1.4,
+                          width:'100%',
+                          letterSpacing:'0.02em',
+                        }}>
+                          {isSlot ? '' : owned ? badge.name : '???'}
+                        </div>
+                      </div>
+                    )
+                  })}
+                </div>
+              </div>
+            </div>
+
+            {/* 下部：ページめくりナビ */}
             {totalPages > 1 && (
-              <div style={{padding:'12px 20px',borderTop:'1px solid rgba(255,255,255,0.1)',display:'flex',alignItems:'center',justifyContent:'center',gap:12,background:'rgba(255,255,255,0.03)'}}>
+              <div style={{
+                padding: isMobile ? '10px 16px' : '12px 28px',
+                borderTop:'1px solid rgba(255,255,255,0.08)',
+                background:'linear-gradient(0deg, rgba(0,0,0,0.3) 0%, rgba(255,255,255,0.02) 100%)',
+                display:'flex',alignItems:'center',justifyContent:'space-between',
+                position:'relative',
+              }}>
+                {/* 下部装飾ライン */}
+                <div style={{position:'absolute',bottom:0,left:0,right:0,height:2,background:'linear-gradient(90deg, transparent, rgba(255,215,0,0.4), rgba(255,255,255,0.6), rgba(255,215,0,0.4), transparent)'}}/>
+
                 <button onClick={()=>setBadgePage(p=>Math.max(0,p-1))} disabled={badgePage===0}
-                  style={{width:36,height:36,borderRadius:'50%',border:'1px solid rgba(255,255,255,0.2)',background:'rgba(255,255,255,0.05)',color:'#fff',cursor:badgePage===0?'not-allowed':'pointer',fontSize:16,opacity:badgePage===0?0.3:1,display:'flex',alignItems:'center',justifyContent:'center'}}>
-                  ‹
+                  style={{
+                    display:'flex',alignItems:'center',gap:6,
+                    padding:'7px 16px',
+                    border:'1px solid rgba(255,255,255,0.15)',
+                    borderRadius:20,
+                    background:'rgba(255,255,255,0.05)',
+                    color: badgePage===0 ? 'rgba(255,255,255,0.2)' : 'rgba(255,255,255,0.8)',
+                    cursor: badgePage===0 ? 'not-allowed' : 'pointer',
+                    fontSize:12,fontWeight:600,letterSpacing:'0.05em',
+                  }}>
+                  ‹ 前のページ
                 </button>
-                <div style={{display:'flex',gap:6}}>
+
+                {/* ページドット */}
+                <div style={{display:'flex',gap:6,alignItems:'center'}}>
                   {Array.from({length:totalPages},(_,i)=>(
                     <button key={i} onClick={()=>setBadgePage(i)}
-                      style={{width:8,height:8,borderRadius:'50%',border:'none',cursor:'pointer',
-                        background:i===badgePage?'#F26A21':'rgba(255,255,255,0.2)',padding:0}}>
-                    </button>
+                      style={{
+                        width: i===badgePage ? 20 : 6,
+                        height:6,borderRadius:3,border:'none',cursor:'pointer',
+                        background: i===badgePage
+                          ? 'linear-gradient(90deg,rgba(255,215,0,0.9),rgba(255,180,0,0.7))'
+                          : 'rgba(255,255,255,0.2)',
+                        padding:0,transition:'all .2s',
+                        boxShadow: i===badgePage ? '0 0 6px rgba(255,215,0,0.6)' : 'none',
+                      }}/>
                   ))}
                 </div>
+
                 <button onClick={()=>setBadgePage(p=>Math.min(totalPages-1,p+1))} disabled={badgePage===totalPages-1}
-                  style={{width:36,height:36,borderRadius:'50%',border:'1px solid rgba(255,255,255,0.2)',background:'rgba(255,255,255,0.05)',color:'#fff',cursor:badgePage===totalPages-1?'not-allowed':'pointer',fontSize:16,opacity:badgePage===totalPages-1?0.3:1,display:'flex',alignItems:'center',justifyContent:'center'}}>
-                  ›
+                  style={{
+                    display:'flex',alignItems:'center',gap:6,
+                    padding:'7px 16px',
+                    border:'1px solid rgba(255,255,255,0.15)',
+                    borderRadius:20,
+                    background:'rgba(255,255,255,0.05)',
+                    color: badgePage===totalPages-1 ? 'rgba(255,255,255,0.2)' : 'rgba(255,255,255,0.8)',
+                    cursor: badgePage===totalPages-1 ? 'not-allowed' : 'pointer',
+                    fontSize:12,fontWeight:600,letterSpacing:'0.05em',
+                  }}>
+                  次のページ ›
                 </button>
               </div>
             )}
