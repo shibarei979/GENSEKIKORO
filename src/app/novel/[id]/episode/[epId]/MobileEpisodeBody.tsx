@@ -32,12 +32,12 @@ export default function MobileEpisodeBody({ title, body, preface, afterword, aut
   const touchStartY = useRef(0)
   const [scrollPos, setScrollPos] = useState(0)
 
-  const isVertical = settings.writingMode === 'horizontal' // 縦書き＝横スクロール
+  // 修正：vertical設定のときに縦書き（横スクロール）表示
+  const isVertical = settings.writingMode === 'vertical'
   const fontFamily = settings.font === 'serif'
     ? "'Noto Serif JP', serif"
     : "'Noto Sans JP', sans-serif"
 
-  // 横スクロール時のタッチ操作
   const handleTouchStart = useCallback((e: React.TouchEvent) => {
     touchStartX.current = e.touches[0].clientX
     touchStartY.current = e.touches[0].clientY
@@ -47,16 +47,15 @@ export default function MobileEpisodeBody({ title, body, preface, afterword, aut
     if (!isVertical || !containerRef.current) return
     const dx = e.changedTouches[0].clientX - touchStartX.current
     const dy = Math.abs(e.changedTouches[0].clientY - touchStartY.current)
-    if (Math.abs(dx) < 30 || dy > Math.abs(dx)) return // 縦スワイプは無視
+    if (Math.abs(dx) < 30 || dy > Math.abs(dx)) return
 
     const pageW = containerRef.current.clientWidth
     const maxScroll = containerRef.current.scrollWidth - pageW
-    const newPos = Math.max(0, Math.min(maxScroll, scrollPos - dx * 1.5)) // 右→左方向
+    const newPos = Math.max(0, Math.min(maxScroll, scrollPos - dx * 1.5))
     setScrollPos(newPos)
     containerRef.current.scrollTo({ left: newPos, behavior: 'smooth' })
   }, [isVertical, scrollPos])
 
-  // スクロール位置同期
   const handleScroll = useCallback(() => {
     if (containerRef.current) {
       setScrollPos(containerRef.current.scrollLeft)
@@ -65,13 +64,18 @@ export default function MobileEpisodeBody({ title, body, preface, afterword, aut
 
   useEffect(() => {
     if (containerRef.current) {
-      containerRef.current.scrollTo({ left: 0 })
+      if (isVertical) {
+        // 縦書き：右端（冒頭）から開始
+        containerRef.current.scrollLeft = containerRef.current.scrollWidth
+      } else {
+        containerRef.current.scrollTo({ left: 0 })
+      }
       setScrollPos(0)
     }
   }, [settings.writingMode])
 
+  // ===== 縦書き（横スクロール） =====
   if (isVertical) {
-    // 縦書き＋横スクロール
     return (
       <div style={{background:'#fff',border:'1px solid #F0D9C9',borderRadius:12,overflow:'hidden',marginBottom:16}}>
         {/* 設定バー */}
@@ -89,8 +93,8 @@ export default function MobileEpisodeBody({ title, body, preface, afterword, aut
             overflowX:'auto',
             overflowY:'hidden',
             WebkitOverflowScrolling:'touch' as any,
-            scrollbarWidth:'none',
-            msOverflowStyle:'none',
+            scrollbarWidth:'none' as any,
+            msOverflowStyle:'none' as any,
           }}
         >
           <div style={{
@@ -146,7 +150,7 @@ export default function MobileEpisodeBody({ title, body, preface, afterword, aut
           </div>
         </div>
 
-        {/* スワイプヒント（初回のみ） */}
+        {/* スワイプヒント */}
         <div style={{padding:'6px 12px',background:'#FFF9F2',borderTop:'1px solid #FFF1E6',textAlign:'center',fontSize:10,color:'#B8AEA8'}}>
           ← スワイプして読み進める
         </div>
@@ -168,7 +172,7 @@ export default function MobileEpisodeBody({ title, body, preface, afterword, aut
     )
   }
 
-  // 縦読み（横書き）
+  // ===== 縦読み（横書き） =====
   return (
     <div style={{background:'#fff',border:'1px solid #F0D9C9',borderRadius:12,overflow:'hidden',marginBottom:16}}>
       <div style={{padding:'8px 12px',borderBottom:'1px solid #FFF1E6',background:'#FFF9F2',display:'flex',justifyContent:'flex-end'}}>
