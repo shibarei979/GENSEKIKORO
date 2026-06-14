@@ -29,16 +29,12 @@ export default async function ContestsPage() {
   }
 
   const { data: contests } = await supabase
-    .from('contests')
-    .select('*')
-    .eq('is_published', true)
-    .order('created_at', { ascending: false })
+    .from('contests').select('*').eq('is_published', true).order('created_at', { ascending: false })
 
   const contestIds = (contests||[]).map((c:any) => c.id)
   const entryCountMap: Record<string,number> = {}
   if (contestIds.length > 0) {
-    const { data: entries } = await supabase
-      .from('contest_entries').select('contest_id').in('contest_id', contestIds)
+    const { data: entries } = await supabase.from('contest_entries').select('contest_id').in('contest_id', contestIds)
     entries?.forEach((e:any) => { entryCountMap[e.contest_id] = (entryCountMap[e.contest_id]||0)+1 })
   }
 
@@ -51,12 +47,12 @@ export default async function ContestsPage() {
     <div style={{minHeight:'100vh',background:'#FFF9F2',fontFamily:"'Noto Sans JP',sans-serif"}}>
       <Header profile={profile} user={user} />
 
-      <div className="main-layout" style={{maxWidth:1200,margin:'0 auto',padding:'20px 32px',display:'flex',gap:20,alignItems:'flex-start'}}>
+      <div className="main-layout" style={{maxWidth:1200,margin:'0 auto',padding:'28px 32px',display:'flex',gap:20,alignItems:'flex-start'}}>
         <div style={{flex:1,minWidth:0}}>
 
           {/* 開催中のコンテスト */}
           {activeContests.length > 0 && (
-            <div style={{marginBottom:24}}>
+            <div style={{marginBottom:28}}>
               <h2 style={{fontSize:15,fontWeight:700,color:'#2B211B',marginBottom:12,display:'flex',alignItems:'center',gap:8}}>
                 <span style={{width:4,height:16,background:'#F26A21',borderRadius:2,display:'inline-block'}}/>
                 開催中のコンテスト
@@ -68,52 +64,40 @@ export default async function ContestsPage() {
                   return (
                     <Link key={c.id} href={`/contests/${c.id}`} style={{textDecoration:'none'}}>
                       <div style={{background:'#fff',border:'1px solid #F0D9C9',borderRadius:12,overflow:'hidden'}}>
-                        {/* モバイル：画像を上部全幅、デスクトップ：左サイド */}
-                        <div className="contest-card-inner" style={{display:'flex'}}>
+                        {/* デスクトップ：画像左サイド */}
+                        <div className="desktop-only" style={{display:'flex',gap:0}}>
                           {c.image_url && (
-                            <>
-                              {/* デスクトップ画像 */}
-                              <div className="desktop-only" style={{width:200,flexShrink:0,overflow:'hidden',background:'#FFF9F2'}}>
-                                <img src={c.image_url} alt={c.title} style={{width:'100%',height:'100%',objectFit:'cover',display:'block'}}/>
-                              </div>
-                              {/* モバイル画像（上部全幅） */}
-                              <div className="mobile-only" style={{width:'100%',position:'absolute',top:0,left:0}}>
-                                <img src={c.image_url} alt={c.title} style={{width:'100%',height:140,objectFit:'cover',display:'block'}}/>
-                              </div>
-                            </>
-                          )}
-                          <div style={{padding:'16px 20px',flex:1,minWidth:0}}>
-                            <div style={{display:'flex',alignItems:'center',gap:8,marginBottom:6,flexWrap:'wrap'}}>
-                              <span style={{fontSize:11,fontWeight:700,color:status.color,background:status.bg,
-                                border:`1px solid ${status.border}`,padding:'2px 10px',borderRadius:10}}>
-                                {status.label}
-                              </span>
-                              {c.deadline && (
-                                <span style={{fontSize:11,color:'#94a3b8'}}>
-                                  締切：{new Date(c.deadline).toLocaleDateString('ja-JP')}
-                                </span>
-                              )}
-                              <span style={{fontSize:11,color:'#77706A',marginLeft:'auto'}}>
-                                応募数：{entryCount}作品
-                              </span>
+                            <div style={{width:200,flexShrink:0,overflow:'hidden',background:'#FFF9F2'}}>
+                              <img src={c.image_url} alt={c.title} style={{width:'100%',height:'100%',objectFit:'cover',display:'block'}}/>
                             </div>
-                            <h3 style={{fontSize:16,fontWeight:700,color:'#2B211B',marginBottom:6,lineHeight:1.4,fontFamily:"'Noto Serif JP',serif"}}>
-                              {c.title}
-                            </h3>
-                            {c.description && (
-                              <p style={{fontSize:12,color:'#77706A',lineHeight:1.8,overflow:'hidden',
-                                display:'-webkit-box',WebkitLineClamp:2,WebkitBoxOrient:'vertical' as any,margin:0}}>
-                                {c.description}
-                              </p>
-                            )}
+                          )}
+                          <div style={{padding:'20px 24px',flex:1,minWidth:0}}>
+                            <div style={{display:'flex',alignItems:'center',gap:8,marginBottom:8,flexWrap:'wrap'}}>
+                              <span style={{fontSize:11,fontWeight:700,color:status.color,background:status.bg,border:`1px solid ${status.border}`,padding:'2px 10px',borderRadius:10}}>{status.label}</span>
+                              {c.deadline && <span style={{fontSize:11,color:'#94a3b8'}}>締切：{new Date(c.deadline).toLocaleDateString('ja-JP')}</span>}
+                              <span style={{fontSize:11,color:'#77706A',marginLeft:'auto'}}>応募数：{entryCount}作品</span>
+                            </div>
+                            <h3 style={{fontSize:17,fontWeight:700,color:'#2B211B',marginBottom:8,lineHeight:1.4,fontFamily:"'Noto Serif JP',serif"}}>{c.title}</h3>
+                            {c.description && <p style={{fontSize:12,color:'#77706A',lineHeight:1.8,overflow:'hidden',display:'-webkit-box',WebkitLineClamp:2,WebkitBoxOrient:'vertical' as any}}>{c.description}</p>}
                             {status.label === '募集中' && (
                               <div style={{marginTop:10}}>
-                                <span style={{display:'inline-block',padding:'6px 16px',background:'#F26A21',color:'#fff',
-                                  fontWeight:700,fontSize:12,borderRadius:6}}>
-                                  応募受付中 →
-                                </span>
+                                <span style={{display:'inline-block',padding:'6px 16px',background:'#F26A21',color:'#fff',fontWeight:700,fontSize:12,borderRadius:6}}>応募受付中 →</span>
                               </div>
                             )}
+                          </div>
+                        </div>
+                        {/* モバイル：画像上部全幅 */}
+                        <div className="mobile-only">
+                          {c.image_url && <img src={c.image_url} alt={c.title} style={{width:'100%',height:130,objectFit:'cover',display:'block'}}/>}
+                          <div style={{padding:'14px 16px'}}>
+                            <div style={{display:'flex',alignItems:'center',gap:8,marginBottom:6,flexWrap:'wrap'}}>
+                              <span style={{fontSize:11,fontWeight:700,color:status.color,background:status.bg,border:`1px solid ${status.border}`,padding:'2px 10px',borderRadius:10}}>{status.label}</span>
+                              {c.deadline && <span style={{fontSize:11,color:'#94a3b8'}}>締切：{new Date(c.deadline).toLocaleDateString('ja-JP')}</span>}
+                              <span style={{fontSize:11,color:'#77706A'}}>応募数：{entryCount}作品</span>
+                            </div>
+                            <h3 style={{fontSize:15,fontWeight:700,color:'#2B211B',marginBottom:6,lineHeight:1.4,fontFamily:"'Noto Serif JP',serif"}}>{c.title}</h3>
+                            {c.description && <p style={{fontSize:12,color:'#77706A',lineHeight:1.8,overflow:'hidden',display:'-webkit-box',WebkitLineClamp:2,WebkitBoxOrient:'vertical' as any,margin:0}}>{c.description}</p>}
+                            {status.label === '募集中' && <div style={{marginTop:10}}><span style={{display:'inline-block',padding:'6px 16px',background:'#F26A21',color:'#fff',fontWeight:700,fontSize:12,borderRadius:6}}>応募受付中 →</span></div>}
                           </div>
                         </div>
                       </div>
@@ -126,7 +110,7 @@ export default async function ContestsPage() {
 
           {/* 外部コンテスト */}
           {externalContests.length > 0 && (
-            <div style={{marginBottom:24}}>
+            <div style={{marginBottom:28}}>
               <h2 style={{fontSize:15,fontWeight:700,color:'#2B211B',marginBottom:12,display:'flex',alignItems:'center',gap:8}}>
                 <span style={{width:4,height:16,background:'#3b82f6',borderRadius:2,display:'inline-block'}}/>
                 外部コンテスト情報
@@ -135,42 +119,36 @@ export default async function ContestsPage() {
                 {externalContests.map((c:any) => {
                   const status = getStatusLabel(c.deadline, c.judging_end)
                   return (
-                    <a key={c.id} href={c.apply_url||'#'} target="_blank" rel="noopener noreferrer"
-                      style={{textDecoration:'none',display:'block',background:'#fff',border:'1px solid #F0D9C9',borderRadius:12,overflow:'hidden'}}>
-                      {c.image_url && (
-                        <img src={c.image_url} alt={c.title}
-                          style={{width:'100%',height:120,objectFit:'cover',display:'block'}}/>
-                      )}
-                      <div style={{padding:'14px 18px'}}>
-                        <div style={{display:'flex',alignItems:'center',gap:8,marginBottom:6,flexWrap:'wrap'}}>
-                          <span style={{fontSize:11,fontWeight:700,color:status.color,background:status.bg,
-                            border:`1px solid ${status.border}`,padding:'2px 10px',borderRadius:10}}>
-                            {status.label}
-                          </span>
-                          {c.deadline && (
-                            <span style={{fontSize:11,color:'#94a3b8'}}>
-                              締切：{new Date(c.deadline).toLocaleDateString('ja-JP')}
-                            </span>
-                          )}
-                          <span style={{fontSize:11,color:'#3b82f6',marginLeft:'auto',fontWeight:600}}>外部サイト ↗</span>
-                        </div>
-                        <h3 style={{fontSize:15,fontWeight:700,color:'#2B211B',marginBottom:4,lineHeight:1.4,fontFamily:"'Noto Serif JP',serif"}}>
-                          {c.title}
-                        </h3>
-                        {c.description && (
-                          <p style={{fontSize:12,color:'#77706A',lineHeight:1.8,overflow:'hidden',
-                            display:'-webkit-box',WebkitLineClamp:2,WebkitBoxOrient:'vertical' as any,margin:0}}>
-                            {c.description}
-                          </p>
-                        )}
-                        {status.label === '募集中' && (
-                          <div style={{marginTop:10}}>
-                            <span style={{display:'inline-block',padding:'6px 16px',background:'#3b82f6',color:'#fff',
-                              fontWeight:700,fontSize:12,borderRadius:6}}>
-                              外部サイトで応募する ↗
-                            </span>
+                    <a key={c.id} href={c.apply_url||'#'} target="_blank" rel="noopener noreferrer" style={{textDecoration:'none'}}>
+                      <div style={{background:'#fff',border:'1px solid #F0D9C9',borderRadius:12,overflow:'hidden'}}>
+                        {/* デスクトップ */}
+                        <div className="desktop-only" style={{display:'flex',gap:0}}>
+                          {c.image_url && <div style={{width:200,flexShrink:0,overflow:'hidden',background:'#FFF9F2'}}><img src={c.image_url} alt={c.title} style={{width:'100%',height:'100%',objectFit:'cover',display:'block'}}/></div>}
+                          <div style={{padding:'20px 24px',flex:1,minWidth:0}}>
+                            <div style={{display:'flex',alignItems:'center',gap:8,marginBottom:8,flexWrap:'wrap'}}>
+                              <span style={{fontSize:11,fontWeight:700,color:status.color,background:status.bg,border:`1px solid ${status.border}`,padding:'2px 10px',borderRadius:10}}>{status.label}</span>
+                              {c.deadline && <span style={{fontSize:11,color:'#94a3b8'}}>締切：{new Date(c.deadline).toLocaleDateString('ja-JP')}</span>}
+                              <span style={{fontSize:11,color:'#3b82f6',marginLeft:'auto',fontWeight:600}}>外部サイト ↗</span>
+                            </div>
+                            <h3 style={{fontSize:17,fontWeight:700,color:'#2B211B',marginBottom:8,lineHeight:1.4,fontFamily:"'Noto Serif JP',serif"}}>{c.title}</h3>
+                            {c.description && <p style={{fontSize:12,color:'#77706A',lineHeight:1.8,overflow:'hidden',display:'-webkit-box',WebkitLineClamp:2,WebkitBoxOrient:'vertical' as any}}>{c.description}</p>}
+                            {status.label === '募集中' && <div style={{marginTop:10}}><span style={{display:'inline-block',padding:'6px 16px',background:'#3b82f6',color:'#fff',fontWeight:700,fontSize:12,borderRadius:6}}>外部サイトで応募する ↗</span></div>}
                           </div>
-                        )}
+                        </div>
+                        {/* モバイル */}
+                        <div className="mobile-only">
+                          {c.image_url && <img src={c.image_url} alt={c.title} style={{width:'100%',height:120,objectFit:'cover',display:'block'}}/>}
+                          <div style={{padding:'14px 16px'}}>
+                            <div style={{display:'flex',alignItems:'center',gap:8,marginBottom:6,flexWrap:'wrap'}}>
+                              <span style={{fontSize:11,fontWeight:700,color:status.color,background:status.bg,border:`1px solid ${status.border}`,padding:'2px 10px',borderRadius:10}}>{status.label}</span>
+                              {c.deadline && <span style={{fontSize:11,color:'#94a3b8'}}>締切：{new Date(c.deadline).toLocaleDateString('ja-JP')}</span>}
+                              <span style={{fontSize:11,color:'#3b82f6',fontWeight:600}}>外部サイト ↗</span>
+                            </div>
+                            <h3 style={{fontSize:15,fontWeight:700,color:'#2B211B',marginBottom:4,lineHeight:1.4,fontFamily:"'Noto Serif JP',serif"}}>{c.title}</h3>
+                            {c.description && <p style={{fontSize:12,color:'#77706A',lineHeight:1.8,overflow:'hidden',display:'-webkit-box',WebkitLineClamp:2,WebkitBoxOrient:'vertical' as any,margin:0}}>{c.description}</p>}
+                            {status.label === '募集中' && <div style={{marginTop:10}}><span style={{display:'inline-block',padding:'6px 16px',background:'#3b82f6',color:'#fff',fontWeight:700,fontSize:12,borderRadius:6}}>外部サイトで応募する ↗</span></div>}
+                          </div>
+                        </div>
                       </div>
                     </a>
                   )
@@ -186,16 +164,13 @@ export default async function ContestsPage() {
                 <span style={{width:4,height:16,background:'#e2e8f0',borderRadius:2,display:'inline-block'}}/>
                 過去のコンテスト
               </h2>
-              <div style={{display:'flex',flexDirection:'column',gap:8}}>
+              <div style={{display:'flex',flexDirection:'column',gap:10}}>
                 {endedContests.map((c:any) => (
                   <Link key={c.id} href={`/contests/${c.id}`} style={{textDecoration:'none',display:'block',
-                    background:'#fff',border:'1px solid #F0D9C9',borderRadius:10,padding:'12px 16px',opacity:0.7}}>
-                    <div style={{display:'flex',alignItems:'center',gap:8,marginBottom:3}}>
-                      <span style={{fontSize:10,fontWeight:700,color:'#94a3b8',background:'#f1f5f9',
-                        border:'1px solid #e2e8f0',padding:'1px 8px',borderRadius:8}}>終了</span>
-                      {c.deadline && (
-                        <span style={{fontSize:11,color:'#94a3b8'}}>締切：{new Date(c.deadline).toLocaleDateString('ja-JP')}</span>
-                      )}
+                    background:'#fff',border:'1px solid #F0D9C9',borderRadius:10,padding:'14px 18px',opacity:0.7}}>
+                    <div style={{display:'flex',alignItems:'center',gap:8,marginBottom:4}}>
+                      <span style={{fontSize:10,fontWeight:700,color:'#94a3b8',background:'#f1f5f9',border:'1px solid #e2e8f0',padding:'1px 8px',borderRadius:8}}>終了</span>
+                      {c.deadline && <span style={{fontSize:11,color:'#94a3b8'}}>締切：{new Date(c.deadline).toLocaleDateString('ja-JP')}</span>}
                     </div>
                     <div style={{fontSize:14,fontWeight:600,color:'#77706A'}}>{c.title}</div>
                   </Link>
@@ -218,13 +193,6 @@ export default async function ContestsPage() {
 
       <AdBanner />
       <Footer user={user} />
-
-      <style>{`
-        @media (max-width: 768px) {
-          .contest-card-inner { flex-direction: column !important; position: relative; }
-          .contest-card-inner .mobile-only { position: static !important; width: 100% !important; }
-        }
-      `}</style>
     </div>
   )
 }
