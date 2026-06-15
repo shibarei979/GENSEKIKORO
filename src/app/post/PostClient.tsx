@@ -17,7 +17,7 @@ function detectAiMarkers(text: string): string[] {
   const patterns: string[] = []
   // **太字** パターン
   const boldMatches = text.match(/\*\*[^*]+\*\*/g) || []
-  if (boldMatches.length > 0) patterns.push(`**太字**パターン ${boldMatches.length}箇所（例：${boldMatches[0].slice(0,30)}）`)
+  if (boldMatches.length > 0) patterns.push(`**太字**パターン ${boldMatches.length}箇所（例：${(boldMatches[0] ?? '').slice(0,30)}）`)
   // # 見出しパターン
   const headingMatches = text.match(/^#{1,3}\s+.+/gm) || []
   if (headingMatches.length > 0) patterns.push(`Markdown見出しパターン ${headingMatches.length}箇所`)
