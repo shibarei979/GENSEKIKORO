@@ -372,7 +372,7 @@ export default function MypageClient({
             </div>
           </div>
         ) : (
-          <div className="profile-card" style={{background:'#fff',border:'1px solid #F0D9C9',borderRadius:16,padding:'24px 28px',marginBottom:20,display:'flex',alignItems:'center',gap:20}}>
+          <div className="profile-card" style={{background:'#fff',border:'1px solid #F0D9C9',borderRadius:16,padding:'20px 28px',marginBottom:20}}>
             <div style={{position:'relative',flexShrink:0,cursor:'pointer'}} onClick={()=>iconInputRef.current?.click()} title="クリックしてアイコンを変更">
               <input ref={iconInputRef} type="file" accept="image/*" style={{display:'none'}} onChange={e=>{const f=e.target.files?.[0];if(f){handleIconUpload(f);e.target.value=''}}}/>
               {iconUrl ? (
@@ -403,16 +403,10 @@ export default function MypageClient({
               </div>
               {nameError && <div style={{fontSize:11,color:'#dc2626',marginBottom:4}}>{nameError}</div>}
               {userNumber && <div style={{fontSize:12,color:'#B8AEA8',marginBottom:4,letterSpacing:'.05em',fontWeight:600}}>{userNumber}</div>}
-              <div style={{fontSize:13,color:'#77706A',marginBottom:8}}>{profile.email}</div>
-              <div style={{display:'flex',gap:16,fontSize:12,color:'#B8AEA8'}}>
-                <span style={{background:'#FFF9F2',border:'1px solid #F0D9C9',borderRadius:6,padding:'2px 10px',color:'#77706A'}}>{profile.login_provider === 'google' ? 'Google' : 'メール'}で登録</span>
-                <span>フォロワー <strong style={{color:'#2B211B'}}>{followerCount}</strong> 人</span>
-                <span>フォロー中 <strong style={{color:'#2B211B'}}>{followingCount}</strong> 人</span>
-                <span>公開 <strong style={{color:'#F26A21'}}>{published.length}</strong> 作品</span>
-                <span>下書き <strong style={{color:'#77706A'}}>{drafts.length}</strong> 作品</span>
-              </div>
+              <div style={{fontSize:12,color:'#77706A'}}>{profile.email}</div>
             </div>
-            <div style={{display:'flex',gap:8,flexShrink:0}}>
+            {/* ボタン群 */}
+            <div style={{display:'flex',gap:8,flexShrink:0,alignItems:'center'}}>
               {/* バッジ図鑑ボタン */}
               <button onClick={()=>{setShowBadgeBook(true);setBadgePage(0)}}
                 style={{border:'1px solid #F0D9C9',borderRadius:10,padding:'8px 14px',background:'#fff',cursor:'pointer',display:'flex',alignItems:'center',gap:6,color:'#77706A',fontSize:13}}>
@@ -450,6 +444,14 @@ export default function MypageClient({
                   </>
                 )}
               </div>
+            </div>
+            {/* 2行目：統計情報 */}
+            <div style={{display:'flex',gap:20,fontSize:12,color:'#B8AEA8',marginTop:14,paddingTop:14,borderTop:'1px solid #F0D9C9'}}>
+              <span style={{background:'#FFF9F2',border:'1px solid #F0D9C9',borderRadius:6,padding:'2px 10px',color:'#77706A'}}>{profile.login_provider === 'google' ? 'Google' : 'メール'}で登録</span>
+              <span>フォロワー <strong style={{color:'#2B211B'}}>{followerCount}</strong> 人</span>
+              <span>フォロー中 <strong style={{color:'#2B211B'}}>{followingCount}</strong> 人</span>
+              <span>公開 <strong style={{color:'#F26A21'}}>{published.length}</strong> 作品</span>
+              <span>下書き <strong style={{color:'#77706A'}}>{drafts.length}</strong> 作品</span>
             </div>
           </div>
         )}
