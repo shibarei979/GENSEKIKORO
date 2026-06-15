@@ -294,7 +294,7 @@ export default function PostClient({ profile, userId }: Props) {
 
       // ===== AI検出チェック =====
       if (publish && hasAiMarkers && novelId && episodeId) {
-        supabase.from('ai_reviews').insert({
+        void supabase.from('ai_reviews').insert({
           novel_id:     novelId,
           episode_id:   episodeId,
           user_id:      userId,
@@ -303,7 +303,7 @@ export default function PostClient({ profile, userId }: Props) {
           author_name:   profile?.display_name || '不明',
           reason:        aiMarkers.join(' / '),
           status:        'pending',
-        }).then(() => {}).catch(() => {})
+        })
       }
 
       if (publish) {
