@@ -6,6 +6,7 @@ import Header from '@/components/layout/Header'
 import Footer from '@/components/layout/Footer'
 import AdminChart from './AdminChart'
 import AdminAnalytics from './AdminAnalytics'
+import AiReviewSection from './AiReviewSection'
 
 export const dynamic = 'force-dynamic'
 
@@ -65,11 +66,8 @@ export default async function AdminPage() {
   const chartData1825 = buildChartData(makeDays(365 * 5))
 
   // ===== 7項目の詳細分析データ取得 =====
-
-  // 1. ジャンル別統計
   const { data: novels } = await supabase.from('novels').select('id, genre').eq('published', true)
   const { data: likes }  = await supabase.from('likes').select('novel_id')
-  const novelIds = (novels || []).map((n: any) => n.id)
   const likeMap: Record<string, number> = {}
   ;(likes || []).forEach((l: any) => { likeMap[l.novel_id] = (likeMap[l.novel_id] || 0) + 1 })
   const genreMap: Record<string, { count: number; likes: number }> = {}
@@ -80,11 +78,8 @@ export default async function AdminPage() {
   })
   const genreStats = Object.entries(genreMap).map(([genre, v]) => ({ genre, ...v }))
 
-  // 2. 時間帯別アクセス（過去30日）
   const since30 = new Date(); since30.setDate(since30.getDate() - 30)
-  const { data: pageViews30 } = await supabase
-    .from('page_views').select('created_at')
-    .gte('created_at', since30.toISOString())
+  const { data: pageViews30 } = await supabase.from('page_views').select('created_at').gte('created_at', since30.toISOString())
   const hourMap: Record<number, number> = {}
   for (let i = 0; i < 24; i++) hourMap[i] = 0
   ;(pageViews30 || []).forEach((pv: any) => {
@@ -93,25 +88,18 @@ export default async function AdminPage() {
   })
   const hourlyAccess = Object.entries(hourMap).map(([h, count]) => ({ hour: Number(h), count })).sort((a,b)=>a.hour-b.hour)
 
-  // 3. 作品別閲覧数・いいね数
-  const { data: novelViews } = await supabase
-    .from('novel_views').select('novel_id, view_count')
+  const { data: novelViews } = await supabase.from('novel_views').select('novel_id, view_count')
   const viewMap: Record<string, number> = {}
   ;(novelViews || []).forEach((v: any) => { viewMap[v.novel_id] = v.view_count })
-  const { data: topNovelData } = await supabase
-    .from('novels').select('id, title, genre').eq('published', true)
-    .order('created_at', { ascending: false }).limit(50)
+  const { data: topNovelData } = await supabase.from('novels').select('id, title, genre').eq('published', true).order('created_at', { ascending: false }).limit(50)
   const topNovels = (topNovelData || []).map((n: any) => ({
     id: n.id, title: n.title, genre: n.genre,
     views: viewMap[n.id] || 0,
     likes: likeMap[n.id] || 0,
   })).sort((a, b) => b.views - a.views).slice(0, 20)
 
-  // 4. コンテスト応募状況
-  const { data: allContests } = await supabase
-    .from('contests').select('id, title, deadline').eq('is_published', true)
-  const { data: allEntries } = await supabase
-    .from('contest_entries').select('contest_id')
+  const { data: allContests } = await supabase.from('contests').select('id, title, deadline').eq('is_published', true)
+  const { data: allEntries } = await supabase.from('contest_entries').select('contest_id')
   const entryCountMap: Record<string, number> = {}
   ;(allEntries || []).forEach((e: any) => { entryCountMap[e.contest_id] = (entryCountMap[e.contest_id] || 0) + 1 })
   const contestStats = (allContests || []).map((c: any) => ({
@@ -119,43 +107,35 @@ export default async function AdminPage() {
     entryCount: entryCountMap[c.id] || 0,
   }))
 
-  // 5. ミッション達成率
-  const { data: missionData } = await supabase
-    .from('user_missions').select('mission_id')
+  const { data: missionData } = await supabase.from('user_missions').select('mission_id')
   const missionCountMap: Record<string, number> = {}
   ;(missionData || []).forEach((m: any) => { missionCountMap[m.mission_id] = (missionCountMap[m.mission_id] || 0) + 1 })
-  const missionStats = Object.entries(missionCountMap)
-    .map(([mission_id, count]) => ({ mission_id, count }))
-    .sort((a, b) => b.count - a.count)
+  const missionStats = Object.entries(missionCountMap).map(([mission_id, count]) => ({ mission_id, count })).sort((a, b) => b.count - a.count)
 
-  // 6. 読み上げ利用率（localStorageは取得不可なので speech_pos_ キーをDBで代替管理できないため概算）
-  // page_viewsから読み上げページを訪問したユニークユーザー数で代替
   const { count: totalUsers2 } = await supabase.from('profiles').select('*', { count: 'exact', head: true })
-  // user_missions のユニークユーザー数を読み上げ利用の参考値として利用
   const { data: speechUserData } = await supabase.from('user_missions').select('user_id')
   const uniqueSpeechUsers = new Set((speechUserData || []).map((d: any) => d.user_id)).size
-  const speechStats = {
-    used: uniqueSpeechUsers,
-    total: totalUsers2 || 0,
-  }
+  const speechStats = { used: uniqueSpeechUsers, total: totalUsers2 || 0 }
 
-  // 7. ページ別PV（離脱率の参考）
-  const { data: allPageViews } = await supabase
-    .from('page_views').select('episode_id')
-  // episode別のカウントをページパスに変換
+  const { data: allPageViews } = await supabase.from('page_views').select('episode_id')
   const epViewMap: Record<string, number> = {}
   ;(allPageViews || []).forEach((pv: any) => {
     const key = pv.episode_id ? '話ページ' : 'その他'
     epViewMap[key] = (epViewMap[key] || 0) + 1
   })
-  // より詳細なページ別PVはnovel_viewsで代替
   const pageViewStats = [
     { path: '話ページ（累計）', count: epViewMap['話ページ'] || 0 },
-    { path: 'ホーム', count: Math.round((allPageViews?.length || 0) * 0.15) }, // 概算
+    { path: 'ホーム', count: Math.round((allPageViews?.length || 0) * 0.15) },
     ...genreStats.map(g => ({ path: `ジャンル：${g.genre}`, count: g.count * 10 })),
   ].sort((a, b) => b.count - a.count).slice(0, 20)
-
   const totalPageViews = (allPageViews || []).length
+
+  // ===== AI審査キュー取得 =====
+  const { data: aiReviews, count: aiReviewCount } = await supabase
+    .from('ai_reviews')
+    .select('*', { count: 'exact' })
+    .eq('status', 'pending')
+    .order('created_at', { ascending: false })
 
   const stats = [
     { label: '登録ユーザー', value: userCount?.toLocaleString() ?? '0', icon: '👤', color: '#3b82f6' },
@@ -200,10 +180,21 @@ export default async function AdminPage() {
           ))}
         </div>
 
-        {/* 既存グラフ */}
+        {/* AI審査キュー（件数があれば目立つ場所に表示） */}
+        {(aiReviewCount ?? 0) > 0 && (
+          <div style={{background:'#fffbeb',border:'2px solid #f59e0b',borderRadius:12,padding:'14px 20px',marginBottom:20,display:'flex',alignItems:'center',justifyContent:'space-between',gap:12}}>
+            <div style={{display:'flex',alignItems:'center',gap:10}}>
+              <span style={{fontSize:20}}>⚠️</span>
+              <div>
+                <div style={{fontSize:14,fontWeight:700,color:'#92400e'}}>AI疑いの作品が {aiReviewCount} 件あります</div>
+                <div style={{fontSize:12,color:'#78350f',marginTop:2}}>下の審査キューから確認・対応してください</div>
+              </div>
+            </div>
+          </div>
+        )}
+
         <AdminChart data30={chartData30} data180={chartData180} data365={chartData365} data1825={chartData1825} />
 
-        {/* ===== 詳細分析 ===== */}
         <AdminAnalytics
           genreStats={genreStats}
           hourlyAccess={hourlyAccess}
@@ -214,6 +205,9 @@ export default async function AdminPage() {
           pageViewStats={pageViewStats}
           totalPageViews={totalPageViews}
         />
+
+        {/* AI審査キュー */}
+        <AiReviewSection reviews={aiReviews || []} />
 
         <div style={{display:'grid',gridTemplateColumns:'2fr 1fr',gap:20}}>
           <div>

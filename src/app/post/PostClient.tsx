@@ -12,6 +12,25 @@ const FONT_SIZES = [{label:'小',size:13},{label:'標準',size:15},{label:'大',
 
 interface Props { profile: any; userId: string }
 
+// AI検出：**〜** パターンを検出
+function detectAiMarkers(text: string): string[] {
+  const patterns: string[] = []
+  // **太字** パターン
+  const boldMatches = text.match(/\*\*[^*]+\*\*/g) || []
+  if (boldMatches.length > 0) patterns.push(`**太字**パターン ${boldMatches.length}箇所（例：${boldMatches[0].slice(0,30)}）`)
+  // # 見出しパターン
+  const headingMatches = text.match(/^#{1,3}\s+.+/gm) || []
+  if (headingMatches.length > 0) patterns.push(`Markdown見出しパターン ${headingMatches.length}箇所`)
+  // - リストパターン（連続3行以上）
+  const lines = text.split('\n')
+  let listCount = 0, maxList = 0
+  for (const line of lines) {
+    if (/^[-*]\s+/.test(line)) { listCount++; maxList = Math.max(maxList, listCount) } else listCount = 0
+  }
+  if (maxList >= 3) patterns.push(`Markdownリストパターン（連続${maxList}行）`)
+  return patterns
+}
+
 export default function PostClient({ profile, userId }: Props) {
   const router        = useRouter()
   const searchParams  = useSearchParams()
@@ -65,6 +84,10 @@ export default function PostClient({ profile, userId }: Props) {
   const [editMode,      setEditMode]      = useState(false)
   const [editEpisodes,  setEditEpisodes]  = useState<any[]>([])
   const [editEpId,      setEditEpId]      = useState<string>('')
+
+  // AI検出警告
+  const aiMarkers = detectAiMarkers(body)
+  const hasAiMarkers = aiMarkers.length > 0
 
   useEffect(() => {
     supabase.from('novels').select('id,title,genre').eq('author_id', userId).eq('published', true)
@@ -208,6 +231,7 @@ export default function PostClient({ profile, userId }: Props) {
 
     try {
       let novelId = savedNovelId || selectedNovelId
+      let novelTitle = title.trim()
 
       if (mode === 'new' && !savedNovelId) {
         const { data: novel, error: nErr } = await supabase.from('novels').insert({
@@ -220,12 +244,18 @@ export default function PostClient({ profile, userId }: Props) {
         }).select().single()
         if (nErr) throw nErr
         novelId = novel.id
+        novelTitle = novel.title
         setSavedNovelId(novel.id)
       } else if (mode === 'new' && savedNovelId && publish) {
         await supabase.from('novels').update({ published: true }).eq('id', savedNovelId)
+      } else if (mode === 'existing' && selectedNovelId) {
+        const found = myNovels.find(n => n.id === selectedNovelId)
+        if (found) novelTitle = found.title
       }
 
       let epErr
+      let episodeId = ''
+
       if (editMode && editEpId) {
         await supabase.from('novels').update({
           title: title.trim(), summary: summary.trim()||null, genre, tags,
@@ -234,13 +264,16 @@ export default function PostClient({ profile, userId }: Props) {
         }).eq('id', savedNovelId)
         const res = await supabase.from('episodes')
           .update({ title: epTitle.trim(), body, preface: preface.trim()||null, afterword: afterword.trim()||null, illust_url: illustPreview||null })
-          .eq('id', editEpId)
+          .eq('id', editEpId).select('id').single()
         epErr = res.error
+        episodeId = editEpId
       } else if (draftSaved && savedNovelId) {
         const res = await supabase.from('episodes')
           .update({ title: epTitle.trim(), body, preface: preface.trim()||null, afterword: afterword.trim()||null, illust_url: illustPreview||null })
           .eq('novel_id', savedNovelId).eq('ep_number', mode==='new'?1:nextEpNum)
+          .select('id').single()
         epErr = res.error
+        episodeId = res.data?.id || ''
       } else {
         if (novelId) {
           await supabase.from('novels').update({ is_r18: isR18, is_r15: isR15 }).eq('id', novelId)
@@ -253,10 +286,25 @@ export default function PostClient({ profile, userId }: Props) {
           afterword:  afterword.trim() || null,
           ep_number:  mode === 'new' ? 1 : nextEpNum,
           illust_url: illustPreview || null,
-        })
+        }).select('id').single()
         epErr = res.error
+        episodeId = res.data?.id || ''
       }
       if (epErr) throw epErr
+
+      // ===== AI検出チェック =====
+      if (publish && hasAiMarkers && novelId && episodeId) {
+        supabase.from('ai_reviews').insert({
+          novel_id:     novelId,
+          episode_id:   episodeId,
+          user_id:      userId,
+          episode_title: epTitle.trim(),
+          novel_title:   novelTitle,
+          author_name:   profile?.display_name || '不明',
+          reason:        aiMarkers.join(' / '),
+          status:        'pending',
+        }).then(() => {}).catch(() => {})
+      }
 
       if (publish) {
         fetch('/api/originality', {
@@ -330,7 +378,6 @@ export default function PostClient({ profile, userId }: Props) {
           <div style={sec}>
             <div style={sh}>投稿タイプ</div>
             <div style={sb}>
-              {/* モバイル：縦並び / デスクトップ：横並び */}
               <div style={{display:'flex',flexDirection: isMobile ? 'column' : 'row',gap:12}}>
                 {[{v:'new' as const,l:'新連載',d:'新しい作品の第1話を投稿する'},
                   {v:'existing' as const,l:'連載中の作品に追加',d:'既存の連載作品に新しい話を追加する'}].map(({v,l,d})=>(
@@ -431,9 +478,7 @@ export default function PostClient({ profile, userId }: Props) {
             <div style={sh}>作品を選択</div>
             <div style={sb}>
               {myNovels.length === 0 ? (
-                <div style={{textAlign:'center',padding:'20px',color:'#B8AEA8',fontSize:13}}>
-                  公開中の連載作品がありません
-                </div>
+                <div style={{textAlign:'center',padding:'20px',color:'#B8AEA8',fontSize:13}}>公開中の連載作品がありません</div>
               ) : (
                 <>
                   <label style={lbl}>連載中の作品 <span style={{color:'#dc2626'}}>*</span></label>
@@ -528,7 +573,6 @@ export default function PostClient({ profile, userId }: Props) {
               </div>
 
               <div style={fg}>
-                {/* 本文ヘッダー：モバイルは縦並び */}
                 <div style={{marginBottom:6}}>
                   <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',flexWrap:'wrap',gap:6}}>
                     <label style={{...lbl,marginBottom:0}}>
@@ -550,7 +594,6 @@ export default function PostClient({ profile, userId }: Props) {
                   </div>
                 </div>
 
-                {/* ツールバー：横スクロール対応 */}
                 <div style={{overflowX:'auto',scrollbarWidth:'none' as any,marginBottom:5}}>
                   <div style={{display:'flex',gap:3,padding:5,background:'#FFF9F2',border:'1px solid #F0D9C9',borderRadius:6,minWidth:'max-content'}}>
                     <button type="button" onClick={insertRuby} style={toolBtn}>ルビ</button>
@@ -568,7 +611,6 @@ export default function PostClient({ profile, userId }: Props) {
 
                 {showReplace && (
                   <div style={{background:'#FFF9F2',border:'1px solid #F0D9C9',borderRadius:6,padding:'10px 12px',marginBottom:6}}>
-                    {/* モバイルは縦並び */}
                     <div style={{display:'flex',flexDirection: isMobile ? 'column' : 'row',gap:8,alignItems: isMobile ? 'stretch' : 'center',flexWrap:'wrap'}}>
                       <input value={replaceFrom} onChange={e=>setReplaceFrom(e.target.value)} placeholder="置換前のテキスト"
                         style={{...inp,flex:1,minWidth:120,fontSize:12}}/>
@@ -586,9 +628,25 @@ export default function PostClient({ profile, userId }: Props) {
                   </div>
                 )}
 
+                {/* AI検出警告バナー */}
+                {hasAiMarkers && (
+                  <div style={{background:'#fffbeb',border:'1.5px solid #f59e0b',borderRadius:8,padding:'10px 14px',marginBottom:8}}>
+                    <div style={{display:'flex',alignItems:'center',gap:6,marginBottom:4}}>
+                      <span style={{fontSize:14}}>⚠️</span>
+                      <span style={{fontSize:12,fontWeight:700,color:'#92400e'}}>AI生成コンテンツの可能性が検出されました</span>
+                    </div>
+                    <div style={{fontSize:11,color:'#78350f',lineHeight:1.7}}>
+                      {aiMarkers.map((m,i)=><div key={i}>・{m}</div>)}
+                    </div>
+                    <div style={{fontSize:11,color:'#92400e',marginTop:6}}>
+                      公開後、運営の審査対象となります。AI全自動生成は規約違反となる場合があります。
+                    </div>
+                  </div>
+                )}
+
                 <textarea ref={bodyRef}
                   style={{...inp,resize:'vertical',minHeight: isMobile ? 300 : 400,fontSize,lineHeight:1.95,
-                    fontFamily:"'Noto Serif JP',serif",borderColor:errors.body?'#dc2626':'#F0D9C9'}}
+                    fontFamily:"'Noto Serif JP',serif",borderColor:errors.body?'#dc2626':hasAiMarkers?'#f59e0b':'#F0D9C9'}}
                   value={body} onChange={e=>setBody(e.target.value)}
                   placeholder="本文を入力してください"/>
 
@@ -617,15 +675,15 @@ export default function PostClient({ profile, userId }: Props) {
           </div>
         )}
 
-        {/* ボタン行：モバイルは縦並び全幅 */}
+        {/* ボタン行 */}
         {isMobile ? (
           <div style={{display:'flex',flexDirection:'column',gap:10}}>
             <button onClick={()=>handleSubmit(true)} disabled={loading}
-              style={{width:'100%',background:'#F26A21',color:'#fff',padding:'14px',borderRadius:10,fontSize:15,fontWeight:700,border:'none',cursor:'pointer',opacity:loading?.5:1}}>
+              style={{width:'100%',background:'#F26A21',color:'#fff',padding:'14px',borderRadius:10,fontSize:15,fontWeight:700,border:'none',cursor:'pointer',opacity:loading?0.5:1}}>
               {loading?'保存中...':(editMode?'変更を保存':'投稿する')}
             </button>
             <button onClick={()=>handleSubmit(false)} disabled={loading||draftSaved}
-              style={{width:'100%',border:'1.5px solid #F26A21',color:draftSaved?'#2e7d32':'#F26A21',padding:'12px',borderRadius:10,fontSize:14,background:draftSaved?'#e8f5e9':'#fff',cursor:draftSaved?'default':'pointer',opacity:loading?.5:1}}>
+              style={{width:'100%',border:'1.5px solid #F26A21',color:draftSaved?'#2e7d32':'#F26A21',padding:'12px',borderRadius:10,fontSize:14,background:draftSaved?'#e8f5e9':'#fff',cursor:draftSaved?'default':'pointer',opacity:loading?0.5:1}}>
               {draftSaved?'✓ 保存しました':'下書き保存'}
             </button>
             <Link href="/mypage" style={{display:'block',textAlign:'center',border:'1px solid #F0D9C9',color:'#77706A',padding:'11px',borderRadius:10,fontSize:14,background:'#fff',textDecoration:'none'}}>
@@ -636,11 +694,11 @@ export default function PostClient({ profile, userId }: Props) {
           <div style={{display:'flex',gap:8,justifyContent:'flex-end'}}>
             <Link href="/mypage" style={{border:'1px solid #F0D9C9',color:'#77706A',padding:'9px 20px',borderRadius:20,fontSize:13,background:'#fff'}}>キャンセル</Link>
             <button onClick={()=>handleSubmit(false)} disabled={loading||draftSaved}
-              style={{border:'1.5px solid #F26A21',color:draftSaved?'#2e7d32':'#F26A21',padding:'9px 20px',borderRadius:20,fontSize:13,background:draftSaved?'#e8f5e9':'#fff',cursor:draftSaved?'default':'pointer',opacity:loading?.5:1,transition:'all .3s'}}>
+              style={{border:'1.5px solid #F26A21',color:draftSaved?'#2e7d32':'#F26A21',padding:'9px 20px',borderRadius:20,fontSize:13,background:draftSaved?'#e8f5e9':'#fff',cursor:draftSaved?'default':'pointer',opacity:loading?0.5:1,transition:'all .3s'}}>
               {draftSaved?'✓ 保存しました':'下書き保存'}
             </button>
             <button onClick={()=>handleSubmit(true)} disabled={loading}
-              style={{background:'#F26A21',color:'#fff',padding:'10px 24px',borderRadius:20,fontSize:13,fontWeight:700,border:'none',cursor:'pointer',opacity:loading?.5:1}}>
+              style={{background:'#F26A21',color:'#fff',padding:'10px 24px',borderRadius:20,fontSize:13,fontWeight:700,border:'none',cursor:'pointer',opacity:loading?0.5:1}}>
               {loading?'保存中...':(editMode?'変更を保存':'投稿する')}
             </button>
           </div>
