@@ -145,15 +145,17 @@ export default async function AdminPage() {
   ]
 
   const menus = [
-    { href: '/admin/announcements', label: 'お知らせ管理', icon: '📢', desc: 'お知らせの作成・編集・削除' },
-    { href: '/admin/contests', label: 'コンテスト管理', icon: '🏆', desc: 'コンテストの作成・管理' },
-    { href: '/admin/users', label: 'ユーザー管理', icon: '👥', desc: 'ユーザーの凍結・削除' },
-    { href: '/admin/novels', label: '作品管理', icon: '📖', desc: '作品の非公開・削除' },
-    { href: '/admin/banners', label: 'バナー管理', icon: '🖼️', desc: '広告バナーの管理' },
-    { href: '/admin/contacts', label: '問い合わせ管理', icon: '✉️', desc: 'お問い合わせの確認・対応' },
-    { href: '/admin/ngwords', label: 'NGワード設定', icon: '🚫', desc: '禁止ワードの管理' },
-    { href: '/admin/messages', label: 'ユーザーへのDM', icon: '💌', desc: '特定ユーザーへのメッセージ送信' },
-    { href: '/admin/discovers', label: '拡散コメント審査', icon: '🔍', desc: '審査待ちの拡散コメントを確認' },
+    { href: '/admin/announcements', label: 'お知らせ管理',    desc: 'お知らせの作成・編集・削除' },
+    { href: '/admin/contests',      label: 'コンテスト管理',  desc: 'コンテストの作成・管理' },
+    { href: '/admin/users',         label: 'ユーザー管理',    desc: 'ユーザーの凍結・削除' },
+    { href: '/admin/novels',        label: '作品管理',        desc: '作品の非公開・削除' },
+    { href: '/admin/banners',       label: 'バナー管理',      desc: '広告バナーの管理' },
+    { href: '/admin/contacts',      label: '問い合わせ管理',  desc: 'お問い合わせの確認・対応' },
+    { href: '/admin/ngwords',       label: 'NGワード設定',    desc: '禁止ワードの管理' },
+    { href: '/admin/messages',      label: 'ユーザーへのDM',  desc: '特定ユーザーへのメッセージ送信' },
+    { href: '/admin/discovers',     label: '拡散コメント審査', desc: '審査待ちの拡散コメントを確認' },
+    { href: '#analytics',           label: '詳細分析',        desc: 'ジャンル・時間帯・作品ランキングなど', isAnchor: true },
+    { href: '#ai-review',           label: 'AI審査',          desc: `AI疑い作品の確認・削除`, isAnchor: true },
   ]
 
   return (
@@ -180,47 +182,19 @@ export default async function AdminPage() {
           ))}
         </div>
 
-        {/* AI審査キュー（件数があれば目立つ場所に表示） */}
-        {(aiReviewCount ?? 0) > 0 && (
-          <div style={{background:'#fffbeb',border:'2px solid #f59e0b',borderRadius:12,padding:'14px 20px',marginBottom:20,display:'flex',alignItems:'center',justifyContent:'space-between',gap:12}}>
-            <div style={{display:'flex',alignItems:'center',gap:10}}>
-              <span style={{fontSize:20}}>⚠️</span>
-              <div>
-                <div style={{fontSize:14,fontWeight:700,color:'#92400e'}}>AI疑いの作品が {aiReviewCount} 件あります</div>
-                <div style={{fontSize:12,color:'#78350f',marginTop:2}}>下の審査キューから確認・対応してください</div>
-              </div>
-            </div>
-          </div>
-        )}
-
         <AdminChart data30={chartData30} data180={chartData180} data365={chartData365} data1825={chartData1825} />
-
-        <AdminAnalytics
-          genreStats={genreStats}
-          hourlyAccess={hourlyAccess}
-          topNovels={topNovels}
-          contestStats={contestStats}
-          missionStats={missionStats}
-          speechStats={speechStats}
-          pageViewStats={pageViewStats}
-          totalPageViews={totalPageViews}
-        />
-
-        {/* AI審査キュー */}
-        <AiReviewSection reviews={aiReviews || []} />
 
         <div style={{display:'grid',gridTemplateColumns:'2fr 1fr',gap:20}}>
           <div>
             <div style={{fontSize:14,fontWeight:700,color:'#1e293b',marginBottom:12}}>管理メニュー</div>
             <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:10}}>
               {menus.map(m => (
-                <Link key={m.href} href={m.href} style={{textDecoration:'none'}}>
-                  <div style={{background:'#fff',border:'1px solid #e2e8f0',borderRadius:12,padding:'18px 20px',cursor:'pointer'}}>
-                    <div style={{fontSize:24,marginBottom:8}}>{m.icon}</div>
+                <a key={m.href} href={m.href} style={{textDecoration:'none'}}>
+                  <div style={{background:'#fff',border:'1px solid #e2e8f0',borderRadius:12,padding:'18px 20px',cursor:'pointer',position:'relative'}}>
                     <div style={{fontSize:14,fontWeight:700,color:'#1e293b',marginBottom:3}}>{m.label}</div>
                     <div style={{fontSize:12,color:'#64748b'}}>{m.desc}</div>
                   </div>
-                </Link>
+                </a>
               ))}
             </div>
           </div>
@@ -264,6 +238,32 @@ export default async function AdminPage() {
               ))}
             </div>
           </div>
+        </div>
+        {/* 詳細分析 */}
+        <div id="analytics" style={{scrollMarginTop:80,marginTop:32}}>
+          <AdminAnalytics
+            genreStats={genreStats}
+            hourlyAccess={hourlyAccess}
+            topNovels={topNovels}
+            contestStats={contestStats}
+            missionStats={missionStats}
+            speechStats={speechStats}
+            pageViewStats={pageViewStats}
+            totalPageViews={totalPageViews}
+          />
+        </div>
+
+        {/* AI審査 */}
+        <div id="ai-review" style={{scrollMarginTop:80,marginTop:8}}>
+          <div style={{fontSize:14,fontWeight:700,color:'#1e293b',marginBottom:12,display:'flex',alignItems:'center',gap:8}}>
+            AI審査
+            {(aiReviewCount ?? 0) > 0 && (
+              <span style={{fontSize:11,background:'#ef4444',color:'#fff',padding:'1px 8px',borderRadius:10,fontWeight:700}}>
+                {aiReviewCount} 件待ち
+              </span>
+            )}
+          </div>
+          <AiReviewSection reviews={aiReviews || []} />
         </div>
       </div>
 
