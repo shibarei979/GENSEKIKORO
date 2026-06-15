@@ -10,6 +10,7 @@ import AdBanner from '@/components/layout/AdBanner'
 import type { Profile, Novel } from '@/types'
 import ContestEntry from './ContestEntry'
 import TweetSection from '@/components/TweetSection'
+import StoryBoard from '@/components/StoryBoard'
 
 interface Contest { id: string; title: string; deadline: string | null; is_site_contest: boolean }
 interface Entry { contest_id: string; novel_id: string }
@@ -26,7 +27,6 @@ interface Props {
   claimedMissionIds?: string[]
 }
 
-// 全バッジ定義（ミッションページと対応）
 const ALL_BADGES = [
   { id:'like_3',      name:'応援バッジ',              category:'読者', color:'#F26A21' },
   { id:'like_10',     name:'読者バッジ Lv.1',          category:'読者', color:'#F26A21' },
@@ -43,19 +43,35 @@ const ALL_BADGES = [
   { id:'episode_20',  name:'長編バッジ',               category:'作者', color:'#3b82f6' },
   { id:'follow_1',    name:'ファンバッジ Lv.1',         category:'フォロー', color:'#8b5cf6' },
   { id:'follow_5',    name:'ファンバッジ Lv.2',         category:'フォロー', color:'#8b5cf6' },
-  // 期間クエスト
   { id:'quest_june_2026', name:'スタートダッシュバッジ', category:'期間限定', color:'#e11d48' },
-  // 近日公開（グレーアウト表示用）
   { id:'login_1',     name:'ログインバッジ Lv.1',       category:'ログイン', color:'#94a3b8' },
   { id:'login_3',     name:'ログインバッジ Lv.2',       category:'ログイン', color:'#94a3b8' },
   { id:'login_7',     name:'ログインバッジ Lv.3',       category:'ログイン', color:'#94a3b8' },
   { id:'login_30',    name:'ログインバッジ Lv.4',       category:'ログイン', color:'#94a3b8' },
   { id:'newbie',      name:'新人バッジ',               category:'特別', color:'#f59e0b' },
   { id:'push_badge',  name:'推しバッジ',               category:'特別', color:'#f59e0b' },
-  // 仮スロット（図鑑を24の倍数に揃える用）
   { id:'_slot1',      name:'？？？',                  category:'未実装', color:'#94a3b8' },
   { id:'_slot2',      name:'？？？',                  category:'未実装', color:'#94a3b8' },
 ]
+
+// アイコン
+const BookIcon = () => (
+  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/>
+    <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>
+  </svg>
+)
+const BoardIcon = () => (
+  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/>
+  </svg>
+)
+const GearIcon = ({ size = 14 }: { size?: number }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <circle cx="12" cy="12" r="3"/>
+    <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+  </svg>
+)
 
 export default function MypageClient({
   profile, novels: initialNovels, bookmarkedNovels,
@@ -64,50 +80,50 @@ export default function MypageClient({
 }: Props) {
   const router   = useRouter()
   const supabase = createClient()
-  const [myNovels,     setMyNovels]     = useState(initialNovels)
-  const [deleteTarget, setDeleteTarget] = useState<{id:string;title:string;episodes:any[]} | null>(null)
-  const [deleteMode,   setDeleteMode]   = useState<'novel'|'episode'|null>(null)
-  const [deleteEpId,   setDeleteEpId]   = useState<string>('')
-  const [deleteLoading,setDeleteLoading]= useState(false)
-  const [loading,      setLoading]      = useState(false)
+  const [myNovels,      setMyNovels]      = useState(initialNovels)
+  const [deleteTarget,  setDeleteTarget]  = useState<{id:string;title:string;episodes:any[]} | null>(null)
+  const [deleteMode,    setDeleteMode]    = useState<'novel'|'episode'|null>(null)
+  const [deleteEpId,    setDeleteEpId]    = useState<string>('')
+  const [deleteLoading, setDeleteLoading] = useState(false)
+  const [loading,       setLoading]       = useState(false)
   const [iconUrl,       setIconUrl]       = useState<string>(profile.icon_url || '')
   const [iconUploading, setIconUploading] = useState(false)
   const iconInputRef = React.useRef<HTMLInputElement>(null)
-  const [editingName,  setEditingName]  = useState(false)
-  const [nameInput,    setNameInput]    = useState(profile.display_name)
-  const [nameSaving,   setNameSaving]   = useState(false)
-  const [nameError,    setNameError]    = useState('')
-  const [nameSaved,    setNameSaved]    = useState(false)
-  const [toast,          setToast]          = useState('')
-  const [showWithdraw,   setShowWithdraw]   = useState(false)
-  const [withdrawPw,     setWithdrawPw]     = useState('')
-  const [withdrawing,    setWithdrawing]    = useState(false)
-  const [withdrawError,  setWithdrawError]  = useState('')
-  const [showSettings,   setShowSettings]   = useState(false)
-  const [showBdModal,    setShowBdModal]    = useState(false)
-  const [bdYear,         setBdYear]         = useState('')
-  const [bdMonth,        setBdMonth]        = useState('')
-  const [bdDay,          setBdDay]          = useState('')
-  const [bdError,        setBdError]        = useState('')
-  const [bdSaving,       setBdSaving]       = useState(false)
-  const [showEmailModal, setShowEmailModal] = useState(false)
-  const [showPwModal,    setShowPwModal]    = useState(false)
-  const [showBioModal,   setShowBioModal]   = useState(false)
-  const [bioInput,       setBioInput]       = useState(profile.bio || '')
-  const [bioSaving,      setBioSaving]      = useState(false)
-  const [newEmail,       setNewEmail]       = useState('')
-  const [emailPw,        setEmailPw]        = useState('')
-  const [emailError,     setEmailError]     = useState('')
-  const [emailSaving,    setEmailSaving]    = useState(false)
-  const [currentPw,      setCurrentPw]      = useState('')
-  const [newPw,          setNewPw]          = useState('')
-  const [newPwConfirm,   setNewPwConfirm]   = useState('')
-  const [pwError,        setPwError]        = useState('')
-  const [pwSaving,       setPwSaving]       = useState(false)
-  const [isMobile,       setIsMobile]       = useState(false)
-  // バッジ図鑑
-  const [showBadgeBook,  setShowBadgeBook]  = useState(false)
-  const [badgePage,      setBadgePage]      = useState(0)
+  const [editingName,   setEditingName]   = useState(false)
+  const [nameInput,     setNameInput]     = useState(profile.display_name)
+  const [nameSaving,    setNameSaving]    = useState(false)
+  const [nameError,     setNameError]     = useState('')
+  const [nameSaved,     setNameSaved]     = useState(false)
+  const [toast,         setToast]         = useState('')
+  const [showWithdraw,  setShowWithdraw]  = useState(false)
+  const [withdrawPw,    setWithdrawPw]    = useState('')
+  const [withdrawing,   setWithdrawing]   = useState(false)
+  const [withdrawError, setWithdrawError] = useState('')
+  const [showSettings,  setShowSettings]  = useState(false)
+  const [showBdModal,   setShowBdModal]   = useState(false)
+  const [bdYear,        setBdYear]        = useState('')
+  const [bdMonth,       setBdMonth]       = useState('')
+  const [bdDay,         setBdDay]         = useState('')
+  const [bdError,       setBdError]       = useState('')
+  const [bdSaving,      setBdSaving]      = useState(false)
+  const [showEmailModal,setShowEmailModal]= useState(false)
+  const [showPwModal,   setShowPwModal]   = useState(false)
+  const [showBioModal,  setShowBioModal]  = useState(false)
+  const [bioInput,      setBioInput]      = useState(profile.bio || '')
+  const [bioSaving,     setBioSaving]     = useState(false)
+  const [newEmail,      setNewEmail]      = useState('')
+  const [emailPw,       setEmailPw]       = useState('')
+  const [emailError,    setEmailError]    = useState('')
+  const [emailSaving,   setEmailSaving]   = useState(false)
+  const [currentPw,     setCurrentPw]     = useState('')
+  const [newPw,         setNewPw]         = useState('')
+  const [newPwConfirm,  setNewPwConfirm]  = useState('')
+  const [pwError,       setPwError]       = useState('')
+  const [pwSaving,      setPwSaving]      = useState(false)
+  const [isMobile,      setIsMobile]      = useState(false)
+  const [showBadgeBook, setShowBadgeBook] = useState(false)
+  const [badgePage,     setBadgePage]     = useState(0)
+  const [showBoard,     setShowBoard]     = useState(false)
 
   useEffect(() => {
     const check = () => setIsMobile(window.innerWidth <= 768)
@@ -116,8 +132,7 @@ export default function MypageClient({
     return () => window.removeEventListener('resize', check)
   }, [])
 
-  // 1ページあたりのバッジ数
-  const perPage = isMobile ? 12 : 24
+  const perPage    = isMobile ? 12 : 24
   const totalPages = Math.ceil(ALL_BADGES.length / perPage)
   const claimedSet = new Set(claimedMissionIds)
 
@@ -131,14 +146,13 @@ export default function MypageClient({
   async function handleIconUpload(file: File) {
     if (!file.type.startsWith('image/')) return
     setIconUploading(true)
-    const ext = file.name.split('.').pop()
+    const ext  = file.name.split('.').pop()
     const path = `avatars/${profile.user_id}.${ext}`
     const { error: upErr } = await supabase.storage.from('illustrations').upload(path, file, { upsert: true })
     if (!upErr) {
       const { data } = supabase.storage.from('illustrations').getPublicUrl(path)
-      const newUrl = data.publicUrl
-      await supabase.from('profiles').update({ icon_url: newUrl }).eq('user_id', profile.user_id)
-      setIconUrl(newUrl)
+      await supabase.from('profiles').update({ icon_url: data.publicUrl }).eq('user_id', profile.user_id)
+      setIconUrl(data.publicUrl)
     }
     setIconUploading(false)
   }
@@ -268,14 +282,6 @@ export default function MypageClient({
     display:'flex', alignItems:'center' as const, gap:8,
   }
 
-  // 本アイコンSVG
-  const BookIcon = () => (
-    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/>
-      <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>
-    </svg>
-  )
-
   return (
     <div style={{minHeight:'100vh',background:'#fff'}}>
       <Header profile={profile} user={true} />
@@ -285,24 +291,26 @@ export default function MypageClient({
         {/* ===== プロフィールカード ===== */}
         {isMobile ? (
           <div style={{background:'#fff',border:'1px solid #F0D9C9',borderRadius:16,padding:'16px',marginBottom:16}}>
-            <div style={{display:'flex',alignItems:'center',gap:12,marginBottom:12}}>
+            <div style={{display:'flex',alignItems:'center',gap:10,marginBottom:12}}>
+              {/* アイコン */}
               <div style={{position:'relative',flexShrink:0,cursor:'pointer'}} onClick={()=>iconInputRef.current?.click()}>
                 <input ref={iconInputRef} type="file" accept="image/*" style={{display:'none'}}
                   onChange={e=>{const f=e.target.files?.[0];if(f){handleIconUpload(f);e.target.value=''}}}/>
                 {iconUrl
-                  ? <img src={iconUrl} alt={profile.display_name} style={{width:56,height:56,borderRadius:'50%',objectFit:'cover',border:'3px solid #F26A21'}}/>
-                  : <div style={{width:56,height:56,borderRadius:'50%',background:'#F26A21',display:'flex',alignItems:'center',justifyContent:'center',fontSize:22,fontWeight:700,color:'#fff'}}>{initial}</div>
+                  ? <img src={iconUrl} alt={profile.display_name} style={{width:52,height:52,borderRadius:'50%',objectFit:'cover',border:'3px solid #F26A21'}}/>
+                  : <div style={{width:52,height:52,borderRadius:'50%',background:'#F26A21',display:'flex',alignItems:'center',justifyContent:'center',fontSize:20,fontWeight:700,color:'#fff'}}>{initial}</div>
                 }
-                <div style={{position:'absolute',bottom:0,right:0,width:18,height:18,background:'#fff',borderRadius:'50%',border:'2px solid #F26A21',display:'flex',alignItems:'center',justifyContent:'center',fontSize:10}}>
+                <div style={{position:'absolute',bottom:0,right:0,width:16,height:16,background:'#fff',borderRadius:'50%',border:'2px solid #F26A21',display:'flex',alignItems:'center',justifyContent:'center',fontSize:9}}>
                   {iconUploading ? '⟳' : '📷'}
                 </div>
               </div>
+              {/* 名前 */}
               <div style={{flex:1,minWidth:0}}>
                 {editingName ? (
                   <div style={{display:'flex',alignItems:'center',gap:6,flexWrap:'wrap'}}>
                     <input value={nameInput} onChange={e=>setNameInput(e.target.value)}
                       onKeyDown={e=>{if(e.key==='Enter')handleSaveName();if(e.key==='Escape')setEditingName(false)}}
-                      style={{fontSize:15,fontWeight:700,color:'#111',border:'1.5px solid #F26A21',borderRadius:6,padding:'2px 8px',outline:'none',width:130}} autoFocus/>
+                      style={{fontSize:14,fontWeight:700,color:'#111',border:'1.5px solid #F26A21',borderRadius:6,padding:'2px 8px',outline:'none',width:120}} autoFocus/>
                     <button onClick={handleSaveName} disabled={nameSaving}
                       style={{fontSize:11,background:'#F26A21',color:'#fff',border:'none',borderRadius:6,padding:'3px 8px',cursor:'pointer',opacity:nameSaving?0.6:1}}>
                       {nameSaving?'保存中':'保存'}
@@ -312,7 +320,7 @@ export default function MypageClient({
                   </div>
                 ) : (
                   <div style={{display:'flex',alignItems:'center',gap:6}}>
-                    <div style={{fontSize:17,fontWeight:700,color:'#111'}}>{nameInput}</div>
+                    <div style={{fontSize:16,fontWeight:700,color:'#111'}}>{nameInput}</div>
                     {nameSaved && <span style={{fontSize:10,color:'#2e7d32',fontWeight:600}}>✓</span>}
                   </div>
                 )}
@@ -321,18 +329,21 @@ export default function MypageClient({
               </div>
               {/* バッジ図鑑ボタン */}
               <button onClick={()=>{setShowBadgeBook(true);setBadgePage(0)}}
-                style={{border:'1px solid #F0D9C9',borderRadius:8,padding:'6px 10px',background:'#fff',cursor:'pointer',display:'flex',alignItems:'center',gap:4,color:'#77706A',fontSize:12,flexShrink:0}}>
+                style={{border:'1px solid #F0D9C9',borderRadius:8,padding:'6px 8px',background:'#fff',cursor:'pointer',display:'flex',alignItems:'center',color:'#77706A',flexShrink:0}}
+                title="バッジ図鑑">
                 <BookIcon/>
+              </button>
+              {/* ボードボタン */}
+              <button onClick={()=>setShowBoard(true)}
+                style={{border:'1px solid #F0D9C9',borderRadius:8,padding:'6px 8px',background:'#fff',cursor:'pointer',display:'flex',alignItems:'center',color:'#77706A',flexShrink:0}}
+                title="ストーリーボード">
+                <BoardIcon/>
               </button>
               {/* 設定ボタン */}
               <div style={{position:'relative',flexShrink:0}}>
                 <button onClick={()=>setShowSettings(!showSettings)}
-                  style={{border:'1px solid #F0D9C9',borderRadius:8,padding:'6px 10px',background:'#fff',cursor:'pointer',display:'flex',alignItems:'center',gap:4,color:'#77706A',fontSize:12}}>
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                    <circle cx="12" cy="12" r="3"/>
-                    <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
-                  </svg>
-                  設定
+                  style={{border:'1px solid #F0D9C9',borderRadius:8,padding:'6px 8px',background:'#fff',cursor:'pointer',display:'flex',alignItems:'center',gap:3,color:'#77706A',fontSize:11}}>
+                  <GearIcon size={13}/>設定
                 </button>
                 {showSettings && (
                   <>
@@ -351,6 +362,7 @@ export default function MypageClient({
                 )}
               </div>
             </div>
+            {/* 統計バー */}
             <div style={{display:'flex',background:'#FFF9F2',border:'1px solid #F0D9C9',borderRadius:10,overflow:'hidden'}}>
               {[
                 {label:'公開', value: published.length},
@@ -366,14 +378,14 @@ export default function MypageClient({
             </div>
           </div>
         ) : (
+          /* ===== デスクトップ プロフィールカード ===== */
           <div className="profile-card" style={{background:'#fff',border:'1px solid #F0D9C9',borderRadius:16,padding:'24px 28px',marginBottom:20,display:'flex',alignItems:'center',gap:20}}>
             <div style={{position:'relative',flexShrink:0,cursor:'pointer'}} onClick={()=>iconInputRef.current?.click()} title="クリックしてアイコンを変更">
               <input ref={iconInputRef} type="file" accept="image/*" style={{display:'none'}} onChange={e=>{const f=e.target.files?.[0];if(f){handleIconUpload(f);e.target.value=''}}}/>
-              {iconUrl ? (
-                <img src={iconUrl} alt={profile.display_name} style={{width:72,height:72,borderRadius:'50%',objectFit:'cover',border:'3px solid #F26A21'}}/>
-              ) : (
-                <div style={{width:72,height:72,borderRadius:'50%',background:'#F26A21',display:'flex',alignItems:'center',justifyContent:'center',fontSize:28,fontWeight:700,color:'#fff'}}>{initial}</div>
-              )}
+              {iconUrl
+                ? <img src={iconUrl} alt={profile.display_name} style={{width:72,height:72,borderRadius:'50%',objectFit:'cover',border:'3px solid #F26A21'}}/>
+                : <div style={{width:72,height:72,borderRadius:'50%',background:'#F26A21',display:'flex',alignItems:'center',justifyContent:'center',fontSize:28,fontWeight:700,color:'#fff'}}>{initial}</div>
+              }
               <div style={{position:'absolute',bottom:0,right:0,width:22,height:22,background:'#fff',borderRadius:'50%',border:'2px solid #F26A21',display:'flex',alignItems:'center',justifyContent:'center',fontSize:12}}>
                 {iconUploading ? '⟳' : '📷'}
               </div>
@@ -410,17 +422,18 @@ export default function MypageClient({
               {/* バッジ図鑑ボタン */}
               <button onClick={()=>{setShowBadgeBook(true);setBadgePage(0)}}
                 style={{border:'1px solid #F0D9C9',borderRadius:10,padding:'8px 14px',background:'#fff',cursor:'pointer',display:'flex',alignItems:'center',gap:6,color:'#77706A',fontSize:13}}>
-                <BookIcon/>
-                バッジ図鑑
+                <BookIcon/>バッジ図鑑
               </button>
+              {/* ボードボタン */}
+              <button onClick={()=>setShowBoard(true)}
+                style={{border:'1px solid #F0D9C9',borderRadius:10,padding:'8px 14px',background:'#fff',cursor:'pointer',display:'flex',alignItems:'center',gap:6,color:'#77706A',fontSize:13}}>
+                <BoardIcon/>ボード
+              </button>
+              {/* 設定ボタン */}
               <div style={{position:'relative'}}>
                 <button onClick={()=>setShowSettings(!showSettings)}
                   style={{border:'1px solid #F0D9C9',borderRadius:10,padding:'8px 12px',background:'#fff',cursor:'pointer',display:'flex',alignItems:'center',gap:6,color:'#77706A',fontSize:13}}>
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                    <circle cx="12" cy="12" r="3"/>
-                    <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
-                  </svg>
-                  設定
+                  <GearIcon size={16}/>設定
                 </button>
                 {showSettings && (
                   <>
@@ -466,7 +479,7 @@ export default function MypageClient({
               {label:'総投稿数',value:myNovels.length,unit:'作品'},
             ].map(item=>(
               <div key={item.label} style={{background:'#fff',border:'1px solid #F0D9C9',borderRadius:12,padding:'16px 20px',textAlign:'center'}}>
-                <div style={{fontSize:28,fontWeight:700,color:'#111111',marginBottom:2}}>{item.value}<span style={{fontSize:13,fontWeight:400,color:'#111111'}}>{item.unit}</span></div>
+                <div style={{fontSize:28,fontWeight:700,color:'#111111',marginBottom:2}}>{item.value}<span style={{fontSize:13,fontWeight:400}}>{item.unit}</span></div>
                 <div style={{fontSize:12,color:'#77706A'}}>{item.label}</div>
               </div>
             ))}
@@ -535,7 +548,7 @@ export default function MypageClient({
 
         {/* 保存済み作品 */}
         <div style={{background:'#fff',border:'1px solid #F0D9C9',borderRadius:16,overflow:'hidden',marginTop:12}}>
-          <div style={{padding: isMobile ? '12px 16px' : '14px 20px',borderBottom:'1px solid #F0D9C9',display:'flex',alignItems:'center',justifyContent:'space-between',background:'#FFF9F2'}}>
+          <div style={{padding: isMobile ? '12px 16px' : '14px 20px',borderBottom:'1px solid #F0D9C9',background:'#FFF9F2'}}>
             <span style={{fontSize:14,fontWeight:700,color:'#2B211B'}}>保存済み作品（{bookmarkedNovels.length}）</span>
           </div>
           {bookmarkedNovels.length === 0 ? (
@@ -595,12 +608,28 @@ export default function MypageClient({
         <div className="mobile-only" style={{height:80}}/>
       </div>
 
+      {/* ===== ストーリーボードモーダル ===== */}
+      {showBoard && (
+        <div style={{position:'fixed',inset:0,zIndex:1000,display:'flex',alignItems:'center',justifyContent:'center',background:'rgba(0,0,0,0.6)',padding: isMobile ? 0 : 20}}>
+          <div style={{
+            position: isMobile ? 'absolute' : 'relative',
+            bottom: isMobile ? 0 : undefined,
+            width: isMobile ? '100%' : '96%',
+            maxWidth:1300,
+            height: isMobile ? '92vh' : '90vh',
+            borderRadius: isMobile ? '16px 16px 0 0' : 12,
+            overflow:'hidden',
+            boxShadow:'0 20px 60px rgba(0,0,0,0.5)',
+          } as any}>
+            <StoryBoard userId={profile.user_id} onClose={()=>setShowBoard(false)} isModal={true}/>
+          </div>
+        </div>
+      )}
+
       {/* ===== バッジ図鑑モーダル ===== */}
       {showBadgeBook && (
         <div style={{position:'fixed',inset:0,zIndex:1000,display:'flex',alignItems:'center',justifyContent:'center',background:'rgba(5,3,12,0.92)',padding: isMobile ? 0 : 20}}>
           <div style={{position:'absolute',inset:0}} onClick={()=>setShowBadgeBook(false)}/>
-
-          {/* ===== 本の外側ラッパー（影・奥行き） ===== */}
           <div style={{
             position: isMobile ? 'absolute' : 'relative',
             bottom: isMobile ? 0 : undefined,
@@ -613,201 +642,57 @@ export default function MypageClient({
             overflow:'visible',
             filter:'drop-shadow(0 40px 60px rgba(0,0,0,0.9))',
           } as any}>
-
-            {/* 背表紙（左端・デスクトップのみ） */}
             {!isMobile && (
-              <div style={{
-                width:32,flexShrink:0,
-                borderRadius:'10px 0 0 10px',
-                background:'linear-gradient(180deg, #3d1a0a 0%, #5c2a10 20%, #3d1a0a 50%, #2a1006 100%)',
-                borderRight:'2px solid #7a3a18',
-                display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',
-                gap:8,
-              }}>
-                {/* 背表紙の縦線装飾 */}
+              <div style={{width:32,flexShrink:0,borderRadius:'10px 0 0 10px',background:'linear-gradient(180deg, #3d1a0a 0%, #5c2a10 20%, #3d1a0a 50%, #2a1006 100%)',borderRight:'2px solid #7a3a18',display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',gap:8}}>
                 <div style={{width:1,height:60,background:'rgba(255,220,150,0.3)'}}/>
-                <div style={{
-                  writingMode:'vertical-rl' as any,
-                  fontSize:9,color:'rgba(255,210,120,0.5)',
-                  letterSpacing:'0.15em',fontWeight:600,
-                }}>BADGE COLLECTION</div>
+                <div style={{writingMode:'vertical-rl' as any,fontSize:9,color:'rgba(255,210,120,0.5)',letterSpacing:'0.15em',fontWeight:600}}>BADGE COLLECTION</div>
                 <div style={{width:1,height:60,background:'rgba(255,220,150,0.3)'}}/>
               </div>
             )}
-
-            {/* 本のページ部分 */}
-            <div style={{
-              flex:1,
-              display:'flex',flexDirection:'column',
-              borderRadius: isMobile
-                ? '18px 18px 0 0'
-                : '0 10px 10px 0',
-              overflow:'hidden',
-              // 古い紙・羊皮紙風
-              background:'#f5ede0',
-              borderTop: isMobile ? 'none' : '1px solid #c8a87a',
-              borderRight: isMobile ? 'none' : '1px solid #c8a87a',
-              borderBottom: isMobile ? 'none' : '1px solid #c8a87a',
-            }}>
-
-              {/* ページ上部ヘッダー：タイトル帯 */}
-              <div style={{
-                background:'linear-gradient(180deg, #2d1206 0%, #4a1e0a 100%)',
-                padding: isMobile ? '14px 16px 12px' : '16px 24px 14px',
-                position:'relative',
-                borderBottom:'3px solid #7a3a18',
-              }}>
-                {/* 上辺の金線 */}
+            <div style={{flex:1,display:'flex',flexDirection:'column',borderRadius: isMobile ? '18px 18px 0 0' : '0 10px 10px 0',overflow:'hidden',background:'#f5ede0',borderTop: isMobile ? 'none' : '1px solid #c8a87a',borderRight: isMobile ? 'none' : '1px solid #c8a87a',borderBottom: isMobile ? 'none' : '1px solid #c8a87a'}}>
+              <div style={{background:'linear-gradient(180deg, #2d1206 0%, #4a1e0a 100%)',padding: isMobile ? '14px 16px 12px' : '16px 24px 14px',position:'relative',borderBottom:'3px solid #7a3a18'}}>
                 <div style={{position:'absolute',top:0,left:0,right:0,height:2,background:'linear-gradient(90deg,transparent 0%,#c8922a 20%,#ffd87a 50%,#c8922a 80%,transparent 100%)'}}/>
-
                 <div style={{display:'flex',alignItems:'center',justifyContent:'space-between'}}>
-                  <div style={{display:'flex',alignItems:'center',gap:10}}>
-                    {/* タイトル */}
-                    <div>
-                      <div style={{
-                        fontSize: isMobile ? 16 : 20,
-                        fontWeight:700,
-                        color:'#ffd87a',
-                        fontFamily:"'Noto Serif JP',serif",
-                        letterSpacing:'0.12em',
-                        textShadow:'0 1px 0 rgba(0,0,0,0.5)',
-                      }}>バッジ図鑑</div>
-                      <div style={{
-                        fontSize: isMobile ? 10 : 11,
-                        color:'rgba(255,200,100,0.6)',
-                        letterSpacing:'0.1em',
-                        marginTop:1,
-                      }}>
-                        {claimedSet.size} / {ALL_BADGES.filter(b=>!b.id.startsWith('_')).length} 獲得済み
-                      </div>
-                    </div>
+                  <div>
+                    <div style={{fontSize: isMobile ? 16 : 20,fontWeight:700,color:'#ffd87a',fontFamily:"'Noto Serif JP',serif",letterSpacing:'0.12em',textShadow:'0 1px 0 rgba(0,0,0,0.5)'}}>バッジ図鑑</div>
+                    <div style={{fontSize: isMobile ? 10 : 11,color:'rgba(255,200,100,0.6)',letterSpacing:'0.1em',marginTop:1}}>{claimedSet.size} / {ALL_BADGES.filter(b=>!b.id.startsWith('_')).length} 獲得済み</div>
                   </div>
                   <div style={{display:'flex',alignItems:'center',gap:10}}>
-                    {totalPages > 1 && (
-                      <span style={{fontSize:11,color:'rgba(255,200,100,0.5)'}}>
-                        {badgePage+1} / {totalPages}
-                      </span>
-                    )}
-                    <button onClick={()=>setShowBadgeBook(false)} style={{
-                      width:28,height:28,border:'1px solid rgba(255,200,100,0.3)',
-                      borderRadius:'50%',background:'rgba(0,0,0,0.3)',
-                      color:'rgba(255,200,100,0.7)',fontSize:13,cursor:'pointer',
-                      display:'flex',alignItems:'center',justifyContent:'center',
-                    }}>×</button>
+                    {totalPages > 1 && <span style={{fontSize:11,color:'rgba(255,200,100,0.5)'}}>{badgePage+1} / {totalPages}</span>}
+                    <button onClick={()=>setShowBadgeBook(false)} style={{width:28,height:28,border:'1px solid rgba(255,200,100,0.3)',borderRadius:'50%',background:'rgba(0,0,0,0.3)',color:'rgba(255,200,100,0.7)',fontSize:13,cursor:'pointer',display:'flex',alignItems:'center',justifyContent:'center'}}>×</button>
                   </div>
                 </div>
-
-                {/* 進捗バー */}
                 <div style={{marginTop:10,height:4,background:'rgba(0,0,0,0.3)',borderRadius:2,overflow:'hidden',border:'1px solid rgba(255,200,100,0.15)'}}>
-                  <div style={{
-                    height:'100%',
-                    background:'linear-gradient(90deg,#c8922a,#ffd87a,#c8922a)',
-                    width:`${(claimedSet.size/ALL_BADGES.filter(b=>!b.id.startsWith('_')).length)*100}%`,
-                    transition:'width .4s',
-                  }}/>
+                  <div style={{height:'100%',background:'linear-gradient(90deg,#c8922a,#ffd87a,#c8922a)',width:`${(claimedSet.size/ALL_BADGES.filter(b=>!b.id.startsWith('_')).length)*100}%`,transition:'width .4s'}}/>
                 </div>
               </div>
-
-              {/* ページ本文エリア */}
               <div style={{flex:1,overflowY:'auto',position:'relative',background:'#f5ede0'}}>
-
-                {/* ページの横罫線（背景） */}
-                <div style={{
-                  position:'absolute',inset:0,pointerEvents:'none',zIndex:0,
-                  backgroundImage:'repeating-linear-gradient(180deg, transparent, transparent 59px, rgba(180,140,90,0.15) 59px, rgba(180,140,90,0.15) 60px)',
-                  backgroundPositionY:'20px',
-                }}/>
-
-                {/* 見開きの綴じ目（デスクトップのみ） */}
-                {!isMobile && (
-                  <div style={{
-                    position:'absolute',top:0,bottom:0,
-                    left:'calc(50% - 1px)',width:2,
-                    background:'linear-gradient(180deg,rgba(120,80,40,0.08),rgba(120,80,40,0.18) 30%,rgba(120,80,40,0.22) 50%,rgba(120,80,40,0.18) 70%,rgba(120,80,40,0.08))',
-                    zIndex:1,pointerEvents:'none',
-                  }}/>
-                )}
-
+                <div style={{position:'absolute',inset:0,pointerEvents:'none',zIndex:0,backgroundImage:'repeating-linear-gradient(180deg, transparent, transparent 59px, rgba(180,140,90,0.15) 59px, rgba(180,140,90,0.15) 60px)',backgroundPositionY:'20px'}}/>
+                {!isMobile && <div style={{position:'absolute',top:0,bottom:0,left:'calc(50% - 1px)',width:2,background:'linear-gradient(180deg,rgba(120,80,40,0.08),rgba(120,80,40,0.18) 30%,rgba(120,80,40,0.22) 50%,rgba(120,80,40,0.18) 70%,rgba(120,80,40,0.08))',zIndex:1,pointerEvents:'none'}}/>}
                 <div style={{padding: isMobile ? '16px 12px 20px' : '20px 28px 24px',position:'relative',zIndex:2}}>
-                  <div style={{
-                    display:'grid',
-                    gridTemplateColumns: isMobile ? 'repeat(4,1fr)' : 'repeat(6,1fr)',
-                    gap: isMobile ? 12 : 18,
-                  }}>
+                  <div style={{display:'grid',gridTemplateColumns: isMobile ? 'repeat(4,1fr)' : 'repeat(6,1fr)',gap: isMobile ? 12 : 18}}>
                     {ALL_BADGES.slice(badgePage*perPage,(badgePage+1)*perPage).map(badge => {
-                      const owned = claimedSet.has(badge.id)
+                      const owned  = claimedSet.has(badge.id)
                       const isSlot = badge.id.startsWith('_')
                       const sz = isMobile ? 58 : 72
-
                       return (
-                        <div key={badge.id} style={{
-                          display:'flex',flexDirection:'column',alignItems:'center',gap:6,
-                          opacity: isSlot ? 0.2 : 1,
-                        }}>
-                          {/* メダル */}
+                        <div key={badge.id} style={{display:'flex',flexDirection:'column',alignItems:'center',gap:6,opacity: isSlot ? 0.2 : 1}}>
                           <div style={{position:'relative'}}>
-                            {/* 外枠リング */}
-                            <div style={{
-                              width:sz+10,height:sz+10,
-                              borderRadius:'50%',
-                              background: owned
-                                ? `radial-gradient(circle at 40% 35%, rgba(255,255,255,0.9), ${badge.color} 40%, ${badge.color}bb)`
-                                : 'radial-gradient(circle at 40% 35%, #aaa 0%, #666 60%, #444)',
-                              border: owned
-                                ? `3px solid ${badge.color}`
-                                : '3px solid #888',
+                            <div style={{width:sz+10,height:sz+10,borderRadius:'50%',
+                              background: owned ? `radial-gradient(circle at 40% 35%, rgba(255,255,255,0.9), ${badge.color} 40%, ${badge.color}bb)` : 'radial-gradient(circle at 40% 35%, #aaa 0%, #666 60%, #444)',
+                              border: owned ? `3px solid ${badge.color}` : '3px solid #888',
                               display:'flex',alignItems:'center',justifyContent:'center',
-                              boxShadow: owned
-                                ? `0 4px 14px ${badge.color}88, inset 0 1px 2px rgba(255,255,255,0.6), inset 0 -2px 4px rgba(0,0,0,0.25)`
-                                : '0 3px 8px rgba(0,0,0,0.25), inset 0 1px 2px rgba(255,255,255,0.1), inset 0 -1px 3px rgba(0,0,0,0.2)',
-                              position:'relative',overflow:'hidden',
-                            }}>
-                              {/* 光沢ハイライト */}
-                              <div style={{
-                                position:'absolute',top:'8%',left:'18%',
-                                width:'28%',height:'26%',
-                                background:'rgba(255,255,255,0.5)',
-                                borderRadius:'50%',filter:'blur(3px)',
-                              }}/>
-                              {owned ? (
-                                <span style={{
-                                  fontSize: isMobile ? 9 : 11,
-                                  fontWeight:700,color:'#fff',
-                                  textAlign:'center',lineHeight:1.25,
-                                  padding:'0 4px',zIndex:1,
-                                  textShadow:'0 1px 3px rgba(0,0,0,0.6)',
-                                }}>
-                                  {badge.name.replace(' Lv.', '\nLv.').replace('バッジ ', 'バッジ\n')}
-                                </span>
-                              ) : (
-                                <span style={{fontSize: isMobile ? 16 : 20,color:'rgba(255,255,255,0.15)',fontWeight:700}}>
-                                  {isSlot ? '' : '?'}
-                                </span>
-                              )}
+                              boxShadow: owned ? `0 4px 14px ${badge.color}88, inset 0 1px 2px rgba(255,255,255,0.6), inset 0 -2px 4px rgba(0,0,0,0.25)` : '0 3px 8px rgba(0,0,0,0.25)',
+                              position:'relative',overflow:'hidden'}}>
+                              <div style={{position:'absolute',top:'8%',left:'18%',width:'28%',height:'26%',background:'rgba(255,255,255,0.5)',borderRadius:'50%',filter:'blur(3px)'}}/>
+                              {owned
+                                ? <span style={{fontSize: isMobile ? 9 : 11,fontWeight:700,color:'#fff',textAlign:'center',lineHeight:1.25,padding:'0 4px',zIndex:1,textShadow:'0 1px 3px rgba(0,0,0,0.6)'}}>{badge.name.replace(' Lv.', '\nLv.').replace('バッジ ', 'バッジ\n')}</span>
+                                : <span style={{fontSize: isMobile ? 16 : 20,color:'rgba(255,255,255,0.15)',fontWeight:700}}>{isSlot ? '' : '?'}</span>
+                              }
                             </div>
-
-                            {/* 獲得済み：右上の星マーク */}
-                            {owned && (
-                              <div style={{
-                                position:'absolute',top:0,right:0,
-                                width:16,height:16,
-                                background:'#ffd700',
-                                borderRadius:'50%',
-                                border:`2px solid #f5ede0`,
-                                display:'flex',alignItems:'center',justifyContent:'center',
-                                fontSize:8,color:'#7a4a00',fontWeight:700,
-                              }}>★</div>
-                            )}
+                            {owned && <div style={{position:'absolute',top:0,right:0,width:16,height:16,background:'#ffd700',borderRadius:'50%',border:'2px solid #f5ede0',display:'flex',alignItems:'center',justifyContent:'center',fontSize:8,color:'#7a4a00',fontWeight:700}}>★</div>}
                           </div>
-
-                          {/* バッジ名 */}
-                          <div style={{
-                            fontSize: isMobile ? 9 : 10,
-                            color: owned ? '#5a3010' : '#c4a882',
-                            textAlign:'center',lineHeight:1.3,
-                            fontWeight: owned ? 600 : 400,
-                            letterSpacing:'0.02em',
-                          }}>
+                          <div style={{fontSize: isMobile ? 9 : 10,color: owned ? '#5a3010' : '#c4a882',textAlign:'center',lineHeight:1.3,fontWeight: owned ? 600 : 400}}>
                             {isSlot ? '' : owned ? badge.name : '未獲得'}
                           </div>
                         </div>
@@ -816,57 +701,17 @@ export default function MypageClient({
                   </div>
                 </div>
               </div>
-
-              {/* ページ下部：ページめくりナビ */}
-              <div style={{
-                background:'linear-gradient(180deg,#ede0cc,#e0cdb0)',
-                borderTop:'2px solid #c8a87a',
-                padding: isMobile ? '10px 14px' : '12px 24px',
-                display:'flex',alignItems:'center',
-                justifyContent: totalPages > 1 ? 'space-between' : 'center',
-                position:'relative',
-              }}>
-                {/* 下辺の金線 */}
+              <div style={{background:'linear-gradient(180deg,#ede0cc,#e0cdb0)',borderTop:'2px solid #c8a87a',padding: isMobile ? '10px 14px' : '12px 24px',display:'flex',alignItems:'center',justifyContent: totalPages > 1 ? 'space-between' : 'center',position:'relative'}}>
                 <div style={{position:'absolute',bottom:0,left:0,right:0,height:2,background:'linear-gradient(90deg,transparent,#c8922a 20%,#ffd87a 50%,#c8922a 80%,transparent)'}}/>
-
                 {totalPages > 1 ? (
                   <>
-                    <button onClick={()=>setBadgePage(p=>Math.max(0,p-1))} disabled={badgePage===0}
-                      style={{
-                        display:'flex',alignItems:'center',gap:5,
-                        padding:'6px 14px',
-                        border:'1px solid #a07840',borderRadius:16,
-                        background: badgePage===0 ? 'transparent' : '#4a1e0a',
-                        color: badgePage===0 ? '#c4a882' : '#ffd87a',
-                        cursor: badgePage===0 ? 'not-allowed' : 'pointer',
-                        fontSize:12,fontWeight:600,
-                      }}>
-                      ‹ 前のページ
-                    </button>
-
+                    <button onClick={()=>setBadgePage(p=>Math.max(0,p-1))} disabled={badgePage===0} style={{display:'flex',alignItems:'center',gap:5,padding:'6px 14px',border:'1px solid #a07840',borderRadius:16,background: badgePage===0 ? 'transparent' : '#4a1e0a',color: badgePage===0 ? '#c4a882' : '#ffd87a',cursor: badgePage===0 ? 'not-allowed' : 'pointer',fontSize:12,fontWeight:600}}>‹ 前のページ</button>
                     <div style={{display:'flex',gap:5,alignItems:'center'}}>
                       {Array.from({length:totalPages},(_,i)=>(
-                        <button key={i} onClick={()=>setBadgePage(i)} style={{
-                          width: i===badgePage ? 18 : 6,
-                          height:6,borderRadius:3,border:'none',cursor:'pointer',padding:0,
-                          background: i===badgePage ? '#c8922a' : '#c4a882',
-                          transition:'all .2s',
-                        }}/>
+                        <button key={i} onClick={()=>setBadgePage(i)} style={{width: i===badgePage ? 18 : 6,height:6,borderRadius:3,border:'none',cursor:'pointer',padding:0,background: i===badgePage ? '#c8922a' : '#c4a882',transition:'all .2s'}}/>
                       ))}
                     </div>
-
-                    <button onClick={()=>setBadgePage(p=>Math.min(totalPages-1,p+1))} disabled={badgePage===totalPages-1}
-                      style={{
-                        display:'flex',alignItems:'center',gap:5,
-                        padding:'6px 14px',
-                        border:'1px solid #a07840',borderRadius:16,
-                        background: badgePage===totalPages-1 ? 'transparent' : '#4a1e0a',
-                        color: badgePage===totalPages-1 ? '#c4a882' : '#ffd87a',
-                        cursor: badgePage===totalPages-1 ? 'not-allowed' : 'pointer',
-                        fontSize:12,fontWeight:600,
-                      }}>
-                      次のページ ›
-                    </button>
+                    <button onClick={()=>setBadgePage(p=>Math.min(totalPages-1,p+1))} disabled={badgePage===totalPages-1} style={{display:'flex',alignItems:'center',gap:5,padding:'6px 14px',border:'1px solid #a07840',borderRadius:16,background: badgePage===totalPages-1 ? 'transparent' : '#4a1e0a',color: badgePage===totalPages-1 ? '#c4a882' : '#ffd87a',cursor: badgePage===totalPages-1 ? 'not-allowed' : 'pointer',fontSize:12,fontWeight:600}}>次のページ ›</button>
                   </>
                 ) : (
                   <div style={{fontSize:11,color:'#a07840',letterSpacing:'0.08em'}}>— {badgePage+1} —</div>
@@ -877,7 +722,7 @@ export default function MypageClient({
         </div>
       )}
 
-      {/* ===== 既存モーダル群 ===== */}
+      {/* ===== 各種モーダル ===== */}
       {showEmailModal && (
         <div style={{position:'fixed',inset:0,background:'rgba(0,0,0,0.5)',zIndex:1000,display:'flex',alignItems:'center',justifyContent:'center',padding:24}}>
           <div style={{background:'#fff',borderRadius:16,padding:'28px',maxWidth:420,width:'100%',boxShadow:'0 20px 60px rgba(0,0,0,0.2)'}}>
@@ -911,7 +756,7 @@ export default function MypageClient({
         <div style={{position:'fixed',inset:0,background:'rgba(0,0,0,0.5)',zIndex:1000,display:'flex',alignItems:'center',justifyContent:'center',padding:24}}>
           <div style={{background:'#fff',borderRadius:16,padding:'28px',maxWidth:380,width:'100%',boxShadow:'0 20px 60px rgba(0,0,0,0.2)'}}>
             <div style={{fontSize:16,fontWeight:700,color:'#2B211B',marginBottom:16}}>生年月日を設定</div>
-            <p style={{fontSize:12,color:'#77706A',lineHeight:1.8,marginBottom:16}}>18歳以上の方はR18コンテンツを閲覧できます（18歳以上の方のみ）。<br/>13歳未満の方はご利用いただけません。</p>
+            <p style={{fontSize:12,color:'#77706A',lineHeight:1.8,marginBottom:16}}>18歳以上の方はR18コンテンツを閲覧できます。<br/>13歳未満の方はご利用いただけません。</p>
             <div style={{display:'flex',gap:8,marginBottom:16,alignItems:'center'}}>
               <select value={bdYear} onChange={e=>setBdYear(e.target.value)} style={{flex:2,padding:'8px',border:'1.5px solid #F0D9C9',borderRadius:8,fontSize:13}}>
                 <option value="">年</option>
