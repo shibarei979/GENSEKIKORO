@@ -81,7 +81,7 @@ function NodeShape({ node, selected, onMouseDown, onDoubleClick }: {
         <polygon points={`${node.x+node.w-16},${node.y} ${node.x+node.w},${node.y} ${node.x+node.w},${node.y+16}`}
           fill="rgba(0,0,0,0.08)"/>
         <foreignObject x={node.x+8} y={node.y+8} width={node.w-16} height={node.h-16}>
-          <div xmlns="http://www.w3.org/1999/xhtml" style={{
+          <div style={{
             width:'100%',height:'100%',
             fontSize:node.fontSize,color:textColor,
             lineHeight:1.5,wordBreak:'break-all',
@@ -104,7 +104,7 @@ function NodeShape({ node, selected, onMouseDown, onDoubleClick }: {
           fill={node.color} stroke={selected?selStroke:'rgba(0,0,0,0.2)'} strokeWidth={strokeW}
           style={{filter:'drop-shadow(1px 2px 4px rgba(0,0,0,0.1))'}}/>
         <foreignObject x={node.x+8} y={node.y+8} width={node.w-16} height={node.h-16}>
-          <div xmlns="http://www.w3.org/1999/xhtml" style={{
+          <div style={{
             width:'100%',height:'100%',display:'flex',alignItems:'center',justifyContent:'center',
             fontSize:node.fontSize,color:textColor,textAlign:'center',
             wordBreak:'break-all',overflow:'hidden',userSelect:'none',
@@ -124,7 +124,7 @@ function NodeShape({ node, selected, onMouseDown, onDoubleClick }: {
           fill={node.color} stroke={selected?selStroke:'rgba(0,0,0,0.2)'} strokeWidth={strokeW}
           style={{filter:'drop-shadow(1px 2px 4px rgba(0,0,0,0.1))'}}/>
         <foreignObject x={node.x+8} y={node.y+8} width={node.w-16} height={node.h-16}>
-          <div xmlns="http://www.w3.org/1999/xhtml" style={{
+          <div style={{
             width:'100%',height:'100%',display:'flex',alignItems:'center',justifyContent:'center',
             fontSize:node.fontSize,color:textColor,textAlign:'center',
             wordBreak:'break-all',overflow:'hidden',userSelect:'none',
@@ -145,7 +145,7 @@ function NodeShape({ node, selected, onMouseDown, onDoubleClick }: {
           fill={node.color} stroke={selected?selStroke:'rgba(0,0,0,0.2)'} strokeWidth={strokeW}
           style={{filter:'drop-shadow(1px 2px 4px rgba(0,0,0,0.1))'}}/>
         <foreignObject x={node.x+16} y={node.y+node.h*0.5} width={node.w-32} height={node.h*0.4}>
-          <div xmlns="http://www.w3.org/1999/xhtml" style={{
+          <div style={{
             width:'100%',height:'100%',display:'flex',alignItems:'center',justifyContent:'center',
             fontSize:node.fontSize,color:textColor,textAlign:'center',
             wordBreak:'break-all',overflow:'hidden',userSelect:'none',
