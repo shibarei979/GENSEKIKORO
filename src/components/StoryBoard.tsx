@@ -46,6 +46,7 @@ const DEFAULT_SIZE: Record<Node['type'], {w:number;h:number}> = {
 }
 const MIN_SIZE = 40
 const MIN_ZOOM = 0.3, MAX_ZOOM = 2.5
+const BOARD_W = 2400, BOARD_H = 1500   // ボードの実サイズ（端が見える範囲）
 
 function genId() { return Math.random().toString(36).slice(2,10) }
 
@@ -171,7 +172,19 @@ export default function StoryBoard({ userId, onClose, isModal }: Props) {
   const nodesRef = useRef<Node[]>([])
   const edgesRef = useRef<Edge[]>([])
 
-  useEffect(() => { setMounted(true) }, [])
+  useEffect(() => {
+    setMounted(true)
+    // 初期表示：ボードを画面中央に収める
+    if (svgRef.current) {
+      const rect = svgRef.current.getBoundingClientRect()
+      const fitZoom = Math.min(MAX_ZOOM, Math.max(MIN_ZOOM, Math.min(rect.width / (BOARD_W+80), rect.height / (BOARD_H+80))))
+      setZoom(Math.round(fitZoom * 100) / 100)
+      setPan({
+        x: (rect.width - BOARD_W * fitZoom) / 2,
+        y: (rect.height - BOARD_H * fitZoom) / 2,
+      })
+    }
+  }, [])
 
   useEffect(() => {
     if (!mounted) return
@@ -236,14 +249,22 @@ export default function StoryBoard({ userId, onClose, isModal }: Props) {
     return { x, y }
   }
 
+  function clampToBoard(x: number, y: number, w: number, h: number) {
+    return {
+      x: Math.min(Math.max(x, 0), BOARD_W - w),
+      y: Math.min(Math.max(y, 0), BOARD_H - h),
+    }
+  }
+
   function handleSvgClick(e: React.MouseEvent<SVGSVGElement>) {
     if (tool === 'select' || tool === 'edge') return
     const { x, y } = screenToBoard(e.clientX, e.clientY)
     const sz = DEFAULT_SIZE[tool as Node['type']]
     const color = tool === 'note' ? noteColor : shapeColor
+    const clamped = clampToBoard(x - sz.w/2, y - sz.h/2, sz.w, sz.h)
     const node: Node = {
       id: genId(), type: tool as Node['type'],
-      x: x - sz.w/2, y: y - sz.h/2,
+      x: clamped.x, y: clamped.y,
       w: sz.w, h: sz.h,
       color, text: '', fontSize: 12,
     }
@@ -281,18 +302,21 @@ export default function StoryBoard({ userId, onClose, isModal }: Props) {
     if (dragRef.current) {
       const dx = (e.clientX - dragRef.current.mx) / zoom
       const dy = (e.clientY - dragRef.current.my) / zoom
-      setNodes(prev => prev.map(n => n.id === dragRef.current!.id
-        ? { ...n, x: dragRef.current!.ox + dx, y: dragRef.current!.oy + dy }
-        : n
-      ))
+      setNodes(prev => prev.map(n => {
+        if (n.id !== dragRef.current!.id) return n
+        const c = clampToBoard(dragRef.current!.ox + dx, dragRef.current!.oy + dy, n.w, n.h)
+        return { ...n, x: c.x, y: c.y }
+      }))
     }
     if (resizeRef.current) {
       const dx = (e.clientX - resizeRef.current.mx) / zoom
       const dy = (e.clientY - resizeRef.current.my) / zoom
-      setNodes(prev => prev.map(n => n.id === resizeRef.current!.id
-        ? { ...n, w: Math.max(MIN_SIZE, resizeRef.current!.ow + dx), h: Math.max(MIN_SIZE, resizeRef.current!.oh + dy) }
-        : n
-      ))
+      setNodes(prev => prev.map(n => {
+        if (n.id !== resizeRef.current!.id) return n
+        const newW = Math.max(MIN_SIZE, resizeRef.current!.ow + dx)
+        const newH = Math.max(MIN_SIZE, resizeRef.current!.oh + dy)
+        return { ...n, w: Math.min(newW, BOARD_W - n.x), h: Math.min(newH, BOARD_H - n.y) }
+      }))
     }
     if (panRef.current) {
       setPan({
@@ -363,6 +387,13 @@ export default function StoryBoard({ userId, onClose, isModal }: Props) {
   function zoomIn()  { setZoom(z => Math.min(MAX_ZOOM, Math.round((z + 0.1) * 100) / 100)) }
   function zoomOut() { setZoom(z => Math.max(MIN_ZOOM, Math.round((z - 0.1) * 100) / 100)) }
   function zoomReset() { setZoom(1); setPan({x:0,y:0}) }
+  function fitToScreen() {
+    if (!svgRef.current) return
+    const rect = svgRef.current.getBoundingClientRect()
+    const fitZoom = Math.min(MAX_ZOOM, Math.max(MIN_ZOOM, Math.min(rect.width / (BOARD_W+80), rect.height / (BOARD_H+80))))
+    setZoom(Math.round(fitZoom * 100) / 100)
+    setPan({ x: (rect.width - BOARD_W * fitZoom) / 2, y: (rect.height - BOARD_H * fitZoom) / 2 })
+  }
 
   if (!mounted) return null
 
@@ -459,13 +490,17 @@ export default function StoryBoard({ userId, onClose, isModal }: Props) {
             style={{width:32,height:32,border:'none',background:'#fff',borderRadius:7,cursor:'pointer',fontSize:16,fontWeight:700,color:'#77706A',display:'flex',alignItems:'center',justifyContent:'center'}}>
             −
           </button>
-          <button onClick={zoomReset} title="リセット(クリックで100%)"
-            style={{minWidth:52,height:32,border:'none',background:'transparent',cursor:'pointer',fontSize:13,fontWeight:700,color:'#2B211B'}}>
+          <span style={{minWidth:46,textAlign:'center',fontSize:13,fontWeight:700,color:'#2B211B'}}>
             {Math.round(zoom*100)}%
-          </button>
+          </span>
           <button onClick={zoomIn} title="拡大"
             style={{width:32,height:32,border:'none',background:'#fff',borderRadius:7,cursor:'pointer',fontSize:16,fontWeight:700,color:'#77706A',display:'flex',alignItems:'center',justifyContent:'center'}}>
             ＋
+          </button>
+          <div style={{width:1,height:20,background:'#F0D9C9',margin:'0 2px'}}/>
+          <button onClick={fitToScreen} title="全体を表示"
+            style={{padding:'0 10px',height:32,border:'none',background:'#fff',borderRadius:7,cursor:'pointer',fontSize:12,fontWeight:600,color:'#77706A'}}>
+            全体表示
           </button>
         </div>
 
@@ -505,8 +540,15 @@ export default function StoryBoard({ userId, onClose, isModal }: Props) {
           </defs>
 
           <g transform={`translate(${pan.x},${pan.y}) scale(${zoom})`}>
-            <rect data-bg="1" x={-5000} y={-5000} width={10000} height={10000}
-              fill="url(#dots)" style={{pointerEvents:'all'}}/>
+            {/* ボード外側の暗い余白（クリックでパン） */}
+            <rect data-bg="1" x={-3000} y={-3000} width={9000} height={9000}
+              fill="#e8e2d8" style={{pointerEvents:'all'}}/>
+            {/* ボード本体（端が見える固定サイズの白い領域） */}
+            <rect x={0} y={0} width={BOARD_W} height={BOARD_H}
+              fill="#f5f0ea" stroke="#d4c4a8" strokeWidth={3}
+              style={{pointerEvents:'none',filter:'drop-shadow(0 2px 12px rgba(0,0,0,0.12))'}}/>
+            <rect x={0} y={0} width={BOARD_W} height={BOARD_H}
+              fill="url(#dots)" style={{pointerEvents:'none'}}/>
 
             {edges.map(edge=>{
               const from = getNodeCenter(edge.from)
@@ -542,7 +584,7 @@ export default function StoryBoard({ userId, onClose, isModal }: Props) {
 
         {/* ズームヒント */}
         <div style={{position:'absolute',bottom:12,right:12,fontSize:11,color:'#B8AEA8',background:'rgba(255,255,255,0.8)',padding:'4px 10px',borderRadius:8,pointerEvents:'none'}}>
-          ホイールで拡大縮小
+          ホイールで拡大縮小・背景ドラッグで移動
         </div>
       </div>
 
