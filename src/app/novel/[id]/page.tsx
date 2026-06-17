@@ -56,8 +56,13 @@ export default async function NovelPage({ params }: { params: { id: string } }) 
     .eq('user_id', novel.author_id).maybeSingle()
 
   const { data: episodes } = await supabase
-    .from('episodes').select('id, title, ep_number, created_at, illust_url')
+    .from('episodes').select('id, title, ep_number, created_at, illust_url, chapter_id')
     .eq('novel_id', params.id).order('ep_number', { ascending: true })
+
+  // 章一覧を取得
+  const { data: chapters } = await supabase
+    .from('novel_chapters').select('id, title, order_num')
+    .eq('novel_id', params.id).order('order_num', { ascending: true })
 
   const epIds = (episodes || []).map(e => e.id)
   let epLikeCounts: Record<string,number>    = {}
@@ -148,6 +153,38 @@ export default async function NovelPage({ params }: { params: { id: string } }) 
   const readCount  = readEpisodeIds.size
   const totalCount = episodes?.length ?? 0
 
+  // ===== 章ごとにエピソードをグループ化 =====
+  const allEpisodes = episodes || []
+  const hasChapters = (chapters || []).length > 0
+  const unassignedEpisodes = allEpisodes.filter(ep => !ep.chapter_id)
+  const chapterGroups = (chapters || []).map(ch => ({
+    chapter: ch,
+    episodes: allEpisodes.filter(ep => ep.chapter_id === ch.id),
+  })).filter(g => g.episodes.length > 0) // 話が無い章は表示しない
+
+  // エピソード1件の見た目（共通化）
+  function EpisodeRow({ ep }: { ep: any }) {
+    const isReadEp = readEpisodeIds.has(ep.id)
+    return (
+      <Link href={`/novel/${params.id}/episode/${ep.id}`} style={{textDecoration:'none',display:'block'}}>
+        <div style={{display:'flex',alignItems:'center',gap:10,padding:'11px 14px',borderBottom:'1px solid #FFF1E6',background: isReadEp ? '#e5e7eb' : '#fff'}}>
+          {ep.illust_url && (
+            <img src={ep.illust_url} alt="" style={{width:36,height:36,objectFit:'cover',borderRadius:4,flexShrink:0}}/>
+          )}
+          <div style={{flex:1,minWidth:0,display:'flex',alignItems:'center',gap:5}}>
+            {isReadEp && <span style={{fontSize:10,color:'#10b981',fontWeight:700,flexShrink:0}}>✓</span>}
+            <span style={{fontSize:13,fontWeight:500,color: isReadEp ? '#4b5563' : '#2B211B',overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap'}}>{ep.title}</span>
+          </div>
+          <div style={{display:'flex',alignItems:'center',gap:6,flexShrink:0}}>
+            {epLikeCounts[ep.id] > 0 && <span style={{fontSize:10,color:'#77706A'}}>♡ {fmtNum(epLikeCounts[ep.id])}</span>}
+            {epCommentCounts[ep.id] > 0 && <span style={{fontSize:10,color:'#77706A'}}>💬 {fmtNum(epCommentCounts[ep.id])}</span>}
+            <span style={{fontSize:10,color:'#B8AEA8'}}>{fmtDate(ep.created_at)}</span>
+          </div>
+        </div>
+      </Link>
+    )
+  }
+
   return (
     <div style={{minHeight:'100vh',background:'#fff'}}>
       <Header profile={profile} user={user} />
@@ -221,7 +258,7 @@ export default async function NovelPage({ params }: { params: { id: string } }) 
             />
           </div>
 
-          {/* 目次 */}
+          {/* 目次（章でグループ化） */}
           <div style={{background:'#fff',border:'1px solid #F0D9C9',borderRadius:12,overflow:'hidden'}}>
             <div style={{padding:'10px 14px',borderBottom:'1px solid #F0D9C9',background:'#FFF9F2'}}>
               <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',flexWrap:'wrap',gap:4}}>
@@ -236,29 +273,38 @@ export default async function NovelPage({ params }: { params: { id: string } }) 
                 </div>
               </div>
             </div>
+
             {!episodes || episodes.length === 0 ? (
               <div style={{padding:'32px',textAlign:'center',color:'#B8AEA8',fontSize:13}}>まだ話がありません</div>
-            ) : episodes.map((ep) => {
-              const isReadEp = readEpisodeIds.has(ep.id)
-              return (
-                <Link key={ep.id} href={`/novel/${params.id}/episode/${ep.id}`} style={{textDecoration:'none',display:'block'}}>
-                  <div style={{display:'flex',alignItems:'center',gap:10,padding:'11px 14px',borderBottom:'1px solid #FFF1E6',background: isReadEp ? '#e5e7eb' : '#fff'}}>
-                    {ep.illust_url && (
-                      <img src={ep.illust_url} alt="" style={{width:36,height:36,objectFit:'cover',borderRadius:4,flexShrink:0}}/>
-                    )}
-                    <div style={{flex:1,minWidth:0,display:'flex',alignItems:'center',gap:5}}>
-                      {isReadEp && <span style={{fontSize:10,color:'#10b981',fontWeight:700,flexShrink:0}}>✓</span>}
-                      <span style={{fontSize:13,fontWeight:500,color: isReadEp ? '#4b5563' : '#2B211B',overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap'}}>{ep.title}</span>
+            ) : !hasChapters ? (
+              // 章が無い場合は従来通りフラット表示
+              allEpisodes.map((ep) => <EpisodeRow key={ep.id} ep={ep} />)
+            ) : (
+              // 章ごとにグループ化して表示
+              <>
+                {chapterGroups.map(({ chapter, episodes: chEps }) => (
+                  <div key={chapter.id}>
+                    <div style={{padding:'9px 14px',background:'#FFF1E6',borderBottom:'1px solid #F0D9C9',borderTop:'1px solid #F0D9C9',display:'flex',alignItems:'center',gap:8}}>
+                      <span style={{width:3,height:14,background:'#F26A21',borderRadius:2,display:'inline-block',flexShrink:0}}/>
+                      <span style={{fontSize:13,fontWeight:700,color:'#F26A21'}}>{chapter.title}</span>
+                      <span style={{fontSize:11,color:'#B8AEA8'}}>（{chEps.length}話）</span>
                     </div>
-                    <div style={{display:'flex',alignItems:'center',gap:6,flexShrink:0}}>
-                      {epLikeCounts[ep.id] > 0 && <span style={{fontSize:10,color:'#77706A'}}>♡ {fmtNum(epLikeCounts[ep.id])}</span>}
-                      {epCommentCounts[ep.id] > 0 && <span style={{fontSize:10,color:'#77706A'}}>💬 {fmtNum(epCommentCounts[ep.id])}</span>}
-                      <span style={{fontSize:10,color:'#B8AEA8'}}>{fmtDate(ep.created_at)}</span>
-                    </div>
+                    {chEps.map((ep) => <EpisodeRow key={ep.id} ep={ep} />)}
                   </div>
-                </Link>
-              )
-            })}
+                ))}
+                {unassignedEpisodes.length > 0 && (
+                  <div>
+                    <div style={{padding:'9px 14px',background:'#F5F5F0',borderBottom:'1px solid #F0D9C9',borderTop:'1px solid #F0D9C9',display:'flex',alignItems:'center',gap:8}}>
+                      <span style={{width:3,height:14,background:'#B8AEA8',borderRadius:2,display:'inline-block',flexShrink:0}}/>
+                      <span style={{fontSize:13,fontWeight:700,color:'#77706A'}}>その他</span>
+                      <span style={{fontSize:11,color:'#B8AEA8'}}>（{unassignedEpisodes.length}話）</span>
+                    </div>
+                    {unassignedEpisodes.map((ep) => <EpisodeRow key={ep.id} ep={ep} />)}
+                  </div>
+                )}
+              </>
+            )}
+
             {episodes && episodes.length > 0 && (
               <div style={{padding:'12px 16px',textAlign:'center',borderTop:'1px solid #F0D9C9'}}>
                 <Link href={`/novel/${params.id}/episode/${episodes[0].id}`}
