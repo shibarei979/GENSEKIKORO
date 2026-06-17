@@ -33,6 +33,7 @@ import CommentSection from './CommentSection'
 import EpisodeLikeButton from './EpisodeLikeButton'
 import ReadButton from './ReadButton'
 import EpisodeBody from './EpisodeBody'
+import ContinueReaction from './ContinueReaction'
 
 interface Props { params: { id: string; epId: string } }
 
@@ -54,11 +55,32 @@ export default async function EpisodePage({ params }: Props) {
     .from('novels').select('id, title, genre, is_serial, author_id, views').eq('id', params.id).maybeSingle()
   if (!novel) notFound()
 
+  // ===== 予約投稿の自動公開判定 =====
+  // 予約時刻を過ぎていれば公開状態に更新する。作者本人は予約中でも閲覧可（プレビュー目的）。
+  const isOwner = user?.id === novel.author_id
+  if (episode.published === false && episode.scheduled_at) {
+    const scheduledTime = new Date(episode.scheduled_at).getTime()
+    if (scheduledTime <= Date.now()) {
+      await supabase.from('episodes').update({ published: true, scheduled_at: null }).eq('id', episode.id)
+      episode.published = true
+      episode.scheduled_at = null
+      // 作品自体がまだ非公開の場合も公開にする
+      const { data: novelPubCheck } = await supabase.from('novels').select('published').eq('id', novel.id).maybeSingle()
+      if (novelPubCheck && novelPubCheck.published === false) {
+        await supabase.from('novels').update({ published: true }).eq('id', novel.id)
+      }
+    } else if (!isOwner) {
+      notFound()
+    }
+  } else if (episode.published === false && !isOwner) {
+    notFound()
+  }
+
   const { data: authorData } = await supabase
     .from('profiles').select('display_name, user_id').eq('user_id', novel.author_id).maybeSingle()
 
   const { data: allEps } = await supabase
-    .from('episodes').select('id, ep_number, title').eq('novel_id', params.id).order('ep_number', { ascending: true })
+    .from('episodes').select('id, ep_number, title, published, scheduled_at').eq('novel_id', params.id).order('ep_number', { ascending: true })
 
   const { data: rawComments } = await supabase
     .from('comments')
@@ -104,9 +126,11 @@ export default async function EpisodePage({ params }: Props) {
     isRead = !!rd
   }
 
-  const currentIdx = allEps?.findIndex(e => e.id === params.epId) ?? -1
-  const prevEp = currentIdx > 0 ? allEps![currentIdx - 1] : null
-  const nextEp = currentIdx >= 0 && currentIdx < (allEps?.length ?? 0) - 1 ? allEps![currentIdx + 1] : null
+  // 読者向けには、未公開（予約投稿中）の話をナビゲーションから除外
+  const visibleEps = isOwner ? (allEps || []) : (allEps || []).filter(e => e.published !== false)
+  const currentIdx = visibleEps.findIndex(e => e.id === params.epId) ?? -1
+  const prevEp = currentIdx > 0 ? visibleEps[currentIdx - 1] : null
+  const nextEp = currentIdx >= 0 && currentIdx < visibleEps.length - 1 ? visibleEps[currentIdx + 1] : null
 
   try {
     await supabase.from('page_views').insert({ episode_id: params.epId, user_id: user?.id || null })
@@ -136,6 +160,12 @@ export default async function EpisodePage({ params }: Props) {
             <span>›</span>
             <span style={{color:'#2B211B'}}>{episode.title}</span>
           </div>
+          {/* 予約投稿中バナー（作者のみ） */}
+          {isOwner && episode.published === false && episode.scheduled_at && (
+            <div style={{background:'#eff6ff',border:'1.5px solid #93c5fd',borderRadius:10,padding:'10px 16px',marginBottom:14,fontSize:12,color:'#1d4ed8',fontWeight:600}}>
+              📅 この話は予約投稿中です。{new Date(episode.scheduled_at).toLocaleString('ja-JP',{month:'numeric',day:'numeric',hour:'2-digit',minute:'2-digit'})} に公開されます（このプレビューは作者にのみ表示されています）
+            </div>
+          )}
           {/* 上ナビ */}
           <div style={{display:'flex',justifyContent:'space-between',marginBottom:16,gap:8}}>
             {prevEp ? <Link href={`/novel/${params.id}/episode/${prevEp.id}`} style={navBtn}>← 前の話</Link> : <div/>}
@@ -149,9 +179,10 @@ export default async function EpisodePage({ params }: Props) {
             </div>
           )}
           <EpisodeBody title={episode.title} body={episode.body} preface={episode.preface} afterword={episode.afterword} authorName={author?.display_name}/>
-          {/* いいね・読了・シェア */}
+          {/* いいね・続きを見たい・読了・シェア */}
           <div style={{display:'flex',alignItems:'center',justifyContent:'center',gap:12,marginBottom:16,flexWrap:'wrap'}}>
             <EpisodeLikeButton episodeId={params.epId} userId={user?.id||null} initialLiked={epLiked} initialCount={epLikeCount??0}/>
+            <ContinueReaction episodeId={params.epId} userId={user?.id||null} authorId={novel.author_id} userDisplayName={profile?.display_name||undefined}/>
             {user && <ReadButton novelId={params.id} episodeId={params.epId} userId={user.id} initialRead={isRead}/>}
             <a href={`https://twitter.com/intent/tweet?text=${encodeURIComponent(`「${novel.title}」\n「${episode.title}」\n#原石航路 #ライトノベル\n`)}&url=${encodeURIComponent(`${process.env.NEXT_PUBLIC_SITE_URL||''}/novel/${params.id}/episode/${params.epId}`)}`}
               target="_blank" rel="noopener noreferrer"
@@ -229,9 +260,10 @@ export default async function EpisodePage({ params }: Props) {
         {/* 本文 */}
         <EpisodeBody title={episode.title} body={episode.body} preface={episode.preface} afterword={episode.afterword} authorName={author?.display_name}/>
 
-        {/* いいね・読了・シェア */}
+        {/* いいね・続きを見たい・読了・シェア */}
         <div style={{display:'flex',alignItems:'center',justifyContent:'center',gap:8,marginBottom:14,flexWrap:'wrap'}}>
           <EpisodeLikeButton episodeId={params.epId} userId={user?.id||null} initialLiked={epLiked} initialCount={epLikeCount??0}/>
+          <ContinueReaction episodeId={params.epId} userId={user?.id||null} authorId={novel.author_id} userDisplayName={profile?.display_name||undefined}/>
           {user && <ReadButton novelId={params.id} episodeId={params.epId} userId={user.id} initialRead={isRead}/>}
           <a href={`https://twitter.com/intent/tweet?text=${encodeURIComponent(`「${novel.title}」\n「${episode.title}」\n#原石航路 #ライトノベル\n`)}&url=${encodeURIComponent(`${process.env.NEXT_PUBLIC_SITE_URL||''}/novel/${params.id}/episode/${params.epId}`)}`}
             target="_blank" rel="noopener noreferrer"

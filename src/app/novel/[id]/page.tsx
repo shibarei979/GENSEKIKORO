@@ -56,9 +56,30 @@ export default async function NovelPage({ params }: { params: { id: string } }) 
     .from('profiles').select('display_name, user_id')
     .eq('user_id', novel.author_id).maybeSingle()
 
-  const { data: episodes } = await supabase
-    .from('episodes').select('id, title, ep_number, created_at, illust_url, chapter_id')
+  const isAuthor = user?.id === novel.author_id
+
+  const { data: rawEpisodes } = await supabase
+    .from('episodes').select('id, title, ep_number, created_at, illust_url, chapter_id, published, scheduled_at')
     .eq('novel_id', params.id).order('ep_number', { ascending: true })
+
+  // ===== 予約投稿の自動公開判定 =====
+  // 予約時刻を過ぎている話があれば公開状態に更新する
+  const nowMs = Date.now()
+  const toPublish = (rawEpisodes || []).filter(ep =>
+    ep.published === false && ep.scheduled_at && new Date(ep.scheduled_at).getTime() <= nowMs
+  )
+  if (toPublish.length > 0) {
+    await supabase.from('episodes')
+      .update({ published: true, scheduled_at: null })
+      .in('id', toPublish.map(ep => ep.id))
+    toPublish.forEach(ep => { ep.published = true; ep.scheduled_at = null })
+    if (novel.published === false) {
+      await supabase.from('novels').update({ published: true }).eq('id', novel.id)
+    }
+  }
+
+  // 読者には未公開（予約中）の話を見せない。作者には全話見せる。
+  const episodes = isAuthor ? rawEpisodes : (rawEpisodes || []).filter(ep => ep.published !== false)
 
   // 章一覧を取得
   const { data: chapters } = await supabase
@@ -104,7 +125,6 @@ export default async function NovelPage({ params }: { params: { id: string } }) 
   }
 
   const author   = authorProfile as any
-  const isAuthor = user?.id === author?.user_id
 
   let isFollowing = false
   let followerCount = 0
@@ -166,6 +186,7 @@ export default async function NovelPage({ params }: { params: { id: string } }) 
   // エピソード1件の見た目（共通化）
   function EpisodeRow({ ep }: { ep: any }) {
     const isReadEp = readEpisodeIds.has(ep.id)
+    const isScheduled = isAuthor && ep.published === false && ep.scheduled_at
     return (
       <Link href={`/novel/${params.id}/episode/${ep.id}`} style={{textDecoration:'none',display:'block'}}>
         <div style={{display:'flex',alignItems:'center',gap:10,padding:'11px 14px',borderBottom:'1px solid #FFF1E6',background: isReadEp ? '#e5e7eb' : '#fff'}}>
@@ -175,6 +196,11 @@ export default async function NovelPage({ params }: { params: { id: string } }) 
           <div style={{flex:1,minWidth:0,display:'flex',alignItems:'center',gap:5}}>
             {isReadEp && <span style={{fontSize:10,color:'#10b981',fontWeight:700,flexShrink:0}}>✓</span>}
             <span style={{fontSize:13,fontWeight:500,color: isReadEp ? '#4b5563' : '#2B211B',overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap'}}>{ep.title}</span>
+            {isScheduled && (
+              <span style={{fontSize:9,background:'#eff6ff',color:'#2563eb',border:'1px solid #bfdbfe',padding:'1px 7px',borderRadius:10,flexShrink:0,whiteSpace:'nowrap'}}>
+                予約 {new Date(ep.scheduled_at).toLocaleString('ja-JP',{month:'numeric',day:'numeric',hour:'2-digit',minute:'2-digit'})}
+              </span>
+            )}
           </div>
           <div style={{display:'flex',alignItems:'center',gap:6,flexShrink:0}}>
             {epLikeCounts[ep.id] > 0 && <span style={{fontSize:10,color:'#77706A'}}>♡ {fmtNum(epLikeCounts[ep.id])}</span>}

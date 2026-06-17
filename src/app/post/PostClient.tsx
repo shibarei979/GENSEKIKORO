@@ -31,6 +31,14 @@ function detectAiMarkers(text: string): string[] {
   return patterns
 }
 
+// ===== 予約投稿用：現在時刻より1時間後をデフォルトに、ローカルのdatetime-local文字列を作る =====
+function defaultScheduleValue(): string {
+  const d = new Date(Date.now() + 60 * 60 * 1000) // 1時間後
+  d.setMinutes(Math.ceil(d.getMinutes() / 5) * 5, 0, 0) // 5分単位に切り上げ
+  const pad = (n: number) => String(n).padStart(2, '0')
+  return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`
+}
+
 export default function PostClient({ profile, userId }: Props) {
   const router        = useRouter()
   const searchParams  = useSearchParams()
@@ -74,6 +82,11 @@ export default function PostClient({ profile, userId }: Props) {
   const [replaceTo,    setReplaceTo]    = useState('')
   const [replaceCount, setReplaceCount] = useState<number|null>(null)
 
+  // ===== 予約投稿 =====
+  const [useSchedule,    setUseSchedule]    = useState(false)
+  const [scheduleValue,  setScheduleValue]  = useState(defaultScheduleValue())
+  const [scheduledAtSaved, setScheduledAtSaved] = useState<string | null>(null)
+
   const [errors,  setErrors]  = useState<Record<string,string>>({})
   const [loading,   setLoading]   = useState(false)
   const [toast,     setToast]     = useState('')
@@ -110,7 +123,7 @@ export default function PostClient({ profile, userId }: Props) {
         setIsR15(novel.is_r15 || false)
         setSavedNovelId(novel.id)
       })
-    supabase.from('episodes').select('id,title,ep_number,body,preface,afterword,illust_url')
+    supabase.from('episodes').select('id,title,ep_number,body,preface,afterword,illust_url,scheduled_at,published')
       .eq('novel_id', editNovelId).order('ep_number', { ascending: true })
       .then(({ data }) => setEditEpisodes(data || []))
   }, [editNovelId])
@@ -124,6 +137,16 @@ export default function PostClient({ profile, userId }: Props) {
     setBody(ep.body || '')
     setAfterword(ep.afterword || '')
     setIllustPreview(ep.illust_url || '')
+    if (ep.scheduled_at && ep.published === false) {
+      setUseSchedule(true)
+      const d = new Date(ep.scheduled_at)
+      const pad = (n: number) => String(n).padStart(2, '0')
+      setScheduleValue(`${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`)
+      setScheduledAtSaved(ep.scheduled_at)
+    } else {
+      setUseSchedule(false)
+      setScheduledAtSaved(null)
+    }
   }, [editEpId, editEpisodes])
 
   useEffect(() => {
@@ -221,6 +244,16 @@ export default function PostClient({ profile, userId }: Props) {
     if (afterLen > 20000)   errs.afterword = 'あとがきは20,000文字以内にしてください'
     if (bodyLen > 100000)   errs.body = '本文は100,000文字以内にしてください'
     if (publish && bodyLen < 500) errs.body = `公開には本文500文字以上必要です（現在${bodyLen}文字）`
+    if (publish && useSchedule) {
+      if (!scheduleValue) {
+        errs.schedule = '公開日時を指定してください'
+      } else {
+        const scheduledDate = new Date(scheduleValue)
+        if (scheduledDate.getTime() <= Date.now()) {
+          errs.schedule = '未来の日時を指定してください'
+        }
+      }
+    }
     return errs
   }
 
@@ -228,6 +261,12 @@ export default function PostClient({ profile, userId }: Props) {
     const errs = validate(publish)
     if (Object.keys(errs).length) { setErrors(errs); return }
     setErrors({}); setLoading(true)
+
+    // 予約投稿か即時公開かを判定
+    const isScheduled = publish && useSchedule
+    const scheduledIso = isScheduled ? new Date(scheduleValue).toISOString() : null
+    // 予約投稿の場合、episodesテーブルのpublishedはfalseのまま、scheduled_atのみセット
+    // 即時公開の場合、publishedはtrue、scheduled_atはnull
 
     try {
       let novelId = savedNovelId || selectedNovelId
@@ -237,7 +276,7 @@ export default function PostClient({ profile, userId }: Props) {
         const { data: novel, error: nErr } = await supabase.from('novels').insert({
           author_id: userId, title: title.trim(),
           summary: summary.trim() || null, genre, tags,
-          is_serial: true, published: publish,
+          is_serial: true, published: publish && !isScheduled,
           novel_type: novelType,
           is_r18: isR18, is_r15: isR15,
           catchcopy: catchcopy.trim() || null,
@@ -246,7 +285,7 @@ export default function PostClient({ profile, userId }: Props) {
         novelId = novel.id
         novelTitle = novel.title
         setSavedNovelId(novel.id)
-      } else if (mode === 'new' && savedNovelId && publish) {
+      } else if (mode === 'new' && savedNovelId && publish && !isScheduled) {
         await supabase.from('novels').update({ published: true }).eq('id', savedNovelId)
       } else if (mode === 'existing' && selectedNovelId) {
         const found = myNovels.find(n => n.id === selectedNovelId)
@@ -256,6 +295,10 @@ export default function PostClient({ profile, userId }: Props) {
       let epErr
       let episodeId = ''
 
+      // episodesテーブルに保存するpublished/scheduled_atの値
+      const epPublished = publish && !isScheduled
+      const epScheduledAt = scheduledIso
+
       if (editMode && editEpId) {
         await supabase.from('novels').update({
           title: title.trim(), summary: summary.trim()||null, genre, tags,
@@ -263,13 +306,21 @@ export default function PostClient({ profile, userId }: Props) {
           catchcopy: catchcopy.trim() || null,
         }).eq('id', savedNovelId)
         const res = await supabase.from('episodes')
-          .update({ title: epTitle.trim(), body, preface: preface.trim()||null, afterword: afterword.trim()||null, illust_url: illustPreview||null })
+          .update({
+            title: epTitle.trim(), body, preface: preface.trim()||null, afterword: afterword.trim()||null,
+            illust_url: illustPreview||null,
+            ...(publish ? { published: epPublished, scheduled_at: epScheduledAt } : {}),
+          })
           .eq('id', editEpId).select('id').single()
         epErr = res.error
         episodeId = editEpId
       } else if (draftSaved && savedNovelId) {
         const res = await supabase.from('episodes')
-          .update({ title: epTitle.trim(), body, preface: preface.trim()||null, afterword: afterword.trim()||null, illust_url: illustPreview||null })
+          .update({
+            title: epTitle.trim(), body, preface: preface.trim()||null, afterword: afterword.trim()||null,
+            illust_url: illustPreview||null,
+            ...(publish ? { published: epPublished, scheduled_at: epScheduledAt } : {}),
+          })
           .eq('novel_id', savedNovelId).eq('ep_number', mode==='new'?1:nextEpNum)
           .select('id').single()
         epErr = res.error
@@ -286,14 +337,16 @@ export default function PostClient({ profile, userId }: Props) {
           afterword:  afterword.trim() || null,
           ep_number:  mode === 'new' ? 1 : nextEpNum,
           illust_url: illustPreview || null,
+          published:  publish ? epPublished : false,
+          scheduled_at: publish ? epScheduledAt : null,
         }).select('id').single()
         epErr = res.error
         episodeId = res.data?.id || ''
       }
       if (epErr) throw epErr
 
-      // ===== AI検出チェック =====
-      if (publish && hasAiMarkers && novelId && episodeId) {
+      // ===== AI検出チェック（即時公開時のみ） =====
+      if (publish && !isScheduled && hasAiMarkers && novelId && episodeId) {
         void supabase.from('ai_reviews').insert({
           novel_id:     novelId,
           episode_id:   episodeId,
@@ -306,7 +359,13 @@ export default function PostClient({ profile, userId }: Props) {
         })
       }
 
-      if (publish) {
+      if (isScheduled) {
+        // ===== 予約投稿 =====
+        const d = new Date(scheduleValue)
+        const fmt = `${d.getMonth()+1}/${d.getDate()} ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`
+        setToast(`予約投稿を設定しました（${fmt}に公開されます）`)
+        setTimeout(() => router.push('/mypage'), 1800)
+      } else if (publish) {
         fetch('/api/originality', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -345,6 +404,12 @@ export default function PostClient({ profile, userId }: Props) {
   const er  = {fontSize:11,color:'#dc2626',marginTop:3} as const
   const toolBtn = {padding:'3px 9px',fontSize:11,border:'1px solid #F0D9C9',borderRadius:4,background:'#fff',color:'#77706A',cursor:'pointer'} as const
 
+  const submitButtonLabel = loading
+    ? '保存中...'
+    : useSchedule
+      ? '予約投稿する'
+      : (editMode ? '変更を保存' : '投稿する')
+
   return (
     <div style={{minHeight:'100vh',background:'#fff'}}>
       <Header profile={profile} user={true} />
@@ -363,8 +428,14 @@ export default function PostClient({ profile, userId }: Props) {
                     style={{padding:'10px 14px',borderRadius:8,textAlign:'left',cursor:'pointer',
                       border:`1.5px solid ${editEpId===ep.id?'#F26A21':'#F0D9C9'}`,
                       background:editEpId===ep.id?'#FFF1E6':'#fff',
-                      fontSize:13,fontWeight:editEpId===ep.id?700:400,color:'#2B211B'}}>
-                    {ep.title}
+                      fontSize:13,fontWeight:editEpId===ep.id?700:400,color:'#2B211B',
+                      display:'flex',alignItems:'center',justifyContent:'space-between',gap:8}}>
+                    <span>{ep.title}</span>
+                    {ep.scheduled_at && ep.published === false && (
+                      <span style={{fontSize:10,background:'#eff6ff',color:'#2563eb',border:'1px solid #bfdbfe',padding:'2px 8px',borderRadius:10,whiteSpace:'nowrap'}}>
+                        予約投稿中
+                      </span>
+                    )}
                   </button>
                 ))}
                 {editEpisodes.length === 0 && <div style={{fontSize:12,color:'#B8AEA8'}}>話がありません</div>}
@@ -669,6 +740,34 @@ export default function PostClient({ profile, userId }: Props) {
           </div>
         )}
 
+        {/* ===== 予約投稿 ===== */}
+        {(!editMode || editEpId) && (
+          <div style={sec}>
+            <div style={sh}>公開タイミング</div>
+            <div style={{padding:'14px 18px'}}>
+              <label style={{display:'flex',alignItems:'center',gap:10,cursor:'pointer',marginBottom: useSchedule ? 12 : 0}}>
+                <input type="checkbox" checked={useSchedule} onChange={e=>setUseSchedule(e.target.checked)}
+                  style={{width:18,height:18,accentColor:'#F26A21',cursor:'pointer'}}/>
+                <span style={{fontSize:13,fontWeight:600,color:'#2B211B'}}>日時を指定して公開する（予約投稿）</span>
+              </label>
+
+              {useSchedule && (
+                <div style={{background:'#FFF9F2',border:'1px solid #F0D9C9',borderRadius:8,padding:'12px 14px'}}>
+                  <label style={lbl}>公開予定日時</label>
+                  <input type="datetime-local" value={scheduleValue} onChange={e=>setScheduleValue(e.target.value)}
+                    min={defaultScheduleValue().slice(0,10)+'T00:00'}
+                    style={{...inp,borderColor:errors.schedule?'#dc2626':'#F0D9C9',colorScheme:'light' as any}}/>
+                  {errors.schedule && <div style={er}>{errors.schedule}</div>}
+                  <div style={{fontSize:11,color:'#77706A',marginTop:8,lineHeight:1.6}}>
+                    指定した日時に作品ページへアクセスがあった時点で自動的に公開されます。<br/>
+                    「投稿する」ボタンを押すと、即時公開ではなく予約状態として保存されます。
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+
         {errors.submit && (
           <div style={{background:'#fff0f0',border:'1px solid #f5c0c0',borderRadius:8,padding:'10px 14px',fontSize:13,color:'#dc2626',marginBottom:12}}>
             {errors.submit}
@@ -680,7 +779,7 @@ export default function PostClient({ profile, userId }: Props) {
           <div style={{display:'flex',flexDirection:'column',gap:10}}>
             <button onClick={()=>handleSubmit(true)} disabled={loading}
               style={{width:'100%',background:'#F26A21',color:'#fff',padding:'14px',borderRadius:10,fontSize:15,fontWeight:700,border:'none',cursor:'pointer',opacity:loading?0.5:1}}>
-              {loading?'保存中...':(editMode?'変更を保存':'投稿する')}
+              {submitButtonLabel}
             </button>
             <button onClick={()=>handleSubmit(false)} disabled={loading||draftSaved}
               style={{width:'100%',border:'1.5px solid #F26A21',color:draftSaved?'#2e7d32':'#F26A21',padding:'12px',borderRadius:10,fontSize:14,background:draftSaved?'#e8f5e9':'#fff',cursor:draftSaved?'default':'pointer',opacity:loading?0.5:1}}>
@@ -699,7 +798,7 @@ export default function PostClient({ profile, userId }: Props) {
             </button>
             <button onClick={()=>handleSubmit(true)} disabled={loading}
               style={{background:'#F26A21',color:'#fff',padding:'10px 24px',borderRadius:20,fontSize:13,fontWeight:700,border:'none',cursor:'pointer',opacity:loading?0.5:1}}>
-              {loading?'保存中...':(editMode?'変更を保存':'投稿する')}
+              {submitButtonLabel}
             </button>
           </div>
         )}
