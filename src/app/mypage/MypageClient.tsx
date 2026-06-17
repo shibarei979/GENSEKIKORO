@@ -481,22 +481,6 @@ export default function MypageClient({
           </div>
         )}
 
-        {/* デスクトップ：統計カード */}
-        {!isMobile && (
-          <div style={{display:'grid',gridTemplateColumns:'repeat(3,1fr)',gap:12,marginBottom:20}}>
-            {[
-              {label:'公開作品',value:published.length,unit:'作品'},
-              {label:'下書き',value:drafts.length,unit:'作品'},
-              {label:'総投稿数',value:myNovels.length,unit:'作品'},
-            ].map(item=>(
-              <div key={item.label} style={{background:'#fff',border:'1px solid #F0D9C9',borderRadius:12,padding:'16px 20px',textAlign:'center'}}>
-                <div style={{fontSize:28,fontWeight:700,color:'#111111',marginBottom:2}}>{item.value}<span style={{fontSize:13,fontWeight:400,color:'#111111'}}>{item.unit}</span></div>
-                <div style={{fontSize:12,color:'#77706A'}}>{item.label}</div>
-              </div>
-            ))}
-          </div>
-        )}
-
         {/* 投稿作品リスト */}
         <div style={{background:'#fff',border:'1px solid #F0D9C9',borderRadius:16,overflow:'hidden',marginBottom: isMobile ? 12 : 0}}>
           <div style={{padding: isMobile ? '12px 16px' : '14px 20px',borderBottom:'1px solid #F0D9C9',display:'flex',alignItems:'center',justifyContent:'space-between',background:'#FFF9F2'}}>
