@@ -33,7 +33,6 @@ import CommentSection from './CommentSection'
 import EpisodeLikeButton from './EpisodeLikeButton'
 import ReadButton from './ReadButton'
 import EpisodeBody from './EpisodeBody'
-import ContinueReaction from './ContinueReaction'
 
 interface Props { params: { id: string; epId: string } }
 
@@ -179,10 +178,9 @@ export default async function EpisodePage({ params }: Props) {
             </div>
           )}
           <EpisodeBody title={episode.title} body={episode.body} preface={episode.preface} afterword={episode.afterword} authorName={author?.display_name}/>
-          {/* いいね・続きを見たい・読了・シェア */}
+          {/* いいね・読了・シェア */}
           <div style={{display:'flex',alignItems:'center',justifyContent:'center',gap:12,marginBottom:16,flexWrap:'wrap'}}>
             <EpisodeLikeButton episodeId={params.epId} userId={user?.id||null} initialLiked={epLiked} initialCount={epLikeCount??0}/>
-            <ContinueReaction episodeId={params.epId} userId={user?.id||null} authorId={novel.author_id} userDisplayName={profile?.display_name||undefined}/>
             {user && <ReadButton novelId={params.id} episodeId={params.epId} userId={user.id} initialRead={isRead}/>}
             <a href={`https://twitter.com/intent/tweet?text=${encodeURIComponent(`「${novel.title}」\n「${episode.title}」\n#原石航路 #ライトノベル\n`)}&url=${encodeURIComponent(`${process.env.NEXT_PUBLIC_SITE_URL||''}/novel/${params.id}/episode/${params.epId}`)}`}
               target="_blank" rel="noopener noreferrer"
@@ -260,10 +258,9 @@ export default async function EpisodePage({ params }: Props) {
         {/* 本文 */}
         <EpisodeBody title={episode.title} body={episode.body} preface={episode.preface} afterword={episode.afterword} authorName={author?.display_name}/>
 
-        {/* いいね・続きを見たい・読了・シェア */}
+        {/* いいね・読了・シェア */}
         <div style={{display:'flex',alignItems:'center',justifyContent:'center',gap:8,marginBottom:14,flexWrap:'wrap'}}>
           <EpisodeLikeButton episodeId={params.epId} userId={user?.id||null} initialLiked={epLiked} initialCount={epLikeCount??0}/>
-          <ContinueReaction episodeId={params.epId} userId={user?.id||null} authorId={novel.author_id} userDisplayName={profile?.display_name||undefined}/>
           {user && <ReadButton novelId={params.id} episodeId={params.epId} userId={user.id} initialRead={isRead}/>}
           <a href={`https://twitter.com/intent/tweet?text=${encodeURIComponent(`「${novel.title}」\n「${episode.title}」\n#原石航路 #ライトノベル\n`)}&url=${encodeURIComponent(`${process.env.NEXT_PUBLIC_SITE_URL||''}/novel/${params.id}/episode/${params.epId}`)}`}
             target="_blank" rel="noopener noreferrer"
