@@ -373,80 +373,81 @@ export default function MypageClient({
           </div>
         ) : (
           <div className="profile-card" style={{background:'#fff',border:'1px solid #F0D9C9',borderRadius:16,padding:'20px 28px',marginBottom:20}}>
-            <div style={{position:'relative',flexShrink:0,cursor:'pointer'}} onClick={()=>iconInputRef.current?.click()} title="クリックしてアイコンを変更">
-              <input ref={iconInputRef} type="file" accept="image/*" style={{display:'none'}} onChange={e=>{const f=e.target.files?.[0];if(f){handleIconUpload(f);e.target.value=''}}}/>
-              {iconUrl ? (
-                <img src={iconUrl} alt={profile.display_name} style={{width:72,height:72,borderRadius:'50%',objectFit:'cover',border:'3px solid #F26A21'}}/>
-              ) : (
-                <div style={{width:72,height:72,borderRadius:'50%',background:'#F26A21',display:'flex',alignItems:'center',justifyContent:'center',fontSize:28,fontWeight:700,color:'#fff'}}>{initial}</div>
-              )}
-              <div style={{position:'absolute',bottom:0,right:0,width:22,height:22,background:'#fff',borderRadius:'50%',border:'2px solid #F26A21',display:'flex',alignItems:'center',justifyContent:'center',fontSize:12}}>
-                {iconUploading ? '⟳' : '📷'}
-              </div>
-            </div>
-            <div style={{flex:1,minWidth:0}}>
-              <div style={{display:'flex',alignItems:'center',gap:8,marginBottom:4}}>
-                {editingName ? (
-                  <div style={{display:'flex',alignItems:'center',gap:6}}>
-                    <input value={nameInput} onChange={e=>setNameInput(e.target.value)}
-                      onKeyDown={e=>{if(e.key==='Enter')handleSaveName();if(e.key==='Escape')setEditingName(false)}}
-                      style={{fontSize:20,fontWeight:700,color:'#111111',border:'1.5px solid #F26A21',borderRadius:6,padding:'2px 8px',outline:'none',width:160}} autoFocus/>
-                    <button onClick={handleSaveName} disabled={nameSaving} style={{fontSize:12,background:'#F26A21',color:'#fff',border:'none',borderRadius:6,padding:'4px 10px',cursor:'pointer',opacity:nameSaving?0.6:1}}>{nameSaving?'保存中':'保存'}</button>
-                    <button onClick={()=>{setEditingName(false);setNameInput(profile.display_name);setNameError('')}} style={{fontSize:12,background:'none',color:'#77706A',border:'1px solid #F0D9C9',borderRadius:6,padding:'4px 10px',cursor:'pointer'}}>キャンセル</button>
-                  </div>
+            {/* 1行目：アイコン＋名前＋ボタン群（折り返さない） */}
+            <div style={{display:'flex',alignItems:'center',gap:16,flexWrap:'nowrap'}}>
+              <div style={{position:'relative',flexShrink:0,cursor:'pointer'}} onClick={()=>iconInputRef.current?.click()} title="クリックしてアイコンを変更">
+                <input ref={iconInputRef} type="file" accept="image/*" style={{display:'none'}} onChange={e=>{const f=e.target.files?.[0];if(f){handleIconUpload(f);e.target.value=''}}}/>
+                {iconUrl ? (
+                  <img src={iconUrl} alt={profile.display_name} style={{width:64,height:64,borderRadius:'50%',objectFit:'cover',border:'3px solid #F26A21'}}/>
                 ) : (
-                  <>
-                    <div style={{fontSize:22,fontWeight:700,color:'#111111'}}>{nameInput}</div>
-                    {nameSaved && <span style={{fontSize:11,color:'#2e7d32',fontWeight:600}}>✓ 保存しました</span>}
-                  </>
+                  <div style={{width:64,height:64,borderRadius:'50%',background:'#F26A21',display:'flex',alignItems:'center',justifyContent:'center',fontSize:24,fontWeight:700,color:'#fff'}}>{initial}</div>
                 )}
+                <div style={{position:'absolute',bottom:0,right:0,width:20,height:20,background:'#fff',borderRadius:'50%',border:'2px solid #F26A21',display:'flex',alignItems:'center',justifyContent:'center',fontSize:11}}>
+                  {iconUploading ? '⟳' : '📷'}
+                </div>
               </div>
-              {nameError && <div style={{fontSize:11,color:'#dc2626',marginBottom:4}}>{nameError}</div>}
-              {userNumber && <div style={{fontSize:12,color:'#B8AEA8',marginBottom:4,letterSpacing:'.05em',fontWeight:600}}>{userNumber}</div>}
-              <div style={{fontSize:12,color:'#77706A'}}>{profile.email}</div>
-            </div>
-            {/* ボタン群 */}
-            <div style={{display:'flex',gap:8,flexShrink:0,alignItems:'center'}}>
-              {/* バッジ図鑑ボタン */}
-              <button onClick={()=>{setShowBadgeBook(true);setBadgePage(0)}}
-                style={{border:'1px solid #F0D9C9',borderRadius:10,padding:'8px 14px',background:'#fff',cursor:'pointer',display:'flex',alignItems:'center',gap:6,color:'#77706A',fontSize:13}}>
-                <BookIcon/>
-                バッジ図鑑
-              </button>
-              {/* ボードボタン */}
-              <button onClick={()=>setShowBoard(true)}
-                style={{border:'1px solid #F0D9C9',borderRadius:10,padding:'8px 14px',background:'#fff',cursor:'pointer',display:'flex',alignItems:'center',gap:6,color:'#77706A',fontSize:13}}>
-                <BoardIcon/>
-                ボード
-              </button>
-              <div style={{position:'relative'}}>
-                <button onClick={()=>setShowSettings(!showSettings)}
-                  style={{border:'1px solid #F0D9C9',borderRadius:10,padding:'8px 12px',background:'#fff',cursor:'pointer',display:'flex',alignItems:'center',gap:6,color:'#77706A',fontSize:13}}>
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                    <circle cx="12" cy="12" r="3"/>
-                    <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
-                  </svg>
-                  設定
-                </button>
-                {showSettings && (
-                  <>
-                    <div style={{position:'fixed',inset:0,zIndex:98}} onClick={()=>setShowSettings(false)}/>
-                    <div style={{position:'absolute',right:0,top:'calc(100% + 8px)',background:'#fff',border:'1px solid #F0D9C9',borderRadius:10,boxShadow:'0 4px 20px rgba(0,0,0,0.12)',minWidth:180,zIndex:99,overflow:'hidden'}}>
-                      {profile.login_provider !== 'google' && <button onClick={()=>{setShowSettings(false);setShowEmailModal(true)}} style={settingBtn}>メールアドレスを変更</button>}
-                      {profile.login_provider !== 'google' && <button onClick={()=>{setShowSettings(false);setShowPwModal(true)}} style={settingBtn}>パスワードを変更</button>}
-                      <button onClick={()=>{setShowSettings(false);iconInputRef.current?.click()}} style={settingBtn}>アイコンを変更</button>
-                      <button onClick={()=>{setShowSettings(false);setEditingName(true)}} style={settingBtn}>名前を変更</button>
-                      <button onClick={()=>{setShowSettings(false);setShowBioModal(true)}} style={{...settingBtn,borderBottom:'1px solid #F0D9C9'}}>自己紹介を編集</button>
-                      <button onClick={()=>{setShowSettings(false);setShowBdModal(true)}} style={settingBtn}>生年月日を設定</button>
-                      <button onClick={()=>{setShowSettings(false);handleSignOut()}} disabled={loading} style={settingBtn}>{loading?'...':'ログアウト'}</button>
-                      <button onClick={()=>{setShowSettings(false);setShowWithdraw(true)}} style={{...settingBtn,color:'#dc2626',borderBottom:'none'}}>退会する</button>
+              <div style={{flex:1,minWidth:0,overflow:'hidden'}}>
+                <div style={{display:'flex',alignItems:'center',gap:8,marginBottom:2}}>
+                  {editingName ? (
+                    <div style={{display:'flex',alignItems:'center',gap:6}}>
+                      <input value={nameInput} onChange={e=>setNameInput(e.target.value)}
+                        onKeyDown={e=>{if(e.key==='Enter')handleSaveName();if(e.key==='Escape')setEditingName(false)}}
+                        style={{fontSize:18,fontWeight:700,color:'#111111',border:'1.5px solid #F26A21',borderRadius:6,padding:'2px 8px',outline:'none',width:150}} autoFocus/>
+                      <button onClick={handleSaveName} disabled={nameSaving} style={{fontSize:12,background:'#F26A21',color:'#fff',border:'none',borderRadius:6,padding:'4px 10px',cursor:'pointer',opacity:nameSaving?0.6:1,whiteSpace:'nowrap'}}>{nameSaving?'保存中':'保存'}</button>
+                      <button onClick={()=>{setEditingName(false);setNameInput(profile.display_name);setNameError('')}} style={{fontSize:12,background:'none',color:'#77706A',border:'1px solid #F0D9C9',borderRadius:6,padding:'4px 10px',cursor:'pointer',whiteSpace:'nowrap'}}>キャンセル</button>
                     </div>
-                  </>
-                )}
+                  ) : (
+                    <>
+                      <div style={{fontSize:18,fontWeight:700,color:'#111111',overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap'}}>{nameInput}</div>
+                      {nameSaved && <span style={{fontSize:11,color:'#2e7d32',fontWeight:600,whiteSpace:'nowrap'}}>✓ 保存しました</span>}
+                    </>
+                  )}
+                </div>
+                {nameError && <div style={{fontSize:11,color:'#dc2626'}}>{nameError}</div>}
+                {userNumber && <div style={{fontSize:12,color:'#B8AEA8',letterSpacing:'.05em',fontWeight:600}}>{userNumber}</div>}
+                <div style={{fontSize:12,color:'#77706A',overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap'}}>{profile.email}</div>
+              </div>
+              {/* ボタン群：常に右側に固定、絶対に折り返さない */}
+              <div style={{display:'flex',gap:8,flexShrink:0,alignItems:'center',whiteSpace:'nowrap'}}>
+                <button onClick={()=>{setShowBadgeBook(true);setBadgePage(0)}}
+                  style={{border:'1px solid #F0D9C9',borderRadius:10,padding:'8px 14px',background:'#fff',cursor:'pointer',display:'flex',alignItems:'center',gap:6,color:'#77706A',fontSize:13,whiteSpace:'nowrap',flexShrink:0}}>
+                  <BookIcon/>
+                  バッジ図鑑
+                </button>
+                <button onClick={()=>setShowBoard(true)}
+                  style={{border:'1px solid #F0D9C9',borderRadius:10,padding:'8px 14px',background:'#fff',cursor:'pointer',display:'flex',alignItems:'center',gap:6,color:'#77706A',fontSize:13,whiteSpace:'nowrap',flexShrink:0}}>
+                  <BoardIcon/>
+                  ボード
+                </button>
+                <div style={{position:'relative',flexShrink:0}}>
+                  <button onClick={()=>setShowSettings(!showSettings)}
+                    style={{border:'1px solid #F0D9C9',borderRadius:10,padding:'8px 12px',background:'#fff',cursor:'pointer',display:'flex',alignItems:'center',gap:6,color:'#77706A',fontSize:13,whiteSpace:'nowrap'}}>
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <circle cx="12" cy="12" r="3"/>
+                      <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+                    </svg>
+                    設定
+                  </button>
+                  {showSettings && (
+                    <>
+                      <div style={{position:'fixed',inset:0,zIndex:98}} onClick={()=>setShowSettings(false)}/>
+                      <div style={{position:'absolute',right:0,top:'calc(100% + 8px)',background:'#fff',border:'1px solid #F0D9C9',borderRadius:10,boxShadow:'0 4px 20px rgba(0,0,0,0.12)',minWidth:180,zIndex:99,overflow:'hidden'}}>
+                        {profile.login_provider !== 'google' && <button onClick={()=>{setShowSettings(false);setShowEmailModal(true)}} style={settingBtn}>メールアドレスを変更</button>}
+                        {profile.login_provider !== 'google' && <button onClick={()=>{setShowSettings(false);setShowPwModal(true)}} style={settingBtn}>パスワードを変更</button>}
+                        <button onClick={()=>{setShowSettings(false);iconInputRef.current?.click()}} style={settingBtn}>アイコンを変更</button>
+                        <button onClick={()=>{setShowSettings(false);setEditingName(true)}} style={settingBtn}>名前を変更</button>
+                        <button onClick={()=>{setShowSettings(false);setShowBioModal(true)}} style={{...settingBtn,borderBottom:'1px solid #F0D9C9'}}>自己紹介を編集</button>
+                        <button onClick={()=>{setShowSettings(false);setShowBdModal(true)}} style={settingBtn}>生年月日を設定</button>
+                        <button onClick={()=>{setShowSettings(false);handleSignOut()}} disabled={loading} style={settingBtn}>{loading?'...':'ログアウト'}</button>
+                        <button onClick={()=>{setShowSettings(false);setShowWithdraw(true)}} style={{...settingBtn,color:'#dc2626',borderBottom:'none'}}>退会する</button>
+                      </div>
+                    </>
+                  )}
+                </div>
               </div>
             </div>
             {/* 2行目：統計情報 */}
-            <div style={{display:'flex',gap:20,fontSize:12,color:'#B8AEA8',marginTop:14,paddingTop:14,borderTop:'1px solid #F0D9C9'}}>
+            <div style={{display:'flex',gap:20,fontSize:12,color:'#B8AEA8',marginTop:14,paddingTop:14,borderTop:'1px solid #F0D9C9',flexWrap:'wrap'}}>
               <span style={{background:'#FFF9F2',border:'1px solid #F0D9C9',borderRadius:6,padding:'2px 10px',color:'#77706A'}}>{profile.login_provider === 'google' ? 'Google' : 'メール'}で登録</span>
               <span>フォロワー <strong style={{color:'#2B211B'}}>{followerCount}</strong> 人</span>
               <span>フォロー中 <strong style={{color:'#2B211B'}}>{followingCount}</strong> 人</span>
