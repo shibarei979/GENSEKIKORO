@@ -447,7 +447,7 @@ export default function MypageClient({
               </div>
             </div>
             {/* 2行目：統計情報 */}
-            <div style={{display:'flex',gap:20,fontSize:12,color:'#B8AEA8',marginTop:10,flexWrap:'wrap'}}>
+            <div style={{display:'flex',gap:20,fontSize:12,color:'#B8AEA8',marginTop:10,flexWrap:'wrap',justifyContent:'center'}}>
               <span>フォロワー <strong style={{color:'#2B211B'}}>{followerCount}</strong> 人</span>
               <span>フォロー中 <strong style={{color:'#2B211B'}}>{followingCount}</strong> 人</span>
               <span>公開 <strong style={{color:'#F26A21'}}>{published.length}</strong> 作品</span>
