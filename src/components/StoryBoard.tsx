@@ -160,6 +160,7 @@ export default function StoryBoard({ userId, onClose, isModal }: Props) {
   const [edgeType, setEdgeType] = useState<'arrow'|'line'>('arrow')
   const [pan,      setPan]      = useState({x:0,y:0})
   const [zoom,     setZoom]     = useState(1)
+  const [minZoom,  setMinZoom]  = useState(MIN_ZOOM)  // 画面サイズに応じた「全体表示」ズーム＝最小ズーム
   const [editing,  setEditing]  = useState<{id:string;text:string}|null>(null)
   const [saving,   setSaving]   = useState(false)
   const [saved,    setSaved]    = useState(false)
@@ -176,14 +177,16 @@ export default function StoryBoard({ userId, onClose, isModal }: Props) {
 
   useEffect(() => {
     setMounted(true)
-    // 初期表示：ボードを画面中央に収める
+    // 初期表示：ボードを画面いっぱいに収め、これを最小ズームとする
     if (svgRef.current) {
       const rect = svgRef.current.getBoundingClientRect()
-      const fitZoom = Math.min(MAX_ZOOM, Math.max(MIN_ZOOM, Math.min(rect.width / (BOARD_W+80), rect.height / (BOARD_H+80))))
-      setZoom(Math.round(fitZoom * 100) / 100)
+      const fitZoom = Math.min(MAX_ZOOM, Math.max(0.05, Math.min(rect.width / BOARD_W, rect.height / BOARD_H)))
+      const z = Math.round(fitZoom * 100) / 100
+      setZoom(z)
+      setMinZoom(z)
       setPan({
-        x: (rect.width - BOARD_W * fitZoom) / 2,
-        y: (rect.height - BOARD_H * fitZoom) / 2,
+        x: (rect.width - BOARD_W * z) / 2,
+        y: (rect.height - BOARD_H * z) / 2,
       })
     }
   }, [])
@@ -332,10 +335,11 @@ export default function StoryBoard({ userId, onClose, isModal }: Props) {
       }))
     }
     if (panRef.current) {
-      setPan({
+      const newPan = {
         x: panRef.current.ox + (e.clientX - panRef.current.sx),
         y: panRef.current.oy + (e.clientY - panRef.current.sy),
-      })
+      }
+      setPan(clampPan(newPan, zoom))
     }
   }
 
@@ -358,11 +362,32 @@ export default function StoryBoard({ userId, onClose, isModal }: Props) {
     }
   }
 
+  // ===== パンをボードが画面外に出ないよう制限 =====
+  function clampPan(p: {x:number;y:number}, z: number) {
+    if (!svgRef.current) return p
+    const rect = svgRef.current.getBoundingClientRect()
+    const boardScreenW = BOARD_W * z
+    const boardScreenH = BOARD_H * z
+    // ボードが画面より小さい場合は中央固定範囲、大きい場合は端が画面端を超えない範囲
+    const minX = Math.min(0, rect.width  - boardScreenW)
+    const maxX = Math.max(0, rect.width  - boardScreenW)
+    const minY = Math.min(0, rect.height - boardScreenH)
+    const maxY = Math.max(0, rect.height - boardScreenH)
+    return {
+      x: Math.min(Math.max(p.x, minX), maxX),
+      y: Math.min(Math.max(p.y, minY), maxY),
+    }
+  }
+
   // ===== マウスホイールでズーム =====
   function handleWheel(e: React.WheelEvent<SVGSVGElement>) {
     e.preventDefault()
     const delta = e.deltaY > 0 ? -0.1 : 0.1
-    setZoom(z => Math.min(MAX_ZOOM, Math.max(MIN_ZOOM, Math.round((z + delta) * 100) / 100)))
+    setZoom(z => {
+      const nz = Math.min(MAX_ZOOM, Math.max(minZoom, Math.round((z + delta) * 100) / 100))
+      setPan(p => clampPan(p, nz))
+      return nz
+    })
   }
 
   function handleDoubleClick(e: React.MouseEvent, id: string) {
@@ -397,15 +422,16 @@ export default function StoryBoard({ userId, onClose, isModal }: Props) {
     return { x: n.x + n.w/2, y: n.y + n.h/2 }
   }
 
-  function zoomIn()  { setZoom(z => Math.min(MAX_ZOOM, Math.round((z + 0.1) * 100) / 100)) }
-  function zoomOut() { setZoom(z => Math.max(MIN_ZOOM, Math.round((z - 0.1) * 100) / 100)) }
-  function zoomReset() { setZoom(1); setPan({x:0,y:0}) }
+  function zoomIn()  { setZoom(z => { const nz = Math.min(MAX_ZOOM, Math.round((z + 0.1) * 100) / 100); setPan(p=>clampPan(p,nz)); return nz }) }
+  function zoomOut() { setZoom(z => { const nz = Math.max(minZoom, Math.round((z - 0.1) * 100) / 100); setPan(p=>clampPan(p,nz)); return nz }) }
   function fitToScreen() {
     if (!svgRef.current) return
     const rect = svgRef.current.getBoundingClientRect()
-    const fitZoom = Math.min(MAX_ZOOM, Math.max(MIN_ZOOM, Math.min(rect.width / (BOARD_W+80), rect.height / (BOARD_H+80))))
-    setZoom(Math.round(fitZoom * 100) / 100)
-    setPan({ x: (rect.width - BOARD_W * fitZoom) / 2, y: (rect.height - BOARD_H * fitZoom) / 2 })
+    const fitZoom = Math.min(MAX_ZOOM, Math.max(0.05, Math.min(rect.width / BOARD_W, rect.height / BOARD_H)))
+    const z = Math.round(fitZoom * 100) / 100
+    setZoom(z)
+    setMinZoom(z)
+    setPan({ x: (rect.width - BOARD_W * z) / 2, y: (rect.height - BOARD_H * z) / 2 })
   }
 
   if (!mounted) return null
