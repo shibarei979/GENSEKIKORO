@@ -45,8 +45,8 @@ const DEFAULT_SIZE: Record<Node['type'], {w:number;h:number}> = {
   arrow:    { w:100, h:40  },
 }
 const MIN_SIZE = 40
-const BOARD_W = 1400
-const BOARD_H = 900
+const BOARD_W = 14000
+const BOARD_H = 9000
 
 function genId() { return Math.random().toString(36).slice(2,10) }
 
@@ -201,7 +201,7 @@ export default function StoryBoard({ userId, onClose, isModal }: Props) {
   const clampViewBox = useCallback((vx: number, vy: number, vw: number, vh: number, fit: {vw:number;vh:number}|null) => {
     const maxVw = fit ? fit.vw : BOARD_W
     const maxVh = fit ? fit.vh : BOARD_H
-    const minVw = BOARD_W * 0.08 // 最大ズーム（拡大の上限）
+    const minVw = BOARD_W * 0.02 // 最大ズーム（拡大の上限）
     const cw = Math.min(Math.max(vw, minVw), maxVw)
     const ratio = vh / vw
     const ch = isFinite(ratio) && ratio > 0 ? cw * ratio : Math.min(Math.max(vh, minVw*(maxVh/maxVw)), maxVh)
