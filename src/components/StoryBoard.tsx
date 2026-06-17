@@ -218,17 +218,23 @@ export default function StoryBoard({ userId, onClose, isModal }: Props) {
   // ===== 初期化：レイアウト確定後に全体表示をセット =====
   useEffect(() => {
     if (!mounted) return
-    // レイアウトが確定するまで少し待つ（モーダルのアニメーション等を考慮）
-    const id = requestAnimationFrame(() => {
-      const fit = computeFitSize()
-      if (!fit) return
-      setFitSize(fit)
-      const vx = (BOARD_W - fit.vw) / 2
-      const vy = (BOARD_H - fit.vh) / 2
-      setViewBox({ vx, vy, vw: fit.vw, vh: fit.vh })
-      setReady(true)
+    // 2段階のrAFでモーダルアニメーション後の最終レイアウトを確実に取得
+    const id1 = requestAnimationFrame(() => {
+      const id2 = requestAnimationFrame(() => {
+        const fit = computeFitSize()
+        if (!fit) return
+        setFitSize(fit)
+        const vx = (BOARD_W - fit.vw) / 2
+        const vy = (BOARD_H - fit.vh) / 2
+        setViewBox({ vx, vy, vw: fit.vw, vh: fit.vh })
+        setReady(true)
+      })
+      ;(id1 as any).id2 = id2
     })
-    return () => cancelAnimationFrame(id)
+    return () => {
+      cancelAnimationFrame(id1)
+      if ((id1 as any).id2) cancelAnimationFrame((id1 as any).id2)
+    }
   }, [mounted, computeFitSize])
 
   // ===== ウィンドウリサイズ対応 =====
@@ -375,28 +381,33 @@ export default function StoryBoard({ userId, onClose, isModal }: Props) {
     const { sx, sy } = pixelToBoardScale()
 
     if (dragRef.current) {
-      const dx = (e.clientX - dragRef.current.mx) * sx
-      const dy = (e.clientY - dragRef.current.my) * sy
+      const dr = dragRef.current
+      const dx = (e.clientX - dr.mx) * sx
+      const dy = (e.clientY - dr.my) * sy
       setNodes(prev => prev.map(n => {
-        if (n.id !== dragRef.current!.id) return n
-        const c = clampToBoard(dragRef.current!.ox + dx, dragRef.current!.oy + dy, n.w, n.h)
+        if (n.id !== dr.id) return n
+        const c = clampToBoard(dr.ox + dx, dr.oy + dy, n.w, n.h)
         return { ...n, x: c.x, y: c.y }
       }))
     }
     if (resizeRef.current) {
-      const dx = (e.clientX - resizeRef.current.mx) * sx
-      const dy = (e.clientY - resizeRef.current.my) * sy
+      const rr = resizeRef.current
+      const dx = (e.clientX - rr.mx) * sx
+      const dy = (e.clientY - rr.my) * sy
       setNodes(prev => prev.map(n => {
-        if (n.id !== resizeRef.current!.id) return n
-        const newW = Math.max(MIN_SIZE, resizeRef.current!.ow + dx)
-        const newH = Math.max(MIN_SIZE, resizeRef.current!.oh + dy)
+        if (n.id !== rr.id) return n
+        const newW = Math.max(MIN_SIZE, rr.ow + dx)
+        const newH = Math.max(MIN_SIZE, rr.oh + dy)
         return { ...n, w: Math.min(newW, BOARD_W - n.x), h: Math.min(newH, BOARD_H - n.y) }
       }))
     }
     if (panRef.current) {
-      const dx = (e.clientX - panRef.current.sx) * sx
-      const dy = (e.clientY - panRef.current.sy) * sy
-      setViewBox(v => clampViewBox(panRef.current!.ovx - dx, panRef.current!.ovy - dy, v.vw, v.vh, fitSize))
+      const pr = panRef.current
+      const dx = (e.clientX - pr.sx) * sx
+      const dy = (e.clientY - pr.sy) * sy
+      const newVx = pr.ovx - dx
+      const newVy = pr.ovy - dy
+      setViewBox(v => clampViewBox(newVx, newVy, v.vw, v.vh, fitSize))
     }
   }
 
@@ -608,6 +619,7 @@ export default function StoryBoard({ userId, onClose, isModal }: Props) {
       <div ref={wrapRef} style={{flex:1,overflow:'hidden',position:'relative',cursor:tool==='select'?'default':'crosshair'}}>
         {ready && (
           <svg ref={svgRef} width="100%" height="100%"
+            preserveAspectRatio="none"
             viewBox={`${viewBox.vx} ${viewBox.vy} ${viewBox.vw} ${viewBox.vh}`}
             onClick={handleSvgClick}
             onMouseDown={handleSvgMouseDown}
