@@ -447,10 +447,19 @@ export default function MypageClient({
               </div>
             </div>
             {/* 2行目：統計情報 */}
-            <div style={{display:'flex',gap:20,fontSize:12,color:'#B8AEA8',marginTop:10,flexWrap:'wrap',justifyContent:'center'}}>
-              <span>フォロワー <strong style={{color:'#2B211B'}}>{followerCount}</strong> 人</span>
-              <span>フォロー中 <strong style={{color:'#2B211B'}}>{followingCount}</strong> 人</span>
-              <span>公開 <strong style={{color:'#F26A21'}}>{published.length}</strong> 作品</span>
+            <div style={{display:'flex',gap:10,marginTop:12,flexWrap:'wrap',justifyContent:'center'}}>
+              <div style={{display:'flex',alignItems:'baseline',gap:4,background:'#FFF9F2',border:'1px solid #F0D9C9',borderRadius:20,padding:'6px 14px'}}>
+                <strong style={{fontSize:16,color:'#2B211B',fontWeight:800}}>{followerCount}</strong>
+                <span style={{fontSize:12,color:'#77706A',fontWeight:600}}>フォロワー</span>
+              </div>
+              <div style={{display:'flex',alignItems:'baseline',gap:4,background:'#FFF9F2',border:'1px solid #F0D9C9',borderRadius:20,padding:'6px 14px'}}>
+                <strong style={{fontSize:16,color:'#2B211B',fontWeight:800}}>{followingCount}</strong>
+                <span style={{fontSize:12,color:'#77706A',fontWeight:600}}>フォロー中</span>
+              </div>
+              <div style={{display:'flex',alignItems:'baseline',gap:4,background:'#FFF1E6',border:'1px solid #f5b080',borderRadius:20,padding:'6px 14px'}}>
+                <strong style={{fontSize:16,color:'#F26A21',fontWeight:800}}>{published.length}</strong>
+                <span style={{fontSize:12,color:'#F26A21',fontWeight:600}}>公開作品</span>
+              </div>
             </div>
           </div>
         )}
