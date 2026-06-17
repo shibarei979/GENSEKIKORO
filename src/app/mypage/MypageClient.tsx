@@ -11,6 +11,7 @@ import type { Profile, Novel } from '@/types'
 import ContestEntry from './ContestEntry'
 import TweetSection from '@/components/TweetSection'
 import StoryBoard from '@/components/StoryBoard'
+import ChapterEditModal from './ChapterEditModal'
 
 interface Contest { id: string; title: string; deadline: string | null; is_site_contest: boolean }
 interface Entry { contest_id: string; novel_id: string }
@@ -105,6 +106,7 @@ export default function MypageClient({
   const [showBadgeBook, setShowBadgeBook] = useState(false)
   const [badgePage,     setBadgePage]     = useState(0)
   const [showBoard,     setShowBoard]     = useState(false)  // ストーリーボード
+  const [chapterTarget, setChapterTarget] = useState<{id:string;title:string}|null>(null) // 章管理対象作品
 
   useEffect(() => {
     const check = () => setIsMobile(window.innerWidth <= 768)
@@ -524,6 +526,8 @@ export default function MypageClient({
                   <div style={{display:'flex',gap:6,flexShrink:0}} onClick={e=>e.stopPropagation()}>
                     <Link href={`/post?edit=${novel.id}`} style={{fontSize:12,border:'1px solid #F0D9C9',padding:'5px 12px',borderRadius:8,color:'#77706A',background:'#fff',textDecoration:'none'}}>編集</Link>
                     {!novel.published && <Link href={`/post?edit=${novel.id}`} style={{fontSize:12,border:'1px solid #F0D9C9',padding:'5px 12px',borderRadius:8,color:'#77706A',background:'#fff',textDecoration:'none'}}>制作再開</Link>}
+                    <button onClick={()=>setChapterTarget({id:novel.id,title:novel.title})}
+                      style={{fontSize:12,border:'1px solid #bfdbfe',padding:'5px 12px',borderRadius:8,color:'#2563eb',background:'#eff6ff',cursor:'pointer'}}>章を編集</button>
                     <button onClick={()=>handleTogglePublish(novel.id, novel.published)}
                       style={{fontSize:12,border:`1px solid ${novel.published?'#F0D9C9':'#86efac'}`,padding:'5px 12px',borderRadius:8,color:novel.published?'#77706A':'#15803d',background:'#fff',cursor:'pointer'}}>
                       {novel.published ? '非公開にする' : '公開する'}
@@ -545,6 +549,8 @@ export default function MypageClient({
                   {!novel.published && (
                     <button onClick={()=>handleTogglePublish(novel.id, novel.published)} style={{fontSize:12,border:'1px solid #86efac',padding:'7px',borderRadius:8,color:'#15803d',background:'#fff',cursor:'pointer'}}>公開する</button>
                   )}
+                  <button onClick={()=>setChapterTarget({id:novel.id,title:novel.title})}
+                    style={{fontSize:12,border:'1px solid #bfdbfe',padding:'7px',borderRadius:8,color:'#2563eb',background:'#eff6ff',cursor:'pointer'}}>章を編集</button>
                   <button onClick={async()=>{
                       const{data:eps}=await supabase.from('episodes').select('id,title,ep_number').eq('novel_id',novel.id).order('ep_number',{ascending:true})
                       setDeleteTarget({id:novel.id,title:novel.title,episodes:eps||[]});setDeleteMode(null);setDeleteEpId('')
@@ -616,6 +622,11 @@ export default function MypageClient({
 
         <div className="mobile-only" style={{height:80}}/>
       </div>
+
+      {/* ===== 章管理モーダル ===== */}
+      {chapterTarget && (
+        <ChapterEditModal novelId={chapterTarget.id} novelTitle={chapterTarget.title} onClose={()=>setChapterTarget(null)}/>
+      )}
 
       {/* ===== ストーリーボードモーダル ===== */}
       {showBoard && (
