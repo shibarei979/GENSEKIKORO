@@ -46,7 +46,7 @@ const DEFAULT_SIZE: Record<Node['type'], {w:number;h:number}> = {
 }
 const MIN_SIZE = 40
 const MIN_ZOOM = 0.3, MAX_ZOOM = 2.5
-const BOARD_W = 2400, BOARD_H = 1500   // ボードの実サイズ（端が見える範囲）
+const BOARD_W = 1400, BOARD_H = 900   // ボードの実サイズ（端が見える範囲）
 
 function genId() { return Math.random().toString(36).slice(2,10) }
 
