@@ -254,7 +254,6 @@ export default async function NovelPage({ params }: { params: { id: string } }) 
                 background:'#eff6ff', border:'1.5px solid #93c5fd', borderRadius:8,
                 padding:'8px 14px', marginBottom:10, fontSize:12, color:'#1d4ed8', fontWeight:600,
               }}>
-                <span style={{fontSize:14}}>📅</span>
                 次回更新予告：
                 {new Date(upcomingEpisode.scheduled_at!).toLocaleString('ja-JP',{month:'numeric',day:'numeric',hour:'2-digit',minute:'2-digit'})} 頃
               </div>
