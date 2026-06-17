@@ -195,7 +195,12 @@ export default function StoryBoard({ userId, onClose, isModal }: Props) {
         if (error) { console.error('board load error:', error); return }
         if (data?.data) {
           const d = data.data as BoardData
-          const n = d.nodes || []
+          // 旧データ補正：ボード範囲外のノードを枠内に収める
+          const n = (d.nodes || []).map(node => ({
+            ...node,
+            x: Math.min(Math.max(node.x, 0), Math.max(0, BOARD_W - node.w)),
+            y: Math.min(Math.max(node.y, 0), Math.max(0, BOARD_H - node.h)),
+          }))
           const e = d.edges || []
           setNodes(n); nodesRef.current = n
           setEdges(e); edgesRef.current = e
@@ -544,10 +549,10 @@ export default function StoryBoard({ userId, onClose, isModal }: Props) {
           <g transform={`translate(${pan.x},${pan.y}) scale(${zoom})`}>
             {/* ボード外側の暗い余白（クリックでパン） */}
             <rect data-bg="1" x={-3000} y={-3000} width={9000} height={9000}
-              fill="#e8e2d8" style={{pointerEvents:'all'}}/>
+              fill="#ddd4c4" style={{pointerEvents:'all'}}/>
             {/* ボード本体（端が見える固定サイズの白い領域） */}
             <rect x={0} y={0} width={BOARD_W} height={BOARD_H}
-              fill="#f5f0ea" stroke="#d4c4a8" strokeWidth={3} vectorEffect="non-scaling-stroke"
+              fill="#f5f0ea" stroke="#F26A21" strokeWidth={4} vectorEffect="non-scaling-stroke"
               style={{pointerEvents:'none',filter:'drop-shadow(0 2px 12px rgba(0,0,0,0.12))'}}/>
             <rect x={0} y={0} width={BOARD_W} height={BOARD_H}
               fill="url(#dots)" style={{pointerEvents:'none'}}/>
