@@ -45,15 +45,8 @@ const DEFAULT_SIZE: Record<Node['type'], {w:number;h:number}> = {
   arrow:    { w:100, h:40  },
 }
 const MIN_SIZE = 40
-
-// ===== ボードの実サイズ（固定。これが「端」になる） =====
 const BOARD_W = 1400
 const BOARD_H = 900
-
-// ===== viewBoxで表示できる最大幅・高さ（=ボードサイズと同じ＝これ以上ズームアウトしない） =====
-// viewBoxの幅が小さいほど「拡大」、大きいほど「縮小」
-const MIN_VIEW_W = BOARD_W * 0.4   // これ以上は拡大しすぎない（zoom最大相当）
-const MAX_VIEW_W = BOARD_W          // ボード全体が映る最大幅（これ以上は縮小しない）
 
 function genId() { return Math.random().toString(36).slice(2,10) }
 
@@ -171,8 +164,10 @@ export default function StoryBoard({ userId, onClose, isModal }: Props) {
   const [edgeColor,setEdgeColor]= useState('#2B211B')
   const [edgeType, setEdgeType] = useState<'arrow'|'line'>('arrow')
 
-  // ===== viewBox管理（vx, vy, vw, vh） vw/vhがズーム、vx/vyがパン =====
-  const [viewBox, setViewBox] = useState({ vx: 0, vy: 0, vw: BOARD_W, vh: BOARD_H })
+  // viewBox: 表示中の範囲（ボード座標系）。fitVw/fitVhが「全体表示＝最低倍率(100%)」の基準
+  const [viewBox, setViewBox]   = useState({ vx: 0, vy: 0, vw: BOARD_W, vh: BOARD_H })
+  const [fitSize, setFitSize]   = useState<{vw:number;vh:number}|null>(null) // 全体表示時のvw/vh
+  const [ready,   setReady]     = useState(false) // レイアウト確定後にtrue
 
   const [editing,  setEditing]  = useState<{id:string;text:string}|null>(null)
   const [saving,   setSaving]   = useState(false)
@@ -190,32 +185,61 @@ export default function StoryBoard({ userId, onClose, isModal }: Props) {
 
   useEffect(() => { setMounted(true) }, [])
 
-  // ===== viewBoxをボード範囲内にクランプする =====
-  // vw/vhのアスペクト比は親要素に合わせて固定。vwがBOARD_Wを超えないようにし、
-  // vx, vyはボードの端が見える範囲でのみ動かせるようにする。
-  const clampViewBox = useCallback((vx: number, vy: number, vw: number, vh: number) => {
-    const cw = Math.min(Math.max(vw, MIN_VIEW_W), MAX_VIEW_W)
-    const ch = cw * (vh / vw) // アスペクト比維持
-    // ボードより表示領域が大きい（縮小しすぎ）場合は中央固定
-    const cx = cw >= BOARD_W
-      ? (BOARD_W - cw) / 2
-      : Math.min(Math.max(vx, 0), BOARD_W - cw)
-    const cy = ch >= BOARD_H
-      ? (BOARD_H - ch) / 2
-      : Math.min(Math.max(vy, 0), BOARD_H - ch)
+  // ===== 全体表示サイズを計算（ガード付き：幅0や無効値を防ぐ） =====
+  const computeFitSize = useCallback((): {vw:number;vh:number} | null => {
+    if (!wrapRef.current) return null
+    const rect = wrapRef.current.getBoundingClientRect()
+    if (!rect.width || !rect.height || rect.width <= 0 || rect.height <= 0) return null
+    const aspect = rect.height / rect.width
+    let vw = BOARD_W, vh = BOARD_W * aspect
+    if (vh < BOARD_H) { vh = BOARD_H; vw = BOARD_H / aspect }
+    if (!isFinite(vw) || !isFinite(vh) || vw <= 0 || vh <= 0) return null
+    return { vw, vh }
+  }, [])
+
+  // ===== viewBoxをクランプ：vwはBOARD_Wを超えない（=全体表示が最低倍率）、vx/vyはボード内 =====
+  const clampViewBox = useCallback((vx: number, vy: number, vw: number, vh: number, fit: {vw:number;vh:number}|null) => {
+    const maxVw = fit ? fit.vw : BOARD_W
+    const maxVh = fit ? fit.vh : BOARD_H
+    const minVw = BOARD_W * 0.08 // 最大ズーム（拡大の上限）
+    const cw = Math.min(Math.max(vw, minVw), maxVw)
+    const ratio = vh / vw
+    const ch = isFinite(ratio) && ratio > 0 ? cw * ratio : Math.min(Math.max(vh, minVw*(maxVh/maxVw)), maxVh)
+
+    const cx = cw >= BOARD_W ? (BOARD_W - cw) / 2 : Math.min(Math.max(vx, 0), Math.max(0, BOARD_W - cw))
+    const cy = ch >= BOARD_H ? (BOARD_H - ch) / 2 : Math.min(Math.max(vy, 0), Math.max(0, BOARD_H - ch))
+
+    if (!isFinite(cx) || !isFinite(cy) || !isFinite(cw) || !isFinite(ch)) {
+      return { vx: 0, vy: 0, vw: BOARD_W, vh: BOARD_H }
+    }
     return { vx: cx, vy: cy, vw: cw, vh: ch }
   }, [])
 
-  // ===== 初期表示：ボード全体を画面にぴったり収める =====
+  // ===== 初期化：レイアウト確定後に全体表示をセット =====
   useEffect(() => {
-    if (!wrapRef.current) return
-    const rect = wrapRef.current.getBoundingClientRect()
-    const aspect = rect.height / rect.width
-    // ボードのアスペクト比に対して、画面のアスペクト比で初期viewBoxを決める
-    let vw = BOARD_W, vh = BOARD_W * aspect
-    if (vh < BOARD_H) { vh = BOARD_H; vw = BOARD_H / aspect }
-    setViewBox(clampViewBox((BOARD_W - vw)/2, (BOARD_H - vh)/2, vw, vh))
-  }, [mounted, clampViewBox])
+    if (!mounted) return
+    // レイアウトが確定するまで少し待つ（モーダルのアニメーション等を考慮）
+    const id = requestAnimationFrame(() => {
+      const fit = computeFitSize()
+      if (!fit) return
+      setFitSize(fit)
+      const vx = (BOARD_W - fit.vw) / 2
+      const vy = (BOARD_H - fit.vh) / 2
+      setViewBox({ vx, vy, vw: fit.vw, vh: fit.vh })
+      setReady(true)
+    })
+    return () => cancelAnimationFrame(id)
+  }, [mounted, computeFitSize])
+
+  // ===== ウィンドウリサイズ対応 =====
+  useEffect(() => {
+    function onResize() {
+      const fit = computeFitSize()
+      if (fit) setFitSize(fit)
+    }
+    window.addEventListener('resize', onResize)
+    return () => window.removeEventListener('resize', onResize)
+  }, [computeFitSize])
 
   useEffect(() => {
     if (!mounted) return
@@ -287,10 +311,10 @@ export default function StoryBoard({ userId, onClose, isModal }: Props) {
     }
   }
 
-  // ===== スクリーン座標 → ボード座標（viewBox考慮） =====
   function screenToBoard(clientX: number, clientY: number) {
     if (!svgRef.current) return { x:0, y:0 }
     const rect = svgRef.current.getBoundingClientRect()
+    if (!rect.width || !rect.height) return { x:0, y:0 }
     const scaleX = viewBox.vw / rect.width
     const scaleY = viewBox.vh / rect.height
     const x = viewBox.vx + (clientX - rect.left) * scaleX
@@ -340,10 +364,10 @@ export default function StoryBoard({ userId, onClose, isModal }: Props) {
     resizeRef.current = { id, ow: node.w, oh: node.h, mx: e.clientX, my: e.clientY }
   }
 
-  // ピクセル差分をボード座標差分に変換するための係数
   function pixelToBoardScale() {
     if (!svgRef.current) return { sx:1, sy:1 }
     const rect = svgRef.current.getBoundingClientRect()
+    if (!rect.width || !rect.height) return { sx:1, sy:1 }
     return { sx: viewBox.vw / rect.width, sy: viewBox.vh / rect.height }
   }
 
@@ -372,7 +396,7 @@ export default function StoryBoard({ userId, onClose, isModal }: Props) {
     if (panRef.current) {
       const dx = (e.clientX - panRef.current.sx) * sx
       const dy = (e.clientY - panRef.current.sy) * sy
-      setViewBox(v => clampViewBox(panRef.current!.ovx - dx, panRef.current!.ovy - dy, v.vw, v.vh))
+      setViewBox(v => clampViewBox(panRef.current!.ovx - dx, panRef.current!.ovy - dy, v.vw, v.vh, fitSize))
     }
   }
 
@@ -395,22 +419,21 @@ export default function StoryBoard({ userId, onClose, isModal }: Props) {
     }
   }
 
-  // ===== ホイールでズーム（viewBoxの幅・高さを変える） =====
   function handleWheel(e: React.WheelEvent<SVGSVGElement>) {
     e.preventDefault()
-    const factor = e.deltaY > 0 ? 1.1 : 0.9 // 下スクロール=縮小(viewBox拡大)、上=拡大(viewBox縮小)
+    if (!svgRef.current) return
+    const rect = svgRef.current.getBoundingClientRect()
+    if (!rect.width || !rect.height) return
+    const factor = e.deltaY > 0 ? 1.1 : 0.9
     setViewBox(v => {
       const newVw = v.vw * factor
       const newVh = v.vh * factor
-      // ズームの中心をマウス位置に保つための補正
-      const rect = svgRef.current?.getBoundingClientRect()
-      if (!rect) return clampViewBox(v.vx, v.vy, newVw, newVh)
       const mx = v.vx + (e.clientX - rect.left) * (v.vw / rect.width)
       const my = v.vy + (e.clientY - rect.top)  * (v.vh / rect.height)
       const ratio = newVw / v.vw
       const newVx = mx - (mx - v.vx) * ratio
       const newVy = my - (my - v.vy) * ratio
-      return clampViewBox(newVx, newVy, newVw, newVh)
+      return clampViewBox(newVx, newVy, newVw, newVh, fitSize)
     })
   }
 
@@ -446,31 +469,28 @@ export default function StoryBoard({ userId, onClose, isModal }: Props) {
     return { x: n.x + n.w/2, y: n.y + n.h/2 }
   }
 
-  // ===== ズームボタン（中心固定でviewBoxを縮小/拡大） =====
   function zoomBy(factor: number) {
     setViewBox(v => {
       const cx = v.vx + v.vw/2, cy = v.vy + v.vh/2
       const newVw = v.vw * factor
       const newVh = v.vh * factor
-      return clampViewBox(cx - newVw/2, cy - newVh/2, newVw, newVh)
+      return clampViewBox(cx - newVw/2, cy - newVh/2, newVw, newVh, fitSize)
     })
   }
   function zoomIn()  { zoomBy(0.9) }
   function zoomOut() { zoomBy(1.1) }
 
   function fitToScreen() {
-    if (!wrapRef.current) return
-    const rect = wrapRef.current.getBoundingClientRect()
-    const aspect = rect.height / rect.width
-    let vw = BOARD_W, vh = BOARD_W * aspect
-    if (vh < BOARD_H) { vh = BOARD_H; vw = BOARD_H / aspect }
-    setViewBox(clampViewBox((BOARD_W - vw)/2, (BOARD_H - vh)/2, vw, vh))
+    const fit = computeFitSize()
+    if (!fit) return
+    setFitSize(fit)
+    setViewBox({ vx: (BOARD_W - fit.vw)/2, vy: (BOARD_H - fit.vh)/2, vw: fit.vw, vh: fit.vh })
   }
 
   if (!mounted) return null
 
   const markerColors = [...EDGE_COLORS, ...SHAPE_COLORS].filter((v,i,a)=>a.indexOf(v)===i)
-  const zoomPercent = Math.round((BOARD_W / viewBox.vw) * 100)
+  const zoomPercent = fitSize && fitSize.vw > 0 ? Math.round((fitSize.vw / viewBox.vw) * 100) : 100
 
   const toolBtnStyle = (active: boolean) => ({
     width:48, height:48, fontSize:20, borderRadius:10, border:'1.5px solid',
@@ -551,7 +571,6 @@ export default function StoryBoard({ userId, onClose, isModal }: Props) {
 
         <div style={{flex:1}}/>
 
-        {/* ===== ズームコントロール ===== */}
         <div style={{display:'flex',alignItems:'center',gap:4,background:'#FFF9F2',border:'1px solid #F0D9C9',borderRadius:10,padding:4}}>
           <button onClick={zoomOut} title="縮小"
             style={{width:32,height:32,border:'none',background:'#fff',borderRadius:7,cursor:'pointer',fontSize:16,fontWeight:700,color:'#77706A',display:'flex',alignItems:'center',justifyContent:'center'}}>
@@ -565,7 +584,7 @@ export default function StoryBoard({ userId, onClose, isModal }: Props) {
             ＋
           </button>
           <div style={{width:1,height:20,background:'#F0D9C9',margin:'0 2px'}}/>
-          <button onClick={fitToScreen} title="全体を表示"
+          <button onClick={fitToScreen} title="全体を表示（最低倍率）"
             style={{padding:'0 10px',height:32,border:'none',background:'#fff',borderRadius:7,cursor:'pointer',fontSize:12,fontWeight:600,color:'#77706A'}}>
             全体表示
           </button>
@@ -587,67 +606,69 @@ export default function StoryBoard({ userId, onClose, isModal }: Props) {
       )}
 
       <div ref={wrapRef} style={{flex:1,overflow:'hidden',position:'relative',cursor:tool==='select'?'default':'crosshair'}}>
-        <svg ref={svgRef} width="100%" height="100%"
-          viewBox={`${viewBox.vx} ${viewBox.vy} ${viewBox.vw} ${viewBox.vh}`}
-          onClick={handleSvgClick}
-          onMouseDown={handleSvgMouseDown}
-          onMouseMove={handleMouseMove}
-          onMouseUp={handleMouseUp}
-          onMouseLeave={handleMouseUp}
-          onWheel={handleWheel}
-          style={{display:'block'}}>
-          <defs>
-            <pattern id="dots" x="0" y="0" width="24" height="24" patternUnits="userSpaceOnUse">
-              <circle cx="1" cy="1" r="1" fill="rgba(0,0,0,0.12)"/>
-            </pattern>
-            {markerColors.map(c=>(
-              <marker key={c} id={`ah-${c.replace('#','')}`} markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
-                <polygon points="0 0, 8 3, 0 6" fill={c}/>
-              </marker>
+        {ready && (
+          <svg ref={svgRef} width="100%" height="100%"
+            viewBox={`${viewBox.vx} ${viewBox.vy} ${viewBox.vw} ${viewBox.vh}`}
+            onClick={handleSvgClick}
+            onMouseDown={handleSvgMouseDown}
+            onMouseMove={handleMouseMove}
+            onMouseUp={handleMouseUp}
+            onMouseLeave={handleMouseUp}
+            onWheel={handleWheel}
+            style={{display:'block'}}>
+            <defs>
+              <pattern id="dots" x="0" y="0" width="24" height="24" patternUnits="userSpaceOnUse">
+                <circle cx="1" cy="1" r="1" fill="rgba(0,0,0,0.12)"/>
+              </pattern>
+              {markerColors.map(c=>(
+                <marker key={c} id={`ah-${c.replace('#','')}`} markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
+                  <polygon points="0 0, 8 3, 0 6" fill={c}/>
+                </marker>
+              ))}
+            </defs>
+
+            {/* ボード外の余白（パン用クリック領域も兼ねる） */}
+            <rect data-bg="1" x={-BOARD_W} y={-BOARD_H} width={BOARD_W*3} height={BOARD_H*3}
+              fill="#ddd4c4" style={{pointerEvents:'all'}}/>
+
+            {/* ===== ボード本体 ===== */}
+            <rect x={0} y={0} width={BOARD_W} height={BOARD_H}
+              fill="#f5f0ea" stroke="#F26A21" strokeWidth={4} vectorEffect="non-scaling-stroke"
+              style={{pointerEvents:'none',filter:'drop-shadow(0 2px 12px rgba(0,0,0,0.12))'}}/>
+            <rect x={0} y={0} width={BOARD_W} height={BOARD_H}
+              fill="url(#dots)" style={{pointerEvents:'none'}}/>
+
+            {edges.map(edge=>{
+              const from = getNodeCenter(edge.from)
+              const to   = getNodeCenter(edge.to)
+              return (
+                <g key={edge.id}>
+                  <line x1={from.x} y1={from.y} x2={to.x} y2={to.y}
+                    stroke={edge.color} strokeWidth={2} vectorEffect="non-scaling-stroke"
+                    markerEnd={edge.type==='arrow'?`url(#ah-${edge.color.replace('#','')})`:undefined}/>
+                  <line x1={from.x} y1={from.y} x2={to.x} y2={to.y}
+                    stroke="transparent" strokeWidth={14} vectorEffect="non-scaling-stroke" style={{cursor:'pointer'}}
+                    onClick={e=>{e.stopPropagation();updateEdges(prev=>prev.filter(x=>x.id!==edge.id))}}/>
+                </g>
+              )
+            })}
+
+            {nodes.map(node=>(
+              <NodeShape key={node.id} node={node} selected={selected===node.id}
+                onMouseDown={e=>handleNodeMouseDown(e,node.id)}
+                onDoubleClick={e=>handleDoubleClick(e,node.id)}
+                onResizeStart={e=>handleResizeStart(e,node.id)}/>
             ))}
-          </defs>
 
-          {/* 画面外（=ボード外）の余白を埋める背景。ボードより大きく取って、ズームアウトしてもグレーが見える */}
-          <rect data-bg="1" x={-BOARD_W} y={-BOARD_H} width={BOARD_W*3} height={BOARD_H*3}
-            fill="#ddd4c4" style={{pointerEvents:'all'}}/>
-
-          {/* ===== ボード本体（端が見える固定範囲） ===== */}
-          <rect x={0} y={0} width={BOARD_W} height={BOARD_H}
-            fill="#f5f0ea" stroke="#F26A21" strokeWidth={4} vectorEffect="non-scaling-stroke"
-            style={{pointerEvents:'none',filter:'drop-shadow(0 2px 12px rgba(0,0,0,0.12))'}}/>
-          <rect x={0} y={0} width={BOARD_W} height={BOARD_H}
-            fill="url(#dots)" style={{pointerEvents:'none'}}/>
-
-          {edges.map(edge=>{
-            const from = getNodeCenter(edge.from)
-            const to   = getNodeCenter(edge.to)
-            return (
-              <g key={edge.id}>
-                <line x1={from.x} y1={from.y} x2={to.x} y2={to.y}
-                  stroke={edge.color} strokeWidth={2} vectorEffect="non-scaling-stroke"
-                  markerEnd={edge.type==='arrow'?`url(#ah-${edge.color.replace('#','')})`:undefined}/>
-                <line x1={from.x} y1={from.y} x2={to.x} y2={to.y}
-                  stroke="transparent" strokeWidth={14} vectorEffect="non-scaling-stroke" style={{cursor:'pointer'}}
-                  onClick={e=>{e.stopPropagation();updateEdges(prev=>prev.filter(x=>x.id!==edge.id))}}/>
-              </g>
-            )
-          })}
-
-          {nodes.map(node=>(
-            <NodeShape key={node.id} node={node} selected={selected===node.id}
-              onMouseDown={e=>handleNodeMouseDown(e,node.id)}
-              onDoubleClick={e=>handleDoubleClick(e,node.id)}
-              onResizeStart={e=>handleResizeStart(e,node.id)}/>
-          ))}
-
-          {edgeFromRef.current && (()=>{
-            const n = nodesRef.current.find(x=>x.id===edgeFromRef.current)
-            if (!n) return null
-            return <rect x={n.x-4} y={n.y-4} width={n.w+8} height={n.h+8} rx={6}
-              fill="none" stroke="#F26A21" strokeWidth={2.5} vectorEffect="non-scaling-stroke" strokeDasharray="6 3"
-              style={{pointerEvents:'none'}}/>
-          })()}
-        </svg>
+            {edgeFromRef.current && (()=>{
+              const n = nodesRef.current.find(x=>x.id===edgeFromRef.current)
+              if (!n) return null
+              return <rect x={n.x-4} y={n.y-4} width={n.w+8} height={n.h+8} rx={6}
+                fill="none" stroke="#F26A21" strokeWidth={2.5} vectorEffect="non-scaling-stroke" strokeDasharray="6 3"
+                style={{pointerEvents:'none'}}/>
+            })()}
+          </svg>
+        )}
 
         <div style={{position:'absolute',bottom:12,right:12,fontSize:11,color:'#B8AEA8',background:'rgba(255,255,255,0.8)',padding:'4px 10px',borderRadius:8,pointerEvents:'none'}}>
           ホイールで拡大縮小・背景ドラッグで移動
