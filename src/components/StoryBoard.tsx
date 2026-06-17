@@ -45,7 +45,7 @@ const DEFAULT_SIZE: Record<Node['type'], {w:number;h:number}> = {
   arrow:    { w:100, h:40  },
 }
 const MIN_SIZE = 40
-const MIN_ZOOM = 0.3, MAX_ZOOM = 2.5
+const MIN_ZOOM = 0.1, MAX_ZOOM = 2.5
 const BOARD_W = 1400, BOARD_H = 900   // ボードの実サイズ（端が見える範囲）
 
 function genId() { return Math.random().toString(36).slice(2,10) }
@@ -80,6 +80,7 @@ function NodeShape({ node, selected, onMouseDown, onDoubleClick, onResizeStart }
           fill={node.color}
           stroke={selected ? sel : 'rgba(0,0,0,0.25)'}
           strokeWidth={sw}
+          vectorEffect="non-scaling-stroke"
           style={{filter:'drop-shadow(1px 2px 4px rgba(0,0,0,0.15))'}}/>
         <polygon points={`${node.x+node.w-14},${node.y} ${node.x+node.w},${node.y} ${node.x+node.w},${node.y+14}`}
           fill="rgba(0,0,0,0.1)"/>
@@ -102,7 +103,7 @@ function NodeShape({ node, selected, onMouseDown, onDoubleClick, onResizeStart }
     return (
       <g onMouseDown={onMouseDown} style={{cursor:'move'}}>
         <ellipse cx={cx} cy={cy} rx={node.w/2} ry={node.h/2}
-          fill="none" stroke={selected ? sel : node.color} strokeWidth={selected ? 2.5 : 2}/>
+          fill="none" stroke={selected ? sel : node.color} strokeWidth={selected ? 2.5 : 2} vectorEffect="non-scaling-stroke"/>
         <ResizeHandle/>
       </g>
     )
@@ -112,7 +113,7 @@ function NodeShape({ node, selected, onMouseDown, onDoubleClick, onResizeStart }
     return (
       <g onMouseDown={onMouseDown} style={{cursor:'move'}}>
         <rect x={node.x} y={node.y} width={node.w} height={node.h} rx={4}
-          fill="none" stroke={selected ? sel : node.color} strokeWidth={selected ? 2.5 : 2}/>
+          fill="none" stroke={selected ? sel : node.color} strokeWidth={selected ? 2.5 : 2} vectorEffect="non-scaling-stroke"/>
         <ResizeHandle/>
       </g>
     )
@@ -122,7 +123,7 @@ function NodeShape({ node, selected, onMouseDown, onDoubleClick, onResizeStart }
     const pts = `${node.x+node.w/2},${node.y} ${node.x+node.w},${node.y+node.h} ${node.x},${node.y+node.h}`
     return (
       <g onMouseDown={onMouseDown} style={{cursor:'move'}}>
-        <polygon points={pts} fill="none" stroke={selected ? sel : node.color} strokeWidth={selected ? 2.5 : 2}/>
+        <polygon points={pts} fill="none" stroke={selected ? sel : node.color} strokeWidth={selected ? 2.5 : 2} vectorEffect="non-scaling-stroke"/>
         <ResizeHandle/>
       </g>
     )
@@ -133,6 +134,7 @@ function NodeShape({ node, selected, onMouseDown, onDoubleClick, onResizeStart }
       <g onMouseDown={onMouseDown} style={{cursor:'move'}}>
         <line x1={node.x} y1={node.y+node.h/2} x2={node.x+node.w} y2={node.y+node.h/2}
           stroke={selected ? sel : node.color} strokeWidth={selected ? 3 : 2.5}
+          vectorEffect="non-scaling-stroke"
           markerEnd={`url(#ah-${node.color.replace('#','')})`}/>
         <line x1={node.x} y1={node.y+node.h/2} x2={node.x+node.w} y2={node.y+node.h/2}
           stroke="transparent" strokeWidth={16} onMouseDown={onMouseDown}/>
@@ -545,7 +547,7 @@ export default function StoryBoard({ userId, onClose, isModal }: Props) {
               fill="#e8e2d8" style={{pointerEvents:'all'}}/>
             {/* ボード本体（端が見える固定サイズの白い領域） */}
             <rect x={0} y={0} width={BOARD_W} height={BOARD_H}
-              fill="#f5f0ea" stroke="#d4c4a8" strokeWidth={3}
+              fill="#f5f0ea" stroke="#d4c4a8" strokeWidth={3} vectorEffect="non-scaling-stroke"
               style={{pointerEvents:'none',filter:'drop-shadow(0 2px 12px rgba(0,0,0,0.12))'}}/>
             <rect x={0} y={0} width={BOARD_W} height={BOARD_H}
               fill="url(#dots)" style={{pointerEvents:'none'}}/>
@@ -556,10 +558,10 @@ export default function StoryBoard({ userId, onClose, isModal }: Props) {
               return (
                 <g key={edge.id}>
                   <line x1={from.x} y1={from.y} x2={to.x} y2={to.y}
-                    stroke={edge.color} strokeWidth={2/zoom}
+                    stroke={edge.color} strokeWidth={Math.min(20, 2/zoom)}
                     markerEnd={edge.type==='arrow'?`url(#ah-${edge.color.replace('#','')})`:undefined}/>
                   <line x1={from.x} y1={from.y} x2={to.x} y2={to.y}
-                    stroke="transparent" strokeWidth={14/zoom} style={{cursor:'pointer'}}
+                    stroke="transparent" strokeWidth={Math.min(60, 14/zoom)} style={{cursor:'pointer'}}
                     onClick={e=>{e.stopPropagation();updateEdges(prev=>prev.filter(x=>x.id!==edge.id))}}/>
                 </g>
               )
@@ -576,7 +578,7 @@ export default function StoryBoard({ userId, onClose, isModal }: Props) {
               const n = nodesRef.current.find(x=>x.id===edgeFromRef.current)
               if (!n) return null
               return <rect x={n.x-4} y={n.y-4} width={n.w+8} height={n.h+8} rx={6}
-                fill="none" stroke="#F26A21" strokeWidth={2.5/zoom} strokeDasharray="6 3"
+                fill="none" stroke="#F26A21" strokeWidth={Math.min(20, 2.5/zoom)} strokeDasharray="6 3"
                 style={{pointerEvents:'none'}}/>
             })()}
           </g>
