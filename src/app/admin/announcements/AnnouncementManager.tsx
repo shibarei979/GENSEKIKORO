@@ -40,17 +40,24 @@ export default function AnnouncementManager({ initialAnnouncements }: { initialA
   const [loading, setLoading] = useState(false)
   const [uploading, setUploading] = useState(false)
 
+  // ===== 全体通知 =====
+  const [notifyAll, setNotifyAll] = useState(false)
+  const [notifying, setNotifying] = useState(false)
+  const [notifyResult, setNotifyResult] = useState('')
+
   function openCreate() {
     setForm({title:'',body:'',type:'info',link:'',image_url:'',is_published:true})
     setErrors({})
+    setNotifyAll(false)
     setCreating(true); setEditing(null)
   }
   function openEdit(a: Announcement) {
     setForm({title:a.title,body:a.body,type:a.type,link:a.link||'',image_url:a.image_url||'',is_published:a.is_published})
     setErrors({})
+    setNotifyAll(false)
     setEditing(a); setCreating(false)
   }
-  function closeForm() { setCreating(false); setEditing(null); setErrors({}) }
+  function closeForm() { setCreating(false); setEditing(null); setErrors({}); setNotifyAll(false); setNotifyResult('') }
 
   async function handleImageUpload(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0]
@@ -72,14 +79,46 @@ export default function AnnouncementManager({ initialAnnouncements }: { initialA
     if (Object.keys(errs).length > 0) { setErrors(errs); return }
     setLoading(true)
     const payload = { ...form, image_url: form.image_url || null, link: form.link || null }
+
+    let savedId: string | null = null
+
     if (creating) {
       const { data } = await supabase.from('announcements').insert(payload).select().single()
-      if (data) setItems([data, ...items])
+      if (data) { setItems([data, ...items]); savedId = data.id }
     } else if (editing) {
       await supabase.from('announcements').update(payload).eq('id', editing.id)
       setItems(items.map(i => i.id === editing.id ? {...i,...payload} : i))
+      savedId = editing.id
     }
-    setLoading(false); closeForm()
+
+    // ===== 全体通知を送る（公開かつチェックON時のみ） =====
+    if (notifyAll && form.is_published && savedId) {
+      setNotifying(true)
+      setNotifyResult('')
+      try {
+        const res = await fetch('/api/notify-all', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            title: form.title.trim(),
+            message: `お知らせ：${form.title.trim()}`,
+            link: `/announcements/${savedId}`,
+          }),
+        })
+        const data = await res.json()
+        if (res.ok) {
+          setNotifyResult(`${data.sent}人に通知を送信しました`)
+        } else {
+          setNotifyResult('通知の送信に失敗しました: ' + (data.error || '不明なエラー'))
+        }
+      } catch (e: any) {
+        setNotifyResult('通知の送信に失敗しました')
+      }
+      setNotifying(false)
+    }
+
+    setLoading(false)
+    if (!notifyAll) closeForm()
   }
 
   async function handleDelete(id: string) {
@@ -171,13 +210,37 @@ export default function AnnouncementManager({ initialAnnouncements }: { initialA
               <input type="checkbox" checked={form.is_published} onChange={e=>setForm({...form,is_published:e.target.checked})}/>
               公開する
             </label>
+
+            {/* ===== 全体通知選択 ===== */}
+            <div style={{
+              background: notifyAll ? '#fff7ed' : '#f8fafc',
+              border: `1.5px solid ${notifyAll ? '#fdba74' : '#e2e8f0'}`,
+              borderRadius:8, padding:'12px 14px', transition:'all .15s',
+            }}>
+              <label style={{display:'flex',alignItems:'flex-start',gap:8,fontSize:13,cursor: form.is_published ? 'pointer' : 'not-allowed',opacity: form.is_published ? 1 : 0.5}}>
+                <input type="checkbox" checked={notifyAll} disabled={!form.is_published}
+                  onChange={e=>setNotifyAll(e.target.checked)} style={{marginTop:2}}/>
+                <span>
+                  <span style={{fontWeight:700,color:'#1e293b'}}>全ユーザーに通知する</span>
+                  <span style={{display:'block',fontSize:11,color:'#64748b',marginTop:2}}>
+                    {form.is_published
+                      ? 'チェックすると、保存と同時に全ユーザーへ通知が送られます'
+                      : '「公開する」がオフの場合は通知できません'}
+                  </span>
+                </span>
+              </label>
+              {notifying && <div style={{fontSize:12,color:'#F26A21',marginTop:8,fontWeight:600}}>通知を送信中...</div>}
+              {notifyResult && <div style={{fontSize:12,color: notifyResult.includes('失敗') ? '#dc2626' : '#16a34a',marginTop:8,fontWeight:600}}>{notifyResult}</div>}
+            </div>
           </div>
 
           <div style={{display:'flex',gap:8,marginTop:16,justifyContent:'flex-end'}}>
-            <button onClick={closeForm} style={btn('#64748b','#fff','#e2e8f0')}>キャンセル</button>
-            <button onClick={handleSave} disabled={loading}
-              style={{...btn('#fff', loading?'#fdba74':'#F26A21', loading?'#fdba74':'#F26A21'),opacity:loading?0.7:1}}>
-              {loading?'保存中...':'保存する'}
+            <button onClick={closeForm} style={btn('#64748b','#fff','#e2e8f0')}>
+              {notifyResult ? '閉じる' : 'キャンセル'}
+            </button>
+            <button onClick={handleSave} disabled={loading||notifying}
+              style={{...btn('#fff', (loading||notifying)?'#fdba74':'#F26A21', (loading||notifying)?'#fdba74':'#F26A21'),opacity:(loading||notifying)?0.7:1}}>
+              {loading?'保存中...':notifying?'通知送信中...':'保存する'}
             </button>
           </div>
         </div>
