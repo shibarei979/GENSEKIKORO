@@ -210,8 +210,14 @@ export default function StoryBoard({ userId, onClose, isModal }: Props) {
 
   const doSave = useCallback(async (n: Node[], e: Edge[]) => {
     setSaving(true); setSaveErr('')
+    // 保存前の最終安全チェック：全ノードをボード範囲内に強制
+    const safeNodes = n.map(node => ({
+      ...node,
+      x: Math.min(Math.max(node.x, 0), Math.max(0, BOARD_W - node.w)),
+      y: Math.min(Math.max(node.y, 0), Math.max(0, BOARD_H - node.h)),
+    }))
     const { error } = await supabase.from('story_boards').upsert(
-      { user_id: userId, data: { nodes: n, edges: e }, updated_at: new Date().toISOString() },
+      { user_id: userId, data: { nodes: safeNodes, edges: e }, updated_at: new Date().toISOString() },
       { onConflict: 'user_id' }
     )
     setSaving(false)
