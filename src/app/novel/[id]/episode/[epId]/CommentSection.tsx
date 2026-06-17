@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { createClient } from '@/lib/supabase/client'
+import ContinueReaction from './ContinueReaction'
 
 interface Comment {
   id: string; body: string; created_at: string; user_id: string
@@ -40,7 +41,14 @@ export default function CommentSection({ novelId, episodeId, userId, userName, u
   const [replyTo,     setReplyTo]     = useState<{id:string;name:string}|null>(null)
   const [replyBody,   setReplyBody]   = useState('')
   const [replyLoading,setReplyLoading]= useState(false)
+  const [continueCount, setContinueCount] = useState(0)
   const LIMIT = 50
+
+  useEffect(() => {
+    supabase.from('episode_reactions').select('id', { count: 'exact', head: true })
+      .eq('episode_id', episodeId).eq('type', 'continue')
+      .then(({ count }) => setContinueCount(count || 0))
+  }, [episodeId])
 
   useEffect(() => {
     supabase.from('comments')
@@ -211,6 +219,11 @@ export default function CommentSection({ novelId, episodeId, userId, userName, u
 
   return (
     <div style={{background:'#fff',border:'1px solid #F0D9C9',borderRadius:12,overflow:'hidden',marginTop:20}}>
+      {/* ===== 続きが気になるボタン（コメント欄の上・独立） ===== */}
+      <div style={{padding:'14px 16px',borderBottom:'1px solid #F0D9C9',display:'flex',justifyContent:'center'}}>
+        <ContinueReaction episodeId={episodeId} userId={userId} authorId={authorId} initialCount={continueCount}/>
+      </div>
+
       <div style={{padding:'12px 16px',borderBottom:'1px solid #F0D9C9'}}>
         <span style={{fontSize:14,fontWeight:700,color:'#2B211B'}}>コメント ({comments.reduce((sum,c)=>sum+(c.replies?.length||0)+1,0)})</span>
       </div>
