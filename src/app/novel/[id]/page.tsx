@@ -33,6 +33,7 @@ import Sidebar from '@/components/layout/Sidebar'
 import NovelActions from './NovelActions'
 import NovelCommentSection from './NovelCommentSection'
 import FollowButton from '@/components/FollowButton'
+import ChapterAccordion from './ChapterAccordion'
 
 export default async function NovelPage({ params }: { params: { id: string } }) {
   const supabase = await createClient()
@@ -280,29 +281,15 @@ export default async function NovelPage({ params }: { params: { id: string } }) 
               // 章が無い場合は従来通りフラット表示
               allEpisodes.map((ep) => <EpisodeRow key={ep.id} ep={ep} />)
             ) : (
-              // 章ごとにグループ化して表示
-              <>
-                {chapterGroups.map(({ chapter, episodes: chEps }) => (
-                  <div key={chapter.id}>
-                    <div style={{padding:'9px 14px',background:'#FFF1E6',borderBottom:'1px solid #F0D9C9',borderTop:'1px solid #F0D9C9',display:'flex',alignItems:'center',gap:8}}>
-                      <span style={{width:3,height:14,background:'#F26A21',borderRadius:2,display:'inline-block',flexShrink:0}}/>
-                      <span style={{fontSize:13,fontWeight:700,color:'#F26A21'}}>{chapter.title}</span>
-                      <span style={{fontSize:11,color:'#B8AEA8'}}>（{chEps.length}話）</span>
-                    </div>
-                    {chEps.map((ep) => <EpisodeRow key={ep.id} ep={ep} />)}
-                  </div>
-                ))}
-                {unassignedEpisodes.length > 0 && (
-                  <div>
-                    <div style={{padding:'9px 14px',background:'#F5F5F0',borderBottom:'1px solid #F0D9C9',borderTop:'1px solid #F0D9C9',display:'flex',alignItems:'center',gap:8}}>
-                      <span style={{width:3,height:14,background:'#B8AEA8',borderRadius:2,display:'inline-block',flexShrink:0}}/>
-                      <span style={{fontSize:13,fontWeight:700,color:'#77706A'}}>その他</span>
-                      <span style={{fontSize:11,color:'#B8AEA8'}}>（{unassignedEpisodes.length}話）</span>
-                    </div>
-                    {unassignedEpisodes.map((ep) => <EpisodeRow key={ep.id} ep={ep} />)}
-                  </div>
-                )}
-              </>
+              // 章ごとにアコーディオンでグループ化表示
+              <ChapterAccordion
+                novelId={params.id}
+                chapterGroups={chapterGroups}
+                unassignedEpisodes={unassignedEpisodes}
+                readEpisodeIds={Array.from(readEpisodeIds)}
+                epLikeCounts={epLikeCounts}
+                epCommentCounts={epCommentCounts}
+              />
             )}
 
             {episodes && episodes.length > 0 && (
