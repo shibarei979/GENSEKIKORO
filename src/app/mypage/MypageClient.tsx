@@ -447,12 +447,10 @@ export default function MypageClient({
               </div>
             </div>
             {/* 2行目：統計情報 */}
-            <div style={{display:'flex',gap:20,fontSize:12,color:'#B8AEA8',marginTop:14,paddingTop:14,borderTop:'1px solid #F0D9C9',flexWrap:'wrap'}}>
-              <span style={{background:'#FFF9F2',border:'1px solid #F0D9C9',borderRadius:6,padding:'2px 10px',color:'#77706A'}}>{profile.login_provider === 'google' ? 'Google' : 'メール'}で登録</span>
+            <div style={{display:'flex',gap:20,fontSize:12,color:'#B8AEA8',marginTop:10,flexWrap:'wrap'}}>
               <span>フォロワー <strong style={{color:'#2B211B'}}>{followerCount}</strong> 人</span>
               <span>フォロー中 <strong style={{color:'#2B211B'}}>{followingCount}</strong> 人</span>
               <span>公開 <strong style={{color:'#F26A21'}}>{published.length}</strong> 作品</span>
-              <span>下書き <strong style={{color:'#77706A'}}>{drafts.length}</strong> 作品</span>
             </div>
           </div>
         )}
