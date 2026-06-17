@@ -45,10 +45,10 @@ const DEFAULT_SIZE: Record<Node['type'], {w:number;h:number}> = {
   arrow:    { w:100, h:40  },
 }
 const MIN_SIZE = 40
+const MIN_ZOOM = 0.3, MAX_ZOOM = 2.5
 
 function genId() { return Math.random().toString(36).slice(2,10) }
 
-// ===== SVG図形（文字なし・リサイズハンドル付き） =====
 function NodeShape({ node, selected, onMouseDown, onDoubleClick, onResizeStart }: {
   node: Node
   selected: boolean
@@ -60,7 +60,7 @@ function NodeShape({ node, selected, onMouseDown, onDoubleClick, onResizeStart }
   const textColor = isDark ? '#fff' : '#2B211B'
   const sel = '#F26A21'
   const sw = selected ? 2.5 : 1.8
-  const handleSize = 10
+  const handleSize = 11
 
   const ResizeHandle = () => selected ? (
     <rect
@@ -156,6 +156,7 @@ export default function StoryBoard({ userId, onClose, isModal }: Props) {
   const [edgeColor,setEdgeColor]= useState('#2B211B')
   const [edgeType, setEdgeType] = useState<'arrow'|'line'>('arrow')
   const [pan,      setPan]      = useState({x:0,y:0})
+  const [zoom,     setZoom]     = useState(1)
   const [editing,  setEditing]  = useState<{id:string;text:string}|null>(null)
   const [saving,   setSaving]   = useState(false)
   const [saved,    setSaved]    = useState(false)
@@ -226,12 +227,18 @@ export default function StoryBoard({ userId, onClose, isModal }: Props) {
     })
   }
 
+  // ===== 座標変換：スクリーン座標 → ボード座標（pan・zoom考慮） =====
+  function screenToBoard(clientX: number, clientY: number) {
+    if (!svgRef.current) return { x:0, y:0 }
+    const rect = svgRef.current.getBoundingClientRect()
+    const x = (clientX - rect.left - pan.x) / zoom
+    const y = (clientY - rect.top - pan.y) / zoom
+    return { x, y }
+  }
+
   function handleSvgClick(e: React.MouseEvent<SVGSVGElement>) {
     if (tool === 'select' || tool === 'edge') return
-    if (!svgRef.current) return
-    const rect = svgRef.current.getBoundingClientRect()
-    const x = e.clientX - rect.left - pan.x
-    const y = e.clientY - rect.top - pan.y
+    const { x, y } = screenToBoard(e.clientX, e.clientY)
     const sz = DEFAULT_SIZE[tool as Node['type']]
     const color = tool === 'note' ? noteColor : shapeColor
     const node: Node = {
@@ -272,16 +279,16 @@ export default function StoryBoard({ userId, onClose, isModal }: Props) {
 
   function handleMouseMove(e: React.MouseEvent) {
     if (dragRef.current) {
-      const dx = e.clientX - dragRef.current.mx
-      const dy = e.clientY - dragRef.current.my
+      const dx = (e.clientX - dragRef.current.mx) / zoom
+      const dy = (e.clientY - dragRef.current.my) / zoom
       setNodes(prev => prev.map(n => n.id === dragRef.current!.id
         ? { ...n, x: dragRef.current!.ox + dx, y: dragRef.current!.oy + dy }
         : n
       ))
     }
     if (resizeRef.current) {
-      const dx = e.clientX - resizeRef.current.mx
-      const dy = e.clientY - resizeRef.current.my
+      const dx = (e.clientX - resizeRef.current.mx) / zoom
+      const dy = (e.clientY - resizeRef.current.my) / zoom
       setNodes(prev => prev.map(n => n.id === resizeRef.current!.id
         ? { ...n, w: Math.max(MIN_SIZE, resizeRef.current!.ow + dx), h: Math.max(MIN_SIZE, resizeRef.current!.oh + dy) }
         : n
@@ -312,6 +319,13 @@ export default function StoryBoard({ userId, onClose, isModal }: Props) {
       edgeFromRef.current = null
       panRef.current = { sx: e.clientX, sy: e.clientY, ox: pan.x, oy: pan.y }
     }
+  }
+
+  // ===== マウスホイールでズーム =====
+  function handleWheel(e: React.WheelEvent<SVGSVGElement>) {
+    e.preventDefault()
+    const delta = e.deltaY > 0 ? -0.1 : 0.1
+    setZoom(z => Math.min(MAX_ZOOM, Math.max(MIN_ZOOM, Math.round((z + delta) * 100) / 100)))
   }
 
   function handleDoubleClick(e: React.MouseEvent, id: string) {
@@ -346,33 +360,38 @@ export default function StoryBoard({ userId, onClose, isModal }: Props) {
     return { x: n.x + n.w/2, y: n.y + n.h/2 }
   }
 
+  function zoomIn()  { setZoom(z => Math.min(MAX_ZOOM, Math.round((z + 0.1) * 100) / 100)) }
+  function zoomOut() { setZoom(z => Math.max(MIN_ZOOM, Math.round((z - 0.1) * 100) / 100)) }
+  function zoomReset() { setZoom(1); setPan({x:0,y:0}) }
+
   if (!mounted) return null
 
   const markerColors = [...EDGE_COLORS, ...SHAPE_COLORS].filter((v,i,a)=>a.indexOf(v)===i)
 
   // ツールボタン共通スタイル（大きめ）
   const toolBtnStyle = (active: boolean) => ({
-    width:38, height:38, fontSize:16, borderRadius:8, border:'1.5px solid',
+    width:48, height:48, fontSize:20, borderRadius:10, border:'1.5px solid',
     cursor:'pointer' as const, display:'flex', alignItems:'center' as const, justifyContent:'center' as const,
     background: active ? '#F26A21' : '#fff',
     color: active ? '#fff' : '#2B211B',
     borderColor: active ? '#F26A21' : '#F0D9C9',
     fontWeight: active ? 700 as const : 400 as const,
+    transition:'all .12s',
   })
 
   return (
     <div style={{width:'100%',height:'100%',display:'flex',flexDirection:'column',background:'#f5f0ea',borderRadius:isModal?0:12,overflow:'hidden',fontFamily:"'Noto Sans JP',sans-serif"}}>
 
-      {/* ===== ツールバー ===== */}
-      <div style={{display:'flex',alignItems:'center',gap:8,padding:'10px 14px',background:'#fff',borderBottom:'1px solid #F0D9C9',flexWrap:'wrap',flexShrink:0}}>
-        <span style={{fontSize:11,color:saveErr?'#dc2626':saving?'#F26A21':saved?'#22c55e':'transparent',minWidth:70,fontWeight:600}}>
+      {/* ===== ツールバー（大きめ） ===== */}
+      <div style={{display:'flex',alignItems:'center',gap:10,padding:'14px 18px',background:'#fff',borderBottom:'1px solid #F0D9C9',flexWrap:'wrap',flexShrink:0}}>
+        <span style={{fontSize:12,color:saveErr?'#dc2626':saving?'#F26A21':saved?'#22c55e':'transparent',minWidth:78,fontWeight:600}}>
           {saveErr || (saving?'保存中…':saved?'保存済み':'　')}
         </span>
 
-        <div style={{width:1,height:28,background:'#F0D9C9'}}/>
+        <div style={{width:1,height:36,background:'#F0D9C9'}}/>
 
-        {/* ツール（大きめボタン） */}
-        <div style={{display:'flex',gap:5}}>
+        {/* ツール（大きいボタン） */}
+        <div style={{display:'flex',gap:6}}>
           <button onClick={()=>{setTool('select');edgeFromRef.current=null}} title="選択" style={toolBtnStyle(tool==='select')}>↖</button>
           <button onClick={()=>{setTool('note');edgeFromRef.current=null}} title="付箋" style={toolBtnStyle(tool==='note')}>▥</button>
           <button onClick={()=>{setTool('circle');edgeFromRef.current=null}} title="円" style={toolBtnStyle(tool==='circle')}>○</button>
@@ -380,17 +399,17 @@ export default function StoryBoard({ userId, onClose, isModal }: Props) {
           <button onClick={()=>{setTool('triangle');edgeFromRef.current=null}} title="三角" style={toolBtnStyle(tool==='triangle')}>△</button>
           <button onClick={()=>{setTool('arrow');edgeFromRef.current=null}} title="矢印図形" style={toolBtnStyle(tool==='arrow')}>→</button>
           <button onClick={()=>{setTool('edge');edgeFromRef.current=null}} title="ノード接続"
-            style={{...toolBtnStyle(tool==='edge'),width:'auto',padding:'0 14px',fontSize:13}}>接続</button>
+            style={{...toolBtnStyle(tool==='edge'),width:'auto',padding:'0 18px',fontSize:15}}>接続</button>
         </div>
 
-        <div style={{width:1,height:28,background:'#F0D9C9'}}/>
+        <div style={{width:1,height:36,background:'#F0D9C9'}}/>
 
         {/* 付箋カラー */}
         {(tool==='note'||(!selectedNode&&tool==='select')||selectedNode?.type==='note') && (
-          <div style={{display:'flex',gap:4,alignItems:'center'}}>
+          <div style={{display:'flex',gap:5,alignItems:'center'}}>
             {NOTE_COLORS.map(c=>(
               <button key={c} onClick={()=>{setNoteColor(c);if(selectedNode?.type==='note')handleColorChange(c)}}
-                style={{width:22,height:22,borderRadius:5,border:'none',cursor:'pointer',background:c,
+                style={{width:26,height:26,borderRadius:6,border:'none',cursor:'pointer',background:c,
                   outline:(selectedNode?.type==='note'?selectedNode.color:noteColor)===c?'2.5px solid #F26A21':'1px solid rgba(0,0,0,0.2)',outlineOffset:1}}/>
             ))}
           </div>
@@ -398,10 +417,10 @@ export default function StoryBoard({ userId, onClose, isModal }: Props) {
 
         {/* 図形カラー */}
         {(['circle','rect','triangle','arrow'].includes(tool)||(selectedNode&&['circle','rect','triangle','arrow'].includes(selectedNode.type))) && (
-          <div style={{display:'flex',gap:4,alignItems:'center'}}>
+          <div style={{display:'flex',gap:5,alignItems:'center'}}>
             {SHAPE_COLORS.map(c=>(
               <button key={c} onClick={()=>{setShapeColor(c);if(selectedNode&&['circle','rect','triangle','arrow'].includes(selectedNode.type))handleColorChange(c)}}
-                style={{width:22,height:22,borderRadius:'50%',border:'none',cursor:'pointer',background:c,
+                style={{width:26,height:26,borderRadius:'50%',border:'none',cursor:'pointer',background:c,
                   outline:(selectedNode&&['circle','rect','triangle','arrow'].includes(selectedNode.type)?selectedNode.color:shapeColor)===c?'2.5px solid #F26A21':'1px solid rgba(0,0,0,0.2)',outlineOffset:1}}/>
             ))}
           </div>
@@ -409,17 +428,17 @@ export default function StoryBoard({ userId, onClose, isModal }: Props) {
 
         {/* 接続線設定 */}
         {tool==='edge' && (
-          <div style={{display:'flex',gap:5,alignItems:'center'}}>
+          <div style={{display:'flex',gap:6,alignItems:'center'}}>
             {(['arrow','line'] as const).map(t=>(
               <button key={t} onClick={()=>setEdgeType(t)}
-                style={{padding:'5px 11px',fontSize:12,borderRadius:7,border:'1px solid',cursor:'pointer',
+                style={{padding:'7px 14px',fontSize:13,borderRadius:8,border:'1px solid',cursor:'pointer',
                   background:edgeType===t?'#2B211B':'#fff',color:edgeType===t?'#fff':'#2B211B',borderColor:'#F0D9C9'}}>
                 {t==='arrow'?'矢印':'直線'}
               </button>
             ))}
             {EDGE_COLORS.map(c=>(
               <button key={c} onClick={()=>setEdgeColor(c)}
-                style={{width:20,height:20,borderRadius:'50%',border:'none',cursor:'pointer',background:c,
+                style={{width:24,height:24,borderRadius:'50%',border:'none',cursor:'pointer',background:c,
                   outline:edgeColor===c?'2.5px solid #F26A21':'1px solid rgba(0,0,0,0.2)',outlineOffset:1}}/>
             ))}
           </div>
@@ -427,21 +446,40 @@ export default function StoryBoard({ userId, onClose, isModal }: Props) {
 
         {/* 削除 */}
         {selectedNode && tool==='select' && (
-          <button onClick={handleDelete} style={{padding:'6px 14px',fontSize:12,border:'1px solid #fca5a5',borderRadius:8,background:'#fef2f2',color:'#dc2626',cursor:'pointer',fontWeight:600}}>
+          <button onClick={handleDelete} style={{padding:'9px 18px',fontSize:13,border:'1px solid #fca5a5',borderRadius:9,background:'#fef2f2',color:'#dc2626',cursor:'pointer',fontWeight:600}}>
             削除
           </button>
         )}
 
         <div style={{flex:1}}/>
+
+        {/* ===== ズームコントロール ===== */}
+        <div style={{display:'flex',alignItems:'center',gap:4,background:'#FFF9F2',border:'1px solid #F0D9C9',borderRadius:10,padding:4}}>
+          <button onClick={zoomOut} title="縮小"
+            style={{width:32,height:32,border:'none',background:'#fff',borderRadius:7,cursor:'pointer',fontSize:16,fontWeight:700,color:'#77706A',display:'flex',alignItems:'center',justifyContent:'center'}}>
+            −
+          </button>
+          <button onClick={zoomReset} title="リセット(クリックで100%)"
+            style={{minWidth:52,height:32,border:'none',background:'transparent',cursor:'pointer',fontSize:13,fontWeight:700,color:'#2B211B'}}>
+            {Math.round(zoom*100)}%
+          </button>
+          <button onClick={zoomIn} title="拡大"
+            style={{width:32,height:32,border:'none',background:'#fff',borderRadius:7,cursor:'pointer',fontSize:16,fontWeight:700,color:'#77706A',display:'flex',alignItems:'center',justifyContent:'center'}}>
+            ＋
+          </button>
+        </div>
+
+        <div style={{width:1,height:36,background:'#F0D9C9'}}/>
+
         {onClose && (
-          <button onClick={onClose} style={{padding:'6px 16px',fontSize:13,border:'1px solid #F0D9C9',borderRadius:8,background:'#fff',color:'#77706A',cursor:'pointer'}}>
+          <button onClick={onClose} style={{padding:'9px 20px',fontSize:14,border:'1px solid #F0D9C9',borderRadius:10,background:'#fff',color:'#77706A',cursor:'pointer',fontWeight:600}}>
             閉じる
           </button>
         )}
       </div>
 
       {tool==='edge' && (
-        <div style={{padding:'6px 14px',background:'#FFF9F2',borderBottom:'1px solid #F0D9C9',fontSize:12,color:'#F26A21',fontWeight:600}}>
+        <div style={{padding:'7px 16px',background:'#FFF9F2',borderBottom:'1px solid #F0D9C9',fontSize:13,color:'#F26A21',fontWeight:600}}>
           {edgeFromRef.current ? '接続先のノードをクリック' : '接続元のノードをクリック'}
         </div>
       )}
@@ -453,6 +491,7 @@ export default function StoryBoard({ userId, onClose, isModal }: Props) {
           onMouseMove={handleMouseMove}
           onMouseUp={handleMouseUp}
           onMouseLeave={handleMouseUp}
+          onWheel={handleWheel}
           style={{display:'block'}}>
           <defs>
             <pattern id="dots" x="0" y="0" width="24" height="24" patternUnits="userSpaceOnUse">
@@ -465,7 +504,7 @@ export default function StoryBoard({ userId, onClose, isModal }: Props) {
             ))}
           </defs>
 
-          <g transform={`translate(${pan.x},${pan.y})`}>
+          <g transform={`translate(${pan.x},${pan.y}) scale(${zoom})`}>
             <rect data-bg="1" x={-5000} y={-5000} width={10000} height={10000}
               fill="url(#dots)" style={{pointerEvents:'all'}}/>
 
@@ -475,10 +514,10 @@ export default function StoryBoard({ userId, onClose, isModal }: Props) {
               return (
                 <g key={edge.id}>
                   <line x1={from.x} y1={from.y} x2={to.x} y2={to.y}
-                    stroke={edge.color} strokeWidth={2}
+                    stroke={edge.color} strokeWidth={2/zoom}
                     markerEnd={edge.type==='arrow'?`url(#ah-${edge.color.replace('#','')})`:undefined}/>
                   <line x1={from.x} y1={from.y} x2={to.x} y2={to.y}
-                    stroke="transparent" strokeWidth={14} style={{cursor:'pointer'}}
+                    stroke="transparent" strokeWidth={14/zoom} style={{cursor:'pointer'}}
                     onClick={e=>{e.stopPropagation();updateEdges(prev=>prev.filter(x=>x.id!==edge.id))}}/>
                 </g>
               )
@@ -495,11 +534,16 @@ export default function StoryBoard({ userId, onClose, isModal }: Props) {
               const n = nodesRef.current.find(x=>x.id===edgeFromRef.current)
               if (!n) return null
               return <rect x={n.x-4} y={n.y-4} width={n.w+8} height={n.h+8} rx={6}
-                fill="none" stroke="#F26A21" strokeWidth={2.5} strokeDasharray="6 3"
+                fill="none" stroke="#F26A21" strokeWidth={2.5/zoom} strokeDasharray="6 3"
                 style={{pointerEvents:'none'}}/>
             })()}
           </g>
         </svg>
+
+        {/* ズームヒント */}
+        <div style={{position:'absolute',bottom:12,right:12,fontSize:11,color:'#B8AEA8',background:'rgba(255,255,255,0.8)',padding:'4px 10px',borderRadius:8,pointerEvents:'none'}}>
+          ホイールで拡大縮小
+        </div>
       </div>
 
       {editing && (
