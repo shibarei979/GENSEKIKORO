@@ -81,6 +81,11 @@ export default async function NovelPage({ params }: { params: { id: string } }) 
   // 読者には未公開（予約中）の話を見せない。作者には全話見せる。
   const episodes = isAuthor ? rawEpisodes : (rawEpisodes || []).filter(ep => ep.published !== false)
 
+  // ===== 次回更新予告：最も早い予約投稿中の話（全ユーザーに表示） =====
+  const upcomingEpisode = (rawEpisodes || [])
+    .filter(ep => ep.published === false && ep.scheduled_at && new Date(ep.scheduled_at).getTime() > nowMs)
+    .sort((a, b) => new Date(a.scheduled_at!).getTime() - new Date(b.scheduled_at!).getTime())[0] || null
+
   // 章一覧を取得
   const { data: chapters } = await supabase
     .from('novel_chapters').select('id, title, order_num')
@@ -243,6 +248,17 @@ export default async function NovelPage({ params }: { params: { id: string } }) 
               ))}
             </div>
             <h1 style={{fontSize:20,fontWeight:700,color:'#2B211B',lineHeight:1.4,marginBottom:8,fontFamily:"'Noto Serif JP',serif"}}>{novel.title}</h1>
+            {upcomingEpisode && (
+              <div style={{
+                display:'flex', alignItems:'center', gap:8,
+                background:'#eff6ff', border:'1.5px solid #93c5fd', borderRadius:8,
+                padding:'8px 14px', marginBottom:10, fontSize:12, color:'#1d4ed8', fontWeight:600,
+              }}>
+                <span style={{fontSize:14}}>📅</span>
+                次回更新予告：
+                {new Date(upcomingEpisode.scheduled_at!).toLocaleString('ja-JP',{month:'numeric',day:'numeric',hour:'2-digit',minute:'2-digit'})} 頃
+              </div>
+            )}
             <div style={{fontSize:13,color:'#77706A',marginBottom:12,display:'flex',alignItems:'center',gap:6,flexWrap:'wrap'}}>
               作者：
               <a href={`/author/${author?.user_id}`} style={{color:'#F26A21',textDecoration:'none',fontWeight:600}}>{author?.display_name}</a>
