@@ -198,9 +198,9 @@ export default function GemSection({ novels, discoverCommentMap }: Props) {
   return (
     <>
       {/* デスクトップ：本棚スタイル（端から端まで均等配置） */}
-      <div className="gem-desktop" style={{flex:1,overflow:'hidden'}}>
-        <div style={{display:'flex',gap:3,paddingBottom:10,paddingTop:4,alignItems:'flex-end',position:'relative',width:'100%'}}>
-          {Array.from({length:7},(_,i) => {
+      <div className="gem-desktop" style={{flex:1,overflowX:'auto',overflowY:'hidden'}}>
+        <div style={{display:'flex',gap:3,paddingBottom:10,paddingTop:4,alignItems:'flex-end',position:'relative',minWidth:'100%'}}>
+          {Array.from({length: Math.min(50, Math.max(novels.length, 15))},(_,i) => {
             const n = novels[i]
             return n
               ? <BookItem key={n.id} n={n} discoverComments={discoverCommentMap[n.id]||[]} />

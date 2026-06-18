@@ -205,7 +205,7 @@ export default async function HomePage() {
     likeCount2: likeMap[n.id]||0,
   }))
   const seed = Date.now()
-  const shuffledGem = [...gemScored.sort((a:any,b:any)=>b.gemScore-a.gemScore).slice(0,20)].sort((a:any,b:any)=>{
+  const shuffledGem = [...gemScored.sort((a:any,b:any)=>b.gemScore-a.gemScore).slice(0,60)].sort((a:any,b:any)=>{
     const ha = (a.id.charCodeAt(0) * seed) % 997
     const hb = (b.id.charCodeAt(0) * seed) % 997
     return ha - hb
@@ -214,7 +214,7 @@ export default async function HomePage() {
   const gemNovels: any[] = []
   for (const n of shuffledGem) {
     if (!seenGemIds.has(n.id)) { seenGemIds.add(n.id); gemNovels.push(n) }
-    if (gemNovels.length >= 7) break
+    if (gemNovels.length >= 50) break
   }
   const gemIds = gemNovels.map((n: any) => n.id)
   const discoverCommentMap: Record<string,{comment:string;display_name:string}[]> = {}
@@ -317,10 +317,8 @@ export default async function HomePage() {
       </div>
 
       {/* ===== 投稿・検索 台形バナー（ユーザーの推し と 週間ランキング の間） ===== */}
-      <div className="desktop-only" style={{background:'#fff',padding:'24px 0'}}>
-        <div style={{maxWidth:1200,margin:'0 auto',padding:'0 32px'}}>
-          <ActionBanner isLoggedIn={!!user} />
-        </div>
+      <div className="desktop-only" style={{background:'#fff',padding:'24px 0',width:'100%'}}>
+        <ActionBanner isLoggedIn={!!user} />
       </div>
 
       {/* ===== 作品を探す（デスクトップのみ） ===== */}
