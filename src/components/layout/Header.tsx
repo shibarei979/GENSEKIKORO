@@ -148,9 +148,9 @@ export default function Header({ profile, user, activeGenre }: Props) {
           <nav style={{display:'flex',alignItems:'stretch',gap:4,flexShrink:0,height:'100%'}}>
             {NAV_LEFT.map(item=>(
               <Link key={item.href} href={item.href} className={`header-nav-link${isActive(item.href)?' header-nav-link-active':''}`}
-                style={{padding:'0 12px',fontSize:13,whiteSpace:'nowrap',textDecoration:'none',
-                  display:'flex',alignItems:'center',fontWeight:500,
-                  color:isActive(item.href)?'#F26A21':'#77706A',
+                style={{padding:'0 12px',fontSize:14.5,whiteSpace:'nowrap',textDecoration:'none',
+                  display:'flex',alignItems:'center',fontWeight:600,
+                  color:isActive(item.href)?'#F26A21':'#2B211B',
                   position:'relative',
                 }}>
                 {item.label}
