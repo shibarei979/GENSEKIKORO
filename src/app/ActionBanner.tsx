@@ -70,10 +70,11 @@ export default function ActionBanner({ isLoggedIn }: Props) {
   const W = 800
   const H = 390
   const R = 26
+  const INSET = H * 0.55 // trapezoidPath内のinsetと同じ計算式（クリップパス計算用）
 
   // 探す：左端基準、先細りが右へ（中央方向）。通常向き。
   const leftPath  = trapezoidPath(W, H, R, 'left', false)
-  // 投稿：右端基準、先細りが左へ（中央方向）。上下反転。
+  // 投稿：右端基準、先細りが左へ（中央方向）。上下逆さま。
   const rightPath = trapezoidPath(W, H, R, 'right', true)
 
   return (
@@ -88,6 +89,7 @@ export default function ActionBanner({ isLoggedIn }: Props) {
           transform: hoverLeft ? 'translateY(-6px)' : 'translateY(0)',
           transition:'transform .25s ease',
           zIndex: 1,
+          clipPath: `polygon(0 0, 100% 0, ${100 - (INSET/W)*100}% 100%, 0 100%)`,
         }}>
         <svg viewBox={`0 0 ${W} ${H}`} preserveAspectRatio="none" style={{width:'100%',height:'100%',display:'block',overflow:'visible'}}>
           <defs>
@@ -124,6 +126,7 @@ export default function ActionBanner({ isLoggedIn }: Props) {
           transform: hoverRight ? 'translateY(6px)' : 'translateY(0)',
           transition:'transform .25s ease',
           zIndex: 1,
+          clipPath: `polygon(${(INSET/W)*100}% 0, 100% 0, 100% 100%, 0 100%)`,
         }}>
         <svg viewBox={`0 0 ${W} ${H}`} preserveAspectRatio="none" style={{width:'100%',height:'100%',display:'block',overflow:'visible'}}>
           <defs>
