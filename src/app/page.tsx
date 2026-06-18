@@ -238,26 +238,12 @@ export default async function HomePage() {
     <div style={{minHeight:'100vh',background:'#FFF9F2',fontFamily:"'Noto Sans JP',sans-serif"}}>
       <Header profile={profile} user={user} />
 
-      {/* ===== デスクトップ：ヒーロー ===== */}
+      {/* ===== デスクトップ：ヒーロー（画像スライダーのみ・横幅いっぱい） ===== */}
       <section className="desktop-only" style={{background:'#FFF1E6',borderBottom:'1px solid #F0D9C9'}}>
-        <div className="hero-section" style={{maxWidth:1200,margin:'0 auto',padding:'36px 32px 36px'}}>
-          <h1 className="hero-title" style={{fontFamily:"'Noto Serif JP',serif",fontSize:32,fontWeight:700,color:'#2B211B',lineHeight:1.35,marginBottom:12}}>
-            次のブームは、<em style={{color:'#F26A21',fontStyle:'normal'}}>ここから</em>生まれる。
-          </h1>
-          <div className="hero-flex" style={{display:'flex',gap:24,alignItems:'center',marginRight:-80}}>
-            <div style={{flexShrink:0}}>
-              <p style={{fontSize:13,color:'#77706A',lineHeight:1.85,marginBottom:16}}>まだ知られていない物語の原石を、<br/>読者とともに発掘するライトノベル投稿サイト。</p>
-              <div style={{display:'flex',gap:10,flexWrap:'wrap'}}>
-                <Link href={user?'/post':'/auth/register'} style={{padding:'11px 22px',border:'none',borderRadius:6,background:'#F26A21',color:'#fff',fontSize:13,fontWeight:700,textDecoration:'none'}}>今すぐ作品を投稿する</Link>
-                <Link href="/search" style={{padding:'10px 22px',border:'1.5px solid #F26A21',borderRadius:6,background:'#FFF9F2',color:'#F26A21',fontSize:13,fontWeight:500,textDecoration:'none'}}>作品を探す</Link>
-              </div>
-            </div>
-            {sliderItems.length > 0 && (
-              <div style={{flex:1,minWidth:0}}>
-                <HeroSlider items={sliderItems} />
-              </div>
-            )}
-          </div>
+        <div className="hero-section" style={{maxWidth:1200,margin:'0 auto',padding:'28px 32px'}}>
+          {sliderItems.length > 0 && (
+            <HeroSlider items={sliderItems} />
+          )}
         </div>
       </section>
 
@@ -285,7 +271,7 @@ export default async function HomePage() {
             href={activeContest.is_site_contest ? `/contests/${activeContest.id}` : (activeContest.apply_url || '#')}
             style={{display:'block',borderRadius:10,overflow:'hidden',textDecoration:'none'}}>
             <img src={activeContest.image_url} alt={activeContest.title}
-              style={{width:'100%',height:120,objectFit:'cover',display:'block'}}/>
+              style={{width:'100%',aspectRatio:'16/9',objectFit:'cover',display:'block'}}/>
           </Link>
         </div>
       )}
