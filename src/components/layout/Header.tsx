@@ -116,11 +116,6 @@ export default function Header({ profile, user, activeGenre }: Props) {
     {label:'作品を探す', href:'/search'},
     {label:'コンテスト', href:'/contests'},
   ]
-  const NAV_RIGHT = [
-    {label:'閲覧履歴',  href:'/history'},
-    {label:'ミッション', href:'/mission'},
-    {label:'マイページ', href:'/mypage'},
-  ]
 
   return (
     <>
@@ -149,7 +144,7 @@ export default function Header({ profile, user, activeGenre }: Props) {
               transition:'height .25s ease',
             }}/>
           </Link>
-          <form onSubmit={handleSearch} style={{position:'absolute',left:'calc(50% - 80px)',transform:'translateX(-50%)',width:520,display:'flex',alignItems:'center',border:'1.5px solid #F0D9C9',borderRadius:24,background:'#FFF9F2',overflow:'hidden'}}>
+          <form onSubmit={handleSearch} style={{position:'absolute',left:'calc(50% - 40px)',transform:'translateX(-50%)',width:380,display:'flex',alignItems:'center',border:'1.5px solid #F0D9C9',borderRadius:20,background:'#FFF9F2',overflow:'hidden'}}>
             <input value={q} onChange={e=>setQ(e.target.value)} placeholder="作品名・作者名・キーワードで検索"
               style={{flex:1,padding:'7px 16px',border:'none',background:'transparent',fontSize:13,color:'#2B211B',outline:'none'}}/>
             <button type="submit" style={{padding:'7px 14px',background:'none',border:'none',borderLeft:'1px solid #F0D9C9',cursor:'pointer',display:'flex',alignItems:'center'}}>
@@ -190,10 +185,15 @@ export default function Header({ profile, user, activeGenre }: Props) {
                 </div>
                 <div ref={userMenuRef} style={{position:'relative'}}>
                   <button onClick={()=>{setShowUserMenu(!showUserMenu);setShowSettings(false)}}
-                    style={{display:'flex',alignItems:'center',gap:6,padding:'6px 14px',borderRadius:20,background:'#FFF9F2',border:'1.5px solid #F0D9C9',cursor:'pointer',fontSize:13}}>
-                    <span style={{color:'#B8AEA8',fontSize:12}}>ユーザー：</span>
-                    <span style={{color:'#F26A21',fontWeight:700}}>{(profile?.display_name||'ユーザー').length>8?(profile?.display_name||'ユーザー').slice(0,8)+'…':(profile?.display_name||'ユーザー')}</span>
-                    <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#77706A" strokeWidth="2.5"><polyline points="6 9 12 15 18 9"/></svg>
+                    style={{display:'flex',alignItems:'center',justifyContent:'center',width:38,height:38,borderRadius:'50%',background:'#FFF9F2',border:'1.5px solid #F0D9C9',cursor:'pointer',padding:0,overflow:'hidden'}}>
+                    {profile?.icon_url ? (
+                      <img src={profile.icon_url} alt="" style={{width:'100%',height:'100%',objectFit:'cover'}}/>
+                    ) : (
+                      <svg width="22" height="22" viewBox="0 0 24 24" fill="#B8AEA8">
+                        <circle cx="12" cy="8" r="4"/>
+                        <path d="M4 20c0-3.5 3.5-6 8-6s8 2.5 8 6a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1z"/>
+                      </svg>
+                    )}
                   </button>
                   {showUserMenu && (
                     <div style={{position:'absolute',right:0,top:'calc(100% + 8px)',width:200,background:'#fff',border:'1px solid #F0D9C9',borderRadius:12,boxShadow:'0 8px 24px rgba(0,0,0,0.12)',zIndex:200,overflow:'hidden'}}>
@@ -203,6 +203,12 @@ export default function Header({ profile, user, activeGenre }: Props) {
                       </div>
                       <Link href="/mypage" onClick={()=>setShowUserMenu(false)} style={{display:'flex',alignItems:'center',justifyContent:'space-between',padding:'11px 16px',borderBottom:'1px solid #FFF1E6',textDecoration:'none',color:'#2B211B',fontSize:13}}>
                         <span>マイページ</span><span style={{color:'#B8AEA8',fontSize:12}}>›</span>
+                      </Link>
+                      <Link href="/history" onClick={()=>setShowUserMenu(false)} style={{display:'flex',alignItems:'center',justifyContent:'space-between',padding:'11px 16px',borderBottom:'1px solid #FFF1E6',textDecoration:'none',color:'#2B211B',fontSize:13}}>
+                        <span>閲覧履歴</span><span style={{color:'#B8AEA8',fontSize:12}}>›</span>
+                      </Link>
+                      <Link href="/mission" onClick={()=>setShowUserMenu(false)} style={{display:'flex',alignItems:'center',justifyContent:'space-between',padding:'11px 16px',borderBottom:'1px solid #FFF1E6',textDecoration:'none',color:'#2B211B',fontSize:13}}>
+                        <span>ミッション</span><span style={{color:'#B8AEA8',fontSize:12}}>›</span>
                       </Link>
                       <button onClick={()=>{setShowSettingsModal(true);setShowUserMenu(false)}}
                         style={{display:'flex',alignItems:'center',justifyContent:'space-between',width:'100%',padding:'11px 16px',borderBottom:'1px solid #FFF1E6',background:'#fff',border:'none',cursor:'pointer',fontSize:13,color:'#2B211B'}}>
@@ -234,16 +240,6 @@ export default function Header({ profile, user, activeGenre }: Props) {
         }}>
           <div style={{maxWidth:1200,margin:'0 auto',padding:'0 32px',display:'flex',width:'100%'}}>
             {NAV_LEFT.map(item=>(
-              <Link key={item.href} href={item.href}
-                style={{padding:'9px 16px',fontSize:13,whiteSpace:'nowrap',textDecoration:'none',display:'inline-block',fontWeight:500,
-                  color:isActive(item.href)?'#F26A21':'#77706A',
-                  borderBottom:isActive(item.href)?'2px solid #F26A21':'2px solid transparent',
-                  transition:'all .15s'}}>
-                {item.label}
-              </Link>
-            ))}
-            <div style={{flex:1}}/>
-            {NAV_RIGHT.map(item=>(
               <Link key={item.href} href={item.href}
                 style={{padding:'9px 16px',fontSize:13,whiteSpace:'nowrap',textDecoration:'none',display:'inline-block',fontWeight:500,
                   color:isActive(item.href)?'#F26A21':'#77706A',
