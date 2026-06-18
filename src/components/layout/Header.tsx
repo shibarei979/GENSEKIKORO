@@ -176,14 +176,13 @@ export default function Header({ profile, user, activeGenre }: Props) {
               <>
                 <Link href="/post"
                   style={{
-                    border:'1.5px solid #F26A21', color:'#F26A21', borderRadius:'20px',
-                    background:'#fff', fontSize:'13px', fontWeight:600,
-                    display:'flex', alignItems:'center', justifyContent:'center', gap:'6px',
+                    color:'#77706A', fontSize:13, fontWeight:500,
+                    display:'flex', alignItems:'center', justifyContent:'center',
                     textDecoration:'none', whiteSpace:'nowrap',
-                    padding:'7px 16px', flexShrink:0,
+                    padding:'8px 12px', borderRadius:8, flexShrink:0,
+                    transition:'all .15s',
                   }}>
-                  <span style={{fontSize:'15px',lineHeight:1}}>＋</span>
-                  <span>投稿する</span>
+                  投稿する
                 </Link>
                 <div ref={notifRef} style={{position:'relative'}}>
                   <button onClick={handleOpenNotif}
