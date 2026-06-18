@@ -159,13 +159,13 @@ export default function Header({ profile, user, activeGenre }: Props) {
               <>
                 <Link href="/post" className="header-post-btn"
                   style={{
-                    border:'1.5px solid #F26A21', color:'#F26A21', borderRadius:'20px',
+                    border:'1.5px solid #F26A21', color:'#F26A21', borderRadius:'50%',
                     background:'#fff', fontSize:'13px', fontWeight:600,
-                    display:'flex', alignItems:'center', justifyContent:'center', gap:'6px',
+                    display:'flex', alignItems:'center', justifyContent:'center', gap:'4px',
                     textDecoration:'none', whiteSpace:'nowrap',
-                    padding:'7px 14px', flexShrink:0,
+                    width:'38px', height:'38px', padding:0, flexShrink:0, boxSizing:'border-box',
                   }}>
-                  <span style={{fontSize:'15px',lineHeight:1}}>＋</span>
+                  <span style={{fontSize:'18px',lineHeight:1}}>＋</span>
                   <span className="header-post-btn-text">投稿する</span>
                 </Link>
                 <div ref={notifRef} style={{position:'relative'}}>
@@ -405,7 +405,7 @@ export default function Header({ profile, user, activeGenre }: Props) {
         }
         nav a:hover { color: #F26A21 !important; opacity: 1; }
 
-        .header-post-btn { transition: padding .25s ease, background .15s ease; }
+        .header-post-btn { transition: width .25s ease, border-radius .25s ease, background .15s ease, padding .25s ease; }
         .header-post-btn-text {
           display: inline-block;
           max-width: 0;
@@ -413,7 +413,12 @@ export default function Header({ profile, user, activeGenre }: Props) {
           opacity: 0;
           transition: max-width .25s ease, opacity .2s ease;
         }
-        .header-post-btn:hover { background: #fff8f5; }
+        .header-post-btn:hover {
+          background: #fff8f5 !important;
+          width: 110px !important;
+          border-radius: 20px !important;
+          padding: 0 16px 0 12px !important;
+        }
         .header-post-btn:hover .header-post-btn-text { max-width: 70px; opacity: 1; }
       `}</style>
     </>
