@@ -145,14 +145,14 @@ export default function Header({ profile, user, activeGenre }: Props) {
           </Link>
 
           {/* ナビ3項目（ホームはロゴが兼ねるため省略） */}
-          <nav style={{display:'flex',alignItems:'center',gap:4,flexShrink:0}}>
+          <nav style={{display:'flex',alignItems:'stretch',gap:4,flexShrink:0,height:'100%'}}>
             {NAV_LEFT.map(item=>(
-              <Link key={item.href} href={item.href}
-                style={{padding:'8px 12px',fontSize:13,whiteSpace:'nowrap',textDecoration:'none',display:'inline-block',fontWeight:500,
+              <Link key={item.href} href={item.href} className={`header-nav-link${isActive(item.href)?' header-nav-link-active':''}`}
+                style={{padding:'0 12px',fontSize:13,whiteSpace:'nowrap',textDecoration:'none',
+                  display:'flex',alignItems:'center',fontWeight:500,
                   color:isActive(item.href)?'#F26A21':'#77706A',
-                  borderRadius:8,
-                  background:isActive(item.href)?'#FFF1E6':'transparent',
-                  transition:'all .15s'}}>
+                  position:'relative',
+                }}>
                 {item.label}
               </Link>
             ))}
@@ -400,6 +400,21 @@ export default function Header({ profile, user, activeGenre }: Props) {
           .mobile-header  { display: block !important; }
         }
         nav a:hover { color: #F26A21 !important; opacity: 1; }
+
+        .header-nav-link::after {
+          content: '';
+          position: absolute;
+          left: 12px;
+          right: 12px;
+          bottom: 0;
+          height: 3px;
+          background: #F26A21;
+          transform: scaleX(0);
+          transition: transform .2s ease;
+        }
+        .header-nav-link:hover { color: #F26A21 !important; }
+        .header-nav-link:hover::after { transform: scaleX(1); }
+        .header-nav-link-active::after { transform: scaleX(1); }
 
         .header-post-btn { transition: transform .18s ease, box-shadow .18s ease, background .18s ease; }
         .header-post-btn:hover {
