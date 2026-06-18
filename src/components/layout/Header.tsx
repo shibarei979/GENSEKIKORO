@@ -25,7 +25,6 @@ export default function Header({ profile, user, activeGenre }: Props) {
   const [showSettingsModal, setShowSettingsModal] = useState(false)
   const [showMobileMenu, setShowMobileMenu] = useState(false)
   const [scrolled, setScrolled] = useState(false)
-  const [postHover, setPostHover] = useState(false)
   const notifRef = useRef<HTMLDivElement>(null)
   const userMenuRef = useRef<HTMLDivElement>(null)
   const supabase = createClient()
@@ -158,16 +157,16 @@ export default function Header({ profile, user, activeGenre }: Props) {
           <div style={{display:'flex',alignItems:'center',gap:12,position:'relative',zIndex:1}}>
             {user ? (
               <>
-                <Link href="/post"
+                <Link href="/post" className="header-post-btn"
                   style={{
                     border:'1.5px solid #F26A21', color:'#F26A21', borderRadius:'20px',
                     background:'#fff', fontSize:'13px', fontWeight:600,
                     display:'flex', alignItems:'center', justifyContent:'center', gap:'6px',
                     textDecoration:'none', whiteSpace:'nowrap',
-                    padding:'7px 16px', flexShrink:0,
+                    padding:'7px 14px', flexShrink:0,
                   }}>
                   <span style={{fontSize:'15px',lineHeight:1}}>＋</span>
-                  <span>投稿する</span>
+                  <span className="header-post-btn-text">投稿する</span>
                 </Link>
                 <div ref={notifRef} style={{position:'relative'}}>
                   <button onClick={handleOpenNotif}
@@ -405,6 +404,17 @@ export default function Header({ profile, user, activeGenre }: Props) {
           .mobile-header  { display: block !important; }
         }
         nav a:hover { color: #F26A21 !important; opacity: 1; }
+
+        .header-post-btn { transition: padding .25s ease, background .15s ease; }
+        .header-post-btn-text {
+          display: inline-block;
+          max-width: 0;
+          overflow: hidden;
+          opacity: 0;
+          transition: max-width .25s ease, opacity .2s ease;
+        }
+        .header-post-btn:hover { background: #fff8f5; }
+        .header-post-btn:hover .header-post-btn-text { max-width: 70px; opacity: 1; }
       `}</style>
     </>
   )
