@@ -131,8 +131,8 @@ export default function Header({ profile, user, activeGenre }: Props) {
 
         {/* ===== デスクトップ：ヘッダー1行に統合（ロゴ・ナビ・検索・ユーザー操作） ===== */}
         <div className="desktop-header" style={{
-          maxWidth:1200, margin:'0 auto', padding:'0 32px',
-          display:'flex', alignItems:'center', gap:24,
+          maxWidth:1360, margin:'0 auto', padding:'0 32px',
+          display:'flex', alignItems:'center', gap:28,
           height: scrolled ? 60 : 82,
           position:'relative',
           transition:'height .25s ease',
@@ -161,7 +161,7 @@ export default function Header({ profile, user, activeGenre }: Props) {
           <div style={{flex:1}}/>
 
           {/* 検索バー（四角・投稿ボタンの隣） */}
-          <form onSubmit={handleSearch} style={{display:'flex',alignItems:'center',width:300,border:'1.5px solid #F0D9C9',borderRadius:6,background:'#FFF9F2',overflow:'hidden',flexShrink:0}}>
+          <form onSubmit={handleSearch} style={{display:'flex',alignItems:'center',width:340,border:'1.5px solid #F0D9C9',borderRadius:6,background:'#FFF9F2',overflow:'hidden',flexShrink:0}}>
             <input value={q} onChange={e=>setQ(e.target.value)} placeholder="作品名・作者名・キーワードで検索"
               style={{flex:1,padding:'7px 12px',border:'none',background:'transparent',fontSize:12,color:'#2B211B',outline:'none',width:'100%',minWidth:0}}/>
             <button type="submit" style={{padding:'7px 12px',background:'none',border:'none',borderLeft:'1px solid #F0D9C9',cursor:'pointer',display:'flex',alignItems:'center',flexShrink:0}}>
