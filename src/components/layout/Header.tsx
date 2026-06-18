@@ -133,13 +133,13 @@ export default function Header({ profile, user, activeGenre }: Props) {
         <div className="desktop-header" style={{
           maxWidth:1200, margin:'0 auto', padding:'0 32px',
           display:'flex', alignItems:'center', gap:24,
-          height: scrolled ? 52 : 66,
+          height: scrolled ? 60 : 82,
           position:'relative',
           transition:'height .25s ease',
         }}>
           <Link href="/" style={{flexShrink:0}}>
             <img src="/logo.png" alt="原石航路" style={{
-              height: scrolled ? 68 : 90, width:'auto', display:'block', objectFit:'contain',
+              height: scrolled ? 80 : 108, width:'auto', display:'block', objectFit:'contain',
               transition:'height .25s ease',
             }}/>
           </Link>
