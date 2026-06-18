@@ -304,15 +304,15 @@ export default async function HomePage() {
 
       {/* ===== ユーザーの推し ===== */}
       <div className="gem-section-wrap" style={{background:'#fff',padding:'16px 0',overflow:'hidden'}}>
-        <div className="gem-layout" style={{display:'flex',alignItems:'flex-start',gap:28,paddingLeft:'max(32px, calc((100vw - 1200px) / 2 + 32px))'}}>
-          <div className="gem-label desktop-only" style={{flexShrink:0,minWidth:160,maxWidth:160}}>
-            <h2 style={{fontSize:17,fontWeight:700,color:'#2B211B',marginBottom:8}}>ユーザーの推し</h2>
-            <p style={{fontSize:12,color:'#2B211B',lineHeight:1.9,marginBottom:12}}>推しの作品を拡散しよう！</p>
-            <Link href="/search" style={{display:'inline-block',fontSize:11,color:'#F26A21',border:'1.5px solid #F26A21',borderRadius:14,padding:'5px 12px',textDecoration:'none',fontWeight:600}}>作品を検索する</Link>
+        <div style={{maxWidth:1200,margin:'0 auto',padding:'0 32px',marginBottom:14}}>
+          <h2 style={{fontSize:17,fontWeight:700,color:'#2B211B',marginBottom:6}}>ユーザーの推し</h2>
+          <div style={{display:'flex',alignItems:'center',gap:14,flexWrap:'wrap'}}>
+            <p style={{fontSize:12,color:'#2B211B',margin:0}}>推しの作品を拡散しよう！</p>
+            <Link href="/search" style={{display:'inline-block',fontSize:11,color:'#F26A21',border:'1.5px solid #F26A21',borderRadius:14,padding:'5px 12px',textDecoration:'none',fontWeight:600,flexShrink:0}}>作品を検索する</Link>
           </div>
-          <div style={{flex:1,minWidth:0}}>
-            <GemSection novels={gemNovels} discoverCommentMap={discoverCommentMap} />
-          </div>
+        </div>
+        <div style={{width:'100%'}}>
+          <GemSection novels={gemNovels} discoverCommentMap={discoverCommentMap} />
         </div>
       </div>
 

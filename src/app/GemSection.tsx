@@ -36,9 +36,9 @@ function BookItem({ n, discoverComments }: { n: Novel; discoverComments: {commen
         onMouseLeave={()=>setHover(false)}
         style={{
           position:'relative',
-          flex: hover ? '0 0 168px' : '1 1 0',
-          minWidth: hover ? 168 : 32,
-          maxWidth: hover ? 168 : 60,
+          flex: hover ? '0 0 168px' : '0 0 48px',
+          minWidth: hover ? 168 : 48,
+          maxWidth: hover ? 168 : 48,
           height:195,
           cursor:'pointer',
           transition:'flex .35s cubic-bezier(.4,0,.2,1), min-width .35s cubic-bezier(.4,0,.2,1), max-width .35s cubic-bezier(.4,0,.2,1)',
@@ -143,9 +143,9 @@ function EmptyBook() {
       onMouseLeave={()=>setHover(false)}
       style={{
         position:'relative',
-        flex: hover ? '0 0 168px' : '1 1 0',
-        minWidth: hover ? 168 : 32,
-        maxWidth: hover ? 168 : 60,
+        flex: hover ? '0 0 168px' : '0 0 48px',
+        minWidth: hover ? 168 : 48,
+        maxWidth: hover ? 168 : 48,
         height:195,
         transition:'flex .35s cubic-bezier(.4,0,.2,1), min-width .35s cubic-bezier(.4,0,.2,1), max-width .35s cubic-bezier(.4,0,.2,1)',
         perspective:1000, zIndex: hover?5:1,
@@ -195,20 +195,36 @@ function EmptyBook() {
 }
 
 export default function GemSection({ novels, discoverCommentMap }: Props) {
+  const bookCount = Math.min(50, Math.max(novels.length, 15))
+  const bookList = Array.from({length: bookCount}, (_,i) => novels[i] || null)
+  // 無限ループ用に同じ並びをもう1セット複製
+  const loopList = [...bookList, ...bookList]
+
   return (
     <>
-      {/* デスクトップ：本棚スタイル（端から端まで均等配置） */}
-      <div className="gem-desktop" style={{flex:1,overflowX:'auto',overflowY:'hidden'}}>
-        <div style={{display:'flex',gap:3,paddingBottom:10,paddingTop:4,alignItems:'flex-end',position:'relative',minWidth:'100%'}}>
-          {Array.from({length: Math.min(50, Math.max(novels.length, 15))},(_,i) => {
-            const n = novels[i]
-            return n
-              ? <BookItem key={n.id} n={n} discoverComments={discoverCommentMap[n.id]||[]} />
-              : <EmptyBook key={i} />
-          })}
-          {/* 本棚の板 */}
-          <div style={{position:'absolute',left:0,right:0,bottom:-6,height:8,background:'linear-gradient(180deg,#c8a87a,#a8855a)',borderRadius:2,boxShadow:'0 3px 6px rgba(0,0,0,0.2)',zIndex:0}}/>
+      {/* デスクトップ：本棚スタイル（自動スライドで流れる） */}
+      <div className="gem-desktop" style={{flex:1,overflow:'hidden',position:'relative'}}>
+        <div className="gem-shelf-track" style={{display:'flex',gap:3,paddingBottom:10,paddingTop:4,alignItems:'flex-end',width:'max-content'}}>
+          {loopList.map((n, i) => (
+            n
+              ? <BookItem key={`${n.id}-${i}`} n={n} discoverComments={discoverCommentMap[n.id]||[]} />
+              : <EmptyBook key={`empty-${i}`} />
+          ))}
         </div>
+        {/* 本棚の板 */}
+        <div style={{position:'absolute',left:0,right:0,bottom:-6,height:8,background:'linear-gradient(180deg,#c8a87a,#a8855a)',borderRadius:2,boxShadow:'0 3px 6px rgba(0,0,0,0.2)',zIndex:0}}/>
+        <style>{`
+          @keyframes gemShelfSlide {
+            from { transform: translateX(0); }
+            to   { transform: translateX(-50%); }
+          }
+          .gem-shelf-track {
+            animation: gemShelfSlide ${Math.max(20, bookCount * 2.2)}s linear infinite;
+          }
+          .gem-shelf-track:hover {
+            animation-play-state: paused;
+          }
+        `}</style>
       </div>
 
       {/* モバイル：お知らせ風デザイン（変更なし） */}
