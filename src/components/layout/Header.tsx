@@ -157,7 +157,20 @@ export default function Header({ profile, user, activeGenre }: Props) {
           <div style={{display:'flex',alignItems:'center',gap:12,position:'relative',zIndex:1}}>
             {user ? (
               <>
-                <Link href="/post" className="header-post-btn" style={{border:'1.5px solid #F26A21',color:'#F26A21',padding:'6px 18px',borderRadius:20,background:'#fff',fontSize:13,fontWeight:500,display:'inline-block',textDecoration:'none'}}>＋ 投稿する</Link>
+                <Link href="/post" className="header-post-btn"
+                  style={{
+                    border:'1.5px solid #F26A21', color:'#F26A21', borderRadius:20,
+                    background:'#fff', fontSize:13, fontWeight:600,
+                    display:'flex', alignItems:'center', justifyContent:'center',
+                    textDecoration:'none', overflow:'hidden', whiteSpace:'nowrap',
+                    height:36, width:36, padding:0,
+                    transition:'width .25s ease, padding .25s ease',
+                  }}>
+                  <span style={{display:'flex',alignItems:'center',gap:5,flexShrink:0,paddingLeft:13}}>
+                    <span style={{fontSize:16,lineHeight:1}}>＋</span>
+                    <span className="header-post-btn-label" style={{opacity:0,transition:'opacity .15s ease'}}>投稿する</span>
+                  </span>
+                </Link>
                 <div ref={notifRef} style={{position:'relative'}}>
                   <button onClick={handleOpenNotif}
                     style={{position:'relative',width:36,height:36,borderRadius:'50%',border:'1.5px solid #F0D9C9',background:'#fff',cursor:'pointer',display:'flex',alignItems:'center',justifyContent:'center',flexShrink:0}}>
@@ -393,7 +406,8 @@ export default function Header({ profile, user, activeGenre }: Props) {
           .desktop-header { display: none !important; }
           .mobile-header  { display: block !important; }
         }
-        .header-post-btn:hover { background: #fff8f5 !important; transform: translateY(-1px); box-shadow: 0 2px 8px rgba(242,106,33,.12); }
+        .header-post-btn:hover { width: 122px !important; padding-right: 14px; background: #fff8f5 !important; box-shadow: 0 2px 8px rgba(242,106,33,.12); }
+        .header-post-btn:hover .header-post-btn-label { opacity: 1 !important; }
         nav a:hover { color: #F26A21 !important; opacity: 1; }
       `}</style>
     </>
