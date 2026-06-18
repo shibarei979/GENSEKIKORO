@@ -166,9 +166,9 @@ export default function Header({ profile, user, activeGenre }: Props) {
                     height:36, width:36, padding:0,
                     transition:'width .25s ease, padding .25s ease',
                   }}>
-                  <span style={{display:'flex',alignItems:'center',gap:5,flexShrink:0,paddingLeft:13}}>
-                    <span style={{fontSize:16,lineHeight:1}}>＋</span>
-                    <span className="header-post-btn-label" style={{opacity:0,transition:'opacity .15s ease'}}>投稿する</span>
+                  <span style={{display:'flex',alignItems:'center',gap:5,flexShrink:0}}>
+                    <span style={{fontSize:16,lineHeight:1,width:20,textAlign:'center',flexShrink:0}}>＋</span>
+                    <span className="header-post-btn-label" style={{opacity:0,transition:'opacity .15s ease',flexShrink:0}}>投稿する</span>
                   </span>
                 </Link>
                 <div ref={notifRef} style={{position:'relative'}}>
@@ -406,7 +406,7 @@ export default function Header({ profile, user, activeGenre }: Props) {
           .desktop-header { display: none !important; }
           .mobile-header  { display: block !important; }
         }
-        .header-post-btn:hover { width: 122px !important; padding-right: 14px; background: #fff8f5 !important; box-shadow: 0 2px 8px rgba(242,106,33,.12); }
+        .header-post-btn:hover { width: 122px !important; background: #fff8f5 !important; box-shadow: 0 2px 8px rgba(242,106,33,.12); }
         .header-post-btn:hover .header-post-btn-label { opacity: 1 !important; }
         nav a:hover { color: #F26A21 !important; opacity: 1; }
       `}</style>
