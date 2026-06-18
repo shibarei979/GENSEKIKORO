@@ -25,6 +25,7 @@ export default function Header({ profile, user, activeGenre }: Props) {
   const [showSettingsModal, setShowSettingsModal] = useState(false)
   const [showMobileMenu, setShowMobileMenu] = useState(false)
   const [scrolled, setScrolled] = useState(false)
+  const [postHover, setPostHover] = useState(false)
   const notifRef = useRef<HTMLDivElement>(null)
   const userMenuRef = useRef<HTMLDivElement>(null)
   const supabase = createClient()
@@ -157,20 +158,24 @@ export default function Header({ profile, user, activeGenre }: Props) {
           <div style={{display:'flex',alignItems:'center',gap:12,position:'relative',zIndex:1}}>
             {user ? (
               <>
-                <Link href="/post" className="header-post-btn"
+                <Link href="/post"
+                  onMouseEnter={()=>setPostHover(true)}
+                  onMouseLeave={()=>setPostHover(false)}
                   style={{
                     border:'1.5px solid #F26A21', color:'#F26A21', borderRadius:20,
-                    background:'#fff', fontSize:13, fontWeight:600,
-                    display:'flex', alignItems:'center', justifyContent:'center', gap:6,
+                    background: postHover ? '#fff8f5' : '#fff', fontSize:13, fontWeight:600,
+                    display:'flex', alignItems:'center', justifyContent: postHover ? 'flex-start' : 'center', gap:6,
                     textDecoration:'none', overflow:'hidden', whiteSpace:'nowrap',
-                    height:36, width:36, padding:0, flexShrink:0,
-                    transition:'width .25s ease',
+                    height:36, width: postHover ? 122 : 36, padding: postHover ? '0 0 0 13px' : 0,
+                    flexShrink:0, boxSizing:'border-box',
+                    boxShadow: postHover ? '0 2px 8px rgba(242,106,33,.12)' : 'none',
+                    transition:'width .25s ease, padding .25s ease, background .15s ease',
                   }}>
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#F26A21" strokeWidth="2.5" strokeLinecap="round" style={{flexShrink:0,minWidth:16}}>
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#F26A21" strokeWidth="2.5" strokeLinecap="round" style={{flexShrink:0,display:'block'}}>
                     <line x1="12" y1="5" x2="12" y2="19"/>
                     <line x1="5" y1="12" x2="19" y2="12"/>
                   </svg>
-                  <span className="header-post-btn-label" style={{opacity:0,transition:'opacity .15s ease',flexShrink:0}}>投稿する</span>
+                  <span style={{opacity: postHover ? 1 : 0,transition:'opacity .15s ease',flexShrink:0}}>投稿する</span>
                 </Link>
                 <div ref={notifRef} style={{position:'relative'}}>
                   <button onClick={handleOpenNotif}
@@ -407,8 +412,6 @@ export default function Header({ profile, user, activeGenre }: Props) {
           .desktop-header { display: none !important; }
           .mobile-header  { display: block !important; }
         }
-        .header-post-btn:hover { width: 122px !important; background: #fff8f5 !important; box-shadow: 0 2px 8px rgba(242,106,33,.12); }
-        .header-post-btn:hover .header-post-btn-label { opacity: 1 !important; }
         nav a:hover { color: #F26A21 !important; opacity: 1; }
       `}</style>
     </>
