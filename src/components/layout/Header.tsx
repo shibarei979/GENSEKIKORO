@@ -166,8 +166,11 @@ export default function Header({ profile, user, activeGenre }: Props) {
                     height:36, width:36, padding:0,
                     transition:'width .25s ease, padding .25s ease',
                   }}>
-                  <span style={{display:'flex',alignItems:'center',gap:5,flexShrink:0}}>
-                    <span style={{fontSize:16,lineHeight:1,width:20,textAlign:'center',flexShrink:0}}>＋</span>
+                  <span style={{display:'flex',alignItems:'center',justifyContent:'center',gap:6,flexShrink:0,width:'100%',height:'100%'}}>
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#F26A21" strokeWidth="2.5" strokeLinecap="round" style={{flexShrink:0}}>
+                      <line x1="12" y1="5" x2="12" y2="19"/>
+                      <line x1="5" y1="12" x2="19" y2="12"/>
+                    </svg>
                     <span className="header-post-btn-label" style={{opacity:0,transition:'opacity .15s ease',flexShrink:0}}>投稿する</span>
                   </span>
                 </Link>
