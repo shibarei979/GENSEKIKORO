@@ -66,7 +66,7 @@ export default function ActionBanner({ isLoggedIn }: Props) {
   const [hoverRight, setHoverRight] = useState(false)
 
   const W = 800
-  const H = 220
+  const H = 374
   const R = 26
 
   // 探す：左端基準、先細りが右へ（中央方向）。通常向き。
@@ -75,7 +75,7 @@ export default function ActionBanner({ isLoggedIn }: Props) {
   const rightPath = trapezoidPath(W, H, R, 'right', true)
 
   return (
-    <div style={{position:'relative', width:'100%', height:300}}>
+    <div style={{position:'relative', width:'100%', height:560}}>
 
       {/* 左：探す（画面左端まで・上にストレッチ） */}
       <Link href="/search"
@@ -101,11 +101,11 @@ export default function ActionBanner({ isLoggedIn }: Props) {
         </svg>
         <div style={{position:'absolute', inset:0, display:'flex', alignItems:'center', padding:'0 14% 0 7%'}}>
           <div>
-            <div style={{fontSize:11,color:'rgba(255,255,255,0.6)',fontWeight:600,letterSpacing:'0.1em',marginBottom:8}}>READ</div>
-            <div style={{fontSize:23,fontWeight:700,color:'#fff',fontFamily:"'Noto Serif JP',serif",marginBottom:10,lineHeight:1.45}}>
+            <div style={{fontSize:13,color:'rgba(255,255,255,0.6)',fontWeight:600,letterSpacing:'0.1em',marginBottom:8}}>READ</div>
+            <div style={{fontSize:30,fontWeight:700,color:'#fff',fontFamily:"'Noto Serif JP',serif",marginBottom:14,lineHeight:1.45}}>
               次に読みたい一冊が、<br/>ここにある
             </div>
-            <div style={{display:'inline-flex',alignItems:'center',gap:6,fontSize:13,color:'#FFD9B8',fontWeight:600}}>
+            <div style={{display:'inline-flex',alignItems:'center',gap:6,fontSize:15,color:'#FFD9B8',fontWeight:600}}>
               作品を探す
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#FFD9B8" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
             </div>
@@ -117,7 +117,7 @@ export default function ActionBanner({ isLoggedIn }: Props) {
       <Link href={isLoggedIn ? '/post' : '/auth/register'}
         onMouseEnter={()=>setHoverRight(true)} onMouseLeave={()=>setHoverRight(false)}
         style={{
-          position:'absolute', right:0, top:100, width:'42%', height:H,
+          position:'absolute', right:0, top:170, width:'42%', height:H,
           textDecoration:'none', display:'block',
           transform: hoverRight ? 'translateY(6px)' : 'translateY(0)',
           transition:'transform .25s ease',
@@ -137,11 +137,11 @@ export default function ActionBanner({ isLoggedIn }: Props) {
         </svg>
         <div style={{position:'absolute', inset:0, display:'flex', alignItems:'center', justifyContent:'flex-end', padding:'0 7% 0 14%'}}>
           <div style={{textAlign:'right'}}>
-            <div style={{fontSize:11,color:'rgba(255,255,255,0.75)',fontWeight:600,letterSpacing:'0.1em',marginBottom:8}}>WRITE</div>
-            <div style={{fontSize:23,fontWeight:700,color:'#fff',fontFamily:"'Noto Serif JP',serif",marginBottom:10,lineHeight:1.45}}>
+            <div style={{fontSize:13,color:'rgba(255,255,255,0.75)',fontWeight:600,letterSpacing:'0.1em',marginBottom:8}}>WRITE</div>
+            <div style={{fontSize:30,fontWeight:700,color:'#fff',fontFamily:"'Noto Serif JP',serif",marginBottom:14,lineHeight:1.45}}>
               あなたの物語を、<br/>世界に届けよう
             </div>
-            <div style={{display:'inline-flex',alignItems:'center',gap:6,fontSize:13,color:'#fff',fontWeight:600}}>
+            <div style={{display:'inline-flex',alignItems:'center',gap:6,fontSize:15,color:'#fff',fontWeight:600}}>
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{transform:'rotate(180deg)'}}><polyline points="9 18 15 12 9 6"/></svg>
               作品を投稿する
             </div>
