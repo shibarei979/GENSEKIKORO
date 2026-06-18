@@ -24,6 +24,7 @@ export default function Header({ profile, user, activeGenre }: Props) {
   const [showSettings, setShowSettings] = useState(false)
   const [showSettingsModal, setShowSettingsModal] = useState(false)
   const [showMobileMenu, setShowMobileMenu] = useState(false)
+  const [scrolled, setScrolled] = useState(false)
   const notifRef = useRef<HTMLDivElement>(null)
   const userMenuRef = useRef<HTMLDivElement>(null)
   const supabase = createClient()
@@ -59,6 +60,16 @@ export default function Header({ profile, user, activeGenre }: Props) {
     }
     return () => { document.body.style.overflow = '' }
   }, [showMobileMenu])
+
+  // ===== A7: スクロール検知でヘッダーを縮小・半透明化 =====
+  useEffect(() => {
+    function handleScroll() {
+      setScrolled(window.scrollY > 24)
+    }
+    handleScroll()
+    window.addEventListener('scroll', handleScroll, { passive: true })
+    return () => window.removeEventListener('scroll', handleScroll)
+  }, [])
 
   const userNumber = profile?.user_number
     ? '#' + String(profile.user_number).padStart(4, '0')
@@ -99,14 +110,44 @@ export default function Header({ profile, user, activeGenre }: Props) {
     return pathname.startsWith(href)
   }
 
+  const NAV_LEFT = [
+    {label:'ホーム',    href:'/'},
+    {label:'ランキング', href:'/ranking'},
+    {label:'作品を探す', href:'/search'},
+    {label:'コンテスト', href:'/contests'},
+  ]
+  const NAV_RIGHT = [
+    {label:'閲覧履歴',  href:'/history'},
+    {label:'ミッション', href:'/mission'},
+    {label:'マイページ', href:'/mypage'},
+  ]
+
   return (
     <>
-      <header style={{background:'#fff',borderBottom:'1px solid #F0D9C9',position:'sticky',top:0,zIndex:50,boxShadow:'0 1px 4px rgba(242,106,33,.07)'}}>
+      {/* ===== 統合ヘッダー（ロゴ＋検索＋ユーザー操作＋ナビを1ブロックに） ===== */}
+      <header style={{
+        background: scrolled ? 'rgba(255,255,255,0.88)' : '#fff',
+        backdropFilter: scrolled ? 'blur(10px)' : 'none',
+        WebkitBackdropFilter: scrolled ? 'blur(10px)' : 'none',
+        borderBottom:'1px solid #F0D9C9',
+        position:'sticky', top:0, zIndex:50,
+        boxShadow: scrolled ? '0 2px 12px rgba(242,106,33,.08)' : '0 1px 4px rgba(242,106,33,.07)',
+        transition:'background .25s ease, box-shadow .25s ease, backdrop-filter .25s ease',
+      }}>
 
-        {/* ===== デスクトップヘッダー ===== */}
-        <div className="desktop-header" style={{maxWidth:1200,margin:'0 auto',padding:'0 32px',display:'flex',alignItems:'center',gap:16,height:66,position:'relative'}}>
+        {/* ===== デスクトップ：上段（ロゴ・検索・ユーザー操作） ===== */}
+        <div className="desktop-header" style={{
+          maxWidth:1200, margin:'0 auto', padding:'0 32px',
+          display:'flex', alignItems:'center', gap:16,
+          height: scrolled ? 52 : 66,
+          position:'relative',
+          transition:'height .25s ease',
+        }}>
           <Link href="/" style={{flexShrink:0}}>
-            <img src="/logo.png" alt="原石航路" style={{height:90,width:'auto',display:'block',objectFit:'contain'}}/>
+            <img src="/logo.png" alt="原石航路" style={{
+              height: scrolled ? 68 : 90, width:'auto', display:'block', objectFit:'contain',
+              transition:'height .25s ease',
+            }}/>
           </Link>
           <form onSubmit={handleSearch} style={{position:'absolute',left:'calc(50% - 80px)',transform:'translateX(-50%)',width:520,display:'flex',alignItems:'center',border:'1.5px solid #F0D9C9',borderRadius:24,background:'#FFF9F2',overflow:'hidden'}}>
             <input value={q} onChange={e=>setQ(e.target.value)} placeholder="作品名・作者名・キーワードで検索"
@@ -183,9 +224,40 @@ export default function Header({ profile, user, activeGenre }: Props) {
           </div>
         </div>
 
+        {/* ===== デスクトップ：下段（ナビゲーション、同ブロック内） ===== */}
+        <nav className="desktop-header" style={{
+          borderTop:'1px solid #FFF1E6',
+          maxHeight: scrolled ? 0 : 40,
+          opacity: scrolled ? 0 : 1,
+          overflow:'hidden',
+          transition:'max-height .25s ease, opacity .2s ease',
+        }}>
+          <div style={{maxWidth:1200,margin:'0 auto',padding:'0 32px',display:'flex',width:'100%'}}>
+            {NAV_LEFT.map(item=>(
+              <Link key={item.href} href={item.href}
+                style={{padding:'9px 16px',fontSize:13,whiteSpace:'nowrap',textDecoration:'none',display:'inline-block',fontWeight:500,
+                  color:isActive(item.href)?'#F26A21':'#77706A',
+                  borderBottom:isActive(item.href)?'2px solid #F26A21':'2px solid transparent',
+                  transition:'all .15s'}}>
+                {item.label}
+              </Link>
+            ))}
+            <div style={{flex:1}}/>
+            {NAV_RIGHT.map(item=>(
+              <Link key={item.href} href={item.href}
+                style={{padding:'9px 16px',fontSize:13,whiteSpace:'nowrap',textDecoration:'none',display:'inline-block',fontWeight:500,
+                  color:isActive(item.href)?'#F26A21':'#77706A',
+                  borderBottom:isActive(item.href)?'2px solid #F26A21':'2px solid transparent',
+                  transition:'all .15s'}}>
+                {item.label}
+              </Link>
+            ))}
+          </div>
+        </nav>
+
         {/* ===== モバイルヘッダー ===== */}
         <div className="mobile-header">
-          <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',padding:'0 16px',height:64}}>
+          <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',padding:'0 16px',height: scrolled ? 54 : 64,transition:'height .25s ease'}}>
             <div style={{width:36}}>
               {user ? (
                 <div ref={notifRef} style={{position:'relative'}}>
@@ -217,7 +289,7 @@ export default function Header({ profile, user, activeGenre }: Props) {
             </div>
 
             <Link href="/" style={{position:'absolute',left:'50%',transform:'translateX(-50%)'}}>
-              <img src="/logo.png" alt="原石航路" style={{height:58,width:'auto',display:'block',objectFit:'contain'}}/>
+              <img src="/logo.png" alt="原石航路" style={{height: scrolled ? 46 : 58,width:'auto',display:'block',objectFit:'contain',transition:'height .25s ease'}}/>
             </Link>
 
             <button onClick={()=>setShowMobileMenu(!showMobileMenu)}
@@ -293,36 +365,6 @@ export default function Header({ profile, user, activeGenre }: Props) {
           </div>
         )}
       </header>
-
-      {/* ===== デスクトップNAV ===== */}
-      <nav className="desktop-header" style={{display:'flex',background:'#fff',borderBottom:'2px solid #F0D9C9'}}>
-        <div style={{maxWidth:1200,margin:'0 auto',padding:'0 32px',display:'flex',gap:0,width:'100%'}}>
-          {/* 左側：メインナビ */}
-          {[
-            {label:'ホーム',    href:'/'},
-            {label:'ランキング', href:'/ranking'},
-            {label:'作品を探す', href:'/search'},
-            {label:'コンテスト', href:'/contests'},
-          ].map(item=>(
-            <Link key={item.href} href={item.href}
-              style={{padding:'9px 16px',fontSize:13,whiteSpace:'nowrap',textDecoration:'none',display:'inline-block',fontWeight:500,color:'#77706A',borderBottom:'2px solid transparent',transition:'all .15s'}}>
-              {item.label}
-            </Link>
-          ))}
-          <div style={{flex:1}}/>
-          {/* 右側：閲覧履歴・ミッション・マイページ */}
-          {[
-            {label:'閲覧履歴',  href:'/history'},
-            {label:'ミッション', href:'/mission'},
-            {label:'マイページ', href:'/mypage'},
-          ].map(item=>(
-            <Link key={item.href} href={item.href}
-              style={{padding:'9px 16px',fontSize:13,whiteSpace:'nowrap',textDecoration:'none',display:'inline-block',fontWeight:500,color:'#77706A',borderBottom:'2px solid transparent',transition:'all .15s'}}>
-              {item.label}
-            </Link>
-          ))}
-        </div>
-      </nav>
 
       {/* ===== ボトムナビ（モバイルのみ） ===== */}
       <nav className="mobile-header" style={{position:'fixed',bottom:0,left:0,right:0,zIndex:49,background:'#fff',borderTop:'1px solid #F0D9C9',boxShadow:'0 -1px 8px rgba(0,0,0,0.06)'}}>
