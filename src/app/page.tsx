@@ -309,11 +309,6 @@ export default async function HomePage() {
         </div>
       </div>
 
-      {/* ===== 投稿・検索 台形バナー（ユーザーの推し と 週間ランキング の間） ===== */}
-      <div className="desktop-only" style={{background:'#fff',padding:'24px 0',width:'100%'}}>
-        <ActionBanner isLoggedIn={!!user} />
-      </div>
-
       {/* ===== 作品を探す（デスクトップのみ） ===== */}
       <div className="desktop-only search-banner-section" style={{background:'#fff',padding:'20px 0'}}>
         <div style={{maxWidth:1200,margin:'0 auto',padding:'0 32px'}}>
@@ -351,6 +346,11 @@ export default async function HomePage() {
           </div>
         </div>
         <div><HomeSidebar announcements={sidebarAnnouncements||[]} contests={sidebarContests} /></div>
+      </div>
+
+      {/* ===== 投稿・検索 台形バナー（新着作品の下） ===== */}
+      <div className="desktop-only" style={{background:'#fff',padding:'24px 0',width:'100%'}}>
+        <ActionBanner isLoggedIn={!!user} />
       </div>
 
       {/* ===== モバイル：週間ランキング ===== */}
