@@ -161,11 +161,11 @@ export default function Header({ profile, user, activeGenre }: Props) {
                   style={{
                     border:'1.5px solid #F26A21', color:'#F26A21', borderRadius:'50%',
                     background:'#fff', fontSize:'13px', fontWeight:600,
-                    display:'flex', alignItems:'center', justifyContent:'center', gap:'4px',
+                    display:'flex', alignItems:'center', justifyContent:'center',
                     textDecoration:'none', whiteSpace:'nowrap',
                     width:'38px', height:'38px', padding:0, flexShrink:0, boxSizing:'border-box',
                   }}>
-                  <span style={{fontSize:'18px',lineHeight:1}}>＋</span>
+                  <span style={{fontSize:'18px',lineHeight:1,flexShrink:0}}>＋</span>
                   <span className="header-post-btn-text">投稿する</span>
                 </Link>
                 <div ref={notifRef} style={{position:'relative'}}>
@@ -418,6 +418,7 @@ export default function Header({ profile, user, activeGenre }: Props) {
           width: 110px !important;
           border-radius: 20px !important;
           padding: 0 16px 0 12px !important;
+          gap: 4px;
         }
         .header-post-btn:hover .header-post-btn-text { max-width: 70px; opacity: 1; }
       `}</style>
