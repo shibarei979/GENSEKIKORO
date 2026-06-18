@@ -89,32 +89,45 @@ function BookItem({ n, discoverComments }: { n: Novel; discoverComments: {commen
             zIndex: 1,
           }}/>
 
-          {/* ===== 表紙（ホバー時・本らしい厚み付き） ===== */}
+          {/* ===== 表紙（ホバー時・本の表紙デザイン） ===== */}
           <div style={{
             position:'absolute', inset:0,
             transformOrigin:'left center',
-            background:'#fff', border:`1px solid ${SPINE_BASE}40`, borderRadius:'2px 7px 7px 2px',
+            background:`linear-gradient(135deg, ${SPINE_LIGHT} 0%, ${SPINE_BASE} 100%)`,
+            border:`1.5px solid ${SPINE_DARK}`, borderRadius:'2px 7px 7px 2px',
             overflow:'hidden', display:'flex', flexDirection:'column',
-            boxShadow: hover ? `0 10px 24px rgba(0,0,0,0.22), inset -3px 0 6px rgba(0,0,0,0.06)` : 'none',
+            boxShadow: hover ? `0 10px 24px rgba(0,0,0,0.28), inset -3px 0 6px rgba(0,0,0,0.15)` : 'none',
             opacity: hover ? 1 : 0,
             transform: hover ? 'rotateY(0deg)' : 'rotateY(100deg)',
             transition:'opacity .2s ease .12s, transform .35s ease',
             backfaceVisibility:'hidden',
           }}>
-            {/* 表紙上部の色帯（本のテーマカラーで統一感を出す） */}
-            <div style={{height:5,background:`linear-gradient(90deg, ${SPINE_DARK}, ${SPINE_LIGHT})`,flexShrink:0}}/>
-            <div style={{padding:9,flex:2,overflow:'hidden'}}>
-              <div style={{display:'flex',gap:4,marginBottom:4,flexWrap:'wrap'}}>
-                <span style={{fontSize:9,fontWeight:700,color:'#F26A21',background:'#FFF1E6',border:'1px solid #f5b080',padding:'1px 5px',borderRadius:3}}>原石</span>
-                <span style={{fontSize:9,color:'#77706A',background:'#FFF9F2',border:'1px solid #F0D9C9',padding:'1px 5px',borderRadius:3}}>{n.genre}</span>
+            {/* 装飾の二重枠線（画像参考の本の表紙デザイン） */}
+            <svg width="100%" height="100%" style={{position:'absolute',inset:0,pointerEvents:'none'}} viewBox="0 0 168 195" preserveAspectRatio="none">
+              <rect x="8" y="8" width="152" height="179" rx="3" fill="none" stroke="rgba(255,230,190,0.55)" strokeWidth="1.5"/>
+              <path d="M 16 22 Q 16 16 22 16 L 146 16 Q 152 16 152 22"
+                fill="none" stroke="rgba(255,230,190,0.7)" strokeWidth="1.2"/>
+              <path d="M 16 173 Q 16 179 22 179 L 146 179 Q 152 179 152 173"
+                fill="none" stroke="rgba(255,230,190,0.7)" strokeWidth="1.2"/>
+              <line x1="16" y1="16" x2="16" y2="179" stroke="rgba(255,230,190,0.7)" strokeWidth="1.2"/>
+              <line x1="152" y1="16" x2="152" y2="179" stroke="rgba(255,230,190,0.7)" strokeWidth="1.2"/>
+            </svg>
+
+            <div style={{position:'relative',zIndex:1,padding:'18px 16px 10px',flex:1,display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',textAlign:'center'}}>
+              <div style={{display:'flex',gap:4,marginBottom:8,flexWrap:'wrap',justifyContent:'center'}}>
+                <span style={{fontSize:8,fontWeight:700,color:'#fff',background:'rgba(255,255,255,0.15)',border:'1px solid rgba(255,230,190,0.5)',padding:'1px 6px',borderRadius:3,letterSpacing:'0.05em'}}>原石</span>
+                <span style={{fontSize:8,color:'rgba(255,255,255,0.85)',background:'rgba(255,255,255,0.1)',border:'1px solid rgba(255,230,190,0.3)',padding:'1px 6px',borderRadius:3}}>{n.genre}</span>
               </div>
-              <div style={{fontSize:13,fontWeight:700,color:'#2B211B',lineHeight:1.4,marginBottom:3,overflow:'hidden',display:'-webkit-box',WebkitLineClamp:2,WebkitBoxOrient:'vertical' as any}}>{n.title}</div>
-              <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',gap:4}}>
-                <div style={{fontSize:10,color:'#77706A',overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap'}}>作者：{n.display_name}</div>
-                {n.likeCount2 > 0 && <span style={{fontSize:9,color:'#B8AEA8',flexShrink:0}}>♡ {n.likeCount2}</span>}
-              </div>
+              <div style={{fontSize:14,fontWeight:700,color:'#fff',lineHeight:1.5,marginBottom:8,fontFamily:"'Noto Serif JP',serif",textShadow:'0 1px 3px rgba(0,0,0,0.3)',overflow:'hidden',display:'-webkit-box',WebkitLineClamp:3,WebkitBoxOrient:'vertical' as any}}>{n.title}</div>
+              <div style={{width:24,height:1,background:'rgba(255,230,190,0.5)',marginBottom:8}}/>
+              <div style={{fontSize:10,color:'rgba(255,230,190,0.9)',overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap',maxWidth:'100%'}}>{n.display_name}</div>
+              {n.likeCount2 > 0 && <span style={{fontSize:9,color:'rgba(255,230,190,0.7)',marginTop:4}}>♡ {n.likeCount2}</span>}
             </div>
-            <GemComment novelId={n.id} discoverCount={n.discoverCount} likeCount={n.likeCount2} discoverComments={discoverComments} />
+
+            {/* 帯（読者の声） */}
+            <div style={{position:'relative',zIndex:1,background:'#fff',borderTop:`2px solid ${SPINE_DARK}`}}>
+              <GemComment novelId={n.id} discoverCount={n.discoverCount} likeCount={n.likeCount2} discoverComments={discoverComments} />
+            </div>
           </div>
         </div>
       </div>
@@ -152,21 +165,26 @@ function EmptyBook() {
         <div style={{
           position:'absolute', inset:0,
           transformOrigin:'left center',
-          background:'#fff', border:`1px solid ${SPINE_BASE}40`, borderRadius:'2px 7px 7px 2px',
+          background:`linear-gradient(135deg, ${SPINE_LIGHT} 0%, ${SPINE_BASE} 100%)`,
+          border:`1.5px solid ${SPINE_DARK}`, borderRadius:'2px 7px 7px 2px',
           overflow:'hidden', display:'flex', flexDirection:'column',
           opacity: hover ? 1 : 0,
           transform: hover ? 'rotateY(0deg)' : 'rotateY(100deg)',
           transition:'opacity .2s ease .12s, transform .35s ease',
           backfaceVisibility:'hidden',
         }}>
-          <div style={{height:5,background:`linear-gradient(90deg, ${SPINE_DARK}, ${SPINE_LIGHT})`,flexShrink:0}}/>
-          <div style={{padding:9,flex:2}}>
-            <div style={{display:'flex',gap:4,marginBottom:4}}>
-              <span style={{fontSize:9,fontWeight:700,color:'#F26A21',background:'#FFF1E6',border:'1px solid #f5b080',padding:'1px 5px',borderRadius:3}}>原石</span>
-            </div>
-            <div style={{fontSize:13,fontWeight:700,color:'#2B211B'}}>作品タイトル（準備中）</div>
+          <svg width="100%" height="100%" style={{position:'absolute',inset:0,pointerEvents:'none'}} viewBox="0 0 168 195" preserveAspectRatio="none">
+            <rect x="8" y="8" width="152" height="179" rx="3" fill="none" stroke="rgba(255,230,190,0.45)" strokeWidth="1.5"/>
+            <line x1="16" y1="16" x2="16" y2="179" stroke="rgba(255,230,190,0.55)" strokeWidth="1.2"/>
+            <line x1="152" y1="16" x2="152" y2="179" stroke="rgba(255,230,190,0.55)" strokeWidth="1.2"/>
+            <line x1="16" y1="16" x2="152" y2="16" stroke="rgba(255,230,190,0.55)" strokeWidth="1.2"/>
+            <line x1="16" y1="179" x2="152" y2="179" stroke="rgba(255,230,190,0.55)" strokeWidth="1.2"/>
+          </svg>
+          <div style={{position:'relative',zIndex:1,padding:'18px 16px',flex:1,display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',textAlign:'center'}}>
+            <span style={{fontSize:8,fontWeight:700,color:'#fff',background:'rgba(255,255,255,0.15)',border:'1px solid rgba(255,230,190,0.4)',padding:'1px 6px',borderRadius:3,marginBottom:10}}>原石</span>
+            <div style={{fontSize:13,fontWeight:700,color:'rgba(255,255,255,0.8)',fontFamily:"'Noto Serif JP',serif"}}>作品準備中</div>
           </div>
-          <div style={{borderTop:'1px solid #F0D9C9',background:'#FFF9F2',padding:'8px 10px',flex:3,display:'flex',flexDirection:'column',justifyContent:'center'}}>
+          <div style={{position:'relative',zIndex:1,background:'#fff',borderTop:`2px solid ${SPINE_DARK}`,padding:'8px 10px'}}>
             <div style={{fontSize:9,fontWeight:700,color:'#F26A21',marginBottom:3}}>読者の声</div>
             <div style={{fontSize:10,color:'#B8AEA8',lineHeight:1.55,fontStyle:'italic',textAlign:'center'}}>君の声を届けよう</div>
           </div>
