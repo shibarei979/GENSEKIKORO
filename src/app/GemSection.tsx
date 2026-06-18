@@ -1,5 +1,5 @@
 'use client'
-import { useState } from 'react'
+import { useState, useRef, useEffect, useCallback } from 'react'
 import GemComment from './GemComment'
 import NovelPreviewPopup from '@/components/NovelPreviewPopup'
 
@@ -197,14 +197,64 @@ function EmptyBook() {
 export default function GemSection({ novels, discoverCommentMap }: Props) {
   const bookCount = Math.min(50, Math.max(novels.length, 15))
   const bookList = Array.from({length: bookCount}, (_,i) => novels[i] || null)
-  // 無限ループ用に同じ並びをもう1セット複製
-  const loopList = [...bookList, ...bookList]
+  // 無限ループ用に同じ並びを3セット複製（中央セットを基準に、はみ出たら反対側へワープする）
+  const loopList = [...bookList, ...bookList, ...bookList]
+
+  const trackRef = useRef<HTMLDivElement>(null)
+  const offsetRef = useRef(0)       // 現在のtranslateX値（px、負の方向に進む）
+  const oneSetWidthRef = useRef(0)  // 1セット分の実際の幅（px）
+  const pausedRef = useRef(false)
+  const rafRef = useRef<number | null>(null)
+
+  const SPEED = 0.45 // px/frame 程度の自動流れ速度
+
+  const measure = useCallback(() => {
+    if (!trackRef.current) return
+    const total = trackRef.current.scrollWidth
+    oneSetWidthRef.current = total / 3
+  }, [])
+
+  useEffect(() => {
+    measure()
+    window.addEventListener('resize', measure)
+    return () => window.removeEventListener('resize', measure)
+  }, [measure])
+
+  useEffect(() => {
+    function tick() {
+      if (!pausedRef.current && trackRef.current && oneSetWidthRef.current > 0) {
+        offsetRef.current += SPEED
+        // 1セット分進んだら、見た目を変えずに巻き戻す（無限ループ）
+        if (offsetRef.current >= oneSetWidthRef.current) {
+          offsetRef.current -= oneSetWidthRef.current
+        }
+        trackRef.current.style.transform = `translateX(-${offsetRef.current}px)`
+      }
+      rafRef.current = requestAnimationFrame(tick)
+    }
+    rafRef.current = requestAnimationFrame(tick)
+    return () => { if (rafRef.current) cancelAnimationFrame(rafRef.current) }
+  }, [])
+
+  function jump(dir: 1 | -1) {
+    if (!trackRef.current || oneSetWidthRef.current <= 0) return
+    const STEP = 220 // 矢印1クリックで進む距離（だいたい1冊強）
+    offsetRef.current += dir * STEP
+    // ループ範囲内に収める
+    while (offsetRef.current < 0) offsetRef.current += oneSetWidthRef.current
+    while (offsetRef.current >= oneSetWidthRef.current) offsetRef.current -= oneSetWidthRef.current
+    trackRef.current.style.transition = 'transform .35s ease'
+    trackRef.current.style.transform = `translateX(-${offsetRef.current}px)`
+    setTimeout(() => { if (trackRef.current) trackRef.current.style.transition = 'none' }, 360)
+  }
 
   return (
     <>
-      {/* デスクトップ：本棚スタイル（自動スライドで流れる） */}
-      <div className="gem-desktop" style={{flex:1,overflow:'hidden',position:'relative'}}>
-        <div className="gem-shelf-track" style={{display:'flex',gap:3,paddingBottom:10,paddingTop:4,alignItems:'flex-end',width:'max-content'}}>
+      {/* デスクトップ：本棚スタイル（自動スライド＋矢印操作） */}
+      <div className="gem-desktop" style={{flex:1,overflow:'hidden',position:'relative'}}
+        onMouseEnter={()=>{pausedRef.current = true}}
+        onMouseLeave={()=>{pausedRef.current = false}}>
+        <div ref={trackRef} style={{display:'flex',gap:3,paddingBottom:10,paddingTop:4,alignItems:'flex-end',width:'max-content',willChange:'transform'}}>
           {loopList.map((n, i) => (
             n
               ? <BookItem key={`${n.id}-${i}`} n={n} discoverComments={discoverCommentMap[n.id]||[]} />
@@ -213,18 +263,28 @@ export default function GemSection({ novels, discoverCommentMap }: Props) {
         </div>
         {/* 本棚の板 */}
         <div style={{position:'absolute',left:0,right:0,bottom:-6,height:8,background:'linear-gradient(180deg,#c8a87a,#a8855a)',borderRadius:2,boxShadow:'0 3px 6px rgba(0,0,0,0.2)',zIndex:0}}/>
-        <style>{`
-          @keyframes gemShelfSlide {
-            from { transform: translateX(0); }
-            to   { transform: translateX(-50%); }
-          }
-          .gem-shelf-track {
-            animation: gemShelfSlide ${Math.max(20, bookCount * 2.2)}s linear infinite;
-          }
-          .gem-shelf-track:hover {
-            animation-play-state: paused;
-          }
-        `}</style>
+
+        {/* ← → 操作バー */}
+        <button onClick={()=>jump(-1)} aria-label="前へ"
+          style={{
+            position:'absolute', left:6, top:'42%', transform:'translateY(-50%)',
+            width:32, height:32, borderRadius:'50%', border:'1px solid rgba(242,106,33,0.3)',
+            background:'rgba(255,255,255,0.92)', cursor:'pointer', zIndex:10,
+            display:'flex', alignItems:'center', justifyContent:'center',
+            boxShadow:'0 2px 8px rgba(0,0,0,0.15)',
+          }}>
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#2B211B" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+        </button>
+        <button onClick={()=>jump(1)} aria-label="次へ"
+          style={{
+            position:'absolute', right:6, top:'42%', transform:'translateY(-50%)',
+            width:32, height:32, borderRadius:'50%', border:'1px solid rgba(242,106,33,0.3)',
+            background:'rgba(255,255,255,0.92)', cursor:'pointer', zIndex:10,
+            display:'flex', alignItems:'center', justifyContent:'center',
+            boxShadow:'0 2px 8px rgba(0,0,0,0.15)',
+          }}>
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#2B211B" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+        </button>
       </div>
 
       {/* モバイル：お知らせ風デザイン（変更なし） */}
