@@ -231,23 +231,29 @@ export default function GemSection({ novels, discoverCommentMap }: Props) {
   const loopList = [...bookList, ...bookList, ...bookList]
 
   const trackRef = useRef<HTMLDivElement>(null)
+  const set1StartRef = useRef<HTMLDivElement>(null) // 1セット目の最初の要素
+  const set2StartRef = useRef<HTMLDivElement>(null) // 2セット目の最初の要素（=1セット分の距離の終点）
   const offsetRef = useRef(0)       // 現在のtranslateX値（px、負の方向に進む）
-  const oneSetWidthRef = useRef(0)  // 1セット分の実際の幅（px）
+  const oneSetWidthRef = useRef(0)  // 1セット分の実際の幅（px、要素位置から直接算出）
   const pausedRef = useRef(false)
   const rafRef = useRef<number | null>(null)
 
   const SPEED = 0.45 // px/frame 程度の自動流れ速度
 
   const measure = useCallback(() => {
-    if (!trackRef.current) return
-    const total = trackRef.current.scrollWidth
-    oneSetWidthRef.current = total / 3
+    if (!set1StartRef.current || !set2StartRef.current) return
+    const r1 = set1StartRef.current.getBoundingClientRect()
+    const r2 = set2StartRef.current.getBoundingClientRect()
+    oneSetWidthRef.current = r2.left - r1.left
   }, [])
 
   useEffect(() => {
     measure()
+    // フォントや画像読み込み後にズレる可能性があるため少し遅延しても再計測
+    const t1 = setTimeout(measure, 100)
+    const t2 = setTimeout(measure, 500)
     window.addEventListener('resize', measure)
-    return () => window.removeEventListener('resize', measure)
+    return () => { window.removeEventListener('resize', measure); clearTimeout(t1); clearTimeout(t2) }
   }, [measure])
 
   useEffect(() => {
@@ -285,13 +291,21 @@ export default function GemSection({ novels, discoverCommentMap }: Props) {
         onMouseEnter={()=>{pausedRef.current = true}}
         onMouseLeave={()=>{pausedRef.current = false}}>
         <div ref={trackRef} style={{display:'flex',gap:3,paddingBottom:10,paddingTop:4,alignItems:'flex-end',width:'max-content',willChange:'transform'}}>
-          {loopList.map((n, i) => (
-            n === 'INTRO'
+          {loopList.map((n, i) => {
+            const setLen = bookList.length
+            const isSet1Start = i === 0
+            const isSet2Start = i === setLen
+            const refProp = isSet1Start ? set1StartRef : isSet2Start ? set2StartRef : undefined
+            const item = n === 'INTRO'
               ? <IntroBlock key={`intro-${i}`} />
               : n
                 ? <BookItem key={`${n.id}-${i}`} n={n} discoverComments={discoverCommentMap[n.id]||[]} />
                 : <EmptyBook key={`empty-${i}`} />
-          ))}
+            if (refProp) {
+              return <div key={`ref-wrap-${i}`} ref={refProp} style={{display:'flex',alignItems:'flex-end'}}>{item}</div>
+            }
+            return item
+          })}
         </div>
         {/* 本棚の板 */}
         <div style={{position:'absolute',left:0,right:0,bottom:-6,height:8,background:'linear-gradient(180deg,#c8a87a,#a8855a)',borderRadius:2,boxShadow:'0 3px 6px rgba(0,0,0,0.2)',zIndex:0}}/>
