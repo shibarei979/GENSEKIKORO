@@ -111,7 +111,6 @@ export default function Header({ profile, user, activeGenre }: Props) {
   }
 
   const NAV_LEFT = [
-    {label:'ホーム',    href:'/'},
     {label:'ランキング', href:'/ranking'},
     {label:'作品を探す', href:'/search'},
     {label:'コンテスト', href:'/contests'},
@@ -130,10 +129,10 @@ export default function Header({ profile, user, activeGenre }: Props) {
         transition:'background .25s ease, box-shadow .25s ease, backdrop-filter .25s ease',
       }}>
 
-        {/* ===== デスクトップ：上段（ロゴ・検索・ユーザー操作） ===== */}
+        {/* ===== デスクトップ：ヘッダー1行に統合（ロゴ・ナビ・検索・ユーザー操作） ===== */}
         <div className="desktop-header" style={{
           maxWidth:1200, margin:'0 auto', padding:'0 32px',
-          display:'flex', alignItems:'center', gap:16,
+          display:'flex', alignItems:'center', gap:24,
           height: scrolled ? 52 : 66,
           position:'relative',
           transition:'height .25s ease',
@@ -144,17 +143,35 @@ export default function Header({ profile, user, activeGenre }: Props) {
               transition:'height .25s ease',
             }}/>
           </Link>
-          <form onSubmit={handleSearch} style={{position:'absolute',left:'calc(50% - 40px)',transform:'translateX(-50%)',width:380,display:'flex',alignItems:'center',border:'1.5px solid #F0D9C9',borderRadius:20,background:'#FFF9F2',overflow:'hidden'}}>
+
+          {/* ナビ3項目（ホームはロゴが兼ねるため省略） */}
+          <nav style={{display:'flex',alignItems:'center',gap:4,flexShrink:0}}>
+            {NAV_LEFT.map(item=>(
+              <Link key={item.href} href={item.href}
+                style={{padding:'8px 12px',fontSize:13,whiteSpace:'nowrap',textDecoration:'none',display:'inline-block',fontWeight:500,
+                  color:isActive(item.href)?'#F26A21':'#77706A',
+                  borderRadius:8,
+                  background:isActive(item.href)?'#FFF1E6':'transparent',
+                  transition:'all .15s'}}>
+                {item.label}
+              </Link>
+            ))}
+          </nav>
+
+          <div style={{flex:1}}/>
+
+          {/* 検索バー（四角・投稿ボタンの隣） */}
+          <form onSubmit={handleSearch} style={{display:'flex',alignItems:'center',width:300,border:'1.5px solid #F0D9C9',borderRadius:6,background:'#FFF9F2',overflow:'hidden',flexShrink:0}}>
             <input value={q} onChange={e=>setQ(e.target.value)} placeholder="作品名・作者名・キーワードで検索"
-              style={{flex:1,padding:'7px 16px',border:'none',background:'transparent',fontSize:13,color:'#2B211B',outline:'none'}}/>
-            <button type="submit" style={{padding:'7px 14px',background:'none',border:'none',borderLeft:'1px solid #F0D9C9',cursor:'pointer',display:'flex',alignItems:'center'}}>
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#F26A21" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+              style={{flex:1,padding:'7px 12px',border:'none',background:'transparent',fontSize:12,color:'#2B211B',outline:'none',width:'100%',minWidth:0}}/>
+            <button type="submit" style={{padding:'7px 12px',background:'none',border:'none',borderLeft:'1px solid #F0D9C9',cursor:'pointer',display:'flex',alignItems:'center',flexShrink:0}}>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#F26A21" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                 <circle cx="11" cy="11" r="7"/><line x1="16.5" y1="16.5" x2="22" y2="22"/>
               </svg>
             </button>
           </form>
-          <div style={{flex:1}}/>
-          <div style={{display:'flex',alignItems:'center',gap:12,position:'relative',zIndex:1}}>
+
+          <div style={{display:'flex',alignItems:'center',gap:12,position:'relative',zIndex:1,flexShrink:0}}>
             {user ? (
               <>
                 <Link href="/post" className="header-post-btn"
@@ -238,27 +255,6 @@ export default function Header({ profile, user, activeGenre }: Props) {
             )}
           </div>
         </div>
-
-        {/* ===== デスクトップ：下段（ナビゲーション、同ブロック内） ===== */}
-        <nav className="desktop-header" style={{
-          borderTop:'1px solid #FFF1E6',
-          maxHeight: scrolled ? 0 : 40,
-          opacity: scrolled ? 0 : 1,
-          overflow:'hidden',
-          transition:'max-height .25s ease, opacity .2s ease',
-        }}>
-          <div style={{maxWidth:1200,margin:'0 auto',padding:'0 32px',display:'flex',width:'100%'}}>
-            {NAV_LEFT.map(item=>(
-              <Link key={item.href} href={item.href}
-                style={{padding:'9px 16px',fontSize:13,whiteSpace:'nowrap',textDecoration:'none',display:'inline-block',fontWeight:500,
-                  color:isActive(item.href)?'#F26A21':'#77706A',
-                  borderBottom:isActive(item.href)?'2px solid #F26A21':'2px solid transparent',
-                  transition:'all .15s'}}>
-                {item.label}
-              </Link>
-            ))}
-          </div>
-        </nav>
 
         {/* ===== モバイルヘッダー ===== */}
         <div className="mobile-header">
