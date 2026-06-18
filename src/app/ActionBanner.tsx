@@ -66,7 +66,7 @@ export default function ActionBanner({ isLoggedIn }: Props) {
   const [hoverRight, setHoverRight] = useState(false)
 
   const W = 800
-  const H = 374
+  const H = 300
   const R = 26
 
   // 探す：左端基準、先細りが右へ（中央方向）。通常向き。
@@ -81,7 +81,7 @@ export default function ActionBanner({ isLoggedIn }: Props) {
       <Link href="/search"
         onMouseEnter={()=>setHoverLeft(true)} onMouseLeave={()=>setHoverLeft(false)}
         style={{
-          position:'absolute', left:0, top:0, width:'42%', height:H,
+          position:'absolute', left:0, top:0, width:'55%', height:H,
           textDecoration:'none', display:'block',
           transform: hoverLeft ? 'translateY(-6px)' : 'translateY(0)',
           transition:'transform .25s ease',
@@ -117,7 +117,7 @@ export default function ActionBanner({ isLoggedIn }: Props) {
       <Link href={isLoggedIn ? '/post' : '/auth/register'}
         onMouseEnter={()=>setHoverRight(true)} onMouseLeave={()=>setHoverRight(false)}
         style={{
-          position:'absolute', right:0, top:170, width:'42%', height:H,
+          position:'absolute', right:0, top:170, width:'55%', height:H,
           textDecoration:'none', display:'block',
           transform: hoverRight ? 'translateY(6px)' : 'translateY(0)',
           transition:'transform .25s ease',
