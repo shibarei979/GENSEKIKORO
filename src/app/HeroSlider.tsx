@@ -37,6 +37,7 @@ export default function HeroSlider({ items }: Props) {
   const [mContainerW, setMContainerW] = useState(0)
   const containerRef = useRef<HTMLDivElement>(null)
   const mContainerRef = useRef<HTMLDivElement>(null)
+  const isAnimatingRef = useRef(false)
 
   const isLooping = items.length > 1
 
@@ -67,6 +68,11 @@ export default function HeroSlider({ items }: Props) {
   const mHalfItem = mItemW / 2 + M_GAP / 2
 
   function goTo(i: number, transition = true) {
+    if (transition && isAnimatingRef.current) return
+    if (transition) {
+      isAnimatingRef.current = true
+      setTimeout(() => { isAnimatingRef.current = false }, 600) // 保険：transitionend取り損ねた場合の解除
+    }
     setWithTransition(transition)
     setIndex(i)
   }
@@ -79,6 +85,7 @@ export default function HeroSlider({ items }: Props) {
 
   // ===== 無限ループのジャンプ処理 =====
   function handleTransitionEnd() {
+    isAnimatingRef.current = false
     if (!isLooping) return
     if (index < CLONE_COUNT) {
       goTo(index + items.length, false)
