@@ -83,7 +83,7 @@ export default function ActionBanner({ isLoggedIn }: Props) {
       <Link href="/search"
         onMouseEnter={()=>setHoverLeft(true)} onMouseLeave={()=>setHoverLeft(false)}
         style={{
-          position:'absolute', left:0, top:0, width:'64%', height:H,
+          position:'absolute', left:0, top:0, width:'52%', height:H,
           textDecoration:'none', display:'block',
           transform: hoverLeft ? 'translateY(-6px)' : 'translateY(0)',
           transition:'transform .25s ease',
@@ -119,7 +119,7 @@ export default function ActionBanner({ isLoggedIn }: Props) {
       <Link href={isLoggedIn ? '/post' : '/auth/register'}
         onMouseEnter={()=>setHoverRight(true)} onMouseLeave={()=>setHoverRight(false)}
         style={{
-          position:'absolute', right:0, top:222, width:'64%', height:H,
+          position:'absolute', right:0, top:222, width:'52%', height:H,
           textDecoration:'none', display:'block',
           transform: hoverRight ? 'translateY(6px)' : 'translateY(0)',
           transition:'transform .25s ease',
