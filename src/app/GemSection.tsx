@@ -21,24 +21,13 @@ interface Props {
   discoverCommentMap: Record<string, {comment:string;display_name:string}[]>
 }
 
-// 背表紙の色をタイトルの文字コードから決定論的に選ぶ（毎回同じ本は同じ色になる）
-const SPINE_COLORS = [
-  { base:'#7a3b2e', dark:'#5a2a20' }, // 赤茶
-  { base:'#2e5a4a', dark:'#1f3f33' }, // 深緑
-  { base:'#3a4a7a', dark:'#283355' }, // 紺
-  { base:'#7a5a2e', dark:'#553f1f' }, // 茶
-  { base:'#5a2e5a', dark:'#3f1f3f' }, // 紫
-  { base:'#2e6a7a', dark:'#1f4a55' }, // 青緑
-]
-function colorFor(id: string) {
-  let h = 0
-  for (let i = 0; i < id.length; i++) h = (h * 31 + id.charCodeAt(i)) % SPINE_COLORS.length
-  return SPINE_COLORS[h]
-}
+// 統一した本のテーマカラー（原石航路のブランドカラー系）
+const SPINE_BASE = '#6b3a22'
+const SPINE_DARK = '#4a2715'
+const SPINE_LIGHT = '#8a4f2e'
 
 function BookItem({ n, discoverComments }: { n: Novel; discoverComments: {comment:string;display_name:string}[] }) {
   const [hover, setHover] = useState(false)
-  const color = colorFor(n.id)
 
   return (
     <NovelPreviewPopup novel={{...n, like_count: n.likeCount2}}>
@@ -47,34 +36,35 @@ function BookItem({ n, discoverComments }: { n: Novel; discoverComments: {commen
         onMouseLeave={()=>setHover(false)}
         style={{
           position:'relative',
-          width: hover ? 168 : 46,
-          height: 195,
-          flexShrink:0,
+          flex: hover ? '0 0 168px' : '1 1 0',
+          minWidth: hover ? 168 : 32,
+          maxWidth: hover ? 168 : 60,
+          height:195,
           cursor:'pointer',
-          transition:'width .35s cubic-bezier(.4,0,.2,1)',
-          perspective: 900,
+          transition:'flex .35s cubic-bezier(.4,0,.2,1), min-width .35s cubic-bezier(.4,0,.2,1), max-width .35s cubic-bezier(.4,0,.2,1)',
+          perspective: 1000,
           zIndex: hover ? 5 : 1,
         }}>
         <div style={{
           position:'absolute', inset:0,
           transformStyle:'preserve-3d',
-          transform: hover ? 'rotateY(0deg)' : 'rotateY(0deg)',
-          transition:'transform .35s ease',
+          transformOrigin:'left center',
         }}>
-          {/* ===== 背表紙（通常時） ===== */}
+          {/* ===== 背表紙（通常時・左端を軸に回転して開く） ===== */}
           <div style={{
             position:'absolute', inset:0,
-            borderRadius:'2px 4px 4px 2px',
-            background:`linear-gradient(90deg, ${color.dark} 0%, ${color.base} 8%, ${color.base} 85%, ${color.dark} 100%)`,
-            boxShadow:'inset 2px 0 4px rgba(0,0,0,0.3), inset -2px 0 3px rgba(255,255,255,0.08), 2px 2px 6px rgba(0,0,0,0.25)',
+            transformOrigin:'left center',
+            borderRadius:'2px 5px 5px 2px',
+            background:`linear-gradient(90deg, ${SPINE_DARK} 0%, ${SPINE_BASE} 10%, ${SPINE_LIGHT} 50%, ${SPINE_BASE} 90%, ${SPINE_DARK} 100%)`,
+            boxShadow:'inset 3px 0 5px rgba(0,0,0,0.35), inset -2px 0 4px rgba(255,255,255,0.1), 2px 2px 8px rgba(0,0,0,0.25)',
             display:'flex', flexDirection:'column', alignItems:'center',
             justifyContent:'space-between', padding:'14px 0',
             opacity: hover ? 0 : 1,
-            transform: hover ? 'rotateY(-90deg)' : 'rotateY(0deg)',
-            transition:'opacity .2s ease, transform .35s ease',
+            transform: hover ? 'rotateY(-100deg)' : 'rotateY(0deg)',
+            transition:'opacity .15s ease, transform .35s ease',
             backfaceVisibility:'hidden',
           }}>
-            <div style={{width:'70%',height:1.5,background:'rgba(255,255,255,0.35)'}}/>
+            <div style={{width:'70%',height:1.5,background:'rgba(255,215,150,0.4)'}}/>
             <div style={{
               writingMode:'vertical-rl' as any, fontSize:11, fontWeight:700, color:'#fff',
               letterSpacing:'0.05em', lineHeight:1.6, maxHeight:130, overflow:'hidden',
@@ -82,20 +72,37 @@ function BookItem({ n, discoverComments }: { n: Novel; discoverComments: {commen
             }}>
               {n.title.length > 11 ? n.title.slice(0,11)+'…' : n.title}
             </div>
-            <div style={{width:'70%',height:1.5,background:'rgba(255,255,255,0.35)'}}/>
+            <div style={{width:'70%',height:1.5,background:'rgba(255,215,150,0.4)'}}/>
           </div>
 
-          {/* ===== 表紙（ホバー時） ===== */}
+          {/* ===== 本の小口（ページの厚み・表紙の右側に見える紙の重なり） ===== */}
+          <div style={{
+            position:'absolute', top:3, bottom:3, right: hover ? -7 : -2, width:7,
+            background:'repeating-linear-gradient(180deg, #f5ede0 0px, #f5ede0 2px, #e8dcc8 2px, #e8dcc8 3px)',
+            borderRadius:'0 3px 3px 0',
+            opacity: hover ? 1 : 0,
+            transform: hover ? 'rotateY(0deg)' : 'rotateY(-100deg)',
+            transformOrigin:'left center',
+            transition:'opacity .2s ease .1s, transform .35s ease',
+            boxShadow:'1px 0 3px rgba(0,0,0,0.15)',
+            backfaceVisibility:'hidden',
+            zIndex: 1,
+          }}/>
+
+          {/* ===== 表紙（ホバー時・本らしい厚み付き） ===== */}
           <div style={{
             position:'absolute', inset:0,
-            background:'#fff', border:'1px solid #F0D9C9', borderRadius:8,
+            transformOrigin:'left center',
+            background:'#fff', border:`1px solid ${SPINE_BASE}40`, borderRadius:'2px 7px 7px 2px',
             overflow:'hidden', display:'flex', flexDirection:'column',
-            boxShadow: hover ? '0 10px 24px rgba(0,0,0,0.22)' : 'none',
+            boxShadow: hover ? `0 10px 24px rgba(0,0,0,0.22), inset -3px 0 6px rgba(0,0,0,0.06)` : 'none',
             opacity: hover ? 1 : 0,
-            transform: hover ? 'rotateY(0deg)' : 'rotateY(90deg)',
+            transform: hover ? 'rotateY(0deg)' : 'rotateY(100deg)',
             transition:'opacity .2s ease .12s, transform .35s ease',
             backfaceVisibility:'hidden',
           }}>
+            {/* 表紙上部の色帯（本のテーマカラーで統一感を出す） */}
+            <div style={{height:5,background:`linear-gradient(90deg, ${SPINE_DARK}, ${SPINE_LIGHT})`,flexShrink:0}}/>
             <div style={{padding:9,flex:2,overflow:'hidden'}}>
               <div style={{display:'flex',gap:4,marginBottom:4,flexWrap:'wrap'}}>
                 <span style={{fontSize:9,fontWeight:700,color:'#F26A21',background:'#FFF1E6',border:'1px solid #f5b080',padding:'1px 5px',borderRadius:3}}>原石</span>
@@ -115,37 +122,44 @@ function BookItem({ n, discoverComments }: { n: Novel; discoverComments: {commen
   )
 }
 
-function EmptyBook({ i }: { i: number }) {
+function EmptyBook() {
   const [hover, setHover] = useState(false)
-  const color = SPINE_COLORS[i % SPINE_COLORS.length]
   return (
     <div
       onMouseEnter={()=>setHover(true)}
       onMouseLeave={()=>setHover(false)}
       style={{
-        position:'relative', width: hover ? 168 : 46, height:195, flexShrink:0,
-        transition:'width .35s cubic-bezier(.4,0,.2,1)', perspective:900, zIndex: hover?5:1,
+        position:'relative',
+        flex: hover ? '0 0 168px' : '1 1 0',
+        minWidth: hover ? 168 : 32,
+        maxWidth: hover ? 168 : 60,
+        height:195,
+        transition:'flex .35s cubic-bezier(.4,0,.2,1), min-width .35s cubic-bezier(.4,0,.2,1), max-width .35s cubic-bezier(.4,0,.2,1)',
+        perspective:1000, zIndex: hover?5:1,
       }}>
-      <div style={{position:'absolute', inset:0, transformStyle:'preserve-3d'}}>
+      <div style={{position:'absolute', inset:0, transformStyle:'preserve-3d', transformOrigin:'left center'}}>
         <div style={{
           position:'absolute', inset:0,
-          borderRadius:'2px 4px 4px 2px',
-          background:`linear-gradient(90deg, ${color.dark} 0%, ${color.base} 8%, ${color.base} 85%, ${color.dark} 100%)`,
-          boxShadow:'inset 2px 0 4px rgba(0,0,0,0.3), 2px 2px 6px rgba(0,0,0,0.2)',
-          opacity: hover ? 0 : 0.5,
-          transform: hover ? 'rotateY(-90deg)' : 'rotateY(0deg)',
-          transition:'opacity .2s ease, transform .35s ease',
+          transformOrigin:'left center',
+          borderRadius:'2px 5px 5px 2px',
+          background:`linear-gradient(90deg, ${SPINE_DARK} 0%, ${SPINE_BASE} 10%, ${SPINE_LIGHT} 50%, ${SPINE_BASE} 90%, ${SPINE_DARK} 100%)`,
+          boxShadow:'inset 3px 0 5px rgba(0,0,0,0.35), 2px 2px 8px rgba(0,0,0,0.2)',
+          opacity: hover ? 0 : 0.45,
+          transform: hover ? 'rotateY(-100deg)' : 'rotateY(0deg)',
+          transition:'opacity .15s ease, transform .35s ease',
           backfaceVisibility:'hidden',
         }}/>
         <div style={{
           position:'absolute', inset:0,
-          background:'#fff', border:'1px solid #F0D9C9', borderRadius:8,
+          transformOrigin:'left center',
+          background:'#fff', border:`1px solid ${SPINE_BASE}40`, borderRadius:'2px 7px 7px 2px',
           overflow:'hidden', display:'flex', flexDirection:'column',
           opacity: hover ? 1 : 0,
-          transform: hover ? 'rotateY(0deg)' : 'rotateY(90deg)',
+          transform: hover ? 'rotateY(0deg)' : 'rotateY(100deg)',
           transition:'opacity .2s ease .12s, transform .35s ease',
           backfaceVisibility:'hidden',
         }}>
+          <div style={{height:5,background:`linear-gradient(90deg, ${SPINE_DARK}, ${SPINE_LIGHT})`,flexShrink:0}}/>
           <div style={{padding:9,flex:2}}>
             <div style={{display:'flex',gap:4,marginBottom:4}}>
               <span style={{fontSize:9,fontWeight:700,color:'#F26A21',background:'#FFF1E6',border:'1px solid #f5b080',padding:'1px 5px',borderRadius:3}}>原石</span>
@@ -165,14 +179,14 @@ function EmptyBook({ i }: { i: number }) {
 export default function GemSection({ novels, discoverCommentMap }: Props) {
   return (
     <>
-      {/* デスクトップ：本棚スタイル */}
-      <div className="gem-desktop" style={{flex:1,overflowX:'auto'}}>
-        <div style={{display:'flex',gap:6,minWidth:'max-content',paddingBottom:10,paddingTop:4,alignItems:'flex-end',position:'relative'}}>
+      {/* デスクトップ：本棚スタイル（端から端まで均等配置） */}
+      <div className="gem-desktop" style={{flex:1,overflow:'hidden'}}>
+        <div style={{display:'flex',gap:3,paddingBottom:10,paddingTop:4,alignItems:'flex-end',position:'relative',width:'100%'}}>
           {Array.from({length:7},(_,i) => {
             const n = novels[i]
             return n
               ? <BookItem key={n.id} n={n} discoverComments={discoverCommentMap[n.id]||[]} />
-              : <EmptyBook key={i} i={i} />
+              : <EmptyBook key={i} />
           })}
           {/* 本棚の板 */}
           <div style={{position:'absolute',left:0,right:0,bottom:-6,height:8,background:'linear-gradient(180deg,#c8a87a,#a8855a)',borderRadius:2,boxShadow:'0 3px 6px rgba(0,0,0,0.2)',zIndex:0}}/>
