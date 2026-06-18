@@ -1,6 +1,6 @@
 'use client'
 import { useState } from 'react'
-import Link from 'next/link'
+import { useRouter } from 'next/navigation'
 
 interface Props {
   isLoggedIn: boolean
@@ -64,13 +64,13 @@ function trapezoidPath(w: number, h: number, r: number, outerEdge: 'left' | 'rig
 }
 
 export default function ActionBanner({ isLoggedIn }: Props) {
+  const router = useRouter()
   const [hoverLeft, setHoverLeft] = useState(false)
   const [hoverRight, setHoverRight] = useState(false)
 
   const W = 800
   const H = 390
   const R = 26
-  const INSET = H * 0.55 // trapezoidPath内のinsetと同じ計算式（クリップパス計算用）
 
   // 探す：左端基準、先細りが右へ（中央方向）。通常向き。
   const leftPath  = trapezoidPath(W, H, R, 'left', false)
@@ -81,15 +81,13 @@ export default function ActionBanner({ isLoggedIn }: Props) {
     <div style={{position:'relative', width:'100vw', marginLeft:'calc(50% - 50vw)', marginRight:'calc(50% - 50vw)', height:660}}>
 
       {/* 左：探す（画面左端まで・上にストレッチ） */}
-      <Link href="/search"
-        onMouseEnter={()=>setHoverLeft(true)} onMouseLeave={()=>setHoverLeft(false)}
+      <div
         style={{
           position:'absolute', left:0, top:0, width:'52%', height:H,
-          textDecoration:'none', display:'block',
           transform: hoverLeft ? 'translateY(-6px)' : 'translateY(0)',
           transition:'transform .25s ease',
           zIndex: 1,
-          clipPath: `polygon(0 0, 100% 0, ${100 - (INSET/W)*100}% 100%, 0 100%)`,
+          pointerEvents:'none',
         }}>
         <svg viewBox={`0 0 ${W} ${H}`} preserveAspectRatio="none" style={{width:'100%',height:'100%',display:'block',overflow:'visible'}}>
           <defs>
@@ -101,32 +99,35 @@ export default function ActionBanner({ isLoggedIn }: Props) {
               <feDropShadow dx="0" dy="6" stdDeviation="10" floodColor="#000" floodOpacity="0.18"/>
             </filter>
           </defs>
-          <path d={leftPath} fill="url(#leftGrad)" filter="url(#leftShadow)"/>
+          <path d={leftPath} fill="url(#leftGrad)" filter="url(#leftShadow)"
+            style={{cursor:'pointer', pointerEvents:'auto'}}
+            onMouseEnter={()=>setHoverLeft(true)} onMouseLeave={()=>setHoverLeft(false)}
+            onClick={()=>router.push('/search')}/>
         </svg>
-        <div style={{position:'absolute', inset:0, display:'flex', alignItems:'center', padding:'0 22% 0 7%'}}>
+        <div style={{position:'absolute', inset:0, display:'flex', alignItems:'center', padding:'0 22% 0 7%', pointerEvents:'none'}}>
           <div>
             <div style={{fontSize:13,color:'rgba(255,255,255,0.6)',fontWeight:600,letterSpacing:'0.1em',marginBottom:8}}>READ</div>
             <div style={{fontSize:30,fontWeight:700,color:'#fff',fontFamily:"'Noto Serif JP',serif",marginBottom:14,lineHeight:1.45}}>
               次に読みたい一冊が、<br/>ここにある
             </div>
-            <div style={{display:'inline-flex',alignItems:'center',gap:6,fontSize:15,color:'#FFD9B8',fontWeight:600}}>
+            <div style={{display:'inline-flex',alignItems:'center',gap:6,fontSize:15,color:'#FFD9B8',fontWeight:600,cursor:'pointer',pointerEvents:'auto'}}
+              onClick={()=>router.push('/search')}
+              onMouseEnter={()=>setHoverLeft(true)} onMouseLeave={()=>setHoverLeft(false)}>
               作品を探す
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#FFD9B8" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
             </div>
           </div>
         </div>
-      </Link>
+      </div>
 
       {/* 右：投稿（画面右端まで・下にずれて配置・上下逆さま） */}
-      <Link href={isLoggedIn ? '/post' : '/auth/register'}
-        onMouseEnter={()=>setHoverRight(true)} onMouseLeave={()=>setHoverRight(false)}
+      <div
         style={{
           position:'absolute', right:0, top:222, width:'52%', height:H,
-          textDecoration:'none', display:'block',
           transform: hoverRight ? 'translateY(6px)' : 'translateY(0)',
           transition:'transform .25s ease',
           zIndex: 1,
-          clipPath: `polygon(${(INSET/W)*100}% 0, 100% 0, 100% 100%, 0 100%)`,
+          pointerEvents:'none',
         }}>
         <svg viewBox={`0 0 ${W} ${H}`} preserveAspectRatio="none" style={{width:'100%',height:'100%',display:'block',overflow:'visible'}}>
           <defs>
@@ -138,21 +139,26 @@ export default function ActionBanner({ isLoggedIn }: Props) {
               <feDropShadow dx="0" dy="-6" stdDeviation="10" floodColor="#000" floodOpacity="0.18"/>
             </filter>
           </defs>
-          <path d={rightPath} fill="url(#rightGrad)" filter="url(#rightShadow)"/>
+          <path d={rightPath} fill="url(#rightGrad)" filter="url(#rightShadow)"
+            style={{cursor:'pointer', pointerEvents:'auto'}}
+            onMouseEnter={()=>setHoverRight(true)} onMouseLeave={()=>setHoverRight(false)}
+            onClick={()=>router.push(isLoggedIn ? '/post' : '/auth/register')}/>
         </svg>
-        <div style={{position:'absolute', inset:0, display:'flex', alignItems:'center', justifyContent:'flex-end', padding:'0 7% 0 22%'}}>
+        <div style={{position:'absolute', inset:0, display:'flex', alignItems:'center', justifyContent:'flex-end', padding:'0 7% 0 22%', pointerEvents:'none'}}>
           <div style={{textAlign:'right'}}>
             <div style={{fontSize:13,color:'rgba(255,255,255,0.75)',fontWeight:600,letterSpacing:'0.1em',marginBottom:8}}>WRITE</div>
             <div style={{fontSize:30,fontWeight:700,color:'#fff',fontFamily:"'Noto Serif JP',serif",marginBottom:14,lineHeight:1.45}}>
               あなたの物語を、<br/>世界に届けよう
             </div>
-            <div style={{display:'inline-flex',alignItems:'center',gap:6,fontSize:15,color:'#fff',fontWeight:600}}>
+            <div style={{display:'inline-flex',alignItems:'center',gap:6,fontSize:15,color:'#fff',fontWeight:600,cursor:'pointer',pointerEvents:'auto'}}
+              onClick={()=>router.push(isLoggedIn ? '/post' : '/auth/register')}
+              onMouseEnter={()=>setHoverRight(true)} onMouseLeave={()=>setHoverRight(false)}>
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{transform:'rotate(180deg)'}}><polyline points="9 18 15 12 9 6"/></svg>
               作品を投稿する
             </div>
           </div>
         </div>
-      </Link>
+      </div>
     </div>
   )
 }
