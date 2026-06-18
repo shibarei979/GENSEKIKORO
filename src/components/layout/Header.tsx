@@ -174,20 +174,20 @@ export default function Header({ profile, user, activeGenre }: Props) {
           <div style={{display:'flex',alignItems:'center',gap:12,position:'relative',zIndex:1,flexShrink:0}}>
             {user ? (
               <>
-                <Link href="/post" className="header-post-btn"
+                <Link href="/post"
                   style={{
-                    border:'1.5px solid #F26A21', color:'#F26A21', borderRadius:'50%',
+                    border:'1.5px solid #F26A21', color:'#F26A21', borderRadius:'20px',
                     background:'#fff', fontSize:'13px', fontWeight:600,
-                    display:'flex', alignItems:'center', justifyContent:'center',
+                    display:'flex', alignItems:'center', justifyContent:'center', gap:'6px',
                     textDecoration:'none', whiteSpace:'nowrap',
-                    width:'36px', height:'36px', padding:0, flexShrink:0, boxSizing:'border-box',
+                    padding:'7px 16px', flexShrink:0,
                   }}>
-                  <span style={{fontSize:'16px',lineHeight:1,flexShrink:0}}>＋</span>
-                  <span className="header-post-btn-text">投稿する</span>
+                  <span style={{fontSize:'15px',lineHeight:1}}>＋</span>
+                  <span>投稿する</span>
                 </Link>
                 <div ref={notifRef} style={{position:'relative'}}>
                   <button onClick={handleOpenNotif}
-                    style={{position:'relative',width:36,height:36,borderRadius:'50%',border:'1.5px solid #F0D9C9',background:'#fff',cursor:'pointer',display:'flex',alignItems:'center',justifyContent:'center',flexShrink:0}}>
+                    style={{position:'relative',width:36,height:36,borderRadius:'50%',border:'none',background:'#fff',cursor:'pointer',display:'flex',alignItems:'center',justifyContent:'center',flexShrink:0}}>
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#77706A" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                       <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/>
                     </svg>
@@ -400,23 +400,6 @@ export default function Header({ profile, user, activeGenre }: Props) {
           .mobile-header  { display: block !important; }
         }
         nav a:hover { color: #F26A21 !important; opacity: 1; }
-
-        .header-post-btn { transition: width .25s ease, border-radius .25s ease, background .15s ease, padding .25s ease; }
-        .header-post-btn-text {
-          display: inline-block;
-          max-width: 0;
-          overflow: hidden;
-          opacity: 0;
-          transition: max-width .25s ease, opacity .2s ease;
-        }
-        .header-post-btn:hover {
-          background: #fff8f5 !important;
-          width: 104px !important;
-          border-radius: 18px !important;
-          padding: 0 14px 0 11px !important;
-          gap: 4px;
-        }
-        .header-post-btn:hover .header-post-btn-text { max-width: 70px; opacity: 1; }
       `}</style>
     </>
   )
