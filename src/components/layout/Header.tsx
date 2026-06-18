@@ -138,9 +138,9 @@ export default function Header({ profile, user, activeGenre }: Props) {
           transition:'height .25s ease',
         }}>
           <Link href="/" style={{flexShrink:0}}>
-            <img src="/logo.png" alt="原石航路" style={{
+            <img src="/logo.png" alt="原石航路" draggable={false} style={{
               height: scrolled ? 80 : 108, width:'auto', display:'block', objectFit:'contain',
-              transition:'height .25s ease',
+              transition:'height .25s ease', userSelect:'none',
             }}/>
           </Link>
 
@@ -290,7 +290,7 @@ export default function Header({ profile, user, activeGenre }: Props) {
             </div>
 
             <Link href="/" style={{position:'absolute',left:'50%',transform:'translateX(-50%)'}}>
-              <img src="/logo.png" alt="原石航路" style={{height: scrolled ? 46 : 58,width:'auto',display:'block',objectFit:'contain',transition:'height .25s ease'}}/>
+              <img src="/logo.png" alt="原石航路" draggable={false} style={{height: scrolled ? 46 : 58,width:'auto',display:'block',objectFit:'contain',transition:'height .25s ease',userSelect:'none'}}/>
             </Link>
 
             <button onClick={()=>setShowMobileMenu(!showMobileMenu)}
@@ -308,7 +308,7 @@ export default function Header({ profile, user, activeGenre }: Props) {
             <div onClick={()=>setShowMobileMenu(false)} style={{position:'absolute',inset:0,background:'rgba(0,0,0,0.4)'}}/>
             <div style={{position:'absolute',top:0,right:0,width:'78%',maxWidth:300,height:'100%',background:'#fff',display:'flex',flexDirection:'column',overflowY:'auto'}}>
               <div style={{padding:'14px 16px',borderBottom:'1px solid #F0D9C9',display:'flex',alignItems:'center',justifyContent:'space-between',background:'#FFF9F2'}}>
-                <img src="/logo.png" alt="原石航路" style={{height:36,width:'auto',objectFit:'contain'}}/>
+                <img src="/logo.png" alt="原石航路" draggable={false} style={{height:36,width:'auto',objectFit:'contain',userSelect:'none'}}/>
                 <button onClick={()=>setShowMobileMenu(false)} style={{width:30,height:30,border:'none',background:'none',cursor:'pointer',fontSize:18,color:'#77706A'}}>×</button>
               </div>
               {user && (
