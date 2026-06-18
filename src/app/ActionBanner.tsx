@@ -75,7 +75,7 @@ export default function ActionBanner({ isLoggedIn }: Props) {
   const rightPath = trapezoidPath(W, H, R, 'right', true)
 
   return (
-    <div style={{position:'relative', width:'100%', height:560}}>
+    <div style={{position:'relative', width:'100vw', marginLeft:'calc(50% - 50vw)', marginRight:'calc(50% - 50vw)', height:560}}>
 
       {/* 左：探す（画面左端まで・上にストレッチ） */}
       <Link href="/search"
