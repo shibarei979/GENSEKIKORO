@@ -240,14 +240,16 @@ export default async function HomePage() {
 
       {/* ===== デスクトップ：ヒーロー ===== */}
       <section className="desktop-only" style={{background:'#FFF1E6',borderBottom:'1px solid #F0D9C9'}}>
-        <div className="hero-section" style={{maxWidth:1200,margin:'0 auto',padding:'36px 32px 36px'}}>
+        <div style={{maxWidth:1200,margin:'0 auto',padding:'36px 32px 0'}}>
           <h1 className="hero-title" style={{fontFamily:"'Noto Serif JP',serif",fontSize:32,fontWeight:700,color:'#2B211B',lineHeight:1.35,marginBottom:20,textAlign:'center'}}>
             次のブームは、<em style={{color:'#F26A21',fontStyle:'normal'}}>ここから</em>生まれる。
           </h1>
-          {sliderItems.length > 0 && (
-            <HeroSlider items={sliderItems} />
-          )}
         </div>
+        {sliderItems.length > 0 && (
+          <div style={{width:'100%',padding:'0 0 36px'}}>
+            <HeroSlider items={sliderItems} />
+          </div>
+        )}
       </section>
 
       {/* ===== デスクトップ：統計バー ===== */}

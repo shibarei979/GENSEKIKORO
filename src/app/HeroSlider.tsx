@@ -62,14 +62,12 @@ export default function HeroSlider({ items }: Props) {
 
   function startTimer() {
     if (timerRef.current) clearTimeout(timerRef.current)
-    if (items.length <= 1) return
-    timerRef.current = setTimeout(() => { next() }, 3500)
+    // 自動再生は停止。手動でのスライド（矢印ボタン・ドット）のみ有効。
   }
 
   useEffect(() => {
-    startTimer()
     return () => { if (timerRef.current) clearTimeout(timerRef.current) }
-  }, [index])
+  }, [])
 
   // ===== 無限ループのジャンプ処理 =====
   function handleTransitionEnd() {
@@ -109,7 +107,7 @@ export default function HeroSlider({ items }: Props) {
   return (
     <div style={{position:'relative',width:'100%'}}>
       {/* デスクトップ */}
-      <div ref={containerRef} className="slider-desktop" style={{overflow:'hidden',borderRadius:8}}>
+      <div ref={containerRef} className="slider-desktop" style={{overflow:'hidden'}}>
         <div
           onTransitionEnd={handleTransitionEnd}
           style={{
@@ -136,8 +134,36 @@ export default function HeroSlider({ items }: Props) {
 
       {items.length > 1 && (
         <>
-          <button onClick={prev} style={{position:'absolute',left:6,top:'50%',transform:'translateY(-50%)',background:'rgba(255,255,255,0.9)',border:'none',borderRadius:'50%',width:28,height:28,cursor:'pointer',fontSize:16,fontWeight:700,color:'#2B211B',display:'flex',alignItems:'center',justifyContent:'center',boxShadow:'0 2px 8px rgba(0,0,0,0.15)',zIndex:2}}>‹</button>
-          <button onClick={next} style={{position:'absolute',right:6,top:'50%',transform:'translateY(-50%)',background:'rgba(255,255,255,0.9)',border:'none',borderRadius:'50%',width:28,height:28,cursor:'pointer',fontSize:16,fontWeight:700,color:'#2B211B',display:'flex',alignItems:'center',justifyContent:'center',boxShadow:'0 2px 8px rgba(0,0,0,0.15)',zIndex:2}}>›</button>
+          <button onClick={prev} aria-label="前へ"
+            style={{
+              position:'absolute', left:16, top:'50%', transform:'translateY(-50%)',
+              background:'rgba(255,255,255,0.95)', border:'1px solid rgba(242,106,33,0.25)',
+              borderRadius:'50%', width:44, height:44, cursor:'pointer',
+              display:'flex', alignItems:'center', justifyContent:'center',
+              boxShadow:'0 4px 14px rgba(0,0,0,0.18)', zIndex:2,
+              transition:'background .15s ease, transform .15s ease',
+            }}
+            onMouseEnter={e=>{e.currentTarget.style.background='#F26A21';e.currentTarget.style.transform='translateY(-50%) scale(1.08)';const svg=e.currentTarget.querySelector('svg') as SVGElement;if(svg)svg.style.color='#fff'}}
+            onMouseLeave={e=>{e.currentTarget.style.background='rgba(255,255,255,0.95)';e.currentTarget.style.transform='translateY(-50%) scale(1)';const svg=e.currentTarget.querySelector('svg') as SVGElement;if(svg)svg.style.color='#2B211B'}}>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{color:'#2B211B'}} className="hero-arrow-icon">
+              <polyline points="15 18 9 12 15 6"/>
+            </svg>
+          </button>
+          <button onClick={next} aria-label="次へ"
+            style={{
+              position:'absolute', right:16, top:'50%', transform:'translateY(-50%)',
+              background:'rgba(255,255,255,0.95)', border:'1px solid rgba(242,106,33,0.25)',
+              borderRadius:'50%', width:44, height:44, cursor:'pointer',
+              display:'flex', alignItems:'center', justifyContent:'center',
+              boxShadow:'0 4px 14px rgba(0,0,0,0.18)', zIndex:2,
+              transition:'background .15s ease, transform .15s ease',
+            }}
+            onMouseEnter={e=>{e.currentTarget.style.background='#F26A21';e.currentTarget.style.transform='translateY(-50%) scale(1.08)';const svg=e.currentTarget.querySelector('svg') as SVGElement;if(svg)svg.style.color='#fff'}}
+            onMouseLeave={e=>{e.currentTarget.style.background='rgba(255,255,255,0.95)';e.currentTarget.style.transform='translateY(-50%) scale(1)';const svg=e.currentTarget.querySelector('svg') as SVGElement;if(svg)svg.style.color='#2B211B'}}>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{color:'#2B211B'}} className="hero-arrow-icon">
+              <polyline points="9 18 15 12 9 6"/>
+            </svg>
+          </button>
 
           <div style={{display:'flex',justifyContent:'center',gap:5,marginTop:6}}>
             {items.map((_, i) => (
