@@ -238,9 +238,12 @@ export default async function HomePage() {
     <div style={{minHeight:'100vh',background:'#FFF9F2',fontFamily:"'Noto Sans JP',sans-serif"}}>
       <Header profile={profile} user={user} />
 
-      {/* ===== デスクトップ：ヒーロー（画像スライダーのみ・横幅いっぱい） ===== */}
+      {/* ===== デスクトップ：ヒーロー ===== */}
       <section className="desktop-only" style={{background:'#FFF1E6',borderBottom:'1px solid #F0D9C9'}}>
-        <div className="hero-section" style={{maxWidth:1200,margin:'0 auto',padding:'28px 32px'}}>
+        <div className="hero-section" style={{maxWidth:1200,margin:'0 auto',padding:'36px 32px 36px'}}>
+          <h1 className="hero-title" style={{fontFamily:"'Noto Serif JP',serif",fontSize:32,fontWeight:700,color:'#2B211B',lineHeight:1.35,marginBottom:20,textAlign:'center'}}>
+            次のブームは、<em style={{color:'#F26A21',fontStyle:'normal'}}>ここから</em>生まれる。
+          </h1>
           {sliderItems.length > 0 && (
             <HeroSlider items={sliderItems} />
           )}

@@ -76,7 +76,7 @@ export default function HeroSlider({ items }: Props) {
 
   const SlideImage = ({ item }: { item: SlideItem }) => {
     const content = (
-      <div style={{width:'100%',aspectRatio:'16/9',overflow:'hidden',borderRadius:8,flexShrink:0}}>
+      <div style={{width:'100%',height:156,overflow:'hidden',borderRadius:8,flexShrink:0}}>
         <img src={item.image_url} alt={item.title} style={{width:'100%',height:'100%',objectFit:'cover',display:'block'}}/>
       </div>
     )
