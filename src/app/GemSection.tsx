@@ -64,15 +64,32 @@ function BookItem({ n, discoverComments }: { n: Novel; discoverComments: {commen
             transition:'opacity .15s ease, transform .35s ease',
             backfaceVisibility:'hidden',
           }}>
-            <div style={{width:'70%',height:1.5,background:'rgba(255,215,150,0.4)'}}/>
-            <div style={{
-              writingMode:'vertical-rl' as any, fontSize:11, fontWeight:700, color:'#fff',
-              letterSpacing:'0.05em', lineHeight:1.6, maxHeight:130, overflow:'hidden',
-              textShadow:'0 1px 2px rgba(0,0,0,0.4)', fontFamily:"'Noto Serif JP',serif",
-            }}>
-              {n.title.length > 11 ? n.title.slice(0,11)+'…' : n.title}
+            {/* 上部装飾ライン（二重） */}
+            <div style={{display:'flex',flexDirection:'column',gap:3,alignItems:'center',width:'100%'}}>
+              <div style={{width:'62%',height:1,background:'rgba(255,215,150,0.55)'}}/>
+              <div style={{width:'40%',height:1,background:'rgba(255,215,150,0.3)'}}/>
             </div>
-            <div style={{width:'70%',height:1.5,background:'rgba(255,215,150,0.4)'}}/>
+
+            {/* タイトルラベル（枠付き） */}
+            <div style={{
+              border:'1px solid rgba(255,215,150,0.5)', borderRadius:3,
+              padding:'10px 6px', background:'rgba(0,0,0,0.08)',
+              display:'flex', alignItems:'center', justifyContent:'center',
+            }}>
+              <div style={{
+                writingMode:'vertical-rl' as any, fontSize:11, fontWeight:700, color:'#fff',
+                letterSpacing:'0.05em', lineHeight:1.65, maxHeight:120, overflow:'hidden',
+                textShadow:'0 1px 2px rgba(0,0,0,0.4)', fontFamily:"'Noto Serif JP',serif",
+              }}>
+                {n.title.length > 11 ? n.title.slice(0,11)+'…' : n.title}
+              </div>
+            </div>
+
+            {/* 下部装飾ライン（二重） */}
+            <div style={{display:'flex',flexDirection:'column',gap:3,alignItems:'center',width:'100%'}}>
+              <div style={{width:'40%',height:1,background:'rgba(255,215,150,0.3)'}}/>
+              <div style={{width:'62%',height:1,background:'rgba(255,215,150,0.55)'}}/>
+            </div>
           </div>
 
           {/* ===== 本の小口（ページの厚み・表紙の右側に見える紙の重なり） ===== */}
@@ -171,13 +188,36 @@ function EmptyBook() {
           position:'absolute', inset:0,
           transformOrigin:'left center',
           borderRadius:'2px 5px 5px 2px',
-          background:`linear-gradient(90deg, ${SPINE_DARK} 0%, ${SPINE_BASE} 10%, ${SPINE_LIGHT} 50%, ${SPINE_BASE} 90%, ${SPINE_DARK} 100%)`,
-          boxShadow:'inset 3px 0 5px rgba(0,0,0,0.35), 2px 2px 8px rgba(0,0,0,0.2)',
-          opacity: hover ? 0 : 0.45,
+          background:`linear-gradient(90deg, #a89488 0%, #beac9e 10%, #d4c2b4 50%, #beac9e 90%, #a89488 100%)`,
+          boxShadow:'inset 3px 0 5px rgba(0,0,0,0.25), inset -2px 0 4px rgba(255,255,255,0.15), 2px 2px 8px rgba(0,0,0,0.18)',
+          opacity: hover ? 0 : 1,
           transform: hover ? 'rotateY(-100deg)' : 'rotateY(0deg)',
           transition:'opacity .15s ease, transform .35s ease',
           backfaceVisibility:'hidden',
-        }}/>
+          display:'flex', flexDirection:'column', alignItems:'center',
+          justifyContent:'space-between', padding:'14px 0',
+        }}>
+          <div style={{display:'flex',flexDirection:'column',gap:3,alignItems:'center',width:'100%'}}>
+            <div style={{width:'62%',height:1,background:'rgba(255,255,255,0.6)'}}/>
+            <div style={{width:'40%',height:1,background:'rgba(255,255,255,0.35)'}}/>
+          </div>
+          <div style={{
+            border:'1px solid rgba(255,255,255,0.4)', borderRadius:3,
+            padding:'10px 6px', background:'rgba(0,0,0,0.05)',
+          }}>
+            <div style={{
+              writingMode:'vertical-rl' as any, fontSize:10, fontWeight:700, color:'rgba(255,255,255,0.85)',
+              letterSpacing:'0.08em', lineHeight:1.6,
+              textShadow:'0 1px 2px rgba(0,0,0,0.2)', fontFamily:"'Noto Serif JP',serif",
+            }}>
+              準備中
+            </div>
+          </div>
+          <div style={{display:'flex',flexDirection:'column',gap:3,alignItems:'center',width:'100%'}}>
+            <div style={{width:'40%',height:1,background:'rgba(255,255,255,0.35)'}}/>
+            <div style={{width:'62%',height:1,background:'rgba(255,255,255,0.6)'}}/>
+          </div>
+        </div>
         <div style={{
           position:'absolute', inset:0,
           transformOrigin:'left center',
