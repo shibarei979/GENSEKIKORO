@@ -150,7 +150,7 @@ export default function Header({ profile, user, activeGenre }: Props) {
               <Link key={item.href} href={item.href} className={`header-nav-link${isActive(item.href)?' header-nav-link-active':''}`}
                 style={{padding:'0 12px',fontSize:14.5,whiteSpace:'nowrap',textDecoration:'none',
                   display:'flex',alignItems:'center',fontWeight:600,
-                  color:isActive(item.href)?'#F26A21':'#2B211B',
+                  color:isActive(item.href)?'#F26A21':'#4a4038',
                   position:'relative',
                 }}>
                 {item.label}
