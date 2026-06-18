@@ -11,7 +11,7 @@ interface Props {
 // flip: 上下反転（逆さま）にするか
 // 画面端側のまっすぐな辺（外側の角）は角丸にしない（半径0）。斜辺側の角だけ丸くする。
 function trapezoidPath(w: number, h: number, r: number, outerEdge: 'left' | 'right', flip: boolean) {
-  const inset = h * 1.1 // 傾斜の強さ（高さに対する比率）
+  const inset = h * 0.55 // 傾斜の強さ（高さに対する比率）
 
   // 各頂点ごとの角丸半径（画面端側の2点は0、斜辺側の2点はr）
   let points: {x:number;y:number;radius:number}[]
