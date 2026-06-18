@@ -10,7 +10,7 @@ interface Props {
 // outerEdge: 'left' | 'right' -- どちら側を画面端（広い辺）にするか
 // flip: 上下反転（逆さま）にするか
 function trapezoidPath(w: number, h: number, r: number, outerEdge: 'left' | 'right', flip: boolean) {
-  const inset = h * 0.65 // 傾斜の強さ（高さに対する比率）
+  const inset = h * 1.1 // 傾斜の強さ（高さに対する比率）
 
   // outerEdge='left'  : 左端で上下とも幅広、右に向かって先細り（右側がすぼまる）
   // outerEdge='right' : 右端で上下とも幅広、左に向かって先細り（左側がすぼまる）
@@ -81,7 +81,7 @@ export default function ActionBanner({ isLoggedIn }: Props) {
       <Link href="/search"
         onMouseEnter={()=>setHoverLeft(true)} onMouseLeave={()=>setHoverLeft(false)}
         style={{
-          position:'absolute', left:0, top:0, width:'55%', height:H,
+          position:'absolute', left:0, top:0, width:'64%', height:H,
           textDecoration:'none', display:'block',
           transform: hoverLeft ? 'translateY(-6px)' : 'translateY(0)',
           transition:'transform .25s ease',
@@ -99,7 +99,7 @@ export default function ActionBanner({ isLoggedIn }: Props) {
           </defs>
           <path d={leftPath} fill="url(#leftGrad)" filter="url(#leftShadow)"/>
         </svg>
-        <div style={{position:'absolute', inset:0, display:'flex', alignItems:'center', padding:'0 14% 0 7%'}}>
+        <div style={{position:'absolute', inset:0, display:'flex', alignItems:'center', padding:'0 22% 0 7%'}}>
           <div>
             <div style={{fontSize:13,color:'rgba(255,255,255,0.6)',fontWeight:600,letterSpacing:'0.1em',marginBottom:8}}>READ</div>
             <div style={{fontSize:30,fontWeight:700,color:'#fff',fontFamily:"'Noto Serif JP',serif",marginBottom:14,lineHeight:1.45}}>
@@ -117,7 +117,7 @@ export default function ActionBanner({ isLoggedIn }: Props) {
       <Link href={isLoggedIn ? '/post' : '/auth/register'}
         onMouseEnter={()=>setHoverRight(true)} onMouseLeave={()=>setHoverRight(false)}
         style={{
-          position:'absolute', right:0, top:170, width:'55%', height:H,
+          position:'absolute', right:0, top:170, width:'64%', height:H,
           textDecoration:'none', display:'block',
           transform: hoverRight ? 'translateY(6px)' : 'translateY(0)',
           transition:'transform .25s ease',
@@ -135,7 +135,7 @@ export default function ActionBanner({ isLoggedIn }: Props) {
           </defs>
           <path d={rightPath} fill="url(#rightGrad)" filter="url(#rightShadow)"/>
         </svg>
-        <div style={{position:'absolute', inset:0, display:'flex', alignItems:'center', justifyContent:'flex-end', padding:'0 7% 0 14%'}}>
+        <div style={{position:'absolute', inset:0, display:'flex', alignItems:'center', justifyContent:'flex-end', padding:'0 7% 0 22%'}}>
           <div style={{textAlign:'right'}}>
             <div style={{fontSize:13,color:'rgba(255,255,255,0.75)',fontWeight:600,letterSpacing:'0.1em',marginBottom:8}}>WRITE</div>
             <div style={{fontSize:30,fontWeight:700,color:'#fff',fontFamily:"'Noto Serif JP',serif",marginBottom:14,lineHeight:1.45}}>
