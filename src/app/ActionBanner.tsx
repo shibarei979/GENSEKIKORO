@@ -9,33 +9,33 @@ interface Props {
 // 角丸台形をSVGパスで生成する関数
 // outerEdge: 'left' | 'right' -- どちら側を画面端（広い辺）にするか
 // flip: 上下反転（逆さま）にするか
+// 画面端側のまっすぐな辺（外側の角）は角丸にしない（半径0）。斜辺側の角だけ丸くする。
 function trapezoidPath(w: number, h: number, r: number, outerEdge: 'left' | 'right', flip: boolean) {
   const inset = h * 1.1 // 傾斜の強さ（高さに対する比率）
 
-  // outerEdge='left'  : 左端で上下とも幅広、右に向かって先細り（右側がすぼまる）
-  // outerEdge='right' : 右端で上下とも幅広、左に向かって先細り（左側がすぼまる）
-  let points: {x:number;y:number}[]
+  // 各頂点ごとの角丸半径（画面端側の2点は0、斜辺側の2点はr）
+  let points: {x:number;y:number;radius:number}[]
   if (outerEdge === 'left') {
     points = [
-      { x: 0, y: 0 },
-      { x: w, y: 0 },
-      { x: w - inset, y: h },
-      { x: 0, y: h },
+      { x: 0, y: 0, radius: 0 },        // 左上（画面端）
+      { x: w, y: 0, radius: r },        // 右上（斜辺側）
+      { x: w - inset, y: h, radius: r }, // 右下（斜辺側）
+      { x: 0, y: h, radius: 0 },        // 左下（画面端）
     ]
   } else {
     points = [
-      { x: 0, y: 0 },
-      { x: w, y: 0 },
-      { x: w, y: h },
-      { x: inset, y: h },
+      { x: 0, y: 0, radius: r },        // 左上（斜辺側）
+      { x: w, y: 0, radius: 0 },        // 右上（画面端）
+      { x: w, y: h, radius: 0 },        // 右下（画面端）
+      { x: inset, y: h, radius: r },    // 左下（斜辺側）
     ]
   }
 
   if (flip) {
-    points = points.map(p => ({ x: p.x, y: h - p.y }))
+    points = points.map(p => ({ ...p, y: h - p.y }))
   }
 
-  function roundedPolygonPath(pts: {x:number;y:number}[], radius: number) {
+  function roundedPolygonPath(pts: {x:number;y:number;radius:number}[]) {
     const n = pts.length
     let d = ''
     for (let i = 0; i < n; i++) {
@@ -46,19 +46,21 @@ function trapezoidPath(w: number, h: number, r: number, outerEdge: 'left' | 'rig
       const v2 = { x: next.x - curr.x, y: next.y - curr.y }
       const len1 = Math.hypot(v1.x, v1.y) || 1
       const len2 = Math.hypot(v2.x, v2.y) || 1
+      const radius = curr.radius
       const r1 = Math.min(radius, len1 / 2)
       const r2 = Math.min(radius, len2 / 2)
       const p1 = { x: curr.x - (v1.x / len1) * r1, y: curr.y - (v1.y / len1) * r1 }
       const p2 = { x: curr.x + (v2.x / len2) * r2, y: curr.y + (v2.y / len2) * r2 }
       if (i === 0) d += `M ${p1.x} ${p1.y} `
       else d += `L ${p1.x} ${p1.y} `
-      d += `Q ${curr.x} ${curr.y} ${p2.x} ${p2.y} `
+      if (radius > 0) d += `Q ${curr.x} ${curr.y} ${p2.x} ${p2.y} `
+      else d += `L ${p2.x} ${p2.y} `
     }
     d += 'Z'
     return d
   }
 
-  return roundedPolygonPath(points, r)
+  return roundedPolygonPath(points)
 }
 
 export default function ActionBanner({ isLoggedIn }: Props) {
@@ -66,7 +68,7 @@ export default function ActionBanner({ isLoggedIn }: Props) {
   const [hoverRight, setHoverRight] = useState(false)
 
   const W = 800
-  const H = 300
+  const H = 390
   const R = 26
 
   // 探す：左端基準、先細りが右へ（中央方向）。通常向き。
@@ -75,7 +77,7 @@ export default function ActionBanner({ isLoggedIn }: Props) {
   const rightPath = trapezoidPath(W, H, R, 'right', true)
 
   return (
-    <div style={{position:'relative', width:'100vw', marginLeft:'calc(50% - 50vw)', marginRight:'calc(50% - 50vw)', height:560}}>
+    <div style={{position:'relative', width:'100vw', marginLeft:'calc(50% - 50vw)', marginRight:'calc(50% - 50vw)', height:660}}>
 
       {/* 左：探す（画面左端まで・上にストレッチ） */}
       <Link href="/search"
@@ -117,7 +119,7 @@ export default function ActionBanner({ isLoggedIn }: Props) {
       <Link href={isLoggedIn ? '/post' : '/auth/register'}
         onMouseEnter={()=>setHoverRight(true)} onMouseLeave={()=>setHoverRight(false)}
         style={{
-          position:'absolute', right:0, top:170, width:'64%', height:H,
+          position:'absolute', right:0, top:222, width:'64%', height:H,
           textDecoration:'none', display:'block',
           transform: hoverRight ? 'translateY(6px)' : 'translateY(0)',
           transition:'transform .25s ease',
