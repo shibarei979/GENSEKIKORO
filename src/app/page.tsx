@@ -6,6 +6,7 @@ import NovelList from './NovelList'
 import GemComment from './GemComment'
 import RecommendedNovels from './RecommendedNovels'
 import SearchBanner from './SearchBanner'
+import ActionBanner from './ActionBanner'
 import Header from '@/components/layout/Header'
 import Footer from '@/components/layout/Footer'
 import AdBanner from '@/components/layout/AdBanner'
@@ -312,6 +313,13 @@ export default async function HomePage() {
             </div>
             <GemSection novels={gemNovels} discoverCommentMap={discoverCommentMap} />
           </div>
+        </div>
+      </div>
+
+      {/* ===== 投稿・検索 台形バナー（ユーザーの推し と 週間ランキング の間） ===== */}
+      <div className="desktop-only" style={{background:'#fff',padding:'24px 0'}}>
+        <div style={{maxWidth:1200,margin:'0 auto',padding:'0 32px'}}>
+          <ActionBanner isLoggedIn={!!user} />
         </div>
       </div>
 
