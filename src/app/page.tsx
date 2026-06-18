@@ -302,15 +302,8 @@ export default async function HomePage() {
         </div>
       </div>
 
-      {/* ===== ユーザーの推し ===== */}
+      {/* ===== ユーザーの推し（見出しは本棚内のIntroBlockに統合） ===== */}
       <div className="gem-section-wrap" style={{background:'#fff',padding:'16px 0',overflow:'hidden'}}>
-        <div style={{maxWidth:1200,margin:'0 auto',padding:'0 32px',marginBottom:14}}>
-          <h2 style={{fontSize:17,fontWeight:700,color:'#2B211B',marginBottom:6}}>ユーザーの推し</h2>
-          <div style={{display:'flex',alignItems:'center',gap:14,flexWrap:'wrap'}}>
-            <p style={{fontSize:12,color:'#2B211B',margin:0}}>推しの作品を拡散しよう！</p>
-            <Link href="/search" style={{display:'inline-block',fontSize:11,color:'#F26A21',border:'1.5px solid #F26A21',borderRadius:14,padding:'5px 12px',textDecoration:'none',fontWeight:600,flexShrink:0}}>作品を検索する</Link>
-          </div>
-        </div>
         <div style={{width:'100%'}}>
           <GemSection novels={gemNovels} discoverCommentMap={discoverCommentMap} />
         </div>

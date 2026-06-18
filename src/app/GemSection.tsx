@@ -135,6 +135,22 @@ function BookItem({ n, discoverComments }: { n: Novel; discoverComments: {commen
   )
 }
 
+// 本棚の中に埋め込む見出しブロック（本の代わりに表示）
+function IntroBlock() {
+  return (
+    <div style={{
+      flex:'0 0 220px', minWidth:220, maxWidth:220, height:195,
+      background:'#FFF9F2', border:`1.5px dashed ${SPINE_BASE}50`, borderRadius:8,
+      display:'flex', flexDirection:'column', justifyContent:'center',
+      padding:'0 20px', boxSizing:'border-box',
+    }}>
+      <h2 style={{fontSize:16,fontWeight:700,color:'#2B211B',marginBottom:8,fontFamily:"'Noto Serif JP',serif"}}>ユーザーの推し</h2>
+      <p style={{fontSize:12,color:'#77706A',marginBottom:14,lineHeight:1.7}}>推しの作品を拡散しよう！</p>
+      <a href="/search" style={{display:'inline-block',fontSize:11,color:'#F26A21',border:'1.5px solid #F26A21',borderRadius:14,padding:'6px 14px',textDecoration:'none',fontWeight:600,width:'fit-content'}}>作品を検索する</a>
+    </div>
+  )
+}
+
 function EmptyBook() {
   const [hover, setHover] = useState(false)
   return (
@@ -195,8 +211,22 @@ function EmptyBook() {
 }
 
 export default function GemSection({ novels, discoverCommentMap }: Props) {
-  const bookCount = Math.min(50, Math.max(novels.length, 15))
-  const bookList = Array.from({length: bookCount}, (_,i) => novels[i] || null)
+  // 防御的に重複を除去（同じidの作品は1つだけにする）
+  const uniqueNovels: Novel[] = []
+  const seenIds = new Set<string>()
+  for (const n of novels) {
+    if (n && !seenIds.has(n.id)) { seenIds.add(n.id); uniqueNovels.push(n) }
+  }
+  // 表示数は「実際のユニークな作品数」を基準にし、見栄えのため最低15冊（足りない分は準備中で埋める）、最大50冊
+  const bookCount = Math.min(50, Math.max(uniqueNovels.length, 15))
+  const rawBookList: (Novel | null)[] = Array.from({length: bookCount}, (_,i) => uniqueNovels[i] || null)
+  // 中央から少し左（全体の40%あたり）の位置に「見出しブロック」を1つ差し込む
+  const introIndex = Math.max(1, Math.floor(bookCount * 0.4))
+  const bookList: (Novel | null | 'INTRO')[] = [
+    ...rawBookList.slice(0, introIndex),
+    'INTRO',
+    ...rawBookList.slice(introIndex),
+  ]
   // 無限ループ用に同じ並びを3セット複製（中央セットを基準に、はみ出たら反対側へワープする）
   const loopList = [...bookList, ...bookList, ...bookList]
 
@@ -256,9 +286,11 @@ export default function GemSection({ novels, discoverCommentMap }: Props) {
         onMouseLeave={()=>{pausedRef.current = false}}>
         <div ref={trackRef} style={{display:'flex',gap:3,paddingBottom:10,paddingTop:4,alignItems:'flex-end',width:'max-content',willChange:'transform'}}>
           {loopList.map((n, i) => (
-            n
-              ? <BookItem key={`${n.id}-${i}`} n={n} discoverComments={discoverCommentMap[n.id]||[]} />
-              : <EmptyBook key={`empty-${i}`} />
+            n === 'INTRO'
+              ? <IntroBlock key={`intro-${i}`} />
+              : n
+                ? <BookItem key={`${n.id}-${i}`} n={n} discoverComments={discoverCommentMap[n.id]||[]} />
+                : <EmptyBook key={`empty-${i}`} />
           ))}
         </div>
         {/* 本棚の板 */}
