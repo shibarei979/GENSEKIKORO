@@ -161,18 +161,16 @@ export default function Header({ profile, user, activeGenre }: Props) {
                   style={{
                     border:'1.5px solid #F26A21', color:'#F26A21', borderRadius:20,
                     background:'#fff', fontSize:13, fontWeight:600,
-                    display:'flex', alignItems:'center', justifyContent:'center',
+                    display:'flex', alignItems:'center', justifyContent:'center', gap:6,
                     textDecoration:'none', overflow:'hidden', whiteSpace:'nowrap',
-                    height:36, width:36, padding:0,
-                    transition:'width .25s ease, padding .25s ease',
+                    height:36, width:36, padding:0, flexShrink:0,
+                    transition:'width .25s ease',
                   }}>
-                  <span style={{display:'flex',alignItems:'center',justifyContent:'center',gap:6,flexShrink:0,width:'100%',height:'100%'}}>
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#F26A21" strokeWidth="2.5" strokeLinecap="round" style={{flexShrink:0}}>
-                      <line x1="12" y1="5" x2="12" y2="19"/>
-                      <line x1="5" y1="12" x2="19" y2="12"/>
-                    </svg>
-                    <span className="header-post-btn-label" style={{opacity:0,transition:'opacity .15s ease',flexShrink:0}}>投稿する</span>
-                  </span>
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#F26A21" strokeWidth="2.5" strokeLinecap="round" style={{flexShrink:0,minWidth:16}}>
+                    <line x1="12" y1="5" x2="12" y2="19"/>
+                    <line x1="5" y1="12" x2="19" y2="12"/>
+                  </svg>
+                  <span className="header-post-btn-label" style={{opacity:0,transition:'opacity .15s ease',flexShrink:0}}>投稿する</span>
                 </Link>
                 <div ref={notifRef} style={{position:'relative'}}>
                   <button onClick={handleOpenNotif}
