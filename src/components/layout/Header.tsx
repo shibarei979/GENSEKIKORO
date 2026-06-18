@@ -185,14 +185,13 @@ export default function Header({ profile, user, activeGenre }: Props) {
                 </div>
                 <div ref={userMenuRef} style={{position:'relative'}}>
                   <button onClick={()=>{setShowUserMenu(!showUserMenu);setShowSettings(false)}}
-                    style={{display:'flex',alignItems:'center',justifyContent:'center',width:38,height:38,borderRadius:'50%',background:'#FFF9F2',border:'1.5px solid #F0D9C9',cursor:'pointer',padding:0,overflow:'hidden'}}>
+                    style={{display:'flex',alignItems:'center',justifyContent:'center',width:38,height:38,borderRadius:'50%',background:'#FFF9F2',border: profile?.icon_url ? '1.5px solid #F0D9C9' : 'none',cursor:'pointer',padding:0,overflow:'hidden'}}>
                     {profile?.icon_url ? (
                       <img src={profile.icon_url} alt="" style={{width:'100%',height:'100%',objectFit:'cover'}}/>
                     ) : (
-                      <svg width="22" height="22" viewBox="0 0 24 24" fill="#B8AEA8">
-                        <circle cx="12" cy="8" r="4"/>
-                        <path d="M4 20c0-3.5 3.5-6 8-6s8 2.5 8 6a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1z"/>
-                      </svg>
+                      <div style={{width:'100%',height:'100%',background:'#F26A21',display:'flex',alignItems:'center',justifyContent:'center',fontSize:15,fontWeight:700,color:'#fff'}}>
+                        {(profile?.display_name||'?').slice(0,1)}
+                      </div>
                     )}
                   </button>
                   {showUserMenu && (
