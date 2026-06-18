@@ -174,15 +174,16 @@ export default function Header({ profile, user, activeGenre }: Props) {
           <div style={{display:'flex',alignItems:'center',gap:12,position:'relative',zIndex:1,flexShrink:0}}>
             {user ? (
               <>
-                <Link href="/post"
+                <Link href="/post" className="header-post-btn"
                   style={{
-                    color:'#77706A', fontSize:13, fontWeight:500,
-                    display:'flex', alignItems:'center', justifyContent:'center',
+                    border:'1.5px solid #F26A21', color:'#F26A21', borderRadius:20,
+                    background:'#fff', fontSize:13, fontWeight:600,
+                    display:'flex', alignItems:'center', justifyContent:'center', gap:6,
                     textDecoration:'none', whiteSpace:'nowrap',
-                    padding:'8px 12px', borderRadius:8, flexShrink:0,
-                    transition:'all .15s',
+                    padding:'7px 18px', flexShrink:0,
                   }}>
-                  投稿する
+                  <span style={{fontSize:15,lineHeight:1}}>＋</span>
+                  <span>投稿する</span>
                 </Link>
                 <div ref={notifRef} style={{position:'relative'}}>
                   <button onClick={handleOpenNotif}
@@ -399,6 +400,14 @@ export default function Header({ profile, user, activeGenre }: Props) {
           .mobile-header  { display: block !important; }
         }
         nav a:hover { color: #F26A21 !important; opacity: 1; }
+
+        .header-post-btn { transition: transform .18s ease, box-shadow .18s ease, background .18s ease; }
+        .header-post-btn:hover {
+          background: #fff8f5;
+          transform: translateY(-2px);
+          box-shadow: 0 4px 10px rgba(242,106,33,.18);
+        }
+        .header-post-btn:active { transform: translateY(0); }
       `}</style>
     </>
   )
