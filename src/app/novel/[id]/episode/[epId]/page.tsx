@@ -33,6 +33,7 @@ import CommentSection from './CommentSection'
 import EpisodeLikeButton from './EpisodeLikeButton'
 import ReadButton from './ReadButton'
 import EpisodeBody from './EpisodeBody'
+import { QuoteProvider } from './QuoteContext'
 
 interface Props { params: { id: string; epId: string } }
 
@@ -145,6 +146,7 @@ export default async function EpisodePage({ params }: Props) {
   const navBtn = {fontSize:12,color:'#F26A21',border:'1px solid #F0D9C9',padding:'6px 14px',borderRadius:16,background:'#fff',textDecoration:'none'} as const
 
   return (
+    <QuoteProvider>
     <div style={{minHeight:'100vh',background:'#FFF9F2'}}>
       <Header profile={profile} user={user} />
 
@@ -311,5 +313,6 @@ export default async function EpisodePage({ params }: Props) {
       <AdBanner />
       <Footer user={user} />
     </div>
+    </QuoteProvider>
   )
 }

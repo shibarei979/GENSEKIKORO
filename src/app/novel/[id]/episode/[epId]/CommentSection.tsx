@@ -2,17 +2,21 @@
 
 import { useState, useEffect } from 'react'
 import { createClient } from '@/lib/supabase/client'
+import { useQuote } from './QuoteContext'
 
 interface Comment {
   id: string; body: string; created_at: string; user_id: string
   display_name: string; icon_url?: string; like_count?: number
   is_pinned?: boolean; parent_id?: string | null; replies?: Comment[]
+  quoted_text?: string | null
 }
 
 interface Props {
   novelId: string; episodeId: string; userId: string | null
   userName: string | null; userIconUrl?: string | null; authorId: string
   comments?: any[]
+  quotedText?: string | null
+  onClearQuote?: () => void
 }
 
 function Avatar({ name, iconUrl, size=26 }: { name:string; iconUrl?:string; size?:number }) {
@@ -29,8 +33,11 @@ function fmtDate(s: string) {
   return `${d.getFullYear()}/${d.getMonth()+1}/${d.getDate()}`
 }
 
-export default function CommentSection({ novelId, episodeId, userId, userName, userIconUrl, authorId }: Props) {
+export default function CommentSection({ novelId, episodeId, userId, userName, userIconUrl, authorId, quotedText: quotedTextProp, onClearQuote: onClearQuoteProp }: Props) {
   const supabase = createClient()
+  const quoteCtx = useQuote()
+  const quotedText = quotedTextProp !== undefined ? quotedTextProp : quoteCtx.quotedText
+  const onClearQuote = onClearQuoteProp || (() => quoteCtx.setQuotedText(null))
   const [comments,    setComments]    = useState<Comment[]>([])
   const [body,        setBody]        = useState('')
   const [loading,     setLoading]     = useState(false)
@@ -44,7 +51,7 @@ export default function CommentSection({ novelId, episodeId, userId, userName, u
 
   useEffect(() => {
     supabase.from('comments')
-      .select('id,body,created_at,user_id,is_pinned,parent_id')
+      .select('id,body,created_at,user_id,is_pinned,parent_id,quoted_text')
       .eq('episode_id', episodeId)
       .order('created_at', { ascending: true })
       .limit(200)
@@ -59,6 +66,7 @@ export default function CommentSection({ novelId, episodeId, userId, userName, u
           id: d.id, body: d.body, created_at: d.created_at,
           user_id: d.user_id, is_pinned: d.is_pinned,
           like_count: 0, parent_id: d.parent_id,
+          quoted_text: d.quoted_text || null,
           display_name: profileMap[d.user_id]?.display_name||'不明',
           icon_url: profileMap[d.user_id]?.icon_url||'',
         }))
@@ -80,13 +88,14 @@ export default function CommentSection({ novelId, episodeId, userId, userName, u
     if (!userId || !body.trim()) return
     setLoading(true)
     const { data, error } = await supabase.from('comments')
-      .insert({ novel_id: novelId, episode_id: episodeId, user_id: userId, body: body.trim(), parent_id: null })
-      .select('id,body,created_at,user_id').single()
+      .insert({ novel_id: novelId, episode_id: episodeId, user_id: userId, body: body.trim(), parent_id: null, quoted_text: quotedText || null })
+      .select('id,body,created_at,user_id,quoted_text').single()
     setLoading(false)
     if (error || !data) return
     const newComment = { ...data, display_name: userName||'', icon_url: userIconUrl||'', like_count:0, replies:[] }
     setComments(prev => [...prev, newComment])
     setBody('')
+    onClearQuote?.()
     if (userId !== authorId) {
       fetch('/api/notify', { method:'POST', headers:{'Content-Type':'application/json'},
         body: JSON.stringify({ user_id: authorId, type:'comment',
@@ -177,6 +186,21 @@ export default function CommentSection({ novelId, episodeId, userId, userName, u
           {isAuthor && <span style={{fontSize:9,background:'#eff6ff',color:'#1d4ed8',border:'1px solid #93c5fd',padding:'1px 5px',borderRadius:3,fontWeight:700}}>作者</span>}
           <span style={{fontSize:10,color:'#B8AEA8',marginLeft:'auto'}}>{fmtDate(c.created_at)}</span>
         </div>
+        {!isReply && c.quoted_text && (
+          <div style={{
+            paddingLeft:33, marginBottom:6,
+          }}>
+            <div style={{
+              fontSize:11.5, color:'#8a5a3a', background:'#FFF6EC',
+              border:'1px solid #f0d9c0', borderLeft:'3px solid #F26A21',
+              borderRadius:'2px 6px 6px 2px', padding:'6px 10px',
+              lineHeight:1.6, whiteSpace:'pre-wrap',
+            }}>
+              <span style={{fontSize:10,color:'#F26A21',fontWeight:700,marginRight:4}}>引用</span>
+              "{c.quoted_text.length > 60 ? c.quoted_text.slice(0,60)+'…' : c.quoted_text}"
+            </div>
+          </div>
+        )}
         <div style={{fontSize:12,color:'#2B211B',lineHeight:1.7,paddingLeft:isReply?29:33,whiteSpace:'pre-wrap'}}>{c.body}</div>
         <div style={{paddingLeft:isReply?29:33,marginTop:5,display:'flex',alignItems:'center',gap:6,flexWrap:'wrap'}}>
           <button onClick={()=>handleCommentLike(c.id)}
@@ -217,6 +241,23 @@ export default function CommentSection({ novelId, episodeId, userId, userName, u
       <div style={{padding:'12px 16px',borderBottom:'1px solid #F0D9C9',background:'#FFF9F2'}}>
         {userId ? (
           <>
+            {/* 引用プレビュー（本文の文をクリックすると表示） */}
+            {quotedText && (
+              <div style={{
+                display:'flex', alignItems:'flex-start', gap:8,
+                background:'#FFF6EC', border:'1px solid #f0d9c0', borderLeft:'3px solid #F26A21',
+                borderRadius:'2px 8px 8px 2px', padding:'8px 10px', marginBottom:8,
+              }}>
+                <div style={{flex:1, fontSize:12, color:'#8a5a3a', lineHeight:1.6}}>
+                  <span style={{fontSize:10,color:'#F26A21',fontWeight:700,marginRight:4}}>引用</span>
+                  "{quotedText.length > 80 ? quotedText.slice(0,80)+'…' : quotedText}"
+                </div>
+                <button onClick={onClearQuote}
+                  style={{fontSize:11,color:'#B8AEA8',background:'none',border:'none',cursor:'pointer',padding:0,flexShrink:0}}>
+                  ✕
+                </button>
+              </div>
+            )}
             {/* ワンクリックリアクション */}
             <div style={{display:'flex',gap:6,marginBottom:8,flexWrap:'wrap'}}>
               {['最高だった','続きが気になる','うぽつ'].map(label => (
@@ -229,7 +270,7 @@ export default function CommentSection({ novelId, episodeId, userId, userName, u
             <div style={{display:'flex',gap:8,marginBottom:8}}>
               <Avatar name={userName||''} iconUrl={userIconUrl||''} size={28}/>
               <textarea value={body} onChange={e=>setBody(e.target.value)} rows={2}
-                placeholder="コメントを書く..."
+                placeholder={quotedText ? 'この文へのコメントを書く...' : 'コメントを書く...'}
                 style={{flex:1,padding:'8px 12px',border:'1.5px solid #F0D9C9',borderRadius:8,fontSize:12,resize:'none',outline:'none',fontFamily:'inherit'}}/>
             </div>
             <div style={{display:'flex',justifyContent:'flex-end',gap:8,alignItems:'center'}}>

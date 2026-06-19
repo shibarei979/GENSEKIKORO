@@ -2,6 +2,7 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react'
 import ReadingSettings, { Settings } from './ReadingSettings'
 import MobileEpisodeBody from './MobileEpisodeBody'
+import { useQuote } from './QuoteContext'
 
 interface Props {
   title: string
@@ -10,6 +11,7 @@ interface Props {
   afterword?: string | null
   authorName?: string
   episodeId?: string
+  onQuote?: (text: string) => void
 }
 
 const DEFAULTS: Settings = { font: 'serif', fontSize: 16, lineHeight: 2.1, writingMode: 'horizontal' }
@@ -276,7 +278,105 @@ function SpeechPanel({ title, body, isMobile }: { title: string; body: string; i
   )
 }
 
-export default function EpisodeBody({ title, body, preface, afterword, authorName, episodeId }: Props) {
+// ===== 文単位コメント機能 =====
+// 本文を「。」「！」「？」「」」「』」の直後で文に分割する（記号自体は文に含める）
+function splitIntoSentences(text: string): string[] {
+  const result: string[] = []
+  let buf = ''
+  for (let i = 0; i < text.length; i++) {
+    const ch = text[i]
+    buf += ch
+    const isEnder = ch === '。' || ch === '！' || ch === '？' || ch === '」' || ch === '』'
+    const next = text[i+1]
+    // 改行直前でも区切る。終端記号の直後に閉じ括弧が続く場合は一旦継続させる簡易処理。
+    if (ch === '\n') {
+      result.push(buf)
+      buf = ''
+      continue
+    }
+    if (isEnder && next !== '」' && next !== '』') {
+      result.push(buf)
+      buf = ''
+    }
+  }
+  if (buf) result.push(buf)
+  return result.filter(s => s.length > 0)
+}
+
+// 文単位でホバー→💬→クリックで引用できる本文ブロック
+function QuotableBody({ body, fontSize, lineHeight, fontFamily, onQuote }: {
+  body: string; fontSize: number; lineHeight: number; fontFamily: string; onQuote?: (text:string)=>void
+}) {
+  const sentences = splitIntoSentences(body)
+  const [hoverIdx, setHoverIdx] = useState<number | null>(null)
+  const [justQuotedIdx, setJustQuotedIdx] = useState<number | null>(null)
+
+  function handleClick(raw: string, idx: number) {
+    if (!onQuote) return
+    // 表示用にルビ記法等を簡易除去してから引用
+    const clean = raw
+      .replace(/｜([^《]+)《[^》]+》/g, '$1')
+      .replace(/《《([^》]+)》》/g, '$1')
+      .replace(/\n/g, '')
+      .trim()
+    if (!clean) return
+    onQuote(clean)
+    setJustQuotedIdx(idx)
+    setTimeout(() => setJustQuotedIdx(prev => prev === idx ? null : prev), 1200)
+  }
+
+  return (
+    <div style={{fontSize,lineHeight,color:'#2B211B',fontFamily,wordBreak:'break-all'}}>
+      {sentences.map((raw, idx) => {
+        const trimmedForDisplay = raw === '\n' ? '' : raw
+        const htmlInner = renderBodyH(trimmedForDisplay)
+        const isHover = hoverIdx === idx
+        const justQuoted = justQuotedIdx === idx
+        if (raw === '\n') return <br key={idx}/>
+        return (
+          <span
+            key={idx}
+            onMouseEnter={()=>setHoverIdx(idx)}
+            onMouseLeave={()=>setHoverIdx(prev => prev===idx?null:prev)}
+            style={{
+              position:'relative',
+              background: justQuoted ? 'rgba(242,106,33,0.16)' : isHover ? 'rgba(242,106,33,0.07)' : 'transparent',
+              borderRadius: 3,
+              transition:'background .15s ease',
+              cursor: onQuote ? 'pointer' : 'inherit',
+            }}
+            onClick={()=>handleClick(raw, idx)}
+          >
+            <span dangerouslySetInnerHTML={{__html: htmlInner}}/>
+            {onQuote && (
+              <span
+                aria-hidden="true"
+                style={{
+                  display:'inline-flex', alignItems:'center', justifyContent:'center',
+                  width:0, opacity:0, overflow:'hidden',
+                  marginLeft: isHover ? 4 : 0,
+                  ...(isHover ? { width:18, opacity:1 } : {}),
+                  transition:'opacity .15s ease, width .15s ease',
+                  verticalAlign:'middle',
+                }}
+              >
+                <span style={{
+                  width:17, height:17, borderRadius:'50%', background:'#F26A21',
+                  display:'flex', alignItems:'center', justifyContent:'center',
+                  fontSize:10, lineHeight:1, color:'#fff', flexShrink:0,
+                }}>💬</span>
+              </span>
+            )}
+          </span>
+        )
+      })}
+    </div>
+  )
+}
+
+export default function EpisodeBody({ title, body, preface, afterword, authorName, episodeId, onQuote }: Props) {
+  const { setQuotedText } = useQuote()
+  const handleQuote = onQuote || setQuotedText
   const [isMobile, setIsMobile] = useState(false)
   const [vertical, setVertical] = useState(false)
   const [settings, setSettings] = useState<Settings>(() => {
@@ -315,7 +415,7 @@ export default function EpisodeBody({ title, body, preface, afterword, authorNam
     return (
       <>
         <SpeechPanel title={title} body={body} isMobile={true}/>
-        <MobileEpisodeBody title={title} body={body} preface={preface} afterword={afterword} authorName={authorName}/>
+        <MobileEpisodeBody title={title} body={body} preface={preface} afterword={afterword} authorName={authorName} onQuote={handleQuote}/>
       </>
     )
   }
@@ -348,10 +448,7 @@ export default function EpisodeBody({ title, body, preface, afterword, authorNam
                   {preface}
                 </div>
               )}
-              <div
-                style={{fontSize:settings.fontSize,lineHeight:settings.lineHeight,color:'#2B211B',fontFamily,wordBreak:'break-all'}}
-                dangerouslySetInnerHTML={{__html: renderBodyH(body)}}
-              />
+              <QuotableBody body={body} fontSize={settings.fontSize} lineHeight={settings.lineHeight} fontFamily={fontFamily} onQuote={handleQuote}/>
             </div>
             {afterword && (
               <div style={{borderTop:'1px solid #F0D9C9'}}>
