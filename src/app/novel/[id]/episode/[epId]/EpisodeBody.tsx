@@ -303,16 +303,16 @@ function splitIntoSentences(text: string): string[] {
   return result.filter(s => s.length > 0)
 }
 
-// 文単位でホバー→💬→クリックで引用できる本文ブロック
-function QuotableBody({ body, fontSize, lineHeight, fontFamily, onQuote }: {
-  body: string; fontSize: number; lineHeight: number; fontFamily: string; onQuote?: (text:string)=>void
+// 文単位でホバー→💬→クリックで引用できる本文ブロック（selectingモード中のみ反応）
+function QuotableBody({ body, fontSize, lineHeight, fontFamily, onQuote, selecting, onAfterQuote }: {
+  body: string; fontSize: number; lineHeight: number; fontFamily: string
+  onQuote?: (text:string)=>void; selecting?: boolean; onAfterQuote?: () => void
 }) {
   const sentences = splitIntoSentences(body)
   const [hoverIdx, setHoverIdx] = useState<number | null>(null)
-  const [justQuotedIdx, setJustQuotedIdx] = useState<number | null>(null)
 
   function handleClick(raw: string, idx: number) {
-    if (!onQuote) return
+    if (!onQuote || !selecting) return
     // 表示用にルビ記法等を簡易除去してから引用
     const clean = raw
       .replace(/｜([^《]+)《[^》]+》/g, '$1')
@@ -321,8 +321,7 @@ function QuotableBody({ body, fontSize, lineHeight, fontFamily, onQuote }: {
       .trim()
     if (!clean) return
     onQuote(clean)
-    setJustQuotedIdx(idx)
-    setTimeout(() => setJustQuotedIdx(prev => prev === idx ? null : prev), 1200)
+    onAfterQuote?.()
   }
 
   return (
@@ -330,41 +329,38 @@ function QuotableBody({ body, fontSize, lineHeight, fontFamily, onQuote }: {
       {sentences.map((raw, idx) => {
         const trimmedForDisplay = raw === '\n' ? '' : raw
         const htmlInner = renderBodyH(trimmedForDisplay)
-        const isHover = hoverIdx === idx
-        const justQuoted = justQuotedIdx === idx
+        const isHover = selecting && hoverIdx === idx
         if (raw === '\n') return <br key={idx}/>
         return (
           <span
             key={idx}
-            onMouseEnter={()=>setHoverIdx(idx)}
-            onMouseLeave={()=>setHoverIdx(prev => prev===idx?null:prev)}
+            onMouseEnter={()=> selecting && setHoverIdx(idx)}
+            onMouseLeave={()=> setHoverIdx(prev => prev===idx?null:prev)}
             style={{
               position:'relative',
-              background: justQuoted ? 'rgba(242,106,33,0.16)' : isHover ? 'rgba(242,106,33,0.07)' : 'transparent',
+              background: isHover ? 'rgba(242,106,33,0.1)' : 'transparent',
               borderRadius: 3,
               transition:'background .15s ease',
-              cursor: onQuote ? 'pointer' : 'inherit',
+              cursor: selecting ? 'pointer' : 'inherit',
             }}
             onClick={()=>handleClick(raw, idx)}
           >
             <span dangerouslySetInnerHTML={{__html: htmlInner}}/>
-            {onQuote && (
+            {selecting && (
               <span
                 aria-hidden="true"
                 style={{
                   display:'inline-flex', alignItems:'center', justifyContent:'center',
                   width:0, opacity:0, overflow:'hidden',
                   marginLeft: isHover ? 4 : 0,
-                  ...(isHover ? { width:18, opacity:1 } : {}),
+                  ...(isHover ? { width:16, opacity:1 } : {}),
                   transition:'opacity .15s ease, width .15s ease',
                   verticalAlign:'middle',
                 }}
               >
-                <span style={{
-                  width:17, height:17, borderRadius:'50%', background:'#F26A21',
-                  display:'flex', alignItems:'center', justifyContent:'center',
-                  fontSize:10, lineHeight:1, color:'#fff', flexShrink:0,
-                }}>💬</span>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#F26A21" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{flexShrink:0}}>
+                  <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/>
+                </svg>
               </span>
             )}
           </span>
@@ -375,8 +371,17 @@ function QuotableBody({ body, fontSize, lineHeight, fontFamily, onQuote }: {
 }
 
 export default function EpisodeBody({ title, body, preface, afterword, authorName, episodeId, onQuote }: Props) {
-  const { setQuotedText } = useQuote()
+  const { setQuotedText, selecting, setSelecting, commentAnchorRef } = useQuote()
   const handleQuote = onQuote || setQuotedText
+
+  function handleAfterQuote() {
+    setSelecting(false)
+    // コメント欄まで自動スクロール
+    if (commentAnchorRef.current) {
+      commentAnchorRef.current.scrollIntoView({ behavior:'smooth', block:'start' })
+    }
+  }
+
   const [isMobile, setIsMobile] = useState(false)
   const [vertical, setVertical] = useState(false)
   const [settings, setSettings] = useState<Settings>(() => {
@@ -448,7 +453,19 @@ export default function EpisodeBody({ title, body, preface, afterword, authorNam
                   {preface}
                 </div>
               )}
-              <QuotableBody body={body} fontSize={settings.fontSize} lineHeight={settings.lineHeight} fontFamily={fontFamily} onQuote={handleQuote}/>
+              {selecting && (
+                <div style={{
+                  display:'flex', alignItems:'center', gap:8,
+                  background:'#FFF6EC', border:'1px solid #f0d9c0', borderRadius:8,
+                  padding:'9px 14px', marginBottom:20, fontSize:12.5, color:'#8a5a3a',
+                }}>
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#F26A21" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{flexShrink:0}}>
+                    <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/>
+                  </svg>
+                  引用したい文をクリックしてください
+                </div>
+              )}
+              <QuotableBody body={body} fontSize={settings.fontSize} lineHeight={settings.lineHeight} fontFamily={fontFamily} onQuote={handleQuote} selecting={selecting} onAfterQuote={handleAfterQuote}/>
             </div>
             {afterword && (
               <div style={{borderTop:'1px solid #F0D9C9'}}>
