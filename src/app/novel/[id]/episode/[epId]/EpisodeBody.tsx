@@ -415,7 +415,7 @@ export default function EpisodeBody({ title, body, preface, afterword, authorNam
     return (
       <>
         <SpeechPanel title={title} body={body} isMobile={true}/>
-        <MobileEpisodeBody title={title} body={body} preface={preface} afterword={afterword} authorName={authorName} onQuote={handleQuote}/>
+        <MobileEpisodeBody title={title} body={body} preface={preface} afterword={afterword} authorName={authorName}/>
       </>
     )
   }
