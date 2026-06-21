@@ -18,7 +18,7 @@ const DEFAULTS: Settings = { font: 'serif', fontSize: 16, lineHeight: 2.1, writi
 
 function renderBodyH(text: string): string {
   let r = text.replace(/｜([^《]+)《([^》]+)》/g, '<ruby>$1<rt>$2</rt></ruby>')
-  r = r.replace(/《《([^》]+)》》/g, '<em style="font-style:normal;font-weight:700;border-bottom:2px solid #F26A21">$1</em>')
+  r = r.replace(/《《([^》]+)》》/g, '<em style="font-style:normal;font-weight:700;border-bottom:2px solid var(--color-brand)">$1</em>')
   r = r.replace(/\n/g, '<br/>')
   return r
 }
@@ -203,23 +203,23 @@ function SpeechPanel({ title, body, isMobile }: { title: string; body: string; i
   const RATES = [0.8, 1.0, 1.25, 1.5, 2.0]
 
   return (
-    <div style={{background:'#fff',border:'1.5px solid #F0D9C9',borderRadius:12,padding:isMobile?'12px 14px':'14px 18px',marginBottom:12}}>
+    <div style={{background:'var(--color-bg-card)',border:'1.5px solid var(--color-brand-border)',borderRadius:12,padding:isMobile?'12px 14px':'14px 18px',marginBottom:12}}>
       {/* 1行目：ラベル＋速度 */}
       <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',marginBottom:10}}>
         <div style={{display:'flex',alignItems:'center',gap:7}}>
-          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#F26A21" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="var(--color-brand)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
             <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/>
             <path d="M19.07 4.93a10 10 0 0 1 0 14.14"/>
             <path d="M15.54 8.46a5 5 0 0 1 0 7.07"/>
           </svg>
-          <span style={{fontSize:13,fontWeight:700,color:'#2B211B'}}>聴く β</span>
+          <span style={{fontSize:13,fontWeight:700,color:'var(--color-text)'}}>聴く β</span>
         </div>
         <div style={{display:'flex',gap:3}}>
           {RATES.map(r => (
             <button key={r} onClick={()=>changeRate(r)} style={{
               padding:'2px 7px',fontSize:10,borderRadius:6,border:'1px solid',cursor:'pointer',
-              background:rate===r?'#F26A21':'#fff',color:rate===r?'#fff':'#77706A',
-              borderColor:rate===r?'#F26A21':'#F0D9C9',fontWeight:rate===r?700:400,
+              background:rate===r?'var(--color-brand)':'var(--color-bg-card)',color:rate===r?'var(--color-bg-card)':'var(--color-text-muted)',
+              borderColor:rate===r?'var(--color-brand)':'var(--color-brand-border)',fontWeight:rate===r?700:400,
             }}>{r}x</button>
           ))}
         </div>
@@ -229,42 +229,42 @@ function SpeechPanel({ title, body, isMobile }: { title: string; body: string; i
       <div style={{display:'flex',alignItems:'center',gap:10}}>
         {/* 停止 */}
         <button onClick={stop} disabled={!isPlaying && !isPaused}
-          style={{width:34,height:34,borderRadius:'50%',border:'1.5px solid #F0D9C9',background:'#fff',cursor:isPlaying||isPaused?'pointer':'not-allowed',display:'flex',alignItems:'center',justifyContent:'center',opacity:isPlaying||isPaused?1:0.35}}>
-          <svg width="11" height="11" viewBox="0 0 24 24" fill="#77706A"><rect x="3" y="3" width="18" height="18" rx="2"/></svg>
+          style={{width:34,height:34,borderRadius:'50%',border:'1.5px solid var(--color-brand-border)',background:'var(--color-bg-card)',cursor:isPlaying||isPaused?'pointer':'not-allowed',display:'flex',alignItems:'center',justifyContent:'center',opacity:isPlaying||isPaused?1:0.35}}>
+          <svg width="11" height="11" viewBox="0 0 24 24" fill="var(--color-text-muted)"><rect x="3" y="3" width="18" height="18" rx="2"/></svg>
         </button>
 
         {/* 再生/一時停止/再開 */}
         <button onClick={()=>{ if(isPlaying) pause(); else if(isPaused && !isStopped) resumeSpeech(); else if(!isPlaying && !isPaused) play() }}
-          style={{width:46,height:46,borderRadius:'50%',border:'none',background:'#F26A21',cursor:'pointer',display:'flex',alignItems:'center',justifyContent:'center',boxShadow:'0 2px 10px rgba(242,106,33,.35)'}}>
+          style={{width:46,height:46,borderRadius:'50%',border:'none',background:'var(--color-brand)',cursor:'pointer',display:'flex',alignItems:'center',justifyContent:'center',boxShadow:'0 2px 10px rgba(242,106,33,.35)'}}>
           {isPlaying
-            ? <svg width="14" height="14" viewBox="0 0 24 24" fill="#fff"><rect x="6" y="4" width="4" height="16" rx="1"/><rect x="14" y="4" width="4" height="16" rx="1"/></svg>
-            : <svg width="14" height="14" viewBox="0 0 24 24" fill="#fff"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+            ? <svg width="14" height="14" viewBox="0 0 24 24" fill="var(--color-bg-card)"><rect x="6" y="4" width="4" height="16" rx="1"/><rect x="14" y="4" width="4" height="16" rx="1"/></svg>
+            : <svg width="14" height="14" viewBox="0 0 24 24" fill="var(--color-bg-card)"><polygon points="5 3 19 12 5 21 5 3"/></svg>
           }
         </button>
 
         {/* 状態テキスト */}
         <div style={{flex:1}}>
-          {isPlaying  && <div style={{fontSize:11,color:'#F26A21',fontWeight:600}}>読み上げ中...</div>}
-          {isPaused   && <div style={{fontSize:11,color:'#77706A'}}>一時停止 — ▶ で再開</div>}
-          {!isPlaying && !isPaused && <div style={{fontSize:11,color:'#B8AEA8'}}>▶ を押して読み上げ開始</div>}
+          {isPlaying  && <div style={{fontSize:11,color:'var(--color-brand)',fontWeight:600}}>読み上げ中...</div>}
+          {isPaused   && <div style={{fontSize:11,color:'var(--color-text-muted)'}}>一時停止 — ▶ で再開</div>}
+          {!isPlaying && !isPaused && <div style={{fontSize:11,color:'var(--color-text-faint)'}}>▶ を押して読み上げ開始</div>}
         </div>
 
         {/* 音声選択 */}
         {voices.length > 0 && (
           <div style={{position:'relative'}}>
             <button onClick={()=>setShowVoice(!showVoice)}
-              style={{fontSize:11,padding:'5px 10px',border:'1px solid #F0D9C9',borderRadius:8,background:showVoice?'#FFF1E6':'#fff',color:'#77706A',cursor:'pointer',display:'flex',alignItems:'center',gap:4}}>
+              style={{fontSize:11,padding:'5px 10px',border:'1px solid var(--color-brand-border)',borderRadius:8,background:showVoice?'var(--color-brand-light)':'var(--color-bg-card)',color:'var(--color-text-muted)',cursor:'pointer',display:'flex',alignItems:'center',gap:4}}>
               音声
               <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><polyline points="6 9 12 15 18 9"/></svg>
             </button>
             {showVoice && (
               <>
                 <div style={{position:'fixed',inset:0,zIndex:98}} onClick={()=>setShowVoice(false)}/>
-                <div style={{position:'absolute',right:0,top:'calc(100% + 6px)',background:'#fff',border:'1px solid #F0D9C9',borderRadius:10,boxShadow:'0 4px 20px rgba(0,0,0,0.12)',minWidth:200,maxHeight:220,overflowY:'auto',zIndex:99}}>
-                  <div style={{padding:'8px 12px',fontSize:11,color:'#B8AEA8',borderBottom:'1px solid #F0D9C9',fontWeight:600}}>日本語音声を選択</div>
+                <div style={{position:'absolute',right:0,top:'calc(100% + 6px)',background:'var(--color-bg-card)',border:'1px solid var(--color-brand-border)',borderRadius:10,boxShadow:'0 4px 20px rgba(0,0,0,0.12)',minWidth:200,maxHeight:220,overflowY:'auto',zIndex:99}}>
+                  <div style={{padding:'8px 12px',fontSize:11,color:'var(--color-text-faint)',borderBottom:'1px solid var(--color-brand-border)',fontWeight:600}}>日本語音声を選択</div>
                   {voices.map((v, i) => (
                     <button key={i} onClick={()=>{changeVoice(i);setShowVoice(false)}}
-                      style={{width:'100%',padding:'9px 14px',textAlign:'left',background:voiceIdx===i?'#FFF1E6':'#fff',border:'none',borderBottom:'1px solid #FFF1E6',fontSize:12,color:voiceIdx===i?'#F26A21':'#2B211B',cursor:'pointer',fontWeight:voiceIdx===i?700:400}}>
+                      style={{width:'100%',padding:'9px 14px',textAlign:'left',background:voiceIdx===i?'var(--color-brand-light)':'var(--color-bg-card)',border:'none',borderBottom:'1px solid var(--color-brand-light)',fontSize:12,color:voiceIdx===i?'var(--color-brand)':'var(--color-text)',cursor:'pointer',fontWeight:voiceIdx===i?700:400}}>
                       {v.name}{voiceIdx===i && <span style={{marginLeft:6,fontSize:10}}>✓</span>}
                     </button>
                   ))}
@@ -325,7 +325,7 @@ function QuotableBody({ body, fontSize, lineHeight, fontFamily, onQuote, selecti
   }
 
   return (
-    <div style={{fontSize,lineHeight,color:'#2B211B',fontFamily,wordBreak:'break-all'}}>
+    <div style={{fontSize,lineHeight,color:'var(--color-text)',fontFamily,wordBreak:'break-all'}}>
       {sentences.map((raw, idx) => {
         const trimmedForDisplay = raw === '\n' ? '' : raw
         const htmlInner = renderBodyH(trimmedForDisplay)
@@ -358,7 +358,7 @@ function QuotableBody({ body, fontSize, lineHeight, fontFamily, onQuote, selecti
                   verticalAlign:'middle',
                 }}
               >
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#F26A21" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{flexShrink:0}}>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--color-brand)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{flexShrink:0}}>
                   <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/>
                 </svg>
               </span>
@@ -429,11 +429,11 @@ export default function EpisodeBody({ title, body, preface, afterword, authorNam
   return (
     <>
       <SpeechPanel title={title} body={body} isMobile={false}/>
-      <div style={{background:'#fff',border:'1px solid #F0D9C9',borderRadius:12,overflow:'hidden',marginBottom:16}}>
-        <div style={{padding:'8px 16px',borderBottom:'1px solid #FFF1E6',background:'#FFF9F2',display:'flex',justifyContent:'space-between',alignItems:'center'}}>
+      <div style={{background:'var(--color-bg-card)',border:'1px solid var(--color-brand-border)',borderRadius:12,overflow:'hidden',marginBottom:16}}>
+        <div style={{padding:'8px 16px',borderBottom:'1px solid var(--color-brand-light)',background:'var(--color-bg)',display:'flex',justifyContent:'space-between',alignItems:'center'}}>
           <button onClick={toggleVertical}
-            style={{fontSize:12,padding:'4px 14px',borderRadius:14,border:'1.5px solid #F0D9C9',
-              background:vertical?'#F26A21':'#fff',color:vertical?'#fff':'#77706A',cursor:'pointer'}}>
+            style={{fontSize:12,padding:'4px 14px',borderRadius:14,border:'1.5px solid var(--color-brand-border)',
+              background:vertical?'var(--color-brand)':'var(--color-bg-card)',color:vertical?'var(--color-bg-card)':'var(--color-text-muted)',cursor:'pointer'}}>
             {vertical ? '横書きに戻す' : '縦書きで読む'}
           </button>
           <ReadingSettings onChange={setSettings} isMobile={false}/>
@@ -445,11 +445,11 @@ export default function EpisodeBody({ title, body, preface, afterword, authorNam
         ) : (
           <>
             <div style={{padding:'32px 48px 40px'}}>
-              <h1 style={{fontFamily,fontSize:20,fontWeight:700,color:'#2B211B',textAlign:'center',marginBottom:28,lineHeight:1.6}}>
+              <h1 style={{fontFamily,fontSize:20,fontWeight:700,color:'var(--color-text)',textAlign:'center',marginBottom:28,lineHeight:1.6}}>
                 {title}
               </h1>
               {preface && (
-                <div style={{fontSize:13,color:'#77706A',lineHeight:1.9,padding:'12px 16px',background:'#FFF9F2',borderLeft:'3px solid #F0D9C9',borderRadius:4,marginBottom:28,whiteSpace:'pre-wrap'}}>
+                <div style={{fontSize:13,color:'var(--color-text-muted)',lineHeight:1.9,padding:'12px 16px',background:'var(--color-bg)',borderLeft:'3px solid var(--color-brand-border)',borderRadius:4,marginBottom:28,whiteSpace:'pre-wrap'}}>
                   {preface}
                 </div>
               )}
@@ -459,7 +459,7 @@ export default function EpisodeBody({ title, body, preface, afterword, authorNam
                   background:'#FFF6EC', border:'1px solid #f0d9c0', borderRadius:8,
                   padding:'9px 14px', marginBottom:20, fontSize:12.5, color:'#8a5a3a',
                 }}>
-                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#F26A21" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{flexShrink:0}}>
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="var(--color-brand)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{flexShrink:0}}>
                     <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/>
                   </svg>
                   引用したい文をクリックしてください
@@ -468,13 +468,13 @@ export default function EpisodeBody({ title, body, preface, afterword, authorNam
               <QuotableBody body={body} fontSize={settings.fontSize} lineHeight={settings.lineHeight} fontFamily={fontFamily} onQuote={handleQuote} selecting={selecting} onAfterQuote={handleAfterQuote}/>
             </div>
             {afterword && (
-              <div style={{borderTop:'1px solid #F0D9C9'}}>
-                <div style={{padding:'10px 16px',borderBottom:'1px solid #F0D9C9',background:'#FFF9F2',display:'flex',alignItems:'center',gap:8}}>
-                  <span style={{width:3,height:14,background:'#F26A21',borderRadius:2,display:'inline-block'}}/>
-                  <span style={{fontSize:13,fontWeight:700,color:'#2B211B'}}>あとがき</span>
-                  {authorName && <span style={{fontSize:11,color:'#77706A',marginLeft:'auto'}}>{authorName}</span>}
+              <div style={{borderTop:'1px solid var(--color-brand-border)'}}>
+                <div style={{padding:'10px 16px',borderBottom:'1px solid var(--color-brand-border)',background:'var(--color-bg)',display:'flex',alignItems:'center',gap:8}}>
+                  <span style={{width:3,height:14,background:'var(--color-brand)',borderRadius:2,display:'inline-block'}}/>
+                  <span style={{fontSize:13,fontWeight:700,color:'var(--color-text)'}}>あとがき</span>
+                  {authorName && <span style={{fontSize:11,color:'var(--color-text-muted)',marginLeft:'auto'}}>{authorName}</span>}
                 </div>
-                <div style={{padding:'16px 20px',fontSize:14,color:'#2B211B',lineHeight:1.9,whiteSpace:'pre-wrap',fontFamily:"'Noto Sans JP',sans-serif"}}>
+                <div style={{padding:'16px 20px',fontSize:14,color:'var(--color-text)',lineHeight:1.9,whiteSpace:'pre-wrap',fontFamily:"'Noto Sans JP',sans-serif"}}>
                   {afterword}
                 </div>
               </div>
@@ -502,17 +502,17 @@ function VerticalBody({ title, body, preface, afterword, authorName, fontSize, f
   return (
     <div>
       {preface && (
-        <div style={{padding:'12px 32px',background:'#FFF9F2',borderBottom:'1px solid #FFF1E6'}}>
-          <div style={{fontSize:13,color:'#77706A',lineHeight:1.9,padding:'10px 14px',background:'#fff',borderLeft:'3px solid #F0D9C9',borderRadius:4,whiteSpace:'pre-wrap'}}>
+        <div style={{padding:'12px 32px',background:'var(--color-bg)',borderBottom:'1px solid var(--color-brand-light)'}}>
+          <div style={{fontSize:13,color:'var(--color-text-muted)',lineHeight:1.9,padding:'10px 14px',background:'var(--color-bg-card)',borderLeft:'3px solid var(--color-brand-border)',borderRadius:4,whiteSpace:'pre-wrap'}}>
             {preface}
           </div>
         </div>
       )}
       <style>{`
         .v-scroll::-webkit-scrollbar { height: 14px; }
-        .v-scroll::-webkit-scrollbar-track { background: #FFF1E6; border-radius: 7px; }
-        .v-scroll::-webkit-scrollbar-thumb { background: #F26A21; border-radius: 7px; border: 2px solid #FFF1E6; }
-        .v-scroll { scrollbar-width: thick; scrollbar-color: #F26A21 #FFF1E6; }
+        .v-scroll::-webkit-scrollbar-track { background: var(--color-brand-light); border-radius: 7px; }
+        .v-scroll::-webkit-scrollbar-thumb { background: var(--color-brand); border-radius: 7px; border: 2px solid var(--color-brand-light); }
+        .v-scroll { scrollbar-width: thick; scrollbar-color: var(--color-brand) var(--color-brand-light); }
       `}</style>
       <div ref={scrollRef} className="v-scroll" style={{overflowX:'scroll',overflowY:'hidden',height:'calc(100vh - 180px)',paddingBottom:4}}>
         <div style={{
@@ -524,23 +524,23 @@ function VerticalBody({ title, body, preface, afterword, authorName, fontSize, f
           boxSizing:'border-box',
         }}>
           <div style={{display:'inline-block',marginRight:'2em',verticalAlign:'top'}}>
-            <div style={{fontSize:fontSize+4,fontWeight:700,color:'#2B211B',fontFamily,lineHeight:1.8}}>
+            <div style={{fontSize:fontSize+4,fontWeight:700,color:'var(--color-text)',fontFamily,lineHeight:1.8}}>
               {title}
             </div>
           </div>
-          <div style={{display:'inline-block',fontSize,lineHeight:2.1,color:'#2B211B',fontFamily,wordBreak:'break-all',verticalAlign:'top'}}>
+          <div style={{display:'inline-block',fontSize,lineHeight:2.1,color:'var(--color-text)',fontFamily,wordBreak:'break-all',verticalAlign:'top'}}>
             <VerticalText text={body}/>
           </div>
         </div>
       </div>
       {afterword && (
-        <div style={{borderTop:'1px solid #F0D9C9'}}>
-          <div style={{padding:'10px 16px',borderBottom:'1px solid #F0D9C9',background:'#FFF9F2',display:'flex',alignItems:'center',gap:8}}>
-            <span style={{width:3,height:14,background:'#F26A21',borderRadius:2,display:'inline-block'}}/>
-            <span style={{fontSize:13,fontWeight:700,color:'#2B211B'}}>あとがき</span>
-            {authorName && <span style={{fontSize:11,color:'#77706A',marginLeft:'auto'}}>{authorName}</span>}
+        <div style={{borderTop:'1px solid var(--color-brand-border)'}}>
+          <div style={{padding:'10px 16px',borderBottom:'1px solid var(--color-brand-border)',background:'var(--color-bg)',display:'flex',alignItems:'center',gap:8}}>
+            <span style={{width:3,height:14,background:'var(--color-brand)',borderRadius:2,display:'inline-block'}}/>
+            <span style={{fontSize:13,fontWeight:700,color:'var(--color-text)'}}>あとがき</span>
+            {authorName && <span style={{fontSize:11,color:'var(--color-text-muted)',marginLeft:'auto'}}>{authorName}</span>}
           </div>
-          <div style={{padding:'16px 20px',fontSize:14,color:'#2B211B',lineHeight:1.9,whiteSpace:'pre-wrap'}}>
+          <div style={{padding:'16px 20px',fontSize:14,color:'var(--color-text)',lineHeight:1.9,whiteSpace:'pre-wrap'}}>
             {afterword}
           </div>
         </div>
