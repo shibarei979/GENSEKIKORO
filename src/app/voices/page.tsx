@@ -60,7 +60,7 @@ export default async function VoicesPage() {
     <div style={{minHeight:'100vh',background:'#EDEDEA',fontFamily:"'Noto Sans JP',sans-serif"}}>
       <Header profile={profile} user={user} />
       <VoicesFloat voices={voices} />
-      <div style={{background:'#FFF9F2'}}>
+      <div style={{background:'var(--color-bg)'}}>
         <Footer user={user} />
       </div>
     </div>
