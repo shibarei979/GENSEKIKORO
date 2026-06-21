@@ -64,24 +64,24 @@ export default async function AuthorPage({ params }: Props) {
 
   // 作品リスト共通パーツ
   const NovelList = () => (
-    <div style={{background:'#FFF9F2',border:'1px solid #F0D9C9',borderRadius:12,overflow:'hidden'}}>
+    <div style={{background:'var(--color-bg)',border:'1px solid var(--color-brand-border)',borderRadius:12,overflow:'hidden'}}>
       {filteredNovels.length === 0 ? (
-        <div style={{padding:'48px',textAlign:'center',color:'#B8AEA8',fontSize:13}}>
+        <div style={{padding:'48px',textAlign:'center',color:'var(--color-text-faint)',fontSize:13}}>
           公開中の作品はありません
         </div>
       ) : filteredNovels.map((n: any, i: number) => (
         <Link key={n.id} href={`/novel/${n.id}`} style={{textDecoration:'none',display:'block'}}>
-          <div style={{padding:'14px 16px',borderBottom:i<filteredNovels.length-1?'1px solid #FFF1E6':'none',background:i%2===0?'#fff':'#fffcfa',cursor:'pointer'}}>
+          <div style={{padding:'14px 16px',borderBottom:i<filteredNovels.length-1?'1px solid var(--color-brand-light)':'none',background:i%2===0?'var(--color-bg-card)':'#fffcfa',cursor:'pointer'}}>
             <div style={{display:'flex',gap:6,marginBottom:5,flexWrap:'wrap',alignItems:'center'}}>
-              <span style={{fontSize:10,background:'#FFF1E6',color:'#F26A21',border:'1px solid #f5b080',padding:'1px 6px',borderRadius:3}}>{n.genre}</span>
-              <span style={{fontSize:10,background:'#eff6ff',color:'#2563eb',border:'1px solid #bfdbfe',padding:'1px 6px',borderRadius:3}}>{n.novel_type}</span>
+              <span style={{fontSize:10,background:'var(--color-brand-light)',color:'var(--color-brand)',border:'1px solid var(--color-tag-border)',padding:'1px 6px',borderRadius:3}}>{n.genre}</span>
+              <span style={{fontSize:10,background:'var(--color-info-bg)',color:'var(--color-info)',border:'1px solid var(--color-info-border)',padding:'1px 6px',borderRadius:3}}>{n.novel_type}</span>
               {n.is_serial
                 ? <span style={{fontSize:10,background:'#f0fdf4',color:'#15803d',border:'1px solid #86efac',padding:'1px 6px',borderRadius:3}}>連載中</span>
                 : <span style={{fontSize:10,background:'#f5f5f5',color:'#757575',border:'1px solid #e0e0e0',padding:'1px 6px',borderRadius:3}}>完結</span>}
-              {n.is_r18 && <span style={{fontSize:10,background:'#fef2f2',color:'#dc2626',border:'1px solid #fca5a5',padding:'1px 6px',borderRadius:3}}>R18</span>}
+              {n.is_r18 && <span style={{fontSize:10,background:'#fef2f2',color:'var(--color-danger)',border:'1px solid #fca5a5',padding:'1px 6px',borderRadius:3}}>R18</span>}
             </div>
-            <div style={{fontSize:15,fontWeight:700,color:'#2B211B',marginBottom:3}}>{n.title}</div>
-            <div style={{fontSize:11,color:'#77706A',marginBottom:n.summary?5:0}}>♡ {likeMap[n.id]||0}</div>
+            <div style={{fontSize:15,fontWeight:700,color:'var(--color-text)',marginBottom:3}}>{n.title}</div>
+            <div style={{fontSize:11,color:'var(--color-text-muted)',marginBottom:n.summary?5:0}}>♡ {likeMap[n.id]||0}</div>
             {n.summary && (
               <div style={{fontSize:12,color:'#5a3a20',lineHeight:1.8,overflow:'hidden',display:'-webkit-box',WebkitLineClamp:2,WebkitBoxOrient:'vertical' as any}}>
                 {n.summary}
@@ -94,45 +94,45 @@ export default async function AuthorPage({ params }: Props) {
   )
 
   return (
-    <div style={{minHeight:'100vh',background:'#fff',fontFamily:"'Noto Sans JP',sans-serif"}}>
+    <div style={{minHeight:'100vh',background:'var(--color-bg-card)',fontFamily:"'Noto Sans JP',sans-serif"}}>
       <Header profile={profile} user={user} />
 
       {/* ===== デスクトップ（元のまま） ===== */}
       <div className="desktop-only" style={{maxWidth:1200,margin:'0 auto',padding:'28px 32px',display:'flex',gap:20,alignItems:'flex-start'}}>
         <div style={{flex:1,minWidth:0}}>
           {/* プロフィールカード */}
-          <div style={{background:'#FFF9F2',border:'1px solid #F0D9C9',borderRadius:16,padding:'28px',marginBottom:20}}>
+          <div style={{background:'var(--color-bg)',border:'1px solid var(--color-brand-border)',borderRadius:16,padding:'28px',marginBottom:20}}>
             <div style={{display:'flex',gap:20,alignItems:'flex-start'}}>
               <div style={{flexShrink:0}}>
                 {author.icon_url
                   ? <img src={author.icon_url} style={{width:80,height:80,borderRadius:'50%',objectFit:'cover'}} alt=""/>
-                  : <div style={{width:80,height:80,borderRadius:'50%',background:'#F0D9C9',display:'flex',alignItems:'center',justifyContent:'center',fontSize:32,color:'#F26A21',fontWeight:700}}>
+                  : <div style={{width:80,height:80,borderRadius:'50%',background:'var(--color-brand-border)',display:'flex',alignItems:'center',justifyContent:'center',fontSize:32,color:'var(--color-brand)',fontWeight:700}}>
                       {author.display_name?.[0] || '?'}
                     </div>
                 }
               </div>
               <div style={{flex:1,minWidth:0}}>
                 <div style={{display:'flex',alignItems:'center',gap:12,flexWrap:'wrap',marginBottom:6}}>
-                  <h1 style={{fontSize:22,fontWeight:700,color:'#2B211B',margin:0}}>{author.display_name}</h1>
+                  <h1 style={{fontSize:22,fontWeight:700,color:'var(--color-text)',margin:0}}>{author.display_name}</h1>
                   {!isMe && user && (
                     <FollowButton authorId={params.id} userId={user.id} initialFollowing={isFollowing} followerCount={followerCount || 0}/>
                   )}
                 </div>
                 <div style={{display:'flex',gap:20,marginBottom:12,fontSize:13}}>
-                  <div style={{color:'#2B211B'}}>
+                  <div style={{color:'var(--color-text)'}}>
                     <strong style={{fontSize:16}}>{(followerCount || 0).toLocaleString()}</strong>
-                    <span style={{color:'#77706A',marginLeft:4}}>フォロワー</span>
+                    <span style={{color:'var(--color-text-muted)',marginLeft:4}}>フォロワー</span>
                   </div>
-                  <div style={{color:'#2B211B'}}>
+                  <div style={{color:'var(--color-text)'}}>
                     <strong style={{fontSize:16}}>{filteredNovels.length}</strong>
-                    <span style={{color:'#77706A',marginLeft:4}}>作品</span>
+                    <span style={{color:'var(--color-text-muted)',marginLeft:4}}>作品</span>
                   </div>
-                  <div style={{color:'#2B211B'}}>
+                  <div style={{color:'var(--color-text)'}}>
                     <strong style={{fontSize:16}}>{totalLikes.toLocaleString()}</strong>
-                    <span style={{color:'#77706A',marginLeft:4}}>総いいね</span>
+                    <span style={{color:'var(--color-text-muted)',marginLeft:4}}>総いいね</span>
                   </div>
                 </div>
-                <div style={{fontSize:12,color:'#B8AEA8',marginBottom:author.bio?10:0}}>{joinStr}から活動中</div>
+                <div style={{fontSize:12,color:'var(--color-text-faint)',marginBottom:author.bio?10:0}}>{joinStr}から活動中</div>
                 {author.bio && (
                   <p style={{fontSize:13,color:'#5a3a20',lineHeight:1.8,margin:0,whiteSpace:'pre-wrap'}}>{author.bio}</p>
                 )}
@@ -140,8 +140,8 @@ export default async function AuthorPage({ params }: Props) {
             </div>
           </div>
           <div style={{marginBottom:12,display:'flex',alignItems:'center',justifyContent:'space-between'}}>
-            <h2 style={{fontSize:17,fontWeight:700,color:'#2B211B',margin:0}}>
-              投稿作品 <span style={{fontSize:13,fontWeight:400,color:'#77706A'}}>（{filteredNovels.length}作品）</span>
+            <h2 style={{fontSize:17,fontWeight:700,color:'var(--color-text)',margin:0}}>
+              投稿作品 <span style={{fontSize:13,fontWeight:400,color:'var(--color-text-muted)'}}>（{filteredNovels.length}作品）</span>
             </h2>
           </div>
           <NovelList/>
@@ -154,18 +154,18 @@ export default async function AuthorPage({ params }: Props) {
       <div className="mobile-only" style={{padding:'12px 16px 0'}}>
 
         {/* プロフィールカード */}
-        <div style={{background:'#FFF9F2',border:'1px solid #F0D9C9',borderRadius:14,padding:'16px',marginBottom:14}}>
+        <div style={{background:'var(--color-bg)',border:'1px solid var(--color-brand-border)',borderRadius:14,padding:'16px',marginBottom:14}}>
           {/* 1行目：アイコン・名前・フォローボタン */}
           <div style={{display:'flex',alignItems:'center',gap:12,marginBottom:12}}>
             {author.icon_url
               ? <img src={author.icon_url} style={{width:56,height:56,borderRadius:'50%',objectFit:'cover',flexShrink:0}} alt=""/>
-              : <div style={{width:56,height:56,borderRadius:'50%',background:'#F0D9C9',display:'flex',alignItems:'center',justifyContent:'center',fontSize:22,color:'#F26A21',fontWeight:700,flexShrink:0}}>
+              : <div style={{width:56,height:56,borderRadius:'50%',background:'var(--color-brand-border)',display:'flex',alignItems:'center',justifyContent:'center',fontSize:22,color:'var(--color-brand)',fontWeight:700,flexShrink:0}}>
                   {author.display_name?.[0] || '?'}
                 </div>
             }
             <div style={{flex:1,minWidth:0}}>
-              <h1 style={{fontSize:17,fontWeight:700,color:'#2B211B',margin:0,marginBottom:2,overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap'}}>{author.display_name}</h1>
-              <div style={{fontSize:11,color:'#B8AEA8'}}>{joinStr}から活動中</div>
+              <h1 style={{fontSize:17,fontWeight:700,color:'var(--color-text)',margin:0,marginBottom:2,overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap'}}>{author.display_name}</h1>
+              <div style={{fontSize:11,color:'var(--color-text-faint)'}}>{joinStr}から活動中</div>
             </div>
             {!isMe && user && (
               <div style={{flexShrink:0}}>
@@ -175,15 +175,15 @@ export default async function AuthorPage({ params }: Props) {
           </div>
 
           {/* 統計バー */}
-          <div style={{display:'flex',background:'#fff',border:'1px solid #F0D9C9',borderRadius:10,overflow:'hidden',marginBottom: author.bio ? 12 : 0}}>
+          <div style={{display:'flex',background:'var(--color-bg-card)',border:'1px solid var(--color-brand-border)',borderRadius:10,overflow:'hidden',marginBottom: author.bio ? 12 : 0}}>
             {[
               {label:'フォロワー', value:(followerCount||0).toLocaleString()},
               {label:'作品', value:filteredNovels.length},
               {label:'総いいね', value:totalLikes.toLocaleString()},
             ].map((item,i,arr)=>(
-              <div key={item.label} style={{flex:1,textAlign:'center',padding:'8px 4px',borderRight:i<arr.length-1?'1px solid #F0D9C9':'none'}}>
-                <div style={{fontSize:15,fontWeight:700,color:'#F26A21'}}>{item.value}</div>
-                <div style={{fontSize:10,color:'#77706A'}}>{item.label}</div>
+              <div key={item.label} style={{flex:1,textAlign:'center',padding:'8px 4px',borderRight:i<arr.length-1?'1px solid var(--color-brand-border)':'none'}}>
+                <div style={{fontSize:15,fontWeight:700,color:'var(--color-brand)'}}>{item.value}</div>
+                <div style={{fontSize:10,color:'var(--color-text-muted)'}}>{item.label}</div>
               </div>
             ))}
           </div>
@@ -196,8 +196,8 @@ export default async function AuthorPage({ params }: Props) {
 
         {/* 作品一覧 */}
         <div style={{marginBottom:10,display:'flex',alignItems:'center'}}>
-          <h2 style={{fontSize:15,fontWeight:700,color:'#2B211B',margin:0}}>
-            投稿作品 <span style={{fontSize:12,fontWeight:400,color:'#77706A'}}>（{filteredNovels.length}作品）</span>
+          <h2 style={{fontSize:15,fontWeight:700,color:'var(--color-text)',margin:0}}>
+            投稿作品 <span style={{fontSize:12,fontWeight:400,color:'var(--color-text-muted)'}}>（{filteredNovels.length}作品）</span>
           </h2>
         </div>
         <NovelList/>
