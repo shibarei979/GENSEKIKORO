@@ -128,35 +128,35 @@ export default function SearchForm({
   const pill = (active: boolean) => ({
     padding: '5px 14px', borderRadius: 16, fontSize: 12,
     fontWeight: 600 as const, cursor: 'pointer' as const,
-    border: `1px solid ${active ? '#F26A21' : '#F0D9C9'}`,
-    background: active ? '#F26A21' : '#fff',
-    color: active ? '#fff' : '#77706A',
+    border: `1px solid ${active ? 'var(--color-brand)' : 'var(--color-brand-border)'}`,
+    background: active ? 'var(--color-brand)' : 'var(--color-bg-card)',
+    color: active ? 'var(--color-bg-card)' : 'var(--color-text-muted)',
     transition: 'all .15s',
   })
 
   const inp = {
-    width: '100%', padding: '9px 14px', border: '1.5px solid #F0D9C9',
-    borderRadius: 8, fontSize: 13, color: '#2B211B', outline: 'none', background: '#fff',
+    width: '100%', padding: '9px 14px', border: '1.5px solid var(--color-brand-border)',
+    borderRadius: 8, fontSize: 13, color: 'var(--color-text)', outline: 'none', background: 'var(--color-bg-card)',
   } as const
 
   return (
-    <div style={{background:'#fff',border:'1px solid #F0D9C9',borderRadius:12,padding: isMobile ? '16px' : '20px',marginBottom:16}}>
+    <div style={{background:'var(--color-bg-card)',border:'1px solid var(--color-brand-border)',borderRadius:12,padding: isMobile ? '16px' : '20px',marginBottom:16}}>
       <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',marginBottom:14,flexWrap:'wrap',gap:8}}>
-        <div style={{fontSize:15,fontWeight:700,color:'#2B211B',display:'flex',alignItems:'center',gap:8}}>
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#F26A21" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+        <div style={{fontSize:15,fontWeight:700,color:'var(--color-text)',display:'flex',alignItems:'center',gap:8}}>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--color-brand)" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
             <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
           </svg>
           探す
         </div>
         <Link href="/voices" style={{
           display:'flex', alignItems:'center', gap:6,
-          fontSize:12.5, fontWeight:700, color:'#fff',
-          background:'linear-gradient(135deg, #F26A21, #d9551a)',
+          fontSize:12.5, fontWeight:700, color:'var(--color-bg-card)',
+          background:'linear-gradient(135deg, var(--color-brand), var(--color-brand-dark))',
           border:'none',
           borderRadius:16, padding:'7px 16px', textDecoration:'none',
           boxShadow:'0 2px 8px rgba(242,106,33,0.35)',
         }}>
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" style={{flexShrink:0}}>
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--color-bg-card)" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" style={{flexShrink:0}}>
             <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/>
           </svg>
           文章から探す
@@ -166,12 +166,12 @@ export default function SearchForm({
       {/* キーワード・除外：モバイルは1列、デスクトップは2列 */}
       <div style={{display:'flex',flexDirection: isMobile ? 'column' : 'row',gap:10,marginBottom:12}}>
         <div style={{flex:1}}>
-          <div style={{fontSize:11,color:'#77706A',fontWeight:600,marginBottom:4}}>キーワード</div>
+          <div style={{fontSize:11,color:'var(--color-text-muted)',fontWeight:600,marginBottom:4}}>キーワード</div>
           <input value={q} onChange={e=>setQ(e.target.value)} onKeyDown={handleKeyDown}
             placeholder="作品名・あらすじで検索" style={inp}/>
           <div style={{marginTop:4}}>
             <button type="button" onClick={()=>setShowHistory(!showHistory)}
-              style={{fontSize:10,color:'#77706A',background:'none',border:'none',cursor:'pointer',padding:0,display:'flex',alignItems:'center',gap:3}}>
+              style={{fontSize:10,color:'var(--color-text-muted)',background:'none',border:'none',cursor:'pointer',padding:0,display:'flex',alignItems:'center',gap:3}}>
               検索履歴
               <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"
                 style={{transition:'transform .15s',transform:showHistory?'rotate(180deg)':'rotate(0deg)'}}>
@@ -179,20 +179,20 @@ export default function SearchForm({
               </svg>
             </button>
             {showHistory && (
-              <div style={{marginTop:4,padding:'8px',background:'#FFF9F2',border:'1px solid #F0D9C9',borderRadius:8}}>
+              <div style={{marginTop:4,padding:'8px',background:'var(--color-bg)',border:'1px solid var(--color-brand-border)',borderRadius:8}}>
                 <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:6}}>
-                  <span style={{fontSize:10,color:'#B8AEA8'}}>最近の検索</span>
+                  <span style={{fontSize:10,color:'var(--color-text-faint)'}}>最近の検索</span>
                   <button type="button" onClick={()=>{setHistory([]);try{localStorage.removeItem('search_history')}catch{}}}
-                    style={{fontSize:10,color:'#B8AEA8',background:'none',border:'none',cursor:'pointer',padding:0}}>クリア</button>
+                    style={{fontSize:10,color:'var(--color-text-faint)',background:'none',border:'none',cursor:'pointer',padding:0}}>クリア</button>
                 </div>
                 {history.length === 0
-                  ? <div style={{fontSize:11,color:'#B8AEA8'}}>まだ検索履歴がありません</div>
+                  ? <div style={{fontSize:11,color:'var(--color-text-faint)'}}>まだ検索履歴がありません</div>
                   : <div style={{display:'flex',gap:4,flexWrap:'wrap'}}>
                     {history.map((h,i) => (
                       <button key={i} type="button" onClick={()=>setQ(h)}
                         style={{padding:'2px 9px',borderRadius:10,fontSize:11,cursor:'pointer',
-                          background:q===h?'#F26A21':'#fff',color:q===h?'#fff':'#77706A',
-                          border:`1px solid ${q===h?'#F26A21':'#F0D9C9'}`}}>{h}</button>
+                          background:q===h?'var(--color-brand)':'var(--color-bg-card)',color:q===h?'var(--color-bg-card)':'var(--color-text-muted)',
+                          border:`1px solid ${q===h?'var(--color-brand)':'var(--color-brand-border)'}`}}>{h}</button>
                     ))}
                   </div>
                 }
@@ -200,7 +200,7 @@ export default function SearchForm({
             )}
           </div>
           <button type="button" onClick={()=>setShowSearchExamples(!showSearchExamples)}
-            style={{marginTop:4,fontSize:10,color:'#F26A21',background:'none',border:'none',cursor:'pointer',padding:0,display:'flex',alignItems:'center',gap:3}}>
+            style={{marginTop:4,fontSize:10,color:'var(--color-brand)',background:'none',border:'none',cursor:'pointer',padding:0,display:'flex',alignItems:'center',gap:3}}>
             検索ワード例
             <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"
               style={{transition:'transform .15s',transform:showSearchExamples?'rotate(180deg)':'rotate(0deg)'}}>
@@ -208,16 +208,16 @@ export default function SearchForm({
             </svg>
           </button>
           {showSearchExamples && (
-            <div style={{marginTop:6,padding:'12px',background:'#FFF9F2',border:'1px solid #F0D9C9',borderRadius:8}}>
+            <div style={{marginTop:6,padding:'12px',background:'var(--color-bg)',border:'1px solid var(--color-brand-border)',borderRadius:8}}>
               {KEYWORD_CATEGORIES.map(cat => (
                 <div key={cat.label} style={{display:'flex',gap:6,marginBottom:8,alignItems:'flex-start'}}>
-                  <div style={{fontSize:11,fontWeight:700,color:'#77706A',minWidth:72,paddingTop:4,flexShrink:0}}>{cat.label}</div>
+                  <div style={{fontSize:11,fontWeight:700,color:'var(--color-text-muted)',minWidth:72,paddingTop:4,flexShrink:0}}>{cat.label}</div>
                   <div style={{display:'flex',gap:4,flexWrap:'wrap'}}>
                     {cat.items.map(ex => (
                       <button key={ex} type="button" onClick={()=>setQ(q===ex?'':ex)}
                         style={{padding:'3px 10px',borderRadius:10,fontSize:11,cursor:'pointer',
-                          background:q===ex?'#F26A21':'#fff',color:q===ex?'#fff':'#77706A',
-                          border:`1px solid ${q===ex?'#F26A21':'#F0D9C9'}`}}>{ex}</button>
+                          background:q===ex?'var(--color-brand)':'var(--color-bg-card)',color:q===ex?'var(--color-bg-card)':'var(--color-text-muted)',
+                          border:`1px solid ${q===ex?'var(--color-brand)':'var(--color-brand-border)'}`}}>{ex}</button>
                     ))}
                   </div>
                 </div>
@@ -227,12 +227,12 @@ export default function SearchForm({
         </div>
 
         <div style={{flex:1}}>
-          <div style={{fontSize:11,color:'#77706A',fontWeight:600,marginBottom:4}}>除外キーワード</div>
+          <div style={{fontSize:11,color:'var(--color-text-muted)',fontWeight:600,marginBottom:4}}>除外キーワード</div>
           <input value={exclude} onChange={e=>setExclude(e.target.value)} onKeyDown={handleKeyDown}
             placeholder="含まない言葉を入力" style={inp}/>
           <div style={{marginTop:4}}>
             <button type="button" onClick={()=>setShowExHistory(!showExHistory)}
-              style={{fontSize:10,color:'#77706A',background:'none',border:'none',cursor:'pointer',padding:0,display:'flex',alignItems:'center',gap:3}}>
+              style={{fontSize:10,color:'var(--color-text-muted)',background:'none',border:'none',cursor:'pointer',padding:0,display:'flex',alignItems:'center',gap:3}}>
               除外履歴
               <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"
                 style={{transition:'transform .15s',transform:showExHistory?'rotate(180deg)':'rotate(0deg)'}}>
@@ -240,20 +240,20 @@ export default function SearchForm({
               </svg>
             </button>
             {showExHistory && (
-              <div style={{marginTop:4,padding:'8px',background:'#FFF9F2',border:'1px solid #F0D9C9',borderRadius:8}}>
+              <div style={{marginTop:4,padding:'8px',background:'var(--color-bg)',border:'1px solid var(--color-brand-border)',borderRadius:8}}>
                 <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:6}}>
-                  <span style={{fontSize:10,color:'#B8AEA8'}}>最近の除外</span>
+                  <span style={{fontSize:10,color:'var(--color-text-faint)'}}>最近の除外</span>
                   <button type="button" onClick={()=>{setExHistory([]);try{localStorage.removeItem('exclude_history')}catch{}}}
-                    style={{fontSize:10,color:'#B8AEA8',background:'none',border:'none',cursor:'pointer',padding:0}}>クリア</button>
+                    style={{fontSize:10,color:'var(--color-text-faint)',background:'none',border:'none',cursor:'pointer',padding:0}}>クリア</button>
                 </div>
                 {exHistory.length === 0
-                  ? <div style={{fontSize:11,color:'#B8AEA8'}}>まだ除外履歴がありません</div>
+                  ? <div style={{fontSize:11,color:'var(--color-text-faint)'}}>まだ除外履歴がありません</div>
                   : <div style={{display:'flex',gap:4,flexWrap:'wrap'}}>
                     {exHistory.map((h,i) => (
                       <button key={i} type="button" onClick={()=>setExclude(h)}
                         style={{padding:'2px 9px',borderRadius:10,fontSize:11,cursor:'pointer',
-                          background:exclude===h?'#F26A21':'#fff',color:exclude===h?'#fff':'#77706A',
-                          border:`1px solid ${exclude===h?'#F26A21':'#F0D9C9'}`}}>{h}</button>
+                          background:exclude===h?'var(--color-brand)':'var(--color-bg-card)',color:exclude===h?'var(--color-bg-card)':'var(--color-text-muted)',
+                          border:`1px solid ${exclude===h?'var(--color-brand)':'var(--color-brand-border)'}`}}>{h}</button>
                     ))}
                   </div>
                 }
@@ -261,7 +261,7 @@ export default function SearchForm({
             )}
           </div>
           <button type="button" onClick={()=>setShowExcludeExamples(!showExcludeExamples)}
-            style={{marginTop:4,fontSize:10,color:'#F26A21',background:'none',border:'none',cursor:'pointer',padding:0,display:'flex',alignItems:'center',gap:3}}>
+            style={{marginTop:4,fontSize:10,color:'var(--color-brand)',background:'none',border:'none',cursor:'pointer',padding:0,display:'flex',alignItems:'center',gap:3}}>
             除外ワード例
             <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"
               style={{transition:'transform .15s',transform:showExcludeExamples?'rotate(180deg)':'rotate(0deg)'}}>
@@ -269,16 +269,16 @@ export default function SearchForm({
             </svg>
           </button>
           {showExcludeExamples && (
-            <div style={{marginTop:6,padding:'12px',background:'#FFF9F2',border:'1px solid #F0D9C9',borderRadius:8}}>
+            <div style={{marginTop:6,padding:'12px',background:'var(--color-bg)',border:'1px solid var(--color-brand-border)',borderRadius:8}}>
               {KEYWORD_CATEGORIES.map(cat => (
                 <div key={cat.label} style={{display:'flex',gap:6,marginBottom:8,alignItems:'flex-start'}}>
-                  <div style={{fontSize:11,fontWeight:700,color:'#77706A',minWidth:72,paddingTop:4,flexShrink:0}}>{cat.label}</div>
+                  <div style={{fontSize:11,fontWeight:700,color:'var(--color-text-muted)',minWidth:72,paddingTop:4,flexShrink:0}}>{cat.label}</div>
                   <div style={{display:'flex',gap:4,flexWrap:'wrap'}}>
                     {cat.items.map(ex => (
                       <button key={ex} type="button" onClick={()=>setExclude(exclude===ex?'':ex)}
                         style={{padding:'3px 10px',borderRadius:10,fontSize:11,cursor:'pointer',
-                          background:exclude===ex?'#F26A21':'#fff',color:exclude===ex?'#fff':'#77706A',
-                          border:`1px solid ${exclude===ex?'#F26A21':'#F0D9C9'}`}}>{ex}</button>
+                          background:exclude===ex?'var(--color-brand)':'var(--color-bg-card)',color:exclude===ex?'var(--color-bg-card)':'var(--color-text-muted)',
+                          border:`1px solid ${exclude===ex?'var(--color-brand)':'var(--color-brand-border)'}`}}>{ex}</button>
                     ))}
                   </div>
                 </div>
@@ -290,8 +290,8 @@ export default function SearchForm({
 
       <div style={{marginBottom:12}}>
         <button type="button" onClick={()=>setShowMoods(!showMoods)}
-          style={{display:'flex',alignItems:'center',gap:6,width:'100%',padding:'7px 14px',border:'1.5px solid #F0D9C9',
-            borderRadius:8,background:'#FFF9F2',color:'#77706A',fontSize:12,fontWeight:600,cursor:'pointer',justifyContent:'space-between'}}>
+          style={{display:'flex',alignItems:'center',gap:6,width:'100%',padding:'7px 14px',border:'1.5px solid var(--color-brand-border)',
+            borderRadius:8,background:'var(--color-bg)',color:'var(--color-text-muted)',fontSize:12,fontWeight:600,cursor:'pointer',justifyContent:'space-between'}}>
           <span>気分で探す{activeMood ? ` ● ${activeMood}` : ''}</span>
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"
             style={{transition:'transform .2s',transform:showMoods?'rotate(180deg)':'rotate(0deg)'}}>
@@ -304,9 +304,9 @@ export default function SearchForm({
               <button key={mood.label} type="button" onClick={()=>handleMoodSelect(mood)}
                 style={{padding:'6px 14px',borderRadius:16,fontSize:12,cursor:'pointer',
                   whiteSpace:'nowrap' as const,
-                  border:`1.5px solid ${activeMood===mood.label?'#F26A21':'#F0D9C9'}`,
-                  background:activeMood===mood.label?'#F26A21':'#fff',
-                  color:activeMood===mood.label?'#fff':'#2B211B',
+                  border:`1.5px solid ${activeMood===mood.label?'var(--color-brand)':'var(--color-brand-border)'}`,
+                  background:activeMood===mood.label?'var(--color-brand)':'var(--color-bg-card)',
+                  color:activeMood===mood.label?'var(--color-bg-card)':'var(--color-text)',
                   fontWeight:activeMood===mood.label?700:400,
                   transition:'all .15s'}}>
                 {mood.label}
@@ -317,8 +317,8 @@ export default function SearchForm({
       </div>
 
       <button onClick={()=>setShowDetail(!showDetail)}
-        style={{display:'flex',alignItems:'center',gap:6,padding:'7px 14px',border:'1.5px solid #F0D9C9',
-          borderRadius:8,background:'#FFF9F2',color:'#77706A',fontSize:12,fontWeight:600,cursor:'pointer',
+        style={{display:'flex',alignItems:'center',gap:6,padding:'7px 14px',border:'1.5px solid var(--color-brand-border)',
+          borderRadius:8,background:'var(--color-bg)',color:'var(--color-text-muted)',fontSize:12,fontWeight:600,cursor:'pointer',
           marginBottom:showDetail?12:0,width:'100%',justifyContent:'space-between'}}>
         <span>詳細条件設定{(genre||type||serial||tags.length>0||author) ? ' ●' : ''}</span>
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"
@@ -328,9 +328,9 @@ export default function SearchForm({
       </button>
 
       {showDetail && (
-        <div style={{border:'1px solid #F0D9C9',borderRadius:8,padding:'14px',marginBottom:12,background:'#FFF9F2'}}>
+        <div style={{border:'1px solid var(--color-brand-border)',borderRadius:8,padding:'14px',marginBottom:12,background:'var(--color-bg)'}}>
           <div style={{marginBottom:12}}>
-            <div style={{fontSize:11,color:'#77706A',fontWeight:600,marginBottom:6}}>ジャンル</div>
+            <div style={{fontSize:11,color:'var(--color-text-muted)',fontWeight:600,marginBottom:6}}>ジャンル</div>
             <div style={{display:'flex',gap:6,flexWrap:'wrap'}}>
               <button onClick={()=>setGenre('')} style={pill(!genre)}>すべて</button>
               {GENRES.map(g => (
@@ -341,7 +341,7 @@ export default function SearchForm({
           {/* モバイルは1列、デスクトップは2列 */}
           <div style={{display:'grid',gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr',gap:12,marginBottom:12}}>
             <div>
-              <div style={{fontSize:11,color:'#77706A',fontWeight:600,marginBottom:6}}>作品の長さ</div>
+              <div style={{fontSize:11,color:'var(--color-text-muted)',fontWeight:600,marginBottom:6}}>作品の長さ</div>
               <div style={{display:'flex',gap:6}}>
                 <button onClick={()=>setType('')}    style={pill(!type)}>すべて</button>
                 <button onClick={()=>setType(type==='長編'?'':'長編')} style={pill(type==='長編')}>長編</button>
@@ -349,7 +349,7 @@ export default function SearchForm({
               </div>
             </div>
             <div>
-              <div style={{fontSize:11,color:'#77706A',fontWeight:600,marginBottom:6}}>連載状況</div>
+              <div style={{fontSize:11,color:'var(--color-text-muted)',fontWeight:600,marginBottom:6}}>連載状況</div>
               <div style={{display:'flex',gap:6,flexWrap:'wrap'}}>
                 <button onClick={()=>setSerial('')}                          style={pill(!serial)}>すべて</button>
                 <button onClick={()=>setSerial(serial==='serial'?'':'serial')}     style={pill(serial==='serial')}>連載中</button>
@@ -358,7 +358,7 @@ export default function SearchForm({
             </div>
           </div>
           <div style={{marginBottom:12}}>
-            <div style={{fontSize:11,color:'#77706A',fontWeight:600,marginBottom:6}}>タグ</div>
+            <div style={{fontSize:11,color:'var(--color-text-muted)',fontWeight:600,marginBottom:6}}>タグ</div>
             <div style={{display:'flex',gap:6,marginBottom:8,alignItems:'center',flexWrap:'wrap'}}>
               <input
                 onKeyDown={e=>{
@@ -372,7 +372,7 @@ export default function SearchForm({
               {tags.length > 0 && (
                 <div style={{display:'flex',gap:4,flexWrap:'wrap'}}>
                   {tags.map(t => (
-                    <span key={t} style={{display:'inline-flex',alignItems:'center',gap:3,padding:'3px 8px',background:'#F26A21',color:'#fff',borderRadius:12,fontSize:11,fontWeight:600}}>
+                    <span key={t} style={{display:'inline-flex',alignItems:'center',gap:3,padding:'3px 8px',background:'var(--color-brand)',color:'var(--color-bg-card)',borderRadius:12,fontSize:11,fontWeight:600}}>
                       #{t}
                       <button onClick={()=>setTags(tags.filter(x=>x!==t))} style={{background:'none',border:'none',color:'rgba(255,255,255,.8)',cursor:'pointer',padding:'0 2px',fontSize:13,lineHeight:1}}>×</button>
                     </span>
@@ -384,19 +384,19 @@ export default function SearchForm({
               {KEYWORD_CATEGORIES.map(cat => cat.items).flat().slice(0,25).map(t => (
                 <button key={t} type="button" onClick={()=>setTags(tags.includes(t)?tags.filter(x=>x!==t):[...tags,t])}
                   style={{padding:'3px 10px',borderRadius:12,fontSize:11,cursor:'pointer',transition:'all .15s',
-                    border:`1px solid ${tags.includes(t)?'#F26A21':'#F0D9C9'}`,
-                    background:tags.includes(t)?'#F26A21':'#FFF9F2',
-                    color:tags.includes(t)?'#fff':'#77706A'}}>
+                    border:`1px solid ${tags.includes(t)?'var(--color-brand)':'var(--color-brand-border)'}`,
+                    background:tags.includes(t)?'var(--color-brand)':'var(--color-bg)',
+                    color:tags.includes(t)?'var(--color-bg-card)':'var(--color-text-muted)'}}>
                   #{t}
                 </button>
               ))}
             </div>
           </div>
           <div style={{marginBottom:12}}>
-            <div style={{fontSize:11,color:'#77706A',fontWeight:600,marginBottom:6}}>作者名で検索</div>
+            <div style={{fontSize:11,color:'var(--color-text-muted)',fontWeight:600,marginBottom:6}}>作者名で検索</div>
             <input value={author} onChange={e=>setAuthor(e.target.value)}
               placeholder="作者名を入力..."
-              style={{width:'100%',padding:'7px 10px',border:'1.5px solid #F0D9C9',borderRadius:8,fontSize:12,outline:'none'}}/>
+              style={{width:'100%',padding:'7px 10px',border:'1.5px solid var(--color-brand-border)',borderRadius:8,fontSize:12,outline:'none'}}/>
           </div>
         </div>
       )}
@@ -410,21 +410,21 @@ export default function SearchForm({
         marginTop:12,
       }}>
         <div style={{display:'flex',alignItems:'center',gap:8}}>
-          <span style={{fontSize:11,color:'#77706A',fontWeight:600}}>並び順</span>
+          <span style={{fontSize:11,color:'var(--color-text-muted)',fontWeight:600}}>並び順</span>
           <button onClick={()=>setSort('new')}  style={pill(sort==='new'&&!discoverMode)}>新着順</button>
           <button onClick={()=>setSort('like')} style={pill(sort==='like'&&!discoverMode)}>いいね順</button>
         </div>
         <div style={{display:'flex',gap:8,alignItems:'center',justifyContent: isMobile ? 'space-between' : 'flex-end'}}>
           {(q||exclude||genre||type||serial||tags.length>0||author) && (
             <button onClick={()=>{setQ('');setExclude('');setGenre('');setType('');setSerial('');setTags([]);setSort('new');setDiscoverMode(false);setAuthor('');router.push('/search')}}
-              style={{fontSize:12,color:'#B8AEA8',background:'none',border:'none',cursor:'pointer'}}>
+              style={{fontSize:12,color:'var(--color-text-faint)',background:'none',border:'none',cursor:'pointer'}}>
               条件クリア ×
             </button>
           )}
           <button onClick={handleSearch}
             style={{
               padding:'10px 32px',
-              background:'#F26A21',color:'#fff',border:'none',borderRadius:8,fontSize:14,fontWeight:700,cursor:'pointer',
+              background:'var(--color-brand)',color:'var(--color-bg-card)',border:'none',borderRadius:8,fontSize:14,fontWeight:700,cursor:'pointer',
               ...(isMobile ? {flex:1} : {}),
             }}>
             この条件で検索する
