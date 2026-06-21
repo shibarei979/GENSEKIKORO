@@ -132,10 +132,10 @@ export default async function RankingPage({ searchParams }: Props) {
     return n.toString()
   }
   function rankColor(abs: number) {
-    if (abs === 0) return '#F26A21'
-    if (abs === 1) return '#9ca3af'
-    if (abs === 2) return '#cd7f32'
-    return '#2B211B'
+    if (abs === 0) return 'var(--color-rank-gold)'
+    if (abs === 1) return 'var(--color-rank-silver)'
+    if (abs === 2) return 'var(--color-rank-bronze)'
+    return 'var(--color-text)'
   }
   function rankSize(abs: number) {
     if (abs === 0) return 22
@@ -172,27 +172,27 @@ export default async function RankingPage({ searchParams }: Props) {
     textDecoration: 'none' as const,
     whiteSpace: 'nowrap' as const,
     flexShrink: 0 as const,
-    background: active ? '#F26A21' : '#FFF1E6',
-    color: active ? '#fff' : '#F26A21',
-    border: `1px solid ${active ? '#F26A21' : '#f5b080'}`,
+    background: active ? 'var(--color-brand)' : 'var(--color-brand-light)',
+    color: active ? 'var(--color-bg-card)' : 'var(--color-brand)',
+    border: `1px solid ${active ? 'var(--color-brand)' : 'var(--color-tag-border)'}`,
   })
 
   return (
-    <div style={{minHeight:'100vh',background:'#fff',fontFamily:"'Noto Sans JP',sans-serif"}}>
+    <div style={{minHeight:'100vh',background:'var(--color-bg-card)',fontFamily:"'Noto Sans JP',sans-serif"}}>
       <Header profile={profile} user={user} />
 
       <div className="main-layout" style={{maxWidth:1200,margin:'0 auto',padding:'20px 32px',display:'flex',gap:20,alignItems:'flex-start'}}>
         <div style={{flex:1,minWidth:0}}>
           <div style={{marginBottom:12}}>
-            <h1 style={{fontSize:20,fontWeight:700,color:'#2B211B',marginBottom:0}}>ランキング</h1>
+            <h1 style={{fontSize:20,fontWeight:700,color:'var(--color-text)',marginBottom:0}}>ランキング</h1>
           </div>
 
           {/* ===== フィルターバー（枠は共通・中身はデスクトップwrap／モバイル横スクロール） ===== */}
-          <div className="ranking-filter" style={{background:'#FFF9F2',border:'1px solid #F0D9C9',borderRadius:12,padding:'14px 18px',marginBottom:16}}>
+          <div className="ranking-filter" style={{background:'var(--color-bg)',border:'1px solid var(--color-brand-border)',borderRadius:12,padding:'14px 18px',marginBottom:16}}>
 
             {/* 期間 */}
             <div style={{marginBottom:10}}>
-              <div style={{fontSize:11,color:'#77706A',fontWeight:600,marginBottom:5}}>期間</div>
+              <div style={{fontSize:11,color:'var(--color-text-muted)',fontWeight:600,marginBottom:5}}>期間</div>
               <div style={{overflowX:'auto',msOverflowStyle:'none',scrollbarWidth:'none'} as any}>
                 <div style={{display:'flex',gap:6,flexWrap:'nowrap'}}>
                   {periodOptions.map(o => (
@@ -206,7 +206,7 @@ export default async function RankingPage({ searchParams }: Props) {
 
             {/* 作品の長さ */}
             <div style={{marginBottom:10}}>
-              <div style={{fontSize:11,color:'#77706A',fontWeight:600,marginBottom:5}}>作品の長さ</div>
+              <div style={{fontSize:11,color:'var(--color-text-muted)',fontWeight:600,marginBottom:5}}>作品の長さ</div>
               <div style={{overflowX:'auto',msOverflowStyle:'none',scrollbarWidth:'none'} as any}>
                 <div style={{display:'flex',gap:6,flexWrap:'nowrap'}}>
                   {typeOptions.map(o => (
@@ -220,7 +220,7 @@ export default async function RankingPage({ searchParams }: Props) {
 
             {/* ジャンル */}
             <div style={{marginBottom:10}}>
-              <div style={{fontSize:11,color:'#77706A',fontWeight:600,marginBottom:5}}>ジャンル</div>
+              <div style={{fontSize:11,color:'var(--color-text-muted)',fontWeight:600,marginBottom:5}}>ジャンル</div>
               <div style={{overflowX:'auto',msOverflowStyle:'none',scrollbarWidth:'none'} as any}>
                 <div style={{display:'flex',gap:5,flexWrap:'nowrap'}}>
                   {genres.map(g => (
@@ -235,7 +235,7 @@ export default async function RankingPage({ searchParams }: Props) {
 
             {/* 絞り込み */}
             <div>
-              <div style={{fontSize:11,color:'#77706A',fontWeight:600,marginBottom:5}}>絞り込み</div>
+              <div style={{fontSize:11,color:'var(--color-text-muted)',fontWeight:600,marginBottom:5}}>絞り込み</div>
               <div style={{overflowX:'auto',msOverflowStyle:'none',scrollbarWidth:'none'} as any}>
                 <div style={{display:'flex',gap:6,flexWrap:'nowrap'}}>
                   {serialOptions.map(o => (
@@ -249,23 +249,23 @@ export default async function RankingPage({ searchParams }: Props) {
           </div>
 
           {/* ランキング本体 */}
-          <div style={{background:'#fff',border:'1px solid #F0D9C9',borderRadius:12,overflow:'hidden'}}>
-            <div style={{padding:'10px 14px',borderBottom:'1px solid #F0D9C9',background:'#FFF9F2',display:'flex',alignItems:'center',justifyContent:'space-between'}}>
+          <div style={{background:'var(--color-bg-card)',border:'1px solid var(--color-brand-border)',borderRadius:12,overflow:'hidden'}}>
+            <div style={{padding:'10px 14px',borderBottom:'1px solid var(--color-brand-border)',background:'var(--color-bg)',display:'flex',alignItems:'center',justifyContent:'space-between'}}>
               <div style={{display:'flex',alignItems:'center',gap:8}}>
-                <span style={{fontSize:15,fontWeight:700,color:'#2B211B'}}>{periodLabel}ランキング</span>
-                <span style={{fontSize:11,color:'#77706A'}}>{novelType!=='全て'&&novelType}{serial==='serial'?' 連載中':serial==='complete'?' 完結':serial==='new'?' 新作':''}</span>
+                <span style={{fontSize:15,fontWeight:700,color:'var(--color-text)'}}>{periodLabel}ランキング</span>
+                <span style={{fontSize:11,color:'var(--color-text-muted)'}}>{novelType!=='全て'&&novelType}{serial==='serial'?' 連載中':serial==='complete'?' 完結':serial==='new'?' 新作':''}</span>
               </div>
-              <span style={{fontSize:12,color:'#77706A'}}>{total}件</span>
+              <span style={{fontSize:12,color:'var(--color-text-muted)'}}>{total}件</span>
             </div>
 
             {ranking.length === 0 ? (
-              <div style={{padding:'48px',textAlign:'center',color:'#B8AEA8',fontSize:13}}>
+              <div style={{padding:'48px',textAlign:'center',color:'var(--color-text-faint)',fontSize:13}}>
                 該当する作品がありません
               </div>
             ) : ranking.map((n, i) => {
               const abs = offset + i
               return (
-                <div key={n.id} style={{borderBottom:'1px solid #FFF1E6'}}>
+                <div key={n.id} style={{borderBottom:'1px solid var(--color-brand-light)'}}>
                   <NovelPreviewPopup novel={{...n, like_count: n.like_count||0}}>
                   <div style={{display:'flex',gap:12,padding:'12px 14px',alignItems:'flex-start',cursor:'pointer'}}>
                     <div style={{width:28,textAlign:'center',flexShrink:0,paddingTop:2}}>
@@ -273,12 +273,12 @@ export default async function RankingPage({ searchParams }: Props) {
                     </div>
                     <div style={{flex:1,minWidth:0}}>
                       <div style={{display:'flex',gap:4,marginBottom:3,flexWrap:'wrap',alignItems:'center'}}>
-                        <span style={{fontSize:10,background:'#FFF1E6',color:'#F26A21',border:'1px solid #f5b080',padding:'1px 5px',borderRadius:3}}>{n.genre}</span>
-                        <span style={{fontSize:10,background:'#eff6ff',color:'#2563eb',border:'1px solid #bfdbfe',padding:'1px 5px',borderRadius:3}}>{n.novel_type}</span>
+                        <span style={{fontSize:10,background:'var(--color-brand-light)',color:'var(--color-brand)',border:'1px solid var(--color-tag-border)',padding:'1px 5px',borderRadius:3}}>{n.genre}</span>
+                        <span style={{fontSize:10,background:'var(--color-info-bg)',color:'var(--color-info)',border:'1px solid var(--color-info-border)',padding:'1px 5px',borderRadius:3}}>{n.novel_type}</span>
                         {n.is_serial && <span style={{fontSize:10,background:'#f0fdf4',color:'#15803d',border:'1px solid #86efac',padding:'1px 5px',borderRadius:3}}>連載中</span>}
                       </div>
-                      <div style={{fontSize:14,fontWeight:700,color:'#2B211B',marginBottom:2,lineHeight:1.4}}>{n.title}</div>
-                      <div style={{fontSize:11,color:'#77706A',marginBottom:4}}>作者：{n.display_name}</div>
+                      <div style={{fontSize:14,fontWeight:700,color:'var(--color-text)',marginBottom:2,lineHeight:1.4}}>{n.title}</div>
+                      <div style={{fontSize:11,color:'var(--color-text-muted)',marginBottom:4}}>作者：{n.display_name}</div>
                       {n.summary && (
                         <div style={{fontSize:12,color:'#5a3a20',lineHeight:1.7,marginBottom:5,overflow:'hidden',display:'-webkit-box',WebkitLineClamp:3,WebkitBoxOrient:'vertical' as any}}>
                           {n.summary}
@@ -287,14 +287,14 @@ export default async function RankingPage({ searchParams }: Props) {
                       {(n.tags||[]).length > 0 && (
                         <div style={{display:'flex',gap:4,flexWrap:'wrap',marginBottom:5}}>
                           {(n.tags as string[]).slice(0,4).map((tag: string) => (
-                            <span key={tag} style={{fontSize:10,background:'#FFF9F2',color:'#77706A',border:'1px solid #F0D9C9',padding:'1px 5px',borderRadius:3}}>#{tag}</span>
+                            <span key={tag} style={{fontSize:10,background:'var(--color-bg)',color:'var(--color-text-muted)',border:'1px solid var(--color-brand-border)',padding:'1px 5px',borderRadius:3}}>#{tag}</span>
                           ))}
                         </div>
                       )}
-                      <div style={{display:'flex',gap:10,fontSize:11,color:'#B8AEA8',flexWrap:'wrap'}}>
+                      <div style={{display:'flex',gap:10,fontSize:11,color:'var(--color-text-faint)',flexWrap:'wrap'}}>
                         {n.char_count > 0 && <span>{fmtChar(n.char_count)}</span>}
                         <span>更新：{fmtDate(n.last_updated)}</span>
-                        <span style={{color:'#77706A',fontWeight:600}}>{scoreLabel} {fmtNum(n.score)}</span>
+                        <span style={{color:'var(--color-text-muted)',fontWeight:600}}>{scoreLabel} {fmtNum(n.score)}</span>
                       </div>
                     </div>
                   </div>
@@ -307,7 +307,7 @@ export default async function RankingPage({ searchParams }: Props) {
           {!showMore && total > PAGE_SIZE && (
             <div style={{textAlign:'center',padding:'16px'}}>
               <Link href={`/ranking?period=${period}&type=${encodeURIComponent(novelType)}&serial=${serial}&page=all`}
-                style={{display:'inline-flex',alignItems:'center',gap:6,padding:'8px 24px',background:'#FFF9F2',border:'1.5px solid #F26A21',borderRadius:20,fontSize:13,color:'#F26A21',textDecoration:'none',fontWeight:600}}>
+                style={{display:'inline-flex',alignItems:'center',gap:6,padding:'8px 24px',background:'var(--color-bg)',border:'1.5px solid var(--color-brand)',borderRadius:20,fontSize:13,color:'var(--color-brand)',textDecoration:'none',fontWeight:600}}>
                 もっと見る
               </Link>
             </div>
@@ -317,18 +317,18 @@ export default async function RankingPage({ searchParams }: Props) {
             <div style={{display:'flex',justifyContent:'center',gap:8,marginTop:20,flexWrap:'wrap'}}>
               {page > 1 && (
                 <Link href={buildUrl(period,novelType,serial,page-1)}
-                  style={{padding:'6px 16px',border:'1px solid #F0D9C9',borderRadius:20,fontSize:13,color:'#F26A21',textDecoration:'none',background:'#FFF9F2'}}>
+                  style={{padding:'6px 16px',border:'1px solid var(--color-brand-border)',borderRadius:20,fontSize:13,color:'var(--color-brand)',textDecoration:'none',background:'var(--color-bg)'}}>
                   ‹ 前へ
                 </Link>
               )}
               {Array.from({length:totalPages},(_,i)=>i+1).filter(p=>p===1||p===totalPages||Math.abs(p-page)<=2).map((p,i,arr)=>(
                 <span key={p} style={{display:'flex',alignItems:'center',gap:8}}>
-                  {i>0&&arr[i-1]!==p-1&&<span style={{color:'#B8AEA8'}}>…</span>}
+                  {i>0&&arr[i-1]!==p-1&&<span style={{color:'var(--color-text-faint)'}}>…</span>}
                   <Link href={buildUrl(period,novelType,serial,p)}
                     style={{padding:'6px 14px',border:'1px solid',borderRadius:20,fontSize:13,textDecoration:'none',
-                      borderColor:p===page?'#F26A21':'#F0D9C9',
-                      background:p===page?'#F26A21':'#fff',
-                      color:p===page?'#fff':'#77706A',
+                      borderColor:p===page?'var(--color-brand)':'var(--color-brand-border)',
+                      background:p===page?'var(--color-brand)':'var(--color-bg-card)',
+                      color:p===page?'var(--color-bg-card)':'var(--color-text-muted)',
                       fontWeight:p===page?700:400}}>
                     {p}
                   </Link>
@@ -336,7 +336,7 @@ export default async function RankingPage({ searchParams }: Props) {
               ))}
               {page < totalPages && (
                 <Link href={buildUrl(period,novelType,serial,page+1)}
-                  style={{padding:'6px 16px',border:'1px solid #F0D9C9',borderRadius:20,fontSize:13,color:'#F26A21',textDecoration:'none',background:'#FFF9F2'}}>
+                  style={{padding:'6px 16px',border:'1px solid var(--color-brand-border)',borderRadius:20,fontSize:13,color:'var(--color-brand)',textDecoration:'none',background:'var(--color-bg)'}}>
                   次へ ›
                 </Link>
               )}
