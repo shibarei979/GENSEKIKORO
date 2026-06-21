@@ -41,22 +41,26 @@ function randomMotion(): Motion {
   }
 }
 
-// 1つの文を表示するボタン。CSSアニメーションが1周するたび(onAnimationIteration)に
-// 新しいランダムな位置・移動量を計算し直すことで、毎回違う場所・違う軌道で浮かぶようにする。
+// 1つの文を表示するボタン。CSSアニメーションが1周し終えるたび(onAnimationEnd)に
+// cycleを進めて要素を再マウントし、毎回新しい位置・軌道で浮かび上がるようにする。
+// keyで再マウントすることで、ブラウザ側のレイアウト状態を引きずらず、
+// 表示位置が飛んだりカーソルに引き寄せられて見えたりする不具合を避ける。
 function VoiceItem({ voice, initialDelay, onClick }: { voice: Voice; initialDelay: number; onClick: () => void }) {
-  const [motion, setMotion] = useState<Motion>(() => randomMotion())
-  const elRef = useRef<HTMLButtonElement>(null)
+  const [cycle, setCycle] = useState(0)
+  const motionRef = useRef<Motion>(randomMotion())
 
-  function handleIteration() {
-    setMotion(randomMotion())
+  function handleAnimationEnd() {
+    motionRef.current = randomMotion()
+    setCycle(c => c + 1)
   }
+
+  const motion = motionRef.current
 
   return (
     <button
-      ref={elRef}
+      key={cycle}
       onClick={onClick}
-      onAnimationIteration={handleIteration}
-      title={voice.novelTitle}
+      onAnimationEnd={handleAnimationEnd}
       className="voice-float-item"
       style={{
         position:'absolute',
@@ -74,8 +78,9 @@ function VoiceItem({ voice, initialDelay, onClick }: { voice: Voice; initialDela
         padding:'4px 8px',
         animationName:'voiceFloat',
         animationDuration:`${motion.duration}s`,
-        animationDelay:`${initialDelay}s`,
-        animationIterationCount:'infinite',
+        animationDelay: cycle === 0 ? `${initialDelay}s` : '0s',
+        animationIterationCount:1,
+        animationFillMode:'forwards',
         animationTimingFunction:'ease-in-out',
         ['--voice-driftx' as any]: `${motion.driftX}px`,
         ['--voice-drifty' as any]: `${motion.driftY}px`,
@@ -92,8 +97,8 @@ export default function VoicesFloat({ voices }: Props) {
   const delaysRef = useRef<number[]>([])
 
   useEffect(() => {
-    // 初回表示時の開始タイミングだけランダムにずらす（負のdelayで「すでに漂っている」状態に）
-    delaysRef.current = voices.map(() => -Math.random() * 6)
+    // 初回表示時の開始タイミングだけランダムにずらす（全部同時に出現しないように）
+    delaysRef.current = voices.map(() => Math.random() * 3)
     setMounted(true)
   }, [voices])
 
