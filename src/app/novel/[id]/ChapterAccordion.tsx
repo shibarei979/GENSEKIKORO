@@ -59,18 +59,18 @@ export default function ChapterAccordion({
     const isReadEp = readSet.has(ep.id)
     return (
       <Link href={`/novel/${novelId}/episode/${ep.id}`} style={{textDecoration:'none',display:'block'}}>
-        <div style={{display:'flex',alignItems:'center',gap:10,padding:'11px 14px',borderBottom:'1px solid #FFF1E6',background: isReadEp ? '#e5e7eb' : '#fff'}}>
+        <div style={{display:'flex',alignItems:'center',gap:10,padding:'11px 14px',borderBottom:'1px solid var(--color-brand-light)',background: isReadEp ? '#e5e7eb' : 'var(--color-bg-card)'}}>
           {ep.illust_url && (
             <img src={ep.illust_url} alt="" style={{width:36,height:36,objectFit:'cover',borderRadius:4,flexShrink:0}}/>
           )}
           <div style={{flex:1,minWidth:0,display:'flex',alignItems:'center',gap:5}}>
             {isReadEp && <span style={{fontSize:10,color:'#10b981',fontWeight:700,flexShrink:0}}>✓</span>}
-            <span style={{fontSize:13,fontWeight:500,color: isReadEp ? '#4b5563' : '#2B211B',overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap'}}>{ep.title}</span>
+            <span style={{fontSize:13,fontWeight:500,color: isReadEp ? '#4b5563' : 'var(--color-text)',overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap'}}>{ep.title}</span>
           </div>
           <div style={{display:'flex',alignItems:'center',gap:6,flexShrink:0}}>
-            {epLikeCounts[ep.id] > 0 && <span style={{fontSize:10,color:'#77706A'}}>♡ {fmtNum(epLikeCounts[ep.id])}</span>}
-            {epCommentCounts[ep.id] > 0 && <span style={{fontSize:10,color:'#77706A'}}>💬 {fmtNum(epCommentCounts[ep.id])}</span>}
-            <span style={{fontSize:10,color:'#B8AEA8'}}>{fmtDate(ep.created_at)}</span>
+            {epLikeCounts[ep.id] > 0 && <span style={{fontSize:10,color:'var(--color-text-muted)'}}>♡ {fmtNum(epLikeCounts[ep.id])}</span>}
+            {epCommentCounts[ep.id] > 0 && <span style={{fontSize:10,color:'var(--color-text-muted)'}}>💬 {fmtNum(epCommentCounts[ep.id])}</span>}
+            <span style={{fontSize:10,color:'var(--color-text-faint)'}}>{fmtDate(ep.created_at)}</span>
           </div>
         </div>
       </Link>
@@ -88,16 +88,16 @@ export default function ChapterAccordion({
               onClick={() => toggle(chapter.id)}
               style={{
                 width:'100%', padding:'9px 14px',
-                background:'#FFF1E6', borderBottom:'1px solid #F0D9C9', borderTop:'1px solid #F0D9C9',
+                background:'var(--color-brand-light)', borderBottom:'1px solid var(--color-brand-border)', borderTop:'1px solid var(--color-brand-border)',
                 border:'none', cursor:'pointer',
                 display:'flex', alignItems:'center', gap:8,
                 textAlign:'left',
               }}>
-              <span style={{width:3,height:14,background:'#F26A21',borderRadius:2,display:'inline-block',flexShrink:0}}/>
-              <span style={{fontSize:13,fontWeight:700,color:'#F26A21'}}>{chapter.title}</span>
-              <span style={{fontSize:11,color:'#B8AEA8'}}>（{chEps.length}話{readInChapter>0?` / ✓${readInChapter}話既読`:''}）</span>
+              <span style={{width:3,height:14,background:'var(--color-brand)',borderRadius:2,display:'inline-block',flexShrink:0}}/>
+              <span style={{fontSize:13,fontWeight:700,color:'var(--color-brand)'}}>{chapter.title}</span>
+              <span style={{fontSize:11,color:'var(--color-text-faint)'}}>（{chEps.length}話{readInChapter>0?` / ✓${readInChapter}話既読`:''}）</span>
               <div style={{flex:1}}/>
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#F26A21" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--color-brand)" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"
                 style={{transform: isOpen ? 'rotate(180deg)' : 'rotate(0deg)', transition:'transform .2s', flexShrink:0}}>
                 <polyline points="6 9 12 15 18 9"/>
               </svg>
@@ -113,16 +113,16 @@ export default function ChapterAccordion({
             onClick={() => toggle('unassigned')}
             style={{
               width:'100%', padding:'9px 14px',
-              background:'#F5F5F0', borderBottom:'1px solid #F0D9C9', borderTop:'1px solid #F0D9C9',
+              background:'#F5F5F0', borderBottom:'1px solid var(--color-brand-border)', borderTop:'1px solid var(--color-brand-border)',
               border:'none', cursor:'pointer',
               display:'flex', alignItems:'center', gap:8,
               textAlign:'left',
             }}>
-            <span style={{width:3,height:14,background:'#B8AEA8',borderRadius:2,display:'inline-block',flexShrink:0}}/>
-            <span style={{fontSize:13,fontWeight:700,color:'#77706A'}}>その他</span>
-            <span style={{fontSize:11,color:'#B8AEA8'}}>（{unassignedEpisodes.length}話）</span>
+            <span style={{width:3,height:14,background:'var(--color-text-faint)',borderRadius:2,display:'inline-block',flexShrink:0}}/>
+            <span style={{fontSize:13,fontWeight:700,color:'var(--color-text-muted)'}}>その他</span>
+            <span style={{fontSize:11,color:'var(--color-text-faint)'}}>（{unassignedEpisodes.length}話）</span>
             <div style={{flex:1}}/>
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#77706A" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--color-text-muted)" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"
               style={{transform: openIds.has('unassigned') ? 'rotate(180deg)' : 'rotate(0deg)', transition:'transform .2s', flexShrink:0}}>
               <polyline points="6 9 12 15 18 9"/>
             </svg>
