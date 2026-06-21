@@ -45,8 +45,8 @@ export default function VoicesFloat({ voices }: Props) {
       voice: v,
       left: 4 + Math.random() * 88,
       top: 6 + Math.random() * 82,
-      delay: Math.random() * 14,
-      duration: 10 + Math.random() * 8,
+      delay: Math.random() * 6,
+      duration: 5 + Math.random() * 4,
       size: sizeFor(v.text),
       drift: -24 + Math.random() * 48,
     }))
