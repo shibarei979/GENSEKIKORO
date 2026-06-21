@@ -322,17 +322,17 @@ export default function MemoMode({ userId }: { userId: string }) {
   const toolBtnStyle = (active:boolean) => ({
     width:44,height:44,fontSize:18,borderRadius:10,border:'1.5px solid',cursor:'pointer' as const,
     display:'flex',alignItems:'center' as const,justifyContent:'center' as const,
-    background:active?'#F26A21':'#fff', color:active?'#fff':'#2B211B',
-    borderColor:active?'#F26A21':'#F0D9C9', fontWeight:active?700 as const:400 as const, transition:'all .12s',
+    background:active?'var(--color-brand)':'var(--color-bg-card)', color:active?'var(--color-bg-card)':'var(--color-text)',
+    borderColor:active?'var(--color-brand)':'var(--color-brand-border)', fontWeight:active?700 as const:400 as const, transition:'all .12s',
   })
 
   return (
     <div style={{width:'100%',height:'100%',display:'flex',flexDirection:'column'}}>
-      <div style={{display:'flex',alignItems:'center',gap:8,padding:'10px 14px',background:'#FFF9F2',borderBottom:'1px solid #F0D9C9',flexWrap:'wrap',flexShrink:0}}>
-        <span style={{fontSize:11,color:saveErr?'#dc2626':saving?'#F26A21':saved?'#22c55e':'transparent',minWidth:70,fontWeight:600}}>
+      <div style={{display:'flex',alignItems:'center',gap:8,padding:'10px 14px',background:'var(--color-bg)',borderBottom:'1px solid var(--color-brand-border)',flexWrap:'wrap',flexShrink:0}}>
+        <span style={{fontSize:11,color:saveErr?'var(--color-danger)':saving?'var(--color-brand)':saved?'#22c55e':'transparent',minWidth:70,fontWeight:600}}>
           {saveErr || (saving?'保存中…':saved?'保存済み':'　')}
         </span>
-        <div style={{width:1,height:30,background:'#F0D9C9'}}/>
+        <div style={{width:1,height:30,background:'var(--color-brand-border)'}}/>
         <div style={{display:'flex',gap:5}}>
           <button onClick={()=>{setTool('select');edgeFromRef.current=null}} title="選択" style={toolBtnStyle(tool==='select')}>↖</button>
           <button onClick={()=>{setTool('note');edgeFromRef.current=null}} title="付箋" style={toolBtnStyle(tool==='note')}>▥</button>
@@ -342,40 +342,40 @@ export default function MemoMode({ userId }: { userId: string }) {
           <button onClick={()=>{setTool('arrow');edgeFromRef.current=null}} title="矢印図形" style={toolBtnStyle(tool==='arrow')}>→</button>
           <button onClick={()=>{setTool('edge');edgeFromRef.current=null}} title="ノード接続" style={{...toolBtnStyle(tool==='edge'),width:'auto',padding:'0 16px',fontSize:13}}>接続</button>
         </div>
-        <div style={{width:1,height:30,background:'#F0D9C9'}}/>
+        <div style={{width:1,height:30,background:'var(--color-brand-border)'}}/>
         {(tool==='note'||(!selectedNode&&tool==='select')||selectedNode?.type==='note') && (
           <div style={{display:'flex',gap:4,alignItems:'center'}}>
             {NOTE_COLORS.map(c=>(<button key={c} onClick={()=>{setNoteColor(c);if(selectedNode?.type==='note')handleColorChange(c)}}
-              style={{width:24,height:24,borderRadius:6,border:'none',cursor:'pointer',background:c,outline:(selectedNode?.type==='note'?selectedNode.color:noteColor)===c?'2.5px solid #F26A21':'1px solid rgba(0,0,0,0.2)',outlineOffset:1}}/>))}
+              style={{width:24,height:24,borderRadius:6,border:'none',cursor:'pointer',background:c,outline:(selectedNode?.type==='note'?selectedNode.color:noteColor)===c?'2.5px solid var(--color-brand)':'1px solid rgba(0,0,0,0.2)',outlineOffset:1}}/>))}
           </div>
         )}
         {(['circle','rect','triangle','arrow'].includes(tool)||(selectedNode&&['circle','rect','triangle','arrow'].includes(selectedNode.type))) && (
           <div style={{display:'flex',gap:4,alignItems:'center'}}>
             {SHAPE_COLORS.map(c=>(<button key={c} onClick={()=>{setShapeColor(c);if(selectedNode&&['circle','rect','triangle','arrow'].includes(selectedNode.type))handleColorChange(c)}}
-              style={{width:24,height:24,borderRadius:'50%',border:'none',cursor:'pointer',background:c,outline:(selectedNode&&['circle','rect','triangle','arrow'].includes(selectedNode.type)?selectedNode.color:shapeColor)===c?'2.5px solid #F26A21':'1px solid rgba(0,0,0,0.2)',outlineOffset:1}}/>))}
+              style={{width:24,height:24,borderRadius:'50%',border:'none',cursor:'pointer',background:c,outline:(selectedNode&&['circle','rect','triangle','arrow'].includes(selectedNode.type)?selectedNode.color:shapeColor)===c?'2.5px solid var(--color-brand)':'1px solid rgba(0,0,0,0.2)',outlineOffset:1}}/>))}
           </div>
         )}
         {tool==='edge' && (
           <div style={{display:'flex',gap:5,alignItems:'center'}}>
-            {(['arrow','line'] as const).map(t=>(<button key={t} onClick={()=>setEdgeType(t)} style={{padding:'6px 12px',fontSize:12,borderRadius:7,border:'1px solid',cursor:'pointer',background:edgeType===t?'#2B211B':'#fff',color:edgeType===t?'#fff':'#2B211B',borderColor:'#F0D9C9'}}>{t==='arrow'?'矢印':'直線'}</button>))}
-            {EDGE_COLORS.map(c=>(<button key={c} onClick={()=>setEdgeColor(c)} style={{width:22,height:22,borderRadius:'50%',border:'none',cursor:'pointer',background:c,outline:edgeColor===c?'2.5px solid #F26A21':'1px solid rgba(0,0,0,0.2)',outlineOffset:1}}/>))}
+            {(['arrow','line'] as const).map(t=>(<button key={t} onClick={()=>setEdgeType(t)} style={{padding:'6px 12px',fontSize:12,borderRadius:7,border:'1px solid',cursor:'pointer',background:edgeType===t?'var(--color-text)':'var(--color-bg-card)',color:edgeType===t?'var(--color-bg-card)':'var(--color-text)',borderColor:'var(--color-brand-border)'}}>{t==='arrow'?'矢印':'直線'}</button>))}
+            {EDGE_COLORS.map(c=>(<button key={c} onClick={()=>setEdgeColor(c)} style={{width:22,height:22,borderRadius:'50%',border:'none',cursor:'pointer',background:c,outline:edgeColor===c?'2.5px solid var(--color-brand)':'1px solid rgba(0,0,0,0.2)',outlineOffset:1}}/>))}
           </div>
         )}
         {selectedNode && tool==='select' && (
-          <button onClick={handleDelete} style={{padding:'8px 16px',fontSize:12,border:'1px solid #fca5a5',borderRadius:8,background:'#fef2f2',color:'#dc2626',cursor:'pointer',fontWeight:600}}>削除</button>
+          <button onClick={handleDelete} style={{padding:'8px 16px',fontSize:12,border:'1px solid #fca5a5',borderRadius:8,background:'#fef2f2',color:'var(--color-danger)',cursor:'pointer',fontWeight:600}}>削除</button>
         )}
         <div style={{flex:1}}/>
-        <div style={{display:'flex',alignItems:'center',gap:4,background:'#fff',border:'1px solid #F0D9C9',borderRadius:10,padding:4}}>
-          <button onClick={zoomOut} style={{width:30,height:30,border:'none',background:'#FFF9F2',borderRadius:7,cursor:'pointer',fontSize:15,fontWeight:700,color:'#77706A'}}>−</button>
-          <span style={{minWidth:44,textAlign:'center',fontSize:12,fontWeight:700,color:'#2B211B'}}>{zoomPercent}%</span>
-          <button onClick={zoomIn} style={{width:30,height:30,border:'none',background:'#FFF9F2',borderRadius:7,cursor:'pointer',fontSize:15,fontWeight:700,color:'#77706A'}}>＋</button>
-          <div style={{width:1,height:18,background:'#F0D9C9',margin:'0 2px'}}/>
-          <button onClick={fitToScreen} style={{padding:'0 10px',height:30,border:'none',background:'#FFF9F2',borderRadius:7,cursor:'pointer',fontSize:11,fontWeight:600,color:'#77706A'}}>全体表示</button>
+        <div style={{display:'flex',alignItems:'center',gap:4,background:'var(--color-bg-card)',border:'1px solid var(--color-brand-border)',borderRadius:10,padding:4}}>
+          <button onClick={zoomOut} style={{width:30,height:30,border:'none',background:'var(--color-bg)',borderRadius:7,cursor:'pointer',fontSize:15,fontWeight:700,color:'var(--color-text-muted)'}}>−</button>
+          <span style={{minWidth:44,textAlign:'center',fontSize:12,fontWeight:700,color:'var(--color-text)'}}>{zoomPercent}%</span>
+          <button onClick={zoomIn} style={{width:30,height:30,border:'none',background:'var(--color-bg)',borderRadius:7,cursor:'pointer',fontSize:15,fontWeight:700,color:'var(--color-text-muted)'}}>＋</button>
+          <div style={{width:1,height:18,background:'var(--color-brand-border)',margin:'0 2px'}}/>
+          <button onClick={fitToScreen} style={{padding:'0 10px',height:30,border:'none',background:'var(--color-bg)',borderRadius:7,cursor:'pointer',fontSize:11,fontWeight:600,color:'var(--color-text-muted)'}}>全体表示</button>
         </div>
       </div>
 
       {tool==='edge' && (
-        <div style={{padding:'6px 14px',background:'#FFF1E6',borderBottom:'1px solid #F0D9C9',fontSize:12,color:'#F26A21',fontWeight:600}}>
+        <div style={{padding:'6px 14px',background:'var(--color-brand-light)',borderBottom:'1px solid var(--color-brand-border)',fontSize:12,color:'var(--color-brand)',fontWeight:600}}>
           {edgeFromRef.current ? '接続先のノードをクリック' : '接続元のノードをクリック'}
         </div>
       )}
@@ -405,23 +405,23 @@ export default function MemoMode({ userId }: { userId: string }) {
               return <rect x={n.x-4} y={n.y-4} width={n.w+8} height={n.h+8} rx={6} fill="none" stroke="#F26A21" strokeWidth={2.5} vectorEffect="non-scaling-stroke" strokeDasharray="6 3" style={{pointerEvents:'none'}}/> })()}
           </svg>
         )}
-        <div style={{position:'absolute',bottom:12,right:12,fontSize:11,color:'#B8AEA8',background:'rgba(255,255,255,0.8)',padding:'4px 10px',borderRadius:8,pointerEvents:'none'}}>
+        <div style={{position:'absolute',bottom:12,right:12,fontSize:11,color:'var(--color-text-faint)',background:'rgba(255,255,255,0.8)',padding:'4px 10px',borderRadius:8,pointerEvents:'none'}}>
           ホイールで拡大縮小・背景ドラッグで移動
         </div>
       </div>
 
       {editing && (
         <div style={{position:'absolute',inset:0,zIndex:100,display:'flex',alignItems:'center',justifyContent:'center',background:'rgba(0,0,0,0.4)'}}>
-          <div style={{background:'#fff',borderRadius:14,padding:'20px',width:300,boxShadow:'0 8px 32px rgba(0,0,0,0.2)'}}>
-            <div style={{fontSize:13,fontWeight:700,color:'#2B211B',marginBottom:10}}>テキストを編集</div>
+          <div style={{background:'var(--color-bg-card)',borderRadius:14,padding:'20px',width:300,boxShadow:'0 8px 32px rgba(0,0,0,0.2)'}}>
+            <div style={{fontSize:13,fontWeight:700,color:'var(--color-text)',marginBottom:10}}>テキストを編集</div>
             <textarea autoFocus value={editing.text} onChange={e=>setEditing({...editing,text:e.target.value})}
               onKeyDown={e=>{if(e.key==='Enter'&&(e.metaKey||e.ctrlKey))handleEditSave()}} rows={4}
-              style={{width:'100%',padding:'8px 10px',border:'1.5px solid #F0D9C9',borderRadius:8,fontSize:13,outline:'none',resize:'vertical',fontFamily:'inherit',boxSizing:'border-box'}}
+              style={{width:'100%',padding:'8px 10px',border:'1.5px solid var(--color-brand-border)',borderRadius:8,fontSize:13,outline:'none',resize:'vertical',fontFamily:'inherit',boxSizing:'border-box'}}
               placeholder="テキストを入力…"/>
-            <div style={{fontSize:10,color:'#B8AEA8',marginBottom:10}}>⌘+Enter で保存</div>
+            <div style={{fontSize:10,color:'var(--color-text-faint)',marginBottom:10}}>⌘+Enter で保存</div>
             <div style={{display:'flex',gap:8}}>
-              <button onClick={()=>setEditing(null)} style={{flex:1,padding:'8px',border:'1px solid #F0D9C9',borderRadius:8,background:'#fff',color:'#77706A',fontSize:13,cursor:'pointer'}}>キャンセル</button>
-              <button onClick={handleEditSave} style={{flex:1,padding:'8px',border:'none',borderRadius:8,background:'#F26A21',color:'#fff',fontSize:13,fontWeight:700,cursor:'pointer'}}>保存</button>
+              <button onClick={()=>setEditing(null)} style={{flex:1,padding:'8px',border:'1px solid var(--color-brand-border)',borderRadius:8,background:'var(--color-bg-card)',color:'var(--color-text-muted)',fontSize:13,cursor:'pointer'}}>キャンセル</button>
+              <button onClick={handleEditSave} style={{flex:1,padding:'8px',border:'none',borderRadius:8,background:'var(--color-brand)',color:'var(--color-bg-card)',fontSize:13,fontWeight:700,cursor:'pointer'}}>保存</button>
             </div>
           </div>
         </div>
