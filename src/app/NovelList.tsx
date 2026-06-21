@@ -20,12 +20,12 @@ export default function NovelList({ novels }: { novels: any[] }) {
 
   return (
     <>
-      <div style={{display:'flex',gap:5,padding:'7px 14px',flexWrap:'wrap',borderBottom:'1px solid #F0D9C9',background:'#FFF9F2'}}>
+      <div style={{display:'flex',gap:5,padding:'7px 14px',flexWrap:'wrap',borderBottom:'1px solid var(--color-brand-border)',background:'var(--color-bg)'}}>
         {GENRE_TABS.map(g=>(
           <button key={g} onClick={()=>setGenre(g)}
-            style={{padding:'3px 9px',borderRadius:10,fontSize:12,border:'1px solid #F0D9C9',
-              background:genre===g?'#F26A21':'#fff',
-              color:genre===g?'#fff':'#77706A',cursor:'pointer'}}>
+            style={{padding:'3px 9px',borderRadius:10,fontSize:12,border:'1px solid var(--color-brand-border)',
+              background:genre===g?'var(--color-brand)':'var(--color-bg-card)',
+              color:genre===g?'var(--color-bg-card)':'var(--color-text-muted)',cursor:'pointer'}}>
             {g}
           </button>
         ))}
@@ -34,25 +34,25 @@ export default function NovelList({ novels }: { novels: any[] }) {
         {slots.map((n, i) => n ? (
           <div key={n.id}>
           <NovelPreviewPopup novel={n}>
-            <div style={{padding:'9px 14px',borderBottom:'1px solid #FFF1E6',borderRight:i%2===0?'1px solid #FFF1E6':'none',minHeight:68,cursor:'pointer'}}>
+            <div style={{padding:'9px 14px',borderBottom:'1px solid var(--color-brand-light)',borderRight:i%2===0?'1px solid var(--color-brand-light)':'none',minHeight:68,cursor:'pointer'}}>
               <div style={{display:'flex',gap:4,marginBottom:3,flexWrap:'wrap',alignItems:'center'}}>
-                <span style={{fontSize:9,background:'#FFF1E6',color:'#F26A21',border:'1px solid #f5b080',padding:'1px 5px',borderRadius:3}}>{n.genre}</span>
-                <span style={{background:'#F26A21',color:'#fff',fontSize:9,padding:'0 4px',borderRadius:3,fontWeight:700}}>NEW</span>
-                {n.novel_type && <span style={{fontSize:9,background:'#eff6ff',color:'#2563eb',border:'1px solid #bfdbfe',padding:'1px 5px',borderRadius:3}}>{n.novel_type}</span>}
+                <span style={{fontSize:9,background:'var(--color-brand-light)',color:'var(--color-brand)',border:'1px solid #f5b080',padding:'1px 5px',borderRadius:3}}>{n.genre}</span>
+                <span style={{background:'var(--color-brand)',color:'var(--color-bg-card)',fontSize:9,padding:'0 4px',borderRadius:3,fontWeight:700}}>NEW</span>
+                {n.novel_type && <span style={{fontSize:9,background:'#eff6ff',color:'var(--color-info)',border:'1px solid #bfdbfe',padding:'1px 5px',borderRadius:3}}>{n.novel_type}</span>}
               </div>
-              <div style={{fontSize:13,fontWeight:700,color:'#2B211B',marginBottom:2}}>{n.title}</div>
-              <div style={{fontSize:11,color:'#77706A'}}>作者：{n.display_name}</div>
+              <div style={{fontSize:13,fontWeight:700,color:'var(--color-text)',marginBottom:2}}>{n.title}</div>
+              <div style={{fontSize:11,color:'var(--color-text-muted)'}}>作者：{n.display_name}</div>
             </div>
           </NovelPreviewPopup>
           </div>
         ) : (
-          <div key={i} style={{padding:'9px 14px',borderBottom:'1px solid #FFF1E6',borderRight:i%2===0?'1px solid #FFF1E6':'none',minHeight:68}}>
+          <div key={i} style={{padding:'9px 14px',borderBottom:'1px solid var(--color-brand-light)',borderRight:i%2===0?'1px solid var(--color-brand-light)':'none',minHeight:68}}>
             <div style={{display:'flex',gap:4,marginBottom:3,flexWrap:'wrap',alignItems:'center'}}>
-              <span style={{fontSize:9,background:'#FFF1E6',color:'#F26A21',border:'1px solid #f5b080',padding:'1px 5px',borderRadius:3}}>ジャンル</span>
-              <span style={{background:'#F26A21',color:'#fff',fontSize:9,padding:'0 4px',borderRadius:3,fontWeight:700}}>NEW</span>
-              <span style={{fontSize:9,background:'#eff6ff',color:'#2563eb',border:'1px solid #bfdbfe',padding:'1px 5px',borderRadius:3}}>長編</span>
+              <span style={{fontSize:9,background:'var(--color-brand-light)',color:'var(--color-brand)',border:'1px solid #f5b080',padding:'1px 5px',borderRadius:3}}>ジャンル</span>
+              <span style={{background:'var(--color-brand)',color:'var(--color-bg-card)',fontSize:9,padding:'0 4px',borderRadius:3,fontWeight:700}}>NEW</span>
+              <span style={{fontSize:9,background:'#eff6ff',color:'var(--color-info)',border:'1px solid #bfdbfe',padding:'1px 5px',borderRadius:3}}>長編</span>
             </div>
-            <div style={{fontSize:13,fontWeight:700,color:'#2B211B'}}>作品タイトル（準備中）</div>
+            <div style={{fontSize:13,fontWeight:700,color:'var(--color-text)'}}>作品タイトル（準備中）</div>
           </div>
         ))}
       </div>
