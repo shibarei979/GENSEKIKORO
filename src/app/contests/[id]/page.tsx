@@ -69,21 +69,21 @@ export default async function ContestPage({ params }: Props) {
   }
 
   return (
-    <div style={{minHeight:'100vh',background:'#FFF9F2',fontFamily:"'Noto Sans JP',sans-serif"}}>
+    <div style={{minHeight:'100vh',background:'var(--color-bg)',fontFamily:"'Noto Sans JP',sans-serif"}}>
       <Header profile={profile} user={user} />
 
       <div style={{maxWidth:900,margin:'0 auto',padding:'32px 24px'}}>
         {/* パンくず */}
         <div style={{display:'flex',alignItems:'center',gap:6,marginBottom:20,fontSize:12,color:'#94a3b8'}}>
-          <Link href="/" style={{color:'#F26A21',textDecoration:'none'}}>ホーム</Link>
+          <Link href="/" style={{color:'var(--color-brand)',textDecoration:'none'}}>ホーム</Link>
           <span>›</span>
-          <Link href="/contests" style={{color:'#F26A21',textDecoration:'none'}}>コンテスト</Link>
+          <Link href="/contests" style={{color:'var(--color-brand)',textDecoration:'none'}}>コンテスト</Link>
           <span>›</span>
-          <span style={{color:'#77706A'}}>{contest.title}</span>
+          <span style={{color:'var(--color-text-muted)'}}>{contest.title}</span>
         </div>
 
         {/* コンテストヘッダー */}
-        <div style={{background:'#fff',border:'1px solid #F0D9C9',borderRadius:16,overflow:'hidden',marginBottom:24}}>
+        <div style={{background:'var(--color-bg-card)',border:'1px solid var(--color-brand-border)',borderRadius:16,overflow:'hidden',marginBottom:24}}>
           {/* デスクトップ：padding付きで表示 */}
           {contest.image_url && (
             <>
@@ -103,29 +103,29 @@ export default async function ContestPage({ params }: Props) {
               <span style={{fontSize:11,fontWeight:700,color:status.color,background:status.bg,border:`1px solid ${status.border}`,padding:'2px 10px',borderRadius:10}}>{status.label}</span>
               {contest.deadline && <span style={{fontSize:12,color:'#94a3b8'}}>締切：{new Date(contest.deadline).toLocaleDateString('ja-JP')}</span>}
               {contest.judging_end && <span style={{fontSize:12,color:'#94a3b8'}}>選考終了：{new Date(contest.judging_end).toLocaleDateString('ja-JP')}</span>}
-              <span style={{fontSize:12,color:'#77706A',marginLeft:'auto',fontWeight:600}}>応募数：{novels.length}作品</span>
+              <span style={{fontSize:12,color:'var(--color-text-muted)',marginLeft:'auto',fontWeight:600}}>応募数：{novels.length}作品</span>
             </div>
-            <h1 style={{fontSize:24,fontWeight:700,color:'#2B211B',marginBottom:12,fontFamily:"'Noto Serif JP',serif"}}>{contest.title}</h1>
+            <h1 style={{fontSize:24,fontWeight:700,color:'var(--color-text)',marginBottom:12,fontFamily:"'Noto Serif JP',serif"}}>{contest.title}</h1>
             {contest.description && (
-              <div style={{fontSize:13,color:'#77706A',lineHeight:1.85,whiteSpace:'pre-wrap',marginBottom:16}}>{contest.description}</div>
+              <div style={{fontSize:13,color:'var(--color-text-muted)',lineHeight:1.85,whiteSpace:'pre-wrap',marginBottom:16}}>{contest.description}</div>
             )}
             {/* デスクトップ：inline-block */}
             {status.label === '募集中' && user && (
               <>
-                <Link href="/mypage" className="desktop-only" style={{display:'inline-block',padding:'10px 28px',background:'#F26A21',color:'#fff',fontWeight:700,fontSize:14,borderRadius:8,textDecoration:'none'}}>
+                <Link href="/mypage" className="desktop-only" style={{display:'inline-block',padding:'10px 28px',background:'var(--color-brand)',color:'var(--color-bg-card)',fontWeight:700,fontSize:14,borderRadius:8,textDecoration:'none'}}>
                   マイページから応募する →
                 </Link>
-                <Link href="/mypage" className="mobile-only" style={{display:'block',padding:'12px',background:'#F26A21',color:'#fff',fontWeight:700,fontSize:14,borderRadius:8,textDecoration:'none',textAlign:'center'}}>
+                <Link href="/mypage" className="mobile-only" style={{display:'block',padding:'12px',background:'var(--color-brand)',color:'var(--color-bg-card)',fontWeight:700,fontSize:14,borderRadius:8,textDecoration:'none',textAlign:'center'}}>
                   マイページから応募する →
                 </Link>
               </>
             )}
             {status.label === '募集中' && !user && (
               <>
-                <Link href="/auth/login" className="desktop-only" style={{display:'inline-block',padding:'10px 28px',background:'#F26A21',color:'#fff',fontWeight:700,fontSize:14,borderRadius:8,textDecoration:'none'}}>
+                <Link href="/auth/login" className="desktop-only" style={{display:'inline-block',padding:'10px 28px',background:'var(--color-brand)',color:'var(--color-bg-card)',fontWeight:700,fontSize:14,borderRadius:8,textDecoration:'none'}}>
                   ログインして応募する →
                 </Link>
-                <Link href="/auth/login" className="mobile-only" style={{display:'block',padding:'12px',background:'#F26A21',color:'#fff',fontWeight:700,fontSize:14,borderRadius:8,textDecoration:'none',textAlign:'center'}}>
+                <Link href="/auth/login" className="mobile-only" style={{display:'block',padding:'12px',background:'var(--color-brand)',color:'var(--color-bg-card)',fontWeight:700,fontSize:14,borderRadius:8,textDecoration:'none',textAlign:'center'}}>
                   ログインして応募する →
                 </Link>
               </>
