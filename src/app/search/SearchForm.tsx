@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
+import Link from 'next/link'
 
 const GENRES_BASE = ['異世界','ファンタジー','SF','恋愛','学園','ミステリー','ホラー','歴史・時代','日常','アクション','コメディ','その他']
 
@@ -140,11 +141,24 @@ export default function SearchForm({
 
   return (
     <div style={{background:'#fff',border:'1px solid #F0D9C9',borderRadius:12,padding: isMobile ? '16px' : '20px',marginBottom:16}}>
-      <div style={{fontSize:15,fontWeight:700,color:'#2B211B',marginBottom:14,display:'flex',alignItems:'center',gap:8}}>
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#F26A21" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-          <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
-        </svg>
-        探す
+      <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',marginBottom:14,flexWrap:'wrap',gap:8}}>
+        <div style={{fontSize:15,fontWeight:700,color:'#2B211B',display:'flex',alignItems:'center',gap:8}}>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#F26A21" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+            <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+          </svg>
+          探す
+        </div>
+        <Link href="/voices" style={{
+          display:'flex', alignItems:'center', gap:6,
+          fontSize:12, fontWeight:600, color:'#8a5a3a',
+          background:'#FFF6EC', border:'1px solid #f0d9c0',
+          borderRadius:14, padding:'5px 12px', textDecoration:'none',
+        }}>
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#F26A21" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{flexShrink:0}}>
+            <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/>
+          </svg>
+          読者の声を見る
+        </Link>
       </div>
 
       {/* キーワード・除外：モバイルは1列、デスクトップは2列 */}

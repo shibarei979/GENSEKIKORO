@@ -177,25 +177,6 @@ export default async function SearchPage({ searchParams }: Props) {
             defaultSort={sort} ageVerified={isAgeVerified}
           />
 
-          {/* ===== /voices への導線 ===== */}
-          <Link href="/voices" style={{
-            display:'flex', alignItems:'center', gap:10,
-            background:'linear-gradient(90deg, #2a2018, #3a2c1e)',
-            borderRadius:10, padding:'12px 16px', marginBottom:14,
-            textDecoration:'none', border:'1px solid #4a3a2e',
-          }}>
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#F26A21" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{flexShrink:0}}>
-              <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/>
-            </svg>
-            <div style={{flex:1}}>
-              <div style={{fontSize:13,fontWeight:700,color:'#fff'}}>読者の声を見る</div>
-              <div style={{fontSize:11,color:'rgba(255,255,255,0.6)'}}>心を動かされた一文から、新しい物語に出会う</div>
-            </div>
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.6)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{flexShrink:0}}>
-              <polyline points="9 18 15 12 9 6"/>
-            </svg>
-          </Link>
-
           <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',marginBottom:10,fontSize:13,color:'#77706A'}}>
             {hasSearch
               ? <span>検索結果：<strong style={{color:'#2B211B'}}>{fmtNum(count)}作品</strong></span>
