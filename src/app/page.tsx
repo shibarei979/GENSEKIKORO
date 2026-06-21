@@ -236,14 +236,14 @@ export default async function HomePage() {
   const activeContest = (allContests || []).find((c: any) => c.image_url && getContestStatusKey(c.deadline, c.judging_end) === '募集中')
 
   return (
-    <div style={{minHeight:'100vh',background:'#FFF9F2',fontFamily:"'Noto Sans JP',sans-serif"}}>
+    <div style={{minHeight:'100vh',background:'var(--color-bg)',fontFamily:"'Noto Sans JP',sans-serif"}}>
       <Header profile={profile} user={user} />
 
       {/* ===== デスクトップ：ヒーロー ===== */}
-      <section className="desktop-only" style={{background:'#FFF1E6',borderBottom:'1px solid #F0D9C9'}}>
+      <section className="desktop-only" style={{background:'var(--color-brand-light)',borderBottom:'1px solid var(--color-brand-border)'}}>
         <div style={{maxWidth:1200,margin:'0 auto',padding:'36px 32px 0'}}>
-          <h1 className="hero-title" style={{fontFamily:"'Noto Serif JP',serif",fontSize:32,fontWeight:700,color:'#2B211B',lineHeight:1.35,marginBottom:20,textAlign:'center'}}>
-            次のブームは、<em style={{color:'#F26A21',fontStyle:'normal'}}>ここから</em>生まれる。
+          <h1 className="hero-title" style={{fontFamily:"'Noto Serif JP',serif",fontSize:32,fontWeight:700,color:'var(--color-text)',lineHeight:1.35,marginBottom:20,textAlign:'center'}}>
+            次のブームは、<em style={{color:'var(--color-brand)',fontStyle:'normal'}}>ここから</em>生まれる。
           </h1>
         </div>
         {sliderItems.length > 0 && (
@@ -254,7 +254,7 @@ export default async function HomePage() {
       </section>
 
       {/* ===== デスクトップ：統計バー ===== */}
-      <div className="desktop-only" style={{background:'#fff',borderBottom:'1px solid #F0D9C9'}}>
+      <div className="desktop-only" style={{background:'var(--color-bg-card)',borderBottom:'1px solid var(--color-brand-border)'}}>
         <div className="stats-grid" style={{maxWidth:1200,margin:'0 auto',padding:'0 32px',display:'grid',gridTemplateColumns:'repeat(4,1fr)'}}>
           {[
             ['投稿作品数', fmtNum(novelCount ?? 0) + '作品'],
@@ -262,9 +262,9 @@ export default async function HomePage() {
             ['累計閲覧数', fmtNum(totalViews ?? 0) + 'PV'],
             ['総コメント数', fmtNum(commentCount ?? 0) + '件'],
           ].map(([l,v])=>(
-            <div key={l} style={{padding:'14px 16px',borderRight:'1px solid #F0D9C9',textAlign:'center'}}>
-              <div style={{fontSize:20,fontWeight:700,color:'#F26A21',lineHeight:1.2}}>{v}</div>
-              <div style={{fontSize:11,color:'#77706A',marginTop:2}}>{l}</div>
+            <div key={l} style={{padding:'14px 16px',borderRight:'1px solid var(--color-brand-border)',textAlign:'center'}}>
+              <div style={{fontSize:20,fontWeight:700,color:'var(--color-brand)',lineHeight:1.2}}>{v}</div>
+              <div style={{fontSize:11,color:'var(--color-text-muted)',marginTop:2}}>{l}</div>
             </div>
           ))}
         </div>
@@ -284,33 +284,33 @@ export default async function HomePage() {
 
       {/* ===== モバイル：お知らせ ===== */}
       <div className="mobile-only" style={{padding:'12px 16px 0'}}>
-        <div style={{background:'#fff',border:'1px solid #F0D9C9',borderRadius:10,overflow:'hidden'}}>
-          <div style={{padding:'10px 16px',borderBottom:'1px solid #F0D9C9',display:'flex',alignItems:'center',justifyContent:'space-between',background:'#FFF9F2'}}>
-            <span style={{fontSize:14,fontWeight:700,color:'#2B211B'}}>お知らせ</span>
-            <Link href="/announcements" style={{fontSize:12,color:'#F26A21',textDecoration:'none'}}>もっと見る ›</Link>
+        <div style={{background:'var(--color-bg-card)',border:'1px solid var(--color-brand-border)',borderRadius:10,overflow:'hidden'}}>
+          <div style={{padding:'10px 16px',borderBottom:'1px solid var(--color-brand-border)',display:'flex',alignItems:'center',justifyContent:'space-between',background:'var(--color-bg)'}}>
+            <span style={{fontSize:14,fontWeight:700,color:'var(--color-text)'}}>お知らせ</span>
+            <Link href="/announcements" style={{fontSize:12,color:'var(--color-brand)',textDecoration:'none'}}>もっと見る ›</Link>
           </div>
           {(sidebarAnnouncements||[]).slice(0,3).map((a:any)=>(
             <Link key={a.id} href={a.link||`/announcements/${a.id}`}
-              style={{display:'flex',alignItems:'center',justifyContent:'space-between',padding:'10px 16px',borderBottom:'1px solid #FFF1E6',textDecoration:'none'}}>
+              style={{display:'flex',alignItems:'center',justifyContent:'space-between',padding:'10px 16px',borderBottom:'1px solid var(--color-brand-light)',textDecoration:'none'}}>
               <div>
-                <div style={{fontSize:12,color:'#2B211B',fontWeight:500,marginBottom:2}}>{a.title}</div>
-                <div style={{fontSize:10,color:'#B8AEA8'}}>{new Date(a.created_at).toLocaleDateString('ja-JP')}</div>
+                <div style={{fontSize:12,color:'var(--color-text)',fontWeight:500,marginBottom:2}}>{a.title}</div>
+                <div style={{fontSize:10,color:'var(--color-text-faint)'}}>{new Date(a.created_at).toLocaleDateString('ja-JP')}</div>
               </div>
-              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#B8AEA8" strokeWidth="2"><polyline points="9 18 15 12 9 6"/></svg>
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="var(--color-text-faint)" strokeWidth="2"><polyline points="9 18 15 12 9 6"/></svg>
             </Link>
           ))}
         </div>
       </div>
 
       {/* ===== ユーザーの推し（見出しは本棚内のIntroBlockに統合） ===== */}
-      <div className="gem-section-wrap" style={{background:'#fff',padding:'16px 0',overflow:'hidden'}}>
+      <div className="gem-section-wrap" style={{background:'var(--color-bg-card)',padding:'16px 0',overflow:'hidden'}}>
         <div style={{width:'100%'}}>
           <GemSection novels={gemNovels} discoverCommentMap={discoverCommentMap} />
         </div>
       </div>
 
       {/* ===== 作品を探す（デスクトップのみ） ===== */}
-      <div className="desktop-only search-banner-section" style={{background:'#fff',padding:'20px 0'}}>
+      <div className="desktop-only search-banner-section" style={{background:'var(--color-bg-card)',padding:'20px 0'}}>
         <div style={{maxWidth:1200,margin:'0 auto',padding:'0 32px'}}>
           <SearchBanner />
         </div>
@@ -319,28 +319,28 @@ export default async function HomePage() {
       {/* ===== デスクトップ：メインエリア ===== */}
       <div className="desktop-only main-layout" style={{maxWidth:1200,margin:'0 auto',padding:'20px 32px',display:'flex',gap:20,alignItems:'flex-start'}}>
         <div style={{flex:1,minWidth:0,display:'flex',flexDirection:'column',gap:16}}>
-          <div style={{background:'#fff',border:'1px solid #F0D9C9',borderRadius:10,overflow:'hidden'}}>
-            <div style={{padding:'10px 16px',borderBottom:'1px solid #F0D9C9',display:'flex',alignItems:'center',justifyContent:'space-between',background:'#FFF9F2'}}>
-              <span style={{fontSize:14,fontWeight:700,color:'#2B211B'}}>週間ランキング</span>
+          <div style={{background:'var(--color-bg-card)',border:'1px solid var(--color-brand-border)',borderRadius:10,overflow:'hidden'}}>
+            <div style={{padding:'10px 16px',borderBottom:'1px solid var(--color-brand-border)',display:'flex',alignItems:'center',justifyContent:'space-between',background:'var(--color-bg)'}}>
+              <span style={{fontSize:14,fontWeight:700,color:'var(--color-text)'}}>週間ランキング</span>
             </div>
             <RankingSection rankingLong={rankingLong} rankingShort={rankingShort} />
-            <div style={{padding:'9px 16px',textAlign:'center',borderTop:'1px solid #F0D9C9'}}>
-              <Link href='/ranking' className='more-link' style={{fontSize:12,color:'#F26A21',textDecoration:'none',display:'inline-block'}}>もっと見る ›</Link>
+            <div style={{padding:'9px 16px',textAlign:'center',borderTop:'1px solid var(--color-brand-border)'}}>
+              <Link href='/ranking' className='more-link' style={{fontSize:12,color:'var(--color-brand)',textDecoration:'none',display:'inline-block'}}>もっと見る ›</Link>
             </div>
           </div>
           <RecommendedNovels novels={recommended} />
-          <div style={{background:'#fff',border:'1px solid #F0D9C9',borderRadius:10,overflow:'hidden'}}>
-            <div style={{padding:'10px 16px',borderBottom:'1px solid #F0D9C9',display:'flex',alignItems:'center',justifyContent:'space-between',background:'#FFF9F2'}}>
-              <span style={{fontSize:14,fontWeight:700,color:'#2B211B'}}>最新話更新</span>
+          <div style={{background:'var(--color-bg-card)',border:'1px solid var(--color-brand-border)',borderRadius:10,overflow:'hidden'}}>
+            <div style={{padding:'10px 16px',borderBottom:'1px solid var(--color-brand-border)',display:'flex',alignItems:'center',justifyContent:'space-between',background:'var(--color-bg)'}}>
+              <span style={{fontSize:14,fontWeight:700,color:'var(--color-text)'}}>最新話更新</span>
             </div>
             <LatestEpisodesSection episodes={latestEpisodes} />
-            <div style={{padding:'9px 16px',textAlign:'center',borderTop:'1px solid #F0D9C9'}}>
-              <Link href='/ranking' className='more-link' style={{fontSize:12,color:'#F26A21',textDecoration:'none',display:'inline-block'}}>もっと見る ›</Link>
+            <div style={{padding:'9px 16px',textAlign:'center',borderTop:'1px solid var(--color-brand-border)'}}>
+              <Link href='/ranking' className='more-link' style={{fontSize:12,color:'var(--color-brand)',textDecoration:'none',display:'inline-block'}}>もっと見る ›</Link>
             </div>
           </div>
-          <div id="novels" style={{background:'#fff',border:'1px solid #F0D9C9',borderRadius:10,overflow:'hidden'}}>
-            <div style={{padding:'10px 16px',borderBottom:'1px solid #F0D9C9',background:'#FFF9F2'}}>
-              <span style={{fontSize:14,fontWeight:700,color:'#2B211B'}}>新着作品</span>
+          <div id="novels" style={{background:'var(--color-bg-card)',border:'1px solid var(--color-brand-border)',borderRadius:10,overflow:'hidden'}}>
+            <div style={{padding:'10px 16px',borderBottom:'1px solid var(--color-brand-border)',background:'var(--color-bg)'}}>
+              <span style={{fontSize:14,fontWeight:700,color:'var(--color-text)'}}>新着作品</span>
             </div>
             <NovelList novels={latestNovels} />
           </div>
@@ -349,16 +349,16 @@ export default async function HomePage() {
       </div>
 
       {/* ===== 投稿・検索 台形バナー（新着作品の下） ===== */}
-      <div className="desktop-only" style={{background:'#fff',padding:'24px 0',width:'100%'}}>
+      <div className="desktop-only" style={{background:'var(--color-bg-card)',padding:'24px 0',width:'100%'}}>
         <ActionBanner isLoggedIn={!!user} />
       </div>
 
       {/* ===== モバイル：週間ランキング ===== */}
       <div className="mobile-only" style={{padding:'12px 16px 0'}}>
-        <div style={{background:'#fff',border:'1px solid #F0D9C9',borderRadius:10,overflow:'hidden'}}>
-          <div style={{padding:'10px 16px',borderBottom:'1px solid #F0D9C9',display:'flex',alignItems:'center',justifyContent:'space-between',background:'#FFF9F2'}}>
-            <span style={{fontSize:14,fontWeight:700,color:'#2B211B'}}>週間ランキング</span>
-            <Link href="/ranking" style={{fontSize:12,color:'#F26A21',textDecoration:'none'}}>もっと見る ›</Link>
+        <div style={{background:'var(--color-bg-card)',border:'1px solid var(--color-brand-border)',borderRadius:10,overflow:'hidden'}}>
+          <div style={{padding:'10px 16px',borderBottom:'1px solid var(--color-brand-border)',display:'flex',alignItems:'center',justifyContent:'space-between',background:'var(--color-bg)'}}>
+            <span style={{fontSize:14,fontWeight:700,color:'var(--color-text)'}}>週間ランキング</span>
+            <Link href="/ranking" style={{fontSize:12,color:'var(--color-brand)',textDecoration:'none'}}>もっと見る ›</Link>
           </div>
           <RankingSection rankingLong={rankingLong} rankingShort={rankingShort} />
         </div>
@@ -371,10 +371,10 @@ export default async function HomePage() {
 
       {/* ===== モバイル：最新話更新 ===== */}
       <div className="mobile-only" style={{padding:'12px 16px 0'}}>
-        <div style={{background:'#fff',border:'1px solid #F0D9C9',borderRadius:10,overflow:'hidden'}}>
-          <div style={{padding:'10px 16px',borderBottom:'1px solid #F0D9C9',display:'flex',alignItems:'center',justifyContent:'space-between',background:'#FFF9F2'}}>
-            <span style={{fontSize:14,fontWeight:700,color:'#2B211B'}}>最新話更新</span>
-            <Link href="/ranking" style={{fontSize:12,color:'#F26A21',textDecoration:'none'}}>もっと見る ›</Link>
+        <div style={{background:'var(--color-bg-card)',border:'1px solid var(--color-brand-border)',borderRadius:10,overflow:'hidden'}}>
+          <div style={{padding:'10px 16px',borderBottom:'1px solid var(--color-brand-border)',display:'flex',alignItems:'center',justifyContent:'space-between',background:'var(--color-bg)'}}>
+            <span style={{fontSize:14,fontWeight:700,color:'var(--color-text)'}}>最新話更新</span>
+            <Link href="/ranking" style={{fontSize:12,color:'var(--color-brand)',textDecoration:'none'}}>もっと見る ›</Link>
           </div>
           <LatestEpisodesSection episodes={latestEpisodes} />
         </div>
@@ -382,9 +382,9 @@ export default async function HomePage() {
 
       {/* ===== モバイル：新着作品 ===== */}
       <div className="mobile-only" style={{padding:'12px 16px 0'}}>
-        <div id="novels" style={{background:'#fff',border:'1px solid #F0D9C9',borderRadius:10,overflow:'hidden'}}>
-          <div style={{padding:'10px 16px',borderBottom:'1px solid #F0D9C9',background:'#FFF9F2'}}>
-            <span style={{fontSize:14,fontWeight:700,color:'#2B211B'}}>新着作品</span>
+        <div id="novels" style={{background:'var(--color-bg-card)',border:'1px solid var(--color-brand-border)',borderRadius:10,overflow:'hidden'}}>
+          <div style={{padding:'10px 16px',borderBottom:'1px solid var(--color-brand-border)',background:'var(--color-bg)'}}>
+            <span style={{fontSize:14,fontWeight:700,color:'var(--color-text)'}}>新着作品</span>
           </div>
           <NovelList novels={latestNovels} />
         </div>
@@ -409,7 +409,9 @@ function WelcomeToast({ profile }: { profile: any }) {
         if (!sessionStorage.getItem(key)) {
           sessionStorage.setItem(key, '1');
           var toast = document.createElement('div');
-          toast.style.cssText = 'position:fixed;bottom:80px;right:24px;background:#F26A21;color:#fff;padding:12px 20px;border-radius:12px;font-size:14px;font-weight:600;z-index:9999;box-shadow:0 4px 16px rgba(242,106,33,.35);animation:slideUp .3s ease';
+          var brandColor = getComputedStyle(document.documentElement).getPropertyValue('--color-brand').trim() || '#F26A21';
+          var cardColor = getComputedStyle(document.documentElement).getPropertyValue('--color-bg-card').trim() || '#fff';
+          toast.style.cssText = 'position:fixed;bottom:80px;right:24px;background:' + brandColor + ';color:' + cardColor + ';padding:12px 20px;border-radius:12px;font-size:14px;font-weight:600;z-index:9999;box-shadow:0 4px 16px rgba(242,106,33,.35);animation:slideUp .3s ease';
           toast.textContent = '${profile?.display_name ?? ''}さん、ようこそ！';
           var style = document.createElement('style');
           style.textContent = '@keyframes slideUp{from{transform:translateY(12px);opacity:0}to{transform:translateY(0);opacity:1}}';
