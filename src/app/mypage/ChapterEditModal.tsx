@@ -102,17 +102,17 @@ export default function ChapterEditModal({ novelId, novelTitle, onClose }: Props
 
   return (
     <div style={{position:'fixed',inset:0,background:'rgba(0,0,0,0.5)',zIndex:1000,display:'flex',alignItems:'center',justifyContent:'center',padding:24}}>
-      <div style={{background:'#fff',borderRadius:16,maxWidth:560,width:'100%',maxHeight:'85vh',display:'flex',flexDirection:'column',boxShadow:'0 20px 60px rgba(0,0,0,0.2)'}}>
+      <div style={{background:'var(--color-bg-card)',borderRadius:16,maxWidth:560,width:'100%',maxHeight:'85vh',display:'flex',flexDirection:'column',boxShadow:'0 20px 60px rgba(0,0,0,0.2)'}}>
 
         {/* ヘッダー */}
-        <div style={{padding:'18px 24px',borderBottom:'1px solid #F0D9C9',background:'#FFF9F2',borderRadius:'16px 16px 0 0'}}>
-          <div style={{fontSize:16,fontWeight:700,color:'#2B211B',marginBottom:2}}>章・編管理</div>
-          <div style={{fontSize:12,color:'#77706A'}}>{novelTitle}</div>
+        <div style={{padding:'18px 24px',borderBottom:'1px solid var(--color-brand-border)',background:'var(--color-bg)',borderRadius:'16px 16px 0 0'}}>
+          <div style={{fontSize:16,fontWeight:700,color:'var(--color-text)',marginBottom:2}}>章・編管理</div>
+          <div style={{fontSize:12,color:'var(--color-text-muted)'}}>{novelTitle}</div>
         </div>
 
         <div style={{flex:1,overflowY:'auto',padding:'20px 24px'}}>
           {loading ? (
-            <div style={{textAlign:'center',padding:40,color:'#B8AEA8',fontSize:13}}>読み込み中...</div>
+            <div style={{textAlign:'center',padding:40,color:'var(--color-text-faint)',fontSize:13}}>読み込み中...</div>
           ) : (
             <>
               {/* 章追加 */}
@@ -120,16 +120,16 @@ export default function ChapterEditModal({ novelId, novelTitle, onClose }: Props
                 <input value={newChapterTitle} onChange={e=>setNewChapterTitle(e.target.value)}
                   onKeyDown={e=>{if(e.key==='Enter')handleAddChapter()}}
                   placeholder="例：第一章 序章"
-                  style={{flex:1,padding:'9px 12px',border:'1.5px solid #F0D9C9',borderRadius:8,fontSize:13,outline:'none'}}/>
+                  style={{flex:1,padding:'9px 12px',border:'1.5px solid var(--color-brand-border)',borderRadius:8,fontSize:13,outline:'none'}}/>
                 <button onClick={handleAddChapter} disabled={adding||!newChapterTitle.trim()}
-                  style={{padding:'9px 18px',background:newChapterTitle.trim()?'#F26A21':'#F0D9C9',color:'#fff',border:'none',borderRadius:8,fontSize:13,fontWeight:700,cursor:newChapterTitle.trim()?'pointer':'not-allowed',whiteSpace:'nowrap'}}>
+                  style={{padding:'9px 18px',background:newChapterTitle.trim()?'var(--color-brand)':'var(--color-brand-border)',color:'var(--color-bg-card)',border:'none',borderRadius:8,fontSize:13,fontWeight:700,cursor:newChapterTitle.trim()?'pointer':'not-allowed',whiteSpace:'nowrap'}}>
                   ＋ 章を追加
                 </button>
               </div>
 
               {/* 章一覧 */}
               {chapters.length === 0 ? (
-                <div style={{textAlign:'center',padding:'24px',color:'#B8AEA8',fontSize:12,background:'#FFF9F2',borderRadius:10,marginBottom:16}}>
+                <div style={{textAlign:'center',padding:'24px',color:'var(--color-text-faint)',fontSize:12,background:'var(--color-bg)',borderRadius:10,marginBottom:16}}>
                   まだ章がありません。上のフォームから追加してください。
                 </div>
               ) : (
@@ -137,37 +137,37 @@ export default function ChapterEditModal({ novelId, novelTitle, onClose }: Props
                   {chapters.map((chapter, i) => {
                     const chEpisodes = episodes.filter(e => e.chapter_id === chapter.id)
                     return (
-                      <div key={chapter.id} style={{border:'1.5px solid #F0D9C9',borderRadius:10,overflow:'hidden'}}>
-                        <div style={{display:'flex',alignItems:'center',gap:8,padding:'10px 14px',background:'#FFF1E6',borderBottom: chEpisodes.length>0 ? '1px solid #F0D9C9' : 'none'}}>
+                      <div key={chapter.id} style={{border:'1.5px solid var(--color-brand-border)',borderRadius:10,overflow:'hidden'}}>
+                        <div style={{display:'flex',alignItems:'center',gap:8,padding:'10px 14px',background:'var(--color-brand-light)',borderBottom: chEpisodes.length>0 ? '1px solid var(--color-brand-border)' : 'none'}}>
                           <div style={{display:'flex',flexDirection:'column',gap:2}}>
                             <button onClick={()=>moveChapter(chapter.id,'up')} disabled={i===0}
-                              style={{width:18,height:14,border:'none',background:'none',cursor:i===0?'default':'pointer',color:i===0?'#F0D9C9':'#77706A',fontSize:10,padding:0}}>▲</button>
+                              style={{width:18,height:14,border:'none',background:'none',cursor:i===0?'default':'pointer',color:i===0?'var(--color-brand-border)':'var(--color-text-muted)',fontSize:10,padding:0}}>▲</button>
                             <button onClick={()=>moveChapter(chapter.id,'down')} disabled={i===chapters.length-1}
-                              style={{width:18,height:14,border:'none',background:'none',cursor:i===chapters.length-1?'default':'pointer',color:i===chapters.length-1?'#F0D9C9':'#77706A',fontSize:10,padding:0}}>▼</button>
+                              style={{width:18,height:14,border:'none',background:'none',cursor:i===chapters.length-1?'default':'pointer',color:i===chapters.length-1?'var(--color-brand-border)':'var(--color-text-muted)',fontSize:10,padding:0}}>▼</button>
                           </div>
                           {editingChapterId === chapter.id ? (
                             <input value={editingTitle} onChange={e=>setEditingTitle(e.target.value)}
                               onKeyDown={e=>{if(e.key==='Enter')handleRenameChapter(chapter.id);if(e.key==='Escape')setEditingChapterId(null)}}
                               onBlur={()=>handleRenameChapter(chapter.id)}
                               autoFocus
-                              style={{flex:1,padding:'4px 8px',border:'1.5px solid #F26A21',borderRadius:6,fontSize:13,outline:'none'}}/>
+                              style={{flex:1,padding:'4px 8px',border:'1.5px solid var(--color-brand)',borderRadius:6,fontSize:13,outline:'none'}}/>
                           ) : (
                             <div onClick={()=>{setEditingChapterId(chapter.id);setEditingTitle(chapter.title)}}
-                              style={{flex:1,fontSize:13,fontWeight:700,color:'#2B211B',cursor:'pointer'}}>
+                              style={{flex:1,fontSize:13,fontWeight:700,color:'var(--color-text)',cursor:'pointer'}}>
                               {chapter.title}
                             </div>
                           )}
-                          <span style={{fontSize:11,color:'#B8AEA8',whiteSpace:'nowrap'}}>{chEpisodes.length}話</span>
+                          <span style={{fontSize:11,color:'var(--color-text-faint)',whiteSpace:'nowrap'}}>{chEpisodes.length}話</span>
                           <button onClick={()=>handleDeleteChapter(chapter.id)}
-                            style={{fontSize:11,padding:'3px 8px',border:'1px solid #fca5a5',borderRadius:6,background:'#fff',color:'#dc2626',cursor:'pointer'}}>削除</button>
+                            style={{fontSize:11,padding:'3px 8px',border:'1px solid #fca5a5',borderRadius:6,background:'var(--color-bg-card)',color:'var(--color-danger)',cursor:'pointer'}}>削除</button>
                         </div>
                         {chEpisodes.length > 0 && (
                           <div style={{padding:'8px 14px'}}>
                             {chEpisodes.map(ep => (
                               <div key={ep.id} style={{display:'flex',alignItems:'center',gap:8,padding:'6px 0'}}>
-                                <span style={{fontSize:12,color:'#2B211B',flex:1}}>{ep.title}</span>
+                                <span style={{fontSize:12,color:'var(--color-text)',flex:1}}>{ep.title}</span>
                                 <select value={ep.chapter_id || ''} onChange={e=>handleAssignEpisode(ep.id, e.target.value || null)}
-                                  style={{fontSize:11,padding:'3px 6px',border:'1px solid #F0D9C9',borderRadius:6,color:'#77706A',background:'#fff'}}>
+                                  style={{fontSize:11,padding:'3px 6px',border:'1px solid var(--color-brand-border)',borderRadius:6,color:'var(--color-text-muted)',background:'var(--color-bg-card)'}}>
                                   <option value="">未分類にする</option>
                                   {chapters.map(c => <option key={c.id} value={c.id}>{c.title}</option>)}
                                 </select>
@@ -184,19 +184,19 @@ export default function ChapterEditModal({ novelId, novelTitle, onClose }: Props
               {/* 未分類の話 */}
               {unassigned.length > 0 && (
                 <div>
-                  <div style={{fontSize:12,fontWeight:700,color:'#77706A',marginBottom:8}}>未分類の話（{unassigned.length}）</div>
-                  <div style={{border:'1.5px dashed #F0D9C9',borderRadius:10,padding:'8px 14px'}}>
+                  <div style={{fontSize:12,fontWeight:700,color:'var(--color-text-muted)',marginBottom:8}}>未分類の話（{unassigned.length}）</div>
+                  <div style={{border:'1.5px dashed var(--color-brand-border)',borderRadius:10,padding:'8px 14px'}}>
                     {unassigned.map(ep => (
                       <div key={ep.id} style={{display:'flex',alignItems:'center',gap:8,padding:'6px 0'}}>
-                        <span style={{fontSize:12,color:'#2B211B',flex:1}}>{ep.title}</span>
+                        <span style={{fontSize:12,color:'var(--color-text)',flex:1}}>{ep.title}</span>
                         {chapters.length > 0 ? (
                           <select value="" onChange={e=>handleAssignEpisode(ep.id, e.target.value || null)}
-                            style={{fontSize:11,padding:'3px 6px',border:'1px solid #F0D9C9',borderRadius:6,color:'#77706A',background:'#fff'}}>
+                            style={{fontSize:11,padding:'3px 6px',border:'1px solid var(--color-brand-border)',borderRadius:6,color:'var(--color-text-muted)',background:'var(--color-bg-card)'}}>
                             <option value="">章を選択...</option>
                             {chapters.map(c => <option key={c.id} value={c.id}>{c.title}</option>)}
                           </select>
                         ) : (
-                          <span style={{fontSize:11,color:'#B8AEA8'}}>章を作成してください</span>
+                          <span style={{fontSize:11,color:'var(--color-text-faint)'}}>章を作成してください</span>
                         )}
                       </div>
                     ))}
@@ -207,14 +207,14 @@ export default function ChapterEditModal({ novelId, novelTitle, onClose }: Props
           )}
         </div>
 
-        <div style={{padding:'16px 24px',borderTop:'1px solid #F0D9C9'}}>
-          <button onClick={onClose} style={{width:'100%',padding:'11px',border:'none',borderRadius:10,background:'#F26A21',color:'#fff',fontSize:14,fontWeight:700,cursor:'pointer'}}>
+        <div style={{padding:'16px 24px',borderTop:'1px solid var(--color-brand-border)'}}>
+          <button onClick={onClose} style={{width:'100%',padding:'11px',border:'none',borderRadius:10,background:'var(--color-brand)',color:'var(--color-bg-card)',fontSize:14,fontWeight:700,cursor:'pointer'}}>
             完了
           </button>
         </div>
 
         {toast && (
-          <div style={{position:'absolute',bottom:70,left:'50%',transform:'translateX(-50%)',background:'#2B211B',color:'#fff',padding:'8px 18px',borderRadius:20,fontSize:12,fontWeight:600}}>
+          <div style={{position:'absolute',bottom:70,left:'50%',transform:'translateX(-50%)',background:'var(--color-text)',color:'var(--color-bg-card)',padding:'8px 18px',borderRadius:20,fontSize:12,fontWeight:600}}>
             {toast}
           </div>
         )}
