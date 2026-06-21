@@ -99,29 +99,29 @@ export default function PlotMode({ userId }: { userId: string }) {
   return (
     <div style={{width:'100%',height:'100%',display:'flex',flexDirection:'column'}}>
       {/* ヘッダー */}
-      <div style={{display:'flex',alignItems:'center',gap:10,padding:'10px 14px',background:'#FFF9F2',borderBottom:'1px solid #F0D9C9',flexWrap:'wrap',flexShrink:0}}>
-        <span style={{fontSize:11,color:saving?'#F26A21':saved?'#22c55e':'transparent',minWidth:70,fontWeight:600}}>{saving?'保存中…':saved?'保存済み':'　'}</span>
-        <div style={{width:1,height:30,background:'#F0D9C9'}}/>
-        <span style={{fontSize:12,color:'#77706A',fontWeight:600}}>表示：</span>
+      <div style={{display:'flex',alignItems:'center',gap:10,padding:'10px 14px',background:'var(--color-bg)',borderBottom:'1px solid var(--color-brand-border)',flexWrap:'wrap',flexShrink:0}}>
+        <span style={{fontSize:11,color:saving?'var(--color-brand)':saved?'#22c55e':'transparent',minWidth:70,fontWeight:600}}>{saving?'保存中…':saved?'保存済み':'　'}</span>
+        <div style={{width:1,height:30,background:'var(--color-brand-border)'}}/>
+        <span style={{fontSize:12,color:'var(--color-text-muted)',fontWeight:600}}>表示：</span>
         {(['all','plot','foreshadow','memo'] as const).map(t=>(
           <button key={t} onClick={()=>setFilterType(t)}
             style={{padding:'7px 14px',fontSize:12,borderRadius:8,border:'1.5px solid',cursor:'pointer',
-              background: filterType===t ? (t==='all'?'#2B211B':TYPE_INFO[t as PlotNote['type']].color) : '#fff',
-              color: filterType===t ? '#fff' : (t==='all'?'#2B211B':TYPE_INFO[t as PlotNote['type']].color),
-              borderColor: filterType===t ? 'transparent' : '#F0D9C9', fontWeight:600}}>
+              background: filterType===t ? (t==='all'?'var(--color-text)':TYPE_INFO[t as PlotNote['type']].color) : 'var(--color-bg-card)',
+              color: filterType===t ? 'var(--color-bg-card)' : (t==='all'?'var(--color-text)':TYPE_INFO[t as PlotNote['type']].color),
+              borderColor: filterType===t ? 'transparent' : 'var(--color-brand-border)', fontWeight:600}}>
             {t==='all'?'すべて':TYPE_INFO[t as PlotNote['type']].label}
           </button>
         ))}
         <div style={{flex:1}}/>
         {unresolvedForeshadows.length>0 && (
           <div style={{display:'flex',alignItems:'center',gap:6,padding:'6px 12px',background:'#fef2f2',border:'1px solid #fca5a5',borderRadius:8}}>
-            <span style={{fontSize:11,color:'#dc2626',fontWeight:700}}>未回収の伏線 {unresolvedForeshadows.length}件</span>
+            <span style={{fontSize:11,color:'var(--color-danger)',fontWeight:700}}>未回収の伏線 {unresolvedForeshadows.length}件</span>
           </div>
         )}
       </div>
 
       {/* タイムライン本体 */}
-      <div style={{flex:1,overflowY:'auto',padding:'20px 24px',background:'#FFF9F2'}}>
+      <div style={{flex:1,overflowY:'auto',padding:'20px 24px',background:'var(--color-bg)'}}>
         <div style={{maxWidth:760,margin:'0 auto'}}>
           {displayEpisodes.map(ep => {
             const epNotes = filtered.filter(n=>n.episode===ep)
@@ -134,24 +134,24 @@ export default function PlotMode({ userId }: { userId: string }) {
                 {/* 話数ラベル＋縦線 */}
                 <div style={{display:'flex',flexDirection:'column',alignItems:'center',flexShrink:0,width:64}}>
                   <div style={{
-                    width:44,height:44,borderRadius:'50%',background:hasAny?'#F26A21':'#F0D9C9',
-                    color:'#fff',display:'flex',alignItems:'center',justifyContent:'center',
+                    width:44,height:44,borderRadius:'50%',background:hasAny?'var(--color-brand)':'var(--color-brand-border)',
+                    color:'var(--color-bg-card)',display:'flex',alignItems:'center',justifyContent:'center',
                     fontSize:13,fontWeight:700,flexShrink:0,
                   }}>
                     {ep}
                   </div>
-                  <div style={{width:2,flex:1,background:'#F0D9C9',marginTop:2,minHeight:20}}/>
+                  <div style={{width:2,flex:1,background:'var(--color-brand-border)',marginTop:2,minHeight:20}}/>
                 </div>
 
                 {/* 話のコンテンツ */}
                 <div style={{flex:1,paddingBottom:20,minWidth:0}}>
-                  <div style={{fontSize:12,color:'#B8AEA8',fontWeight:600,marginBottom:8,paddingTop:10}}>第{ep}話</div>
+                  <div style={{fontSize:12,color:'var(--color-text-faint)',fontWeight:600,marginBottom:8,paddingTop:10}}>第{ep}話</div>
                   <div style={{display:'flex',flexDirection:'column',gap:8,marginBottom:10}}>
                     {epNotes.map(note=>{
                       const info = TYPE_INFO[note.type]
                       return (
                         <div key={note.id} style={{
-                          background:'#fff',border:`1.5px solid ${note.type==='foreshadow'&&!note.resolved?'#fca5a5':'#F0D9C9'}`,
+                          background:'var(--color-bg-card)',border:`1.5px solid ${note.type==='foreshadow'&&!note.resolved?'#fca5a5':'var(--color-brand-border)'}`,
                           borderRadius:10,padding:'12px 14px',position:'relative',
                           opacity: note.type==='foreshadow'&&note.resolved?0.6:1,
                         }}>
@@ -160,20 +160,20 @@ export default function PlotMode({ userId }: { userId: string }) {
                             {note.type==='foreshadow' && (
                               <button onClick={()=>toggleResolved(note.id)}
                                 style={{fontSize:10,padding:'2px 8px',borderRadius:6,border:'1px solid',cursor:'pointer',
-                                  background:note.resolved?'#f0fdf4':'#fff',color:note.resolved?'#15803d':'#dc2626',
+                                  background:note.resolved?'#f0fdf4':'var(--color-bg-card)',color:note.resolved?'#15803d':'var(--color-danger)',
                                   borderColor:note.resolved?'#86efac':'#fca5a5',fontWeight:600}}>
                                 {note.resolved?'✓ 回収済み':'未回収'}
                               </button>
                             )}
                             {note.resolveEpisode && (
-                              <span style={{fontSize:10,color:'#B8AEA8'}}>→ 第{note.resolveEpisode}話で回収予定</span>
+                              <span style={{fontSize:10,color:'var(--color-text-faint)'}}>→ 第{note.resolveEpisode}話で回収予定</span>
                             )}
                           </div>
-                          <div style={{fontSize:13,fontWeight:700,color:'#2B211B',marginBottom:4}}>{note.title||'（無題）'}</div>
-                          {note.body && <div style={{fontSize:12,color:'#77706A',lineHeight:1.7,whiteSpace:'pre-wrap'}}>{note.body}</div>}
+                          <div style={{fontSize:13,fontWeight:700,color:'var(--color-text)',marginBottom:4}}>{note.title||'（無題）'}</div>
+                          {note.body && <div style={{fontSize:12,color:'var(--color-text-muted)',lineHeight:1.7,whiteSpace:'pre-wrap'}}>{note.body}</div>}
                           <div style={{display:'flex',gap:6,marginTop:8}}>
-                            <button onClick={()=>setEditing(note)} style={{fontSize:11,padding:'4px 10px',border:'1px solid #F0D9C9',borderRadius:6,background:'#fff',color:'#77706A',cursor:'pointer'}}>編集</button>
-                            <button onClick={()=>handleDelete(note.id)} style={{fontSize:11,padding:'4px 10px',border:'1px solid #fca5a5',borderRadius:6,background:'#fef2f2',color:'#dc2626',cursor:'pointer'}}>削除</button>
+                            <button onClick={()=>setEditing(note)} style={{fontSize:11,padding:'4px 10px',border:'1px solid var(--color-brand-border)',borderRadius:6,background:'var(--color-bg-card)',color:'var(--color-text-muted)',cursor:'pointer'}}>編集</button>
+                            <button onClick={()=>handleDelete(note.id)} style={{fontSize:11,padding:'4px 10px',border:'1px solid #fca5a5',borderRadius:6,background:'#fef2f2',color:'var(--color-danger)',cursor:'pointer'}}>削除</button>
                           </div>
                         </div>
                       )
@@ -189,11 +189,11 @@ export default function PlotMode({ userId }: { userId: string }) {
                           ＋ {TYPE_INFO[t].label}
                         </button>
                       ))}
-                      <button onClick={()=>setShowAddForEp(null)} style={{fontSize:12,padding:'7px 14px',borderRadius:8,border:'1px solid #F0D9C9',background:'#fff',color:'#77706A',cursor:'pointer'}}>キャンセル</button>
+                      <button onClick={()=>setShowAddForEp(null)} style={{fontSize:12,padding:'7px 14px',borderRadius:8,border:'1px solid var(--color-brand-border)',background:'var(--color-bg-card)',color:'var(--color-text-muted)',cursor:'pointer'}}>キャンセル</button>
                     </div>
                   ) : (
                     <button onClick={()=>setShowAddForEp(ep)}
-                      style={{fontSize:12,padding:'7px 14px',borderRadius:8,border:'1px dashed #F0D9C9',background:'#fff',color:'#B8AEA8',cursor:'pointer'}}>
+                      style={{fontSize:12,padding:'7px 14px',borderRadius:8,border:'1px dashed var(--color-brand-border)',background:'var(--color-bg-card)',color:'var(--color-text-faint)',cursor:'pointer'}}>
                       ＋ この話にメモを追加
                     </button>
                   )}
@@ -207,34 +207,34 @@ export default function PlotMode({ userId }: { userId: string }) {
       {/* 編集モーダル */}
       {editing && (
         <div style={{position:'absolute',inset:0,zIndex:100,display:'flex',alignItems:'center',justifyContent:'center',background:'rgba(0,0,0,0.4)'}}>
-          <div style={{background:'#fff',borderRadius:14,padding:'22px',width:380,maxHeight:'80vh',overflowY:'auto',boxShadow:'0 8px 32px rgba(0,0,0,0.2)'}}>
+          <div style={{background:'var(--color-bg-card)',borderRadius:14,padding:'22px',width:380,maxHeight:'80vh',overflowY:'auto',boxShadow:'0 8px 32px rgba(0,0,0,0.2)'}}>
             <div style={{display:'flex',alignItems:'center',gap:8,marginBottom:14}}>
               <span style={{fontSize:11,background:TYPE_INFO[editing.type].bg,color:TYPE_INFO[editing.type].color,padding:'3px 10px',borderRadius:8,fontWeight:700}}>{TYPE_INFO[editing.type].label}</span>
-              <span style={{fontSize:13,fontWeight:700,color:'#2B211B'}}>第{editing.episode}話</span>
+              <span style={{fontSize:13,fontWeight:700,color:'var(--color-text)'}}>第{editing.episode}話</span>
             </div>
 
-            <label style={{fontSize:11,color:'#77706A',fontWeight:600,display:'block',marginBottom:4}}>タイトル</label>
+            <label style={{fontSize:11,color:'var(--color-text-muted)',fontWeight:600,display:'block',marginBottom:4}}>タイトル</label>
             <input value={editing.title} onChange={e=>setEditing({...editing,title:e.target.value})}
               placeholder={editing.type==='foreshadow'?'例：謎の鍵の存在':'例：主人公が決意する'}
-              style={{width:'100%',padding:'8px 10px',border:'1.5px solid #F0D9C9',borderRadius:8,fontSize:13,outline:'none',marginBottom:12,boxSizing:'border-box'}}/>
+              style={{width:'100%',padding:'8px 10px',border:'1.5px solid var(--color-brand-border)',borderRadius:8,fontSize:13,outline:'none',marginBottom:12,boxSizing:'border-box'}}/>
 
-            <label style={{fontSize:11,color:'#77706A',fontWeight:600,display:'block',marginBottom:4}}>詳細メモ</label>
+            <label style={{fontSize:11,color:'var(--color-text-muted)',fontWeight:600,display:'block',marginBottom:4}}>詳細メモ</label>
             <textarea value={editing.body} onChange={e=>setEditing({...editing,body:e.target.value})}
               rows={5}
-              style={{width:'100%',padding:'8px 10px',border:'1.5px solid #F0D9C9',borderRadius:8,fontSize:13,outline:'none',resize:'vertical',marginBottom:12,boxSizing:'border-box',fontFamily:'inherit'}}/>
+              style={{width:'100%',padding:'8px 10px',border:'1.5px solid var(--color-brand-border)',borderRadius:8,fontSize:13,outline:'none',resize:'vertical',marginBottom:12,boxSizing:'border-box',fontFamily:'inherit'}}/>
 
             {editing.type==='foreshadow' && (
               <>
-                <label style={{fontSize:11,color:'#77706A',fontWeight:600,display:'block',marginBottom:4}}>回収予定の話数（省略可）</label>
+                <label style={{fontSize:11,color:'var(--color-text-muted)',fontWeight:600,display:'block',marginBottom:4}}>回収予定の話数（省略可）</label>
                 <input type="number" value={editing.resolveEpisode||''} onChange={e=>setEditing({...editing,resolveEpisode:e.target.value?Number(e.target.value):null})}
                   placeholder="例：15"
-                  style={{width:'100%',padding:'8px 10px',border:'1.5px solid #F0D9C9',borderRadius:8,fontSize:13,outline:'none',marginBottom:14,boxSizing:'border-box'}}/>
+                  style={{width:'100%',padding:'8px 10px',border:'1.5px solid var(--color-brand-border)',borderRadius:8,fontSize:13,outline:'none',marginBottom:14,boxSizing:'border-box'}}/>
               </>
             )}
 
             <div style={{display:'flex',gap:8}}>
-              <button onClick={()=>setEditing(null)} style={{flex:1,padding:'10px',border:'1px solid #F0D9C9',borderRadius:8,background:'#fff',color:'#77706A',fontSize:13,cursor:'pointer'}}>キャンセル</button>
-              <button onClick={handleSaveEdit} style={{flex:1,padding:'10px',border:'none',borderRadius:8,background:'#F26A21',color:'#fff',fontSize:13,fontWeight:700,cursor:'pointer'}}>保存</button>
+              <button onClick={()=>setEditing(null)} style={{flex:1,padding:'10px',border:'1px solid var(--color-brand-border)',borderRadius:8,background:'var(--color-bg-card)',color:'var(--color-text-muted)',fontSize:13,cursor:'pointer'}}>キャンセル</button>
+              <button onClick={handleSaveEdit} style={{flex:1,padding:'10px',border:'none',borderRadius:8,background:'var(--color-brand)',color:'var(--color-bg-card)',fontSize:13,fontWeight:700,cursor:'pointer'}}>保存</button>
             </div>
           </div>
         </div>
