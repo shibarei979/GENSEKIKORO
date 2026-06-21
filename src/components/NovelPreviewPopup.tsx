@@ -80,8 +80,8 @@ export default function NovelPreviewPopup({ novel, children }: Props) {
       <div
         onClick={e=>e.stopPropagation()}
         style={{
-          background:'#fff',
-          border:'2px solid #F26A21',
+          background:'var(--color-bg-card)',
+          border:'2px solid var(--color-brand)',
           borderRadius:16,
           boxShadow:'0 8px 24px rgba(0,0,0,0.15)',
           overflow:'hidden',
@@ -94,28 +94,28 @@ export default function NovelPreviewPopup({ novel, children }: Props) {
         }}>
 
         {/* ヘッダー（固定） */}
-        <div style={{background:'#FFF1E6',padding:'10px 14px',borderBottom:'1px solid #F0D9C9',position:'relative',flexShrink:0}}>
+        <div style={{background:'var(--color-brand-light)',padding:'10px 14px',borderBottom:'1px solid var(--color-brand-border)',position:'relative',flexShrink:0}}>
           <button onClick={()=>setShow(false)}
-            style={{position:'absolute',top:8,right:10,background:'none',border:'none',fontSize:18,color:'#B8AEA8',cursor:'pointer'}}>
+            style={{position:'absolute',top:8,right:10,background:'none',border:'none',fontSize:18,color:'var(--color-text-faint)',cursor:'pointer'}}>
             ×
           </button>
           <div style={{display:'flex',gap:5,marginBottom:3,flexWrap:'wrap'}}>
-            <span style={{fontSize:10,background:'#FFF1E6',color:'#F26A21',border:'1px solid #f5b080',padding:'1px 6px',borderRadius:3}}>{novel.genre}</span>
-            {novel.novel_type && <span style={{fontSize:10,background:'#eff6ff',color:'#2563eb',border:'1px solid #bfdbfe',padding:'1px 6px',borderRadius:3}}>{novel.novel_type}</span>}
+            <span style={{fontSize:10,background:'var(--color-brand-light)',color:'var(--color-brand)',border:'1px solid var(--color-tag-border)',padding:'1px 6px',borderRadius:3}}>{novel.genre}</span>
+            {novel.novel_type && <span style={{fontSize:10,background:'var(--color-info-bg)',color:'var(--color-info)',border:'1px solid var(--color-info-border)',padding:'1px 6px',borderRadius:3}}>{novel.novel_type}</span>}
           </div>
-          <div style={{fontSize: isMobile ? 13 : 15,fontWeight:700,color:'#2B211B',lineHeight:1.4,fontFamily:"'Noto Serif JP',serif",paddingRight:20}}>{novel.title}</div>
+          <div style={{fontSize: isMobile ? 13 : 15,fontWeight:700,color:'var(--color-text)',lineHeight:1.4,fontFamily:"'Noto Serif JP',serif",paddingRight:20}}>{novel.title}</div>
           {novel.display_name && (
             <div style={{display:'flex',alignItems:'center',gap:8,marginTop:3,flexWrap:'wrap'}}>
-              <span style={{fontSize:11,color:'#77706A'}}>作者：{novel.display_name}</span>
+              <span style={{fontSize:11,color:'var(--color-text-muted)'}}>作者：{novel.display_name}</span>
               {novel.like_count !== undefined && novel.like_count > 0 && (
-                <span style={{fontSize:11,color:'#77706A'}}>♡ {novel.like_count}</span>
+                <span style={{fontSize:11,color:'var(--color-text-muted)'}}>♡ {novel.like_count}</span>
               )}
             </div>
           )}
           {(novel.tags||[]).length > 0 && (
             <div style={{display:'flex',gap:4,flexWrap:'wrap',marginTop:4}}>
               {(novel.tags||[]).slice(0,5).map((t:string) => (
-                <span key={t} style={{fontSize:9,background:'#FFF9F2',color:'#77706A',border:'1px solid #F0D9C9',padding:'1px 5px',borderRadius:3}}>#{t}</span>
+                <span key={t} style={{fontSize:9,background:'var(--color-bg)',color:'var(--color-text-muted)',border:'1px solid var(--color-brand-border)',padding:'1px 5px',borderRadius:3}}>#{t}</span>
               ))}
             </div>
           )}
@@ -124,11 +124,11 @@ export default function NovelPreviewPopup({ novel, children }: Props) {
         {/* 本文エリア（スクロール可能） */}
         <div style={{flex:1,overflowY:'auto',minHeight:0}}>
           {rawText ? (
-            <div style={{padding:'12px 0',background:'#fff'}}>
+            <div style={{padding:'12px 0',background:'var(--color-bg-card)'}}>
               <div style={{fontSize:10,color:'#999',marginBottom:6,textAlign:'center',letterSpacing:'0.1em'}}>
                 {novel.catchcopy ? '― キャッチコピー ―' : '― あらすじ ―'}
               </div>
-              {/* 縦書きマス目 */}
+              {/* 縦書きマス目（原稿用紙風の罫線は専用の固定色を維持） */}
               <div style={{margin: isMobile ? '0 8px' : '0 28px'}}>
                 <div style={{
                   display:'flex',
@@ -181,24 +181,24 @@ export default function NovelPreviewPopup({ novel, children }: Props) {
                 </div>
               </div>
               {rawText.replace(/\n/g,'').length > ROWS * TEXT_COLS && (
-                <div style={{fontSize:11,color:'#B8AEA8',textAlign:'center',marginTop:6}}>…続く</div>
+                <div style={{fontSize:11,color:'var(--color-text-faint)',textAlign:'center',marginTop:6}}>…続く</div>
               )}
             </div>
           ) : (
-            <div style={{padding:'20px',textAlign:'center',color:'#B8AEA8',fontSize:13}}>
+            <div style={{padding:'20px',textAlign:'center',color:'var(--color-text-faint)',fontSize:13}}>
               あらすじがありません
             </div>
           )}
         </div>
 
         {/* ボタン（常に下部固定） */}
-        <div style={{padding:'10px 14px',borderTop:'1px solid #F0D9C9',background:'#FFF9F2',display:'flex',gap:8,flexShrink:0}}>
+        <div style={{padding:'10px 14px',borderTop:'1px solid var(--color-brand-border)',background:'var(--color-bg)',display:'flex',gap:8,flexShrink:0}}>
           <button onClick={()=>setShow(false)}
-            style={{flex:1,padding:'9px',border:'1px solid #F0D9C9',borderRadius:8,background:'#fff',color:'#77706A',fontSize:13,cursor:'pointer'}}>
+            style={{flex:1,padding:'9px',border:'1px solid var(--color-brand-border)',borderRadius:8,background:'var(--color-bg-card)',color:'var(--color-text-muted)',fontSize:13,cursor:'pointer'}}>
             閉じる
           </button>
           <a href={`/novel/${novel.id}`}
-            style={{flex:2,display:'block',padding:'9px 0',background:'#F26A21',color:'#fff',
+            style={{flex:2,display:'block',padding:'9px 0',background:'var(--color-brand)',color:'var(--color-bg-card)',
               fontWeight:700,fontSize:14,borderRadius:8,textDecoration:'none',textAlign:'center'}}>
             作品を読む →
           </a>
