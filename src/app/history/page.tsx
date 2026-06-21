@@ -81,36 +81,36 @@ export default async function HistoryPage() {
   }
 
   return (
-    <div style={{minHeight:'100vh',background:'#fff',fontFamily:"'Noto Sans JP',sans-serif"}}>
+    <div style={{minHeight:'100vh',background:'var(--color-bg-card)',fontFamily:"'Noto Sans JP',sans-serif"}}>
       <Header profile={profile} user={user} />
 
       <div className="main-layout" style={{maxWidth:1200,margin:'0 auto',padding:'28px 32px',display:'flex',gap:20,alignItems:'flex-start'}}>
         <div style={{flex:1,minWidth:0}}>
           <div style={{marginBottom:20}}>
-            <h1 style={{fontSize:22,fontWeight:700,color:'#2B211B',marginBottom:4}}>閲覧履歴</h1>
-            <p style={{fontSize:12,color:'#77706A'}}>最近読んだ作品が表示されます（最大200件）</p>
+            <h1 style={{fontSize:22,fontWeight:700,color:'var(--color-text)',marginBottom:4}}>閲覧履歴</h1>
+            <p style={{fontSize:12,color:'var(--color-text-muted)'}}>最近読んだ作品が表示されます（最大200件）</p>
           </div>
 
-          <div style={{background:'#fff',border:'1px solid #F0D9C9',borderRadius:12,overflow:'hidden'}}>
+          <div style={{background:'var(--color-bg-card)',border:'1px solid var(--color-brand-border)',borderRadius:12,overflow:'hidden'}}>
             {historyItems.length === 0 ? (
-              <div style={{padding:'60px',textAlign:'center',color:'#B8AEA8',fontSize:13}}>
+              <div style={{padding:'60px',textAlign:'center',color:'var(--color-text-faint)',fontSize:13}}>
                 まだ閲覧履歴がありません
               </div>
             ) : historyItems.map((item) => (
-              <Link key={item.novelId} href={`/novel/${item.novelId}`} className="history-card" style={{textDecoration:'none',display:'flex',gap:14,padding:'14px 20px',borderBottom:'1px solid #FFF1E6',background:'#fff',alignItems:'center',color:'inherit'}}>
+              <Link key={item.novelId} href={`/novel/${item.novelId}`} className="history-card" style={{textDecoration:'none',display:'flex',gap:14,padding:'14px 20px',borderBottom:'1px solid var(--color-brand-light)',background:'var(--color-bg-card)',alignItems:'center',color:'inherit'}}>
                 <span style={{flex:1,minWidth:0,display:'block'}}>
                   <span style={{display:'flex',gap:6,marginBottom:4,flexWrap:'wrap',alignItems:'center'}}>
-                    <span style={{fontSize:10,background:'#FFF1E6',color:'#F26A21',border:'1px solid #f5b080',padding:'1px 6px',borderRadius:3}}>{item.genre}</span>
+                    <span style={{fontSize:10,background:'var(--color-brand-light)',color:'var(--color-brand)',border:'1px solid var(--color-tag-border)',padding:'1px 6px',borderRadius:3}}>{item.genre}</span>
                   </span>
-                  <span style={{display:'block',fontSize:15,fontWeight:700,color:'#2B211B',marginBottom:2}}>{item.novelTitle}</span>
-                  <span style={{display:'block',fontSize:12,color:'#77706A',marginBottom:4}}>作者：{item.displayName}</span>
-                  <span style={{display:'block',fontSize:11,color:'#B8AEA8'}}>
-                    最後に読んだ話：<span style={{color:'#F26A21'}}>{item.epTitle}</span>
+                  <span style={{display:'block',fontSize:15,fontWeight:700,color:'var(--color-text)',marginBottom:2}}>{item.novelTitle}</span>
+                  <span style={{display:'block',fontSize:12,color:'var(--color-text-muted)',marginBottom:4}}>作者：{item.displayName}</span>
+                  <span style={{display:'block',fontSize:11,color:'var(--color-text-faint)'}}>
+                    最後に読んだ話：<span style={{color:'var(--color-brand)'}}>{item.epTitle}</span>
                   </span>
                 </span>
-                <span style={{fontSize:11,color:'#B8AEA8',flexShrink:0,textAlign:'right',display:'block'}}>
+                <span style={{fontSize:11,color:'var(--color-text-faint)',flexShrink:0,textAlign:'right',display:'block'}}>
                   <span style={{display:'block'}}>{fmtDate(item.viewedAt)}</span>
-                  <span style={{marginTop:6,display:'inline-block',padding:'5px 12px',background:'#F26A21',color:'#fff',borderRadius:12,fontSize:11,fontWeight:600}}>
+                  <span style={{marginTop:6,display:'inline-block',padding:'5px 12px',background:'var(--color-brand)',color:'var(--color-bg-card)',borderRadius:12,fontSize:11,fontWeight:600}}>
                     続きを読む
                   </span>
                 </span>
