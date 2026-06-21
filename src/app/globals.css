@@ -50,6 +50,22 @@
   --color-tag-border:  #f5b080; /* ジャンルタグの枠線（brand-lightより少し濃い） */
   --color-info-bg:     #eff6ff; /* 「長編／短編」等の青系バッジ背景 */
   --color-info-border: #bfdbfe; /* 同バッジの枠線 */
+
+  /* --- 管理画面（Admin）専用カラー --- */
+  --admin-bg:           #f8fafc; /* 管理画面の背景 */
+  --admin-bg-card:      #ffffff; /* 管理画面のカード背景 */
+  --admin-border:       #e2e8f0; /* 管理画面の枠線 */
+  --admin-text:         #1e293b; /* 管理画面の本文・見出し文字色 */
+  --admin-text-muted:   #64748b; /* 管理画面の補助テキスト */
+  --admin-text-faint:   #94a3b8; /* 管理画面のさらに薄いテキスト（日付など） */
+  --admin-row-border:   #f1f5f9; /* テーブル行の境界線 */
+
+  /* --- 管理画面 統計カードの色 --- */
+  --admin-stat-blue:    #3b82f6;
+  --admin-stat-green:   #10b981;
+  --admin-stat-amber:   #f59e0b;
+  --admin-stat-purple:  #8b5cf6;
+  --admin-stat-red:     #ef4444;
 }
 
 /* 将来のダークモード対応用（A5実装時にここを拡張する） */

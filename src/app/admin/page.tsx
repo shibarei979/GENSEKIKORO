@@ -64,10 +64,10 @@ export default async function AdminPage() {
   const chartData1825 = buildChartData(makeDays(365 * 5))
 
   const stats = [
-    { label: '登録ユーザー', value: userCount?.toLocaleString() ?? '0', color: '#3b82f6' },
-    { label: '公開作品',     value: novelCount?.toLocaleString() ?? '0', color: '#10b981' },
-    { label: '話数',         value: episodeCount?.toLocaleString() ?? '0', color: '#f59e0b' },
-    { label: 'コメント',     value: commentCount?.toLocaleString() ?? '0', color: '#8b5cf6' },
+    { label: '登録ユーザー', value: userCount?.toLocaleString() ?? '0', color: 'var(--admin-stat-blue)' },
+    { label: '公開作品',     value: novelCount?.toLocaleString() ?? '0', color: 'var(--admin-stat-green)' },
+    { label: '話数',         value: episodeCount?.toLocaleString() ?? '0', color: 'var(--admin-stat-amber)' },
+    { label: 'コメント',     value: commentCount?.toLocaleString() ?? '0', color: 'var(--admin-stat-purple)' },
   ]
 
   const menus = [
@@ -85,23 +85,23 @@ export default async function AdminPage() {
   ]
 
   return (
-    <div style={{minHeight:'100vh',background:'#f8fafc',fontFamily:"'Noto Sans JP',sans-serif"}}>
+    <div style={{minHeight:'100vh',background:'var(--admin-bg)',fontFamily:"'Noto Sans JP',sans-serif"}}>
       <Header profile={profile} user={user} />
       <div style={{maxWidth:1100,margin:'0 auto',padding:'32px'}}>
         <div style={{marginBottom:28}}>
           <div style={{display:'flex',alignItems:'center',gap:10,marginBottom:4}}>
-            <span style={{fontSize:22,fontWeight:800,color:'#1e293b'}}>運営管理画面</span>
-            <span style={{fontSize:11,background:'#F26A21',color:'#fff',padding:'2px 8px',borderRadius:10,fontWeight:700}}>ADMIN</span>
+            <span style={{fontSize:22,fontWeight:800,color:'var(--admin-text)'}}>運営管理画面</span>
+            <span style={{fontSize:11,background:'var(--color-brand)',color:'var(--color-bg-card)',padding:'2px 8px',borderRadius:10,fontWeight:700}}>ADMIN</span>
           </div>
-          <div style={{fontSize:13,color:'#64748b'}}>原石航路 管理者専用ページ</div>
+          <div style={{fontSize:13,color:'var(--admin-text-muted)'}}>原石航路 管理者専用ページ</div>
         </div>
 
         {/* 統計カード */}
         <div style={{display:'grid',gridTemplateColumns:'repeat(4,1fr)',gap:14,marginBottom:20}}>
           {stats.map(s => (
-            <div key={s.label} style={{background:'#fff',border:'1px solid #e2e8f0',borderRadius:12,padding:'18px 20px'}}>
+            <div key={s.label} style={{background:'var(--admin-bg-card)',border:'1px solid var(--admin-border)',borderRadius:12,padding:'18px 20px'}}>
               <div style={{fontSize:26,fontWeight:800,color:s.color,marginBottom:2}}>{s.value}</div>
-              <div style={{fontSize:12,color:'#64748b'}}>{s.label}</div>
+              <div style={{fontSize:12,color:'var(--admin-text-muted)'}}>{s.label}</div>
             </div>
           ))}
         </div>
@@ -110,18 +110,18 @@ export default async function AdminPage() {
 
         <div style={{display:'grid',gridTemplateColumns:'2fr 1fr',gap:20}}>
           <div>
-            <div style={{fontSize:14,fontWeight:700,color:'#1e293b',marginBottom:12}}>管理メニュー</div>
+            <div style={{fontSize:14,fontWeight:700,color:'var(--admin-text)',marginBottom:12}}>管理メニュー</div>
             <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:10}}>
               {menus.map(m => (
                 <Link key={m.href} href={m.href} style={{textDecoration:'none'}}>
-                  <div style={{background:'#fff',border:'1px solid #e2e8f0',borderRadius:12,padding:'18px 20px',cursor:'pointer',position:'relative'}}>
+                  <div style={{background:'var(--admin-bg-card)',border:'1px solid var(--admin-border)',borderRadius:12,padding:'18px 20px',cursor:'pointer',position:'relative'}}>
                     {'badge' in m && (m as any).badge > 0 && (
-                      <span style={{position:'absolute',top:12,right:12,fontSize:10,background:'#ef4444',color:'#fff',padding:'1px 7px',borderRadius:10,fontWeight:700}}>
+                      <span style={{position:'absolute',top:12,right:12,fontSize:10,background:'var(--admin-stat-red)',color:'#fff',padding:'1px 7px',borderRadius:10,fontWeight:700}}>
                         {(m as any).badge}件
                       </span>
                     )}
-                    <div style={{fontSize:14,fontWeight:700,color:'#1e293b',marginBottom:3}}>{m.label}</div>
-                    <div style={{fontSize:12,color:'#64748b'}}>{m.desc}</div>
+                    <div style={{fontSize:14,fontWeight:700,color:'var(--admin-text)',marginBottom:3}}>{m.label}</div>
+                    <div style={{fontSize:12,color:'var(--admin-text-muted)'}}>{m.desc}</div>
                   </div>
                 </Link>
               ))}
@@ -130,39 +130,39 @@ export default async function AdminPage() {
 
           <div>
             <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:12}}>
-              <div style={{fontSize:14,fontWeight:700,color:'#1e293b'}}>最近のお知らせ</div>
-              <Link href="/admin/announcements" style={{fontSize:12,color:'#F26A21',textDecoration:'none'}}>管理 ›</Link>
+              <div style={{fontSize:14,fontWeight:700,color:'var(--admin-text)'}}>最近のお知らせ</div>
+              <Link href="/admin/announcements" style={{fontSize:12,color:'var(--color-brand)',textDecoration:'none'}}>管理 ›</Link>
             </div>
-            <div style={{background:'#fff',border:'1px solid #e2e8f0',borderRadius:12,overflow:'hidden'}}>
+            <div style={{background:'var(--admin-bg-card)',border:'1px solid var(--admin-border)',borderRadius:12,overflow:'hidden'}}>
               {(announcements||[]).length === 0
-                ? <div style={{padding:'24px',textAlign:'center',color:'#94a3b8',fontSize:13}}>お知らせなし</div>
+                ? <div style={{padding:'24px',textAlign:'center',color:'var(--admin-text-faint)',fontSize:13}}>お知らせなし</div>
                 : (announcements||[]).map((a: any) => (
-                  <div key={a.id} style={{padding:'12px 16px',borderBottom:'1px solid #f1f5f9',display:'flex',alignItems:'center',gap:10}}>
+                  <div key={a.id} style={{padding:'12px 16px',borderBottom:'1px solid var(--admin-row-border)',display:'flex',alignItems:'center',gap:10}}>
                     <span style={{fontSize:10,
-                      background:a.type==='contest'?'#FFF1E6':a.type==='important'?'#fef2f2':'#eff6ff',
-                      color:a.type==='contest'?'#F26A21':a.type==='important'?'#ef4444':'#3b82f6',
-                      border:`1px solid ${a.type==='contest'?'#f5b080':a.type==='important'?'#fca5a5':'#bfdbfe'}`,
+                      background:a.type==='contest'?'var(--color-brand-light)':a.type==='important'?'#fef2f2':'var(--color-info-bg)',
+                      color:a.type==='contest'?'var(--color-brand)':a.type==='important'?'var(--admin-stat-red)':'var(--admin-stat-blue)',
+                      border:`1px solid ${a.type==='contest'?'var(--color-tag-border)':a.type==='important'?'#fca5a5':'var(--color-info-border)'}`,
                       padding:'1px 6px',borderRadius:3,flexShrink:0}}>
                       {a.type==='contest'?'コンテスト':a.type==='important'?'重要':'お知らせ'}
                     </span>
-                    <span style={{fontSize:12,color:'#1e293b',flex:1,overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap'}}>{a.title}</span>
-                    {!a.is_published && <span style={{fontSize:10,color:'#94a3b8',flexShrink:0}}>非公開</span>}
+                    <span style={{fontSize:12,color:'var(--admin-text)',flex:1,overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap'}}>{a.title}</span>
+                    {!a.is_published && <span style={{fontSize:10,color:'var(--admin-text-faint)',flexShrink:0}}>非公開</span>}
                   </div>
                 ))}
             </div>
 
             <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginTop:16,marginBottom:12}}>
-              <div style={{fontSize:14,fontWeight:700,color:'#1e293b'}}>コンテスト</div>
-              <Link href="/admin/contests" style={{fontSize:12,color:'#F26A21',textDecoration:'none'}}>管理 ›</Link>
+              <div style={{fontSize:14,fontWeight:700,color:'var(--admin-text)'}}>コンテスト</div>
+              <Link href="/admin/contests" style={{fontSize:12,color:'var(--color-brand)',textDecoration:'none'}}>管理 ›</Link>
             </div>
-            <div style={{background:'#fff',border:'1px solid #e2e8f0',borderRadius:12,overflow:'hidden'}}>
+            <div style={{background:'var(--admin-bg-card)',border:'1px solid var(--admin-border)',borderRadius:12,overflow:'hidden'}}>
               {(contests||[]).length === 0
-                ? <div style={{padding:'24px',textAlign:'center',color:'#94a3b8',fontSize:13}}>コンテストなし</div>
+                ? <div style={{padding:'24px',textAlign:'center',color:'var(--admin-text-faint)',fontSize:13}}>コンテストなし</div>
                 : (contests||[]).map((c: any) => (
-                  <div key={c.id} style={{padding:'12px 16px',borderBottom:'1px solid #f1f5f9',display:'flex',alignItems:'center',gap:10}}>
-                    <span style={{fontSize:12,color:'#1e293b',flex:1}}>{c.title}</span>
-                    {c.deadline && <span style={{fontSize:11,color:'#94a3b8',flexShrink:0}}>{new Date(c.deadline).toLocaleDateString('ja-JP')}</span>}
-                    {!c.is_published && <span style={{fontSize:10,color:'#94a3b8',flexShrink:0}}>非公開</span>}
+                  <div key={c.id} style={{padding:'12px 16px',borderBottom:'1px solid var(--admin-row-border)',display:'flex',alignItems:'center',gap:10}}>
+                    <span style={{fontSize:12,color:'var(--admin-text)',flex:1}}>{c.title}</span>
+                    {c.deadline && <span style={{fontSize:11,color:'var(--admin-text-faint)',flexShrink:0}}>{new Date(c.deadline).toLocaleDateString('ja-JP')}</span>}
+                    {!c.is_published && <span style={{fontSize:10,color:'var(--admin-text-faint)',flexShrink:0}}>非公開</span>}
                   </div>
                 ))}
             </div>

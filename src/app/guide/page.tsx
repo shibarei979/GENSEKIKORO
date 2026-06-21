@@ -74,16 +74,16 @@ export default async function GuidePage() {
   }
 
   return (
-    <div style={{minHeight:'100vh',background:'#fff',fontFamily:"'Noto Sans JP',sans-serif"}}>
+    <div style={{minHeight:'100vh',background:'var(--color-bg-card)',fontFamily:"'Noto Sans JP',sans-serif"}}>
       <Header profile={profile} user={user} />
 
       {/* サブナビ */}
-      <div style={{background:'#FFF9F2',borderBottom:'1px solid #F0D9C9',overflowX:'auto'}}>
+      <div style={{background:'var(--color-bg)',borderBottom:'1px solid var(--color-brand-border)',overflowX:'auto'}}>
         <div style={{maxWidth:860,margin:'0 auto',padding:'0 16px',display:'flex'}}>
           {navLinks.map(n => (
             <Link key={n.href} href={n.href}
-              style={{padding:'10px 14px',fontSize:12,color:n.active?'#F26A21':'#77706A',textDecoration:'none',whiteSpace:'nowrap',
-                borderBottom:n.active?'2px solid #F26A21':'2px solid transparent',fontWeight:n.active?700:400}}>
+              style={{padding:'10px 14px',fontSize:12,color:n.active?'var(--color-brand)':'var(--color-text-muted)',textDecoration:'none',whiteSpace:'nowrap',
+                borderBottom:n.active?'2px solid var(--color-brand)':'2px solid transparent',fontWeight:n.active?700:400}}>
               {n.label}
             </Link>
           ))}
@@ -94,11 +94,11 @@ export default async function GuidePage() {
 
         {/* 目次（デスクトップのみ） */}
         <div className="desktop-only" style={{width:180,flexShrink:0,position:'sticky',top:80}}>
-          <div style={{background:'#FFF9F2',border:'1px solid #F0D9C9',borderRadius:10,padding:'14px'}}>
-            <div style={{fontSize:12,fontWeight:700,color:'#2B211B',marginBottom:8}}>目次</div>
+          <div style={{background:'var(--color-bg)',border:'1px solid var(--color-brand-border)',borderRadius:10,padding:'14px'}}>
+            <div style={{fontSize:12,fontWeight:700,color:'var(--color-text)',marginBottom:8}}>目次</div>
             {sections.map(s => (
               <a key={s.id} href={`#${s.id}`}
-                style={{display:'block',fontSize:11,color:'#F26A21',textDecoration:'none',padding:'4px 0',borderBottom:'1px solid #FFF1E6'}}>
+                style={{display:'block',fontSize:11,color:'var(--color-brand)',textDecoration:'none',padding:'4px 0',borderBottom:'1px solid var(--color-brand-light)'}}>
                 {s.title}
               </a>
             ))}
@@ -108,27 +108,27 @@ export default async function GuidePage() {
         {/* 本文 */}
         <div style={{flex:1,minWidth:0}}>
           <div style={{marginBottom:20}}>
-            <h1 style={{fontSize:22,fontWeight:700,color:'#2B211B',marginBottom:4}}>投稿ガイド</h1>
-            <p style={{fontSize:12,color:'#77706A'}}>原石航路への作品投稿方法をご説明します</p>
+            <h1 style={{fontSize:22,fontWeight:700,color:'var(--color-text)',marginBottom:4}}>投稿ガイド</h1>
+            <p style={{fontSize:12,color:'var(--color-text-muted)'}}>原石航路への作品投稿方法をご説明します</p>
           </div>
 
           {sections.map(s => (
-            <div key={s.id} id={s.id} style={{background:'#FFF9F2',border:'1px solid #F0D9C9',borderRadius:12,padding:'16px',marginBottom:12}}>
-              <h2 style={{fontSize:15,fontWeight:700,color:'#2B211B',marginBottom:12,display:'flex',alignItems:'center',gap:8}}>
-                <span style={{width:4,height:16,background:'#F26A21',borderRadius:2,display:'inline-block',flexShrink:0}}/>
+            <div key={s.id} id={s.id} style={{background:'var(--color-bg)',border:'1px solid var(--color-brand-border)',borderRadius:12,padding:'16px',marginBottom:12}}>
+              <h2 style={{fontSize:15,fontWeight:700,color:'var(--color-text)',marginBottom:12,display:'flex',alignItems:'center',gap:8}}>
+                <span style={{width:4,height:16,background:'var(--color-brand)',borderRadius:2,display:'inline-block',flexShrink:0}}/>
                 {s.title}
               </h2>
               {s.content && (
-                <p style={{fontSize:13,color:'#2B211B',lineHeight:1.8,marginBottom:s.items||s.list||s.examples?10:0}}>
+                <p style={{fontSize:13,color:'var(--color-text)',lineHeight:1.8,marginBottom:s.items||s.list||s.examples?10:0}}>
                   {s.content}
                 </p>
               )}
               {s.items && (
                 <div style={{display:'flex',flexDirection:'column',gap:8,marginBottom:s.note?10:0}}>
                   {s.items.map((item,i) => (
-                    <div key={i} style={{background:'#fff',borderRadius:8,padding:'10px 12px',borderLeft:'3px solid #F26A21'}}>
-                      <div style={{fontSize:13,fontWeight:700,color:'#F26A21',marginBottom:3}}>{item.label}</div>
-                      <div style={{fontSize:12,color:'#2B211B',lineHeight:1.7}}>{item.desc}</div>
+                    <div key={i} style={{background:'var(--color-bg-card)',borderRadius:8,padding:'10px 12px',borderLeft:'3px solid var(--color-brand)'}}>
+                      <div style={{fontSize:13,fontWeight:700,color:'var(--color-brand)',marginBottom:3}}>{item.label}</div>
+                      <div style={{fontSize:12,color:'var(--color-text)',lineHeight:1.7}}>{item.desc}</div>
                     </div>
                   ))}
                 </div>
@@ -136,8 +136,8 @@ export default async function GuidePage() {
               {s.list && (
                 <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:5,marginBottom:s.note?10:0}}>
                   {s.list.map((item,i) => (
-                    <div key={i} style={{display:'flex',alignItems:'center',gap:5,fontSize:12,color:'#2B211B',padding:'5px 8px',background:'#fff',borderRadius:6}}>
-                      <span style={{color:'#F26A21',fontWeight:700,fontSize:10,flexShrink:0}}>▶</span>{item}
+                    <div key={i} style={{display:'flex',alignItems:'center',gap:5,fontSize:12,color:'var(--color-text)',padding:'5px 8px',background:'var(--color-bg-card)',borderRadius:6}}>
+                      <span style={{color:'var(--color-brand)',fontWeight:700,fontSize:10,flexShrink:0}}>▶</span>{item}
                     </div>
                   ))}
                 </div>
@@ -145,12 +145,12 @@ export default async function GuidePage() {
               {s.examples && (
                 <div style={{display:'flex',gap:5,flexWrap:'wrap',marginTop:8}}>
                   {s.examples.map((ex,i) => (
-                    <span key={i} style={{fontSize:11,padding:'2px 8px',background:'#FFF1E6',color:'#F26A21',border:'1px solid #f5b080',borderRadius:10}}>#{ex}</span>
+                    <span key={i} style={{fontSize:11,padding:'2px 8px',background:'var(--color-brand-light)',color:'var(--color-brand)',border:'1px solid var(--color-tag-border)',borderRadius:10}}>#{ex}</span>
                   ))}
                 </div>
               )}
               {s.note && (
-                <div style={{fontSize:12,color:'#F26A21',background:'#FFF1E6',border:'1px solid #f5b080',borderRadius:8,padding:'8px 10px',marginTop:8}}>
+                <div style={{fontSize:12,color:'var(--color-brand)',background:'var(--color-brand-light)',border:'1px solid var(--color-tag-border)',borderRadius:8,padding:'8px 10px',marginTop:8}}>
                   ⚠ {s.note}
                 </div>
               )}
@@ -158,7 +158,7 @@ export default async function GuidePage() {
           ))}
 
           <div style={{textAlign:'center',marginTop:24}}>
-            <Link href="/post" style={{display:'inline-block',padding:'12px 32px',background:'#F26A21',color:'#fff',borderRadius:24,fontSize:14,fontWeight:700,textDecoration:'none'}}>
+            <Link href="/post" style={{display:'inline-block',padding:'12px 32px',background:'var(--color-brand)',color:'var(--color-bg-card)',borderRadius:24,fontSize:14,fontWeight:700,textDecoration:'none'}}>
               作品を投稿する →
             </Link>
           </div>
