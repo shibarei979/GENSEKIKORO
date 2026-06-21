@@ -29,21 +29,21 @@ export default function ContestClient({ novels, myEntryNovelIds, contestId }: Pr
 
   const pill = (active: boolean) => ({
     padding:'4px 12px', borderRadius:16, fontSize:12, fontWeight:600,
-    cursor:'pointer', border:`1px solid ${active?'#F26A21':'#F0D9C9'}`,
-    background: active?'#F26A21':'#fff', color: active?'#fff':'#77706A',
+    cursor:'pointer', border:`1px solid ${active?'var(--color-brand)':'var(--color-brand-border)'}`,
+    background: active?'var(--color-brand)':'var(--color-bg-card)', color: active?'var(--color-bg-card)':'var(--color-text-muted)',
     whiteSpace:'nowrap' as const, flexShrink:0 as const,
   })
 
   const availableGenres = GENRES.filter(g => g === 'すべて' || novels.some(n => n.genre === g))
 
   return (
-    <div style={{background:'#fff',border:'1px solid #F0D9C9',borderRadius:16,overflow:'hidden'}}>
+    <div style={{background:'var(--color-bg-card)',border:'1px solid var(--color-brand-border)',borderRadius:16,overflow:'hidden'}}>
       {/* フィルターバー */}
-      <div style={{padding:'12px 20px',borderBottom:'1px solid #F0D9C9',background:'#FFF9F2'}}>
+      <div style={{padding:'12px 20px',borderBottom:'1px solid var(--color-brand-border)',background:'var(--color-bg)'}}>
         <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',marginBottom:10,flexWrap:'wrap',gap:8}}>
-          <span style={{fontSize:15,fontWeight:700,color:'#2B211B'}}>
+          <span style={{fontSize:15,fontWeight:700,color:'var(--color-text)'}}>
             応募作品一覧
-            <span style={{fontSize:12,fontWeight:400,color:'#77706A',marginLeft:8}}>（{filtered.length}作品）</span>
+            <span style={{fontSize:12,fontWeight:400,color:'var(--color-text-muted)',marginLeft:8}}>（{filtered.length}作品）</span>
           </span>
           {/* 並び順：横スクロール対応 */}
           <div style={{overflowX:'auto',scrollbarWidth:'none' as any}}>
@@ -60,9 +60,9 @@ export default function ContestClient({ novels, myEntryNovelIds, contestId }: Pr
             {availableGenres.map(g => (
               <button key={g} onClick={()=>setGenre(g)} style={{
                 padding:'3px 10px', borderRadius:12, fontSize:11, cursor:'pointer',
-                border:`1px solid ${genre===g?'#F26A21':'#F0D9C9'}`,
-                background:genre===g?'#FFF1E6':'#fff',
-                color:genre===g?'#F26A21':'#77706A',
+                border:`1px solid ${genre===g?'var(--color-brand)':'var(--color-brand-border)'}`,
+                background:genre===g?'var(--color-brand-light)':'var(--color-bg-card)',
+                color:genre===g?'var(--color-brand)':'var(--color-text-muted)',
                 fontWeight:genre===g?700:400,
                 whiteSpace:'nowrap', flexShrink:0,
               }}>{g}</button>
@@ -73,24 +73,24 @@ export default function ContestClient({ novels, myEntryNovelIds, contestId }: Pr
 
       {/* 作品一覧 */}
       {filtered.length === 0 ? (
-        <div style={{padding:'48px',textAlign:'center',color:'#B8AEA8',fontSize:13}}>該当する作品がありません</div>
+        <div style={{padding:'48px',textAlign:'center',color:'var(--color-text-faint)',fontSize:13}}>該当する作品がありません</div>
       ) : filtered.map((n, i) => (
         <NovelPreviewPopup key={n.id} novel={{...n, like_count: n.like_count||0}}>
         <div style={{cursor:'pointer',display:'block'}}>
-          <div style={{padding:'14px 20px',borderBottom:i<filtered.length-1?'1px solid #FFF1E6':'none',
-            background:myEntryNovelIds.includes(n.id)?'#FFF9F2':'#fff',cursor:'pointer'}}>
+          <div style={{padding:'14px 20px',borderBottom:i<filtered.length-1?'1px solid var(--color-brand-light)':'none',
+            background:myEntryNovelIds.includes(n.id)?'var(--color-bg)':'var(--color-bg-card)',cursor:'pointer'}}>
             <div style={{display:'flex',gap:6,marginBottom:6,flexWrap:'wrap',alignItems:'center'}}>
-              <span style={{fontSize:10,background:'#FFF1E6',color:'#F26A21',border:'1px solid #f5b080',padding:'1px 6px',borderRadius:3}}>{n.genre}</span>
-              <span style={{fontSize:10,background:'#eff6ff',color:'#2563eb',border:'1px solid #bfdbfe',padding:'1px 6px',borderRadius:3}}>{n.novel_type}</span>
+              <span style={{fontSize:10,background:'var(--color-brand-light)',color:'var(--color-brand)',border:'1px solid var(--color-tag-border)',padding:'1px 6px',borderRadius:3}}>{n.genre}</span>
+              <span style={{fontSize:10,background:'var(--color-info-bg)',color:'var(--color-info)',border:'1px solid var(--color-info-border)',padding:'1px 6px',borderRadius:3}}>{n.novel_type}</span>
               {n.is_serial
                 ? <span style={{fontSize:10,background:'#f0fdf4',color:'#15803d',border:'1px solid #86efac',padding:'1px 6px',borderRadius:3}}>連載中</span>
                 : <span style={{fontSize:10,background:'#f5f5f5',color:'#757575',border:'1px solid #e0e0e0',padding:'1px 6px',borderRadius:3}}>完結</span>}
               {myEntryNovelIds.includes(n.id) && (
-                <span style={{fontSize:10,background:'#FFF1E6',color:'#F26A21',border:'1px solid #f5b080',padding:'1px 6px',borderRadius:3}}>自分の応募作品</span>
+                <span style={{fontSize:10,background:'var(--color-brand-light)',color:'var(--color-brand)',border:'1px solid var(--color-tag-border)',padding:'1px 6px',borderRadius:3}}>自分の応募作品</span>
               )}
             </div>
-            <div style={{fontSize:15,fontWeight:700,color:'#2B211B',marginBottom:3}}>{n.title}</div>
-            <div style={{fontSize:12,color:'#77706A',marginBottom:n.summary?6:0}}>作者：{n.display_name} · ♡ {n.like_count}</div>
+            <div style={{fontSize:15,fontWeight:700,color:'var(--color-text)',marginBottom:3}}>{n.title}</div>
+            <div style={{fontSize:12,color:'var(--color-text-muted)',marginBottom:n.summary?6:0}}>作者：{n.display_name} · ♡ {n.like_count}</div>
             {n.summary && (
               <div style={{fontSize:12,color:'#5a3a20',lineHeight:1.8,overflow:'hidden',display:'-webkit-box',WebkitLineClamp:2,WebkitBoxOrient:'vertical' as any}}>
                 {n.summary}
