@@ -26,8 +26,8 @@ export default function LoginPromptModal({ show, onClose, message = 'この機�
       <div
         onClick={e=>e.stopPropagation()}
         style={{
-          background:'#fff',
-          border:'2px solid #F26A21',
+          background:'var(--color-bg-card)',
+          border:'2px solid var(--color-brand)',
           borderRadius:16,
           padding:'32px 28px',
           width:340,
@@ -36,22 +36,22 @@ export default function LoginPromptModal({ show, onClose, message = 'この機�
           boxShadow:'0 8px 32px rgba(0,0,0,0.15)',
           animation:'modalIn .2s ease',
         }}>
-        <div style={{fontSize:16,fontWeight:700,color:'#2B211B',marginBottom:8}}>{message}</div>
-        <div style={{fontSize:13,color:'#77706A',marginBottom:24,lineHeight:1.7}}>
+        <div style={{fontSize:16,fontWeight:700,color:'var(--color-text)',marginBottom:8}}>{message}</div>
+        <div style={{fontSize:13,color:'var(--color-text-muted)',marginBottom:24,lineHeight:1.7}}>
           ログインすると、いいね・ブックマーク・拡散・コメントなどの機能が使えます。
         </div>
         <div style={{display:'flex',gap:10}}>
           <button onClick={onClose}
-            style={{flex:1,padding:'10px',border:'1px solid #F0D9C9',borderRadius:10,background:'#fff',color:'#77706A',fontSize:13,cursor:'pointer'}}>
+            style={{flex:1,padding:'10px',border:'1px solid var(--color-brand-border)',borderRadius:10,background:'var(--color-bg-card)',color:'var(--color-text-muted)',fontSize:13,cursor:'pointer'}}>
             閉じる
           </button>
           <Link href="/auth/register"
-            style={{flex:1,padding:'10px',background:'#F26A21',color:'#fff',borderRadius:10,fontSize:13,fontWeight:700,textDecoration:'none',display:'block'}}>
+            style={{flex:1,padding:'10px',background:'var(--color-brand)',color:'var(--color-bg-card)',borderRadius:10,fontSize:13,fontWeight:700,textDecoration:'none',display:'block'}}>
             新規登録
           </Link>
         </div>
         <Link href="/auth/login"
-          style={{display:'block',marginTop:10,fontSize:12,color:'#F26A21',textDecoration:'none'}}>
+          style={{display:'block',marginTop:10,fontSize:12,color:'var(--color-brand)',textDecoration:'none'}}>
           すでにアカウントをお持ちの方はこちら
         </Link>
       </div>
