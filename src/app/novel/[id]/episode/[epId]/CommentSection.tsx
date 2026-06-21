@@ -21,7 +21,7 @@ interface Props {
 
 function Avatar({ name, iconUrl, size=26 }: { name:string; iconUrl?:string; size?:number }) {
   if (iconUrl) return <img src={iconUrl} style={{width:size,height:size,borderRadius:'50%',objectFit:'cover',flexShrink:0}} alt=""/>
-  return <div style={{width:size,height:size,borderRadius:'50%',background:'#F0D9C9',display:'flex',alignItems:'center',justifyContent:'center',fontSize:size*0.4,color:'#F26A21',fontWeight:700,flexShrink:0}}>{name?.[0]||'?'}</div>
+  return <div style={{width:size,height:size,borderRadius:'50%',background:'var(--color-brand-border)',display:'flex',alignItems:'center',justifyContent:'center',fontSize:size*0.4,color:'var(--color-brand)',fontWeight:700,flexShrink:0}}>{name?.[0]||'?'}</div>
 }
 
 function fmtDate(s: string) {
@@ -174,18 +174,18 @@ export default function CommentSection({ novelId, episodeId, userId, userName, u
     return (
       <div style={{
         padding: isReply?'8px 12px':'12px 16px',
-        borderBottom: isReply?'none':'1px solid #FFF1E6',
-        background: c.is_pinned?'#fffbeb':isReply?'#f8f8f8':'transparent',
-        borderLeft: isReply?'2px solid #F0D9C9':'none',
+        borderBottom: isReply?'none':'1px solid var(--color-brand-light)',
+        background: c.is_pinned?'#fffbeb':isReply?'var(--color-bg-subtle)':'transparent',
+        borderLeft: isReply?'2px solid var(--color-brand-border)':'none',
         marginLeft: isReply?36:0,
         borderRadius: isReply?'0 0 6px 6px':0,
       }}>
-        {c.is_pinned && !isReply && <div style={{fontSize:10,color:'#92400e',marginBottom:4}}>📌 ピン留め</div>}
+        {c.is_pinned && !isReply && <div style={{fontSize:10,color:'var(--color-warning)',marginBottom:4}}>📌 ピン留め</div>}
         <div style={{display:'flex',alignItems:'center',gap:7,marginBottom:4}}>
           <Avatar name={c.display_name} iconUrl={c.icon_url} size={isReply?22:26}/>
-          <span style={{fontSize:isReply?11:12,fontWeight:600,color:isAuthor?'#1d4ed8':'#2B211B'}}>{c.display_name}</span>
-          {isAuthor && <span style={{fontSize:9,background:'#eff6ff',color:'#1d4ed8',border:'1px solid #93c5fd',padding:'1px 5px',borderRadius:3,fontWeight:700}}>作者</span>}
-          <span style={{fontSize:10,color:'#B8AEA8',marginLeft:'auto'}}>{fmtDate(c.created_at)}</span>
+          <span style={{fontSize:isReply?11:12,fontWeight:600,color:isAuthor?'var(--color-info)':'var(--color-text)'}}>{c.display_name}</span>
+          {isAuthor && <span style={{fontSize:9,background:'var(--color-info-bg)',color:'var(--color-info)',border:'1px solid var(--color-info-border)',padding:'1px 5px',borderRadius:3,fontWeight:700}}>作者</span>}
+          <span style={{fontSize:10,color:'var(--color-text-faint)',marginLeft:'auto'}}>{fmtDate(c.created_at)}</span>
         </div>
         {!isReply && c.quoted_text && (
           <div style={{
@@ -193,37 +193,37 @@ export default function CommentSection({ novelId, episodeId, userId, userName, u
           }}>
             <div style={{
               fontSize:11.5, color:'#8a5a3a', background:'#FFF6EC',
-              border:'1px solid #f0d9c0', borderLeft:'3px solid #F26A21',
+              border:'1px solid #f0d9c0', borderLeft:'3px solid var(--color-brand)',
               borderRadius:'2px 6px 6px 2px', padding:'6px 10px',
               lineHeight:1.6, whiteSpace:'pre-wrap',
             }}>
-              <span style={{fontSize:10,color:'#F26A21',fontWeight:700,marginRight:4}}>引用</span>
+              <span style={{fontSize:10,color:'var(--color-brand)',fontWeight:700,marginRight:4}}>引用</span>
               "{c.quoted_text.length > 60 ? c.quoted_text.slice(0,60)+'…' : c.quoted_text}"
             </div>
           </div>
         )}
-        <div style={{fontSize:12,color:'#2B211B',lineHeight:1.7,paddingLeft:isReply?29:33,whiteSpace:'pre-wrap'}}>{c.body}</div>
+        <div style={{fontSize:12,color:'var(--color-text)',lineHeight:1.7,paddingLeft:isReply?29:33,whiteSpace:'pre-wrap'}}>{c.body}</div>
         <div style={{paddingLeft:isReply?29:33,marginTop:5,display:'flex',alignItems:'center',gap:6,flexWrap:'wrap'}}>
           <button onClick={()=>handleCommentLike(c.id)}
             style={{display:'inline-flex',alignItems:'center',gap:3,padding:'2px 8px',borderRadius:10,border:'1px solid',fontSize:11,cursor:userId?'pointer':'default',
-              background:liked?'#fef2f2':'#fff',borderColor:liked?'#fca5a5':'#F0D9C9',color:liked?'#dc2626':'#77706A'}}>
+              background:liked?'#fef2f2':'var(--color-bg-card)',borderColor:liked?'#fca5a5':'var(--color-brand-border)',color:liked?'var(--color-danger)':'var(--color-text-muted)'}}>
             ♡ {c.like_count||0}
           </button>
           {userId && (
             <button onClick={()=>{setReplyTo({id: parentRootId||c.id, name:c.display_name});setReplyBody('')}}
-              style={{fontSize:11,color:'#77706A',background:'none',border:'1px solid #F0D9C9',borderRadius:10,padding:'2px 8px',cursor:'pointer'}}>
+              style={{fontSize:11,color:'var(--color-text-muted)',background:'none',border:'1px solid var(--color-brand-border)',borderRadius:10,padding:'2px 8px',cursor:'pointer'}}>
               返信
             </button>
           )}
           {userId===authorId && !isReply && c.user_id!==authorId && (
             <button onClick={()=>handlePin(c.id,c.is_pinned||false)}
-              style={{fontSize:10,color:c.is_pinned?'#92400e':'#77706A',background:'none',border:'1px solid #F0D9C9',borderRadius:10,padding:'2px 8px',cursor:'pointer'}}>
+              style={{fontSize:10,color:c.is_pinned?'var(--color-warning)':'var(--color-text-muted)',background:'none',border:'1px solid var(--color-brand-border)',borderRadius:10,padding:'2px 8px',cursor:'pointer'}}>
               {c.is_pinned?'ピン解除':'ピン留め'}
             </button>
           )}
           {isMe && (
             <button onClick={()=>handleDelete(c.id,isReply,parentId)} disabled={deletingId===c.id}
-              style={{fontSize:10,color:'#B8AEA8',background:'none',border:'none',cursor:'pointer',padding:0,marginLeft:'auto'}}>
+              style={{fontSize:10,color:'var(--color-text-faint)',background:'none',border:'none',cursor:'pointer',padding:0,marginLeft:'auto'}}>
               {deletingId===c.id?'削除中…':'削除'}
             </button>
           )}
@@ -235,26 +235,26 @@ export default function CommentSection({ novelId, episodeId, userId, userName, u
   const displayComments = showAll ? comments : comments.slice(0, LIMIT)
 
   return (
-    <div ref={commentAnchorRef} style={{background:'#fff',border:'1px solid #F0D9C9',borderRadius:12,overflow:'hidden',marginTop:20,scrollMarginTop:80}}>
-      <div style={{padding:'12px 16px',borderBottom:'1px solid #F0D9C9'}}>
-        <span style={{fontSize:14,fontWeight:700,color:'#2B211B'}}>コメント ({comments.reduce((sum,c)=>sum+(c.replies?.length||0)+1,0)})</span>
+    <div ref={commentAnchorRef} style={{background:'var(--color-bg-card)',border:'1px solid var(--color-brand-border)',borderRadius:12,overflow:'hidden',marginTop:20,scrollMarginTop:80}}>
+      <div style={{padding:'12px 16px',borderBottom:'1px solid var(--color-brand-border)'}}>
+        <span style={{fontSize:14,fontWeight:700,color:'var(--color-text)'}}>コメント ({comments.reduce((sum,c)=>sum+(c.replies?.length||0)+1,0)})</span>
       </div>
-      <div style={{padding:'12px 16px',borderBottom:'1px solid #F0D9C9',background:'#FFF9F2'}}>
+      <div style={{padding:'12px 16px',borderBottom:'1px solid var(--color-brand-border)',background:'var(--color-bg)'}}>
         {userId ? (
           <>
             {/* 「本文から引用する」ボタン／引用プレビュー */}
             {quotedText ? (
               <div style={{
                 display:'flex', alignItems:'flex-start', gap:8,
-                background:'#FFF6EC', border:'1px solid #f0d9c0', borderLeft:'3px solid #F26A21',
+                background:'#FFF6EC', border:'1px solid #f0d9c0', borderLeft:'3px solid var(--color-brand)',
                 borderRadius:'2px 8px 8px 2px', padding:'8px 10px', marginBottom:8,
               }}>
                 <div style={{flex:1, fontSize:12, color:'#8a5a3a', lineHeight:1.6}}>
-                  <span style={{fontSize:10,color:'#F26A21',fontWeight:700,marginRight:4}}>引用</span>
+                  <span style={{fontSize:10,color:'var(--color-brand)',fontWeight:700,marginRight:4}}>引用</span>
                   "{quotedText.length > 80 ? quotedText.slice(0,80)+'…' : quotedText}"
                 </div>
                 <button onClick={onClearQuote}
-                  style={{fontSize:11,color:'#B8AEA8',background:'none',border:'none',cursor:'pointer',padding:0,flexShrink:0}}>
+                  style={{fontSize:11,color:'var(--color-text-faint)',background:'none',border:'none',cursor:'pointer',padding:0,flexShrink:0}}>
                   ✕
                 </button>
               </div>
@@ -264,10 +264,10 @@ export default function CommentSection({ novelId, episodeId, userId, userName, u
                 style={{
                   display:'flex', alignItems:'center', gap:6, width:'100%',
                   padding:'8px 12px', marginBottom:8,
-                  background: selecting ? '#FFF1E6' : '#fff',
-                  border:`1.5px dashed ${selecting ? '#F26A21' : '#F0D9C9'}`,
+                  background: selecting ? 'var(--color-brand-light)' : 'var(--color-bg-card)',
+                  border:`1.5px dashed ${selecting ? 'var(--color-brand)' : 'var(--color-brand-border)'}`,
                   borderRadius:8, fontSize:12,
-                  color: selecting ? '#F26A21' : '#77706A',
+                  color: selecting ? 'var(--color-brand)' : 'var(--color-text-muted)',
                   cursor:'pointer', fontWeight:500,
                 }}>
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{flexShrink:0}}>
@@ -280,7 +280,7 @@ export default function CommentSection({ novelId, episodeId, userId, userName, u
             <div style={{display:'flex',gap:6,marginBottom:8,flexWrap:'wrap'}}>
               {['最高だった','続きが気になる','うぽつ'].map(label => (
                 <button key={label} onClick={()=>setBody(label)}
-                  style={{padding:'5px 12px',background:body===label?'#FFF1E6':'#FFF9F2',border:`1.5px solid ${body===label?'#F26A21':'#F0D9C9'}`,borderRadius:16,fontSize:12,cursor:'pointer',color:body===label?'#F26A21':'#2B211B',fontWeight:500}}>
+                  style={{padding:'5px 12px',background:body===label?'var(--color-brand-light)':'var(--color-bg)',border:`1.5px solid ${body===label?'var(--color-brand)':'var(--color-brand-border)'}`,borderRadius:16,fontSize:12,cursor:'pointer',color:body===label?'var(--color-brand)':'var(--color-text)',fontWeight:500}}>
                   {label}
                 </button>
               ))}
@@ -289,41 +289,41 @@ export default function CommentSection({ novelId, episodeId, userId, userName, u
               <Avatar name={userName||''} iconUrl={userIconUrl||''} size={28}/>
               <textarea value={body} onChange={e=>setBody(e.target.value)} rows={2}
                 placeholder={quotedText ? 'この文へのコメントを書く...' : 'コメントを書く...'}
-                style={{flex:1,padding:'8px 12px',border:'1.5px solid #F0D9C9',borderRadius:8,fontSize:12,resize:'none',outline:'none',fontFamily:'inherit'}}/>
+                style={{flex:1,padding:'8px 12px',border:'1.5px solid var(--color-brand-border)',borderRadius:8,fontSize:12,resize:'none',outline:'none',fontFamily:'inherit'}}/>
             </div>
             <div style={{display:'flex',justifyContent:'flex-end',gap:8,alignItems:'center'}}>
-              <span style={{fontSize:11,color:'#B8AEA8'}}>{body.length}/1000</span>
+              <span style={{fontSize:11,color:'var(--color-text-faint)'}}>{body.length}/1000</span>
               <button onClick={handleSubmit} disabled={loading||!body.trim()}
-                style={{padding:'5px 16px',background:'#F26A21',color:'#fff',border:'none',borderRadius:14,fontSize:12,fontWeight:600,cursor:'pointer',opacity:loading||!body.trim()?0.5:1}}>
+                style={{padding:'5px 16px',background:'var(--color-brand)',color:'var(--color-bg-card)',border:'none',borderRadius:14,fontSize:12,fontWeight:600,cursor:'pointer',opacity:loading||!body.trim()?0.5:1}}>
                 {loading?'送信中...':'投稿'}
               </button>
             </div>
           </>
         ) : (
-          <div style={{textAlign:'center',fontSize:12,color:'#77706A',padding:'6px'}}>
-            <a href="/auth/login" style={{color:'#F26A21',fontWeight:600}}>ログイン</a>してコメントする
+          <div style={{textAlign:'center',fontSize:12,color:'var(--color-text-muted)',padding:'6px'}}>
+            <a href="/auth/login" style={{color:'var(--color-brand)',fontWeight:600}}>ログイン</a>してコメントする
           </div>
         )}
       </div>
       {comments.length === 0
-        ? <div style={{padding:'24px',textAlign:'center',fontSize:12,color:'#B8AEA8'}}>まだコメントがありません</div>
+        ? <div style={{padding:'24px',textAlign:'center',fontSize:12,color:'var(--color-text-faint)'}}>まだコメントがありません</div>
         : displayComments.map(c => (
           <div key={c.id}>
             <CommentCard c={c}/>
             {(c.replies||[]).map(r => <CommentCard key={r.id} c={r} isReply parentId={c.id} parentRootId={c.id}/>)}
             {replyTo?.id === c.id && (
-              <div style={{marginLeft:36,padding:'8px 12px',background:'#FFF9F2',borderLeft:'2px solid #F26A21'}}>
-                <div style={{fontSize:11,color:'#F26A21',marginBottom:4}}>{replyTo.name} への返信</div>
+              <div style={{marginLeft:36,padding:'8px 12px',background:'var(--color-bg)',borderLeft:'2px solid var(--color-brand)'}}>
+                <div style={{fontSize:11,color:'var(--color-brand)',marginBottom:4}}>{replyTo.name} への返信</div>
                 <textarea value={replyBody} onChange={e=>setReplyBody(e.target.value)} rows={2}
                   placeholder="返信を書く..."
-                  style={{width:'100%',padding:'6px 10px',border:'1.5px solid #F0D9C9',borderRadius:6,fontSize:12,resize:'none',outline:'none',fontFamily:'inherit',boxSizing:'border-box'}}/>
+                  style={{width:'100%',padding:'6px 10px',border:'1.5px solid var(--color-brand-border)',borderRadius:6,fontSize:12,resize:'none',outline:'none',fontFamily:'inherit',boxSizing:'border-box'}}/>
                 <div style={{display:'flex',gap:6,justifyContent:'flex-end',marginTop:4}}>
                   <button onClick={()=>{setReplyTo(null);setReplyBody('')}}
-                    style={{fontSize:11,color:'#77706A',background:'none',border:'1px solid #F0D9C9',borderRadius:10,padding:'3px 10px',cursor:'pointer'}}>
+                    style={{fontSize:11,color:'var(--color-text-muted)',background:'none',border:'1px solid var(--color-brand-border)',borderRadius:10,padding:'3px 10px',cursor:'pointer'}}>
                     キャンセル
                   </button>
                   <button onClick={()=>handleReply(c.id)} disabled={replyLoading||!replyBody.trim()}
-                    style={{fontSize:11,color:'#fff',background:'#F26A21',border:'none',borderRadius:10,padding:'3px 10px',cursor:'pointer',opacity:replyLoading||!replyBody.trim()?0.5:1}}>
+                    style={{fontSize:11,color:'var(--color-bg-card)',background:'var(--color-brand)',border:'none',borderRadius:10,padding:'3px 10px',cursor:'pointer',opacity:replyLoading||!replyBody.trim()?0.5:1}}>
                     {replyLoading?'送信中...':'返信する'}
                   </button>
                 </div>
@@ -333,9 +333,9 @@ export default function CommentSection({ novelId, episodeId, userId, userName, u
         ))
       }
       {comments.length > LIMIT && !showAll && (
-        <div style={{padding:'10px',textAlign:'center',borderTop:'1px solid #F0D9C9'}}>
+        <div style={{padding:'10px',textAlign:'center',borderTop:'1px solid var(--color-brand-border)'}}>
           <button onClick={()=>setShowAll(true)}
-            style={{fontSize:12,color:'#F26A21',background:'none',border:'1px solid #F0D9C9',borderRadius:16,padding:'6px 20px',cursor:'pointer'}}>
+            style={{fontSize:12,color:'var(--color-brand)',background:'none',border:'1px solid var(--color-brand-border)',borderRadius:16,padding:'6px 20px',cursor:'pointer'}}>
             もっと見る（残り{comments.length-LIMIT}件）
           </button>
         </div>
