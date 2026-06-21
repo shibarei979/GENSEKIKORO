@@ -44,24 +44,24 @@ export default function LatestEpisodesSection({ episodes }: Props) {
             like_count: ep.like_count,
             tags: ep.tags,
           }}>
-            <div style={{padding:'9px 14px',borderBottom:'1px solid #FFF1E6',borderRight:i%2===0?'1px solid #FFF1E6':'none',cursor:'pointer'}}>
+            <div style={{padding:'9px 14px',borderBottom:'1px solid var(--color-brand-light)',borderRight:i%2===0?'1px solid var(--color-brand-light)':'none',cursor:'pointer'}}>
               <div style={{display:'flex',gap:4,alignItems:'center',marginBottom:2}}>
-                <span style={{fontSize:9,background:'#FFF1E6',color:'#F26A21',border:'1px solid #f5b080',padding:'1px 5px',borderRadius:3}}>{ep.genre}</span>
-                <span style={{background:'#F26A21',color:'#fff',fontSize:9,padding:'0 4px',borderRadius:3,fontWeight:700}}>NEW</span>
+                <span style={{fontSize:9,background:'var(--color-brand-light)',color:'var(--color-brand)',border:'1px solid var(--color-tag-border)',padding:'1px 5px',borderRadius:3}}>{ep.genre}</span>
+                <span style={{background:'var(--color-brand)',color:'var(--color-bg-card)',fontSize:9,padding:'0 4px',borderRadius:3,fontWeight:700}}>NEW</span>
               </div>
-              <div style={{fontSize:13,fontWeight:700,color:'#2B211B',marginBottom:1}}>{ep.novel_title}</div>
-              <div style={{fontSize:10,color:'#77706A'}}>{ep.title}</div>
-              <div style={{fontSize:10,color:'#77706A'}}>作者：{ep.author_name}</div>
+              <div style={{fontSize:13,fontWeight:700,color:'var(--color-text)',marginBottom:1}}>{ep.novel_title}</div>
+              <div style={{fontSize:10,color:'var(--color-text-muted)'}}>{ep.title}</div>
+              <div style={{fontSize:10,color:'var(--color-text-muted)'}}>作者：{ep.author_name}</div>
             </div>
           </NovelPreviewPopup>
           </div>
         ) : (
-          <div key={i} style={{padding:'9px 14px',borderBottom:'1px solid #FFF1E6',borderRight:i%2===0?'1px solid #FFF1E6':'none'}}>
+          <div key={i} style={{padding:'9px 14px',borderBottom:'1px solid var(--color-brand-light)',borderRight:i%2===0?'1px solid var(--color-brand-light)':'none'}}>
             <div style={{display:'flex',gap:4,alignItems:'center',marginBottom:2}}>
-              <span style={{fontSize:9,background:'#FFF1E6',color:'#F26A21',border:'1px solid #f5b080',padding:'1px 5px',borderRadius:3}}>ジャンル</span>
-              <span style={{background:'#F26A21',color:'#fff',fontSize:9,padding:'0 4px',borderRadius:3,fontWeight:700}}>NEW</span>
+              <span style={{fontSize:9,background:'var(--color-brand-light)',color:'var(--color-brand)',border:'1px solid var(--color-tag-border)',padding:'1px 5px',borderRadius:3}}>ジャンル</span>
+              <span style={{background:'var(--color-brand)',color:'var(--color-bg-card)',fontSize:9,padding:'0 4px',borderRadius:3,fontWeight:700}}>NEW</span>
             </div>
-            <div style={{fontSize:13,fontWeight:700,color:'#2B211B'}}>作品タイトル（準備中）</div>
+            <div style={{fontSize:13,fontWeight:700,color:'var(--color-text)'}}>作品タイトル（準備中）</div>
           </div>
         )
       })}

@@ -43,12 +43,12 @@ export default function RecommendedNovels({ novels }: Props) {
   }, [novels])
 
   return (
-    <div style={{background:'#fff',border:'1px solid #F0D9C9',borderRadius:10,overflow:'hidden'}}>
-      <div style={{padding:'10px 16px',borderBottom:'1px solid #F0D9C9',display:'flex',alignItems:'center',justifyContent:'space-between',background:'#FFF9F2'}}>
-        <span style={{fontSize:14,fontWeight:700,color:'#2B211B'}}>おすすめ作品</span>
+    <div style={{background:'var(--color-bg-card)',border:'1px solid var(--color-brand-border)',borderRadius:10,overflow:'hidden'}}>
+      <div style={{padding:'10px 16px',borderBottom:'1px solid var(--color-brand-border)',display:'flex',alignItems:'center',justifyContent:'space-between',background:'var(--color-bg)'}}>
+        <span style={{fontSize:14,fontWeight:700,color:'var(--color-text)'}}>おすすめ作品</span>
         <button onClick={shuffle} title="シャッフル"
           style={{background:'none',border:'none',cursor:'pointer',padding:4,borderRadius:'50%',display:'flex',alignItems:'center',justifyContent:'center',transition:'background .15s'}}>
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#F26A21" strokeWidth="2.2"
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--color-brand)" strokeWidth="2.2"
             strokeLinecap="round" strokeLinejoin="round"
             style={{transition:'transform .4s ease',transform:spinning?'rotate(360deg)':'rotate(0deg)'}}>
             <polyline points="23 4 23 10 17 10"/>
@@ -63,13 +63,13 @@ export default function RecommendedNovels({ novels }: Props) {
           return n ? (
             <div key={n.id}>
             <NovelPreviewPopup novel={{...n, like_count: n.likeCount || n.like_count || 0}}>
-              <div style={{padding:'9px 14px',borderBottom:'1px solid #FFF1E6',borderRight:i%2===0?'1px solid #FFF1E6':'none',minHeight:60,cursor:'pointer'}}>
+              <div style={{padding:'9px 14px',borderBottom:'1px solid var(--color-brand-light)',borderRight:i%2===0?'1px solid var(--color-brand-light)':'none',minHeight:60,cursor:'pointer'}}>
                 <div style={{display:'flex',gap:4,marginBottom:2,flexWrap:'wrap'}}>
-                  <span style={{fontSize:9,background:'#FFF1E6',color:'#F26A21',border:'1px solid #f5b080',padding:'1px 5px',borderRadius:3}}>{n.genre}</span>
-                  {n.novel_type && <span style={{fontSize:9,background:'#eff6ff',color:'#2563eb',border:'1px solid #bfdbfe',padding:'1px 5px',borderRadius:3}}>{n.novel_type}</span>}
+                  <span style={{fontSize:9,background:'var(--color-brand-light)',color:'var(--color-brand)',border:'1px solid var(--color-tag-border)',padding:'1px 5px',borderRadius:3}}>{n.genre}</span>
+                  {n.novel_type && <span style={{fontSize:9,background:'var(--color-info-bg)',color:'var(--color-info)',border:'1px solid var(--color-info-border)',padding:'1px 5px',borderRadius:3}}>{n.novel_type}</span>}
                 </div>
-                <div style={{fontSize:13,fontWeight:700,color:'#2B211B',marginBottom:1}}>{n.title}</div>
-                <div style={{display:'flex',gap:8,fontSize:10,color:'#77706A'}}>
+                <div style={{fontSize:13,fontWeight:700,color:'var(--color-text)',marginBottom:1}}>{n.title}</div>
+                <div style={{display:'flex',gap:8,fontSize:10,color:'var(--color-text-muted)'}}>
                   <span>作者：{n.display_name}</span>
                   <span>♡ {n.likeCount||0}</span>
                 </div>
@@ -77,11 +77,11 @@ export default function RecommendedNovels({ novels }: Props) {
             </NovelPreviewPopup>
             </div>
           ) : (
-            <div key={i} style={{padding:'9px 14px',borderBottom:'1px solid #FFF1E6',borderRight:i%2===0?'1px solid #FFF1E6':'none',minHeight:60}}>
+            <div key={i} style={{padding:'9px 14px',borderBottom:'1px solid var(--color-brand-light)',borderRight:i%2===0?'1px solid var(--color-brand-light)':'none',minHeight:60}}>
               <div style={{display:'flex',gap:4,marginBottom:2}}>
-                <span style={{fontSize:9,background:'#FFF1E6',color:'#F26A21',border:'1px solid #f5b080',padding:'1px 5px',borderRadius:3}}>ジャンル</span>
+                <span style={{fontSize:9,background:'var(--color-brand-light)',color:'var(--color-brand)',border:'1px solid var(--color-tag-border)',padding:'1px 5px',borderRadius:3}}>ジャンル</span>
               </div>
-              <div style={{fontSize:13,fontWeight:700,color:'#2B211B'}}>作品タイトル（準備中）</div>
+              <div style={{fontSize:13,fontWeight:700,color:'var(--color-text)'}}>作品タイトル（準備中）</div>
             </div>
           )
         })}
