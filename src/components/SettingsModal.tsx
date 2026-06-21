@@ -71,28 +71,28 @@ export default function SettingsModal({ show, onClose, profile, userId }: Props)
 
   if (!show || !mounted) return null
 
-  const inp = { width:'100%', padding:'9px 12px', border:'1.5px solid #F0D9C9', borderRadius:8, fontSize:13, outline:'none', boxSizing:'border-box' as const }
+  const inp = { width:'100%', padding:'9px 12px', border:'1.5px solid var(--color-brand-border)', borderRadius:8, fontSize:13, outline:'none', boxSizing:'border-box' as const }
 
   return createPortal(
     <div style={{position:'fixed',inset:0,background:'rgba(0,0,0,0.45)',zIndex:9999,display:'flex',alignItems:'center',justifyContent:'center',padding:20}}
       onClick={onClose}>
       <div onClick={e=>e.stopPropagation()} style={{
-        background:'#fff', border:'1px solid #F0D9C9', borderRadius:16,
+        background:'var(--color-bg-card)', border:'1px solid var(--color-brand-border)', borderRadius:16,
         width:360, maxWidth:'95vw', boxShadow:'0 8px 32px rgba(0,0,0,0.15)',
         overflow:'hidden', animation:'modalIn .2s ease',
       }}>
         {/* ヘッダー */}
-        <div style={{background:'#FFF1E6',padding:'12px 16px',borderBottom:'1px solid #F0D9C9',display:'flex',alignItems:'center',justifyContent:'space-between'}}>
+        <div style={{background:'var(--color-brand-light)',padding:'12px 16px',borderBottom:'1px solid var(--color-brand-border)',display:'flex',alignItems:'center',justifyContent:'space-between'}}>
           <div style={{display:'flex',alignItems:'center',gap:8}}>
             {tab !== 'menu' && (
               <button onClick={()=>{setTab('menu');setMsg('');setValue('');setValue2('')}}
-                style={{background:'none',border:'none',cursor:'pointer',fontSize:16,color:'#77706A',padding:'0 4px'}}>‹</button>
+                style={{background:'none',border:'none',cursor:'pointer',fontSize:16,color:'var(--color-text-muted)',padding:'0 4px'}}>‹</button>
             )}
-            <span style={{fontSize:14,fontWeight:700,color:'#2B211B'}}>
+            <span style={{fontSize:14,fontWeight:700,color:'var(--color-text)'}}>
               {tab === 'menu' ? '設定' : items.find(i=>i.key===tab)?.label}
             </span>
           </div>
-          <button onClick={onClose} style={{background:'none',border:'none',cursor:'pointer',fontSize:18,color:'#B8AEA8'}}>×</button>
+          <button onClick={onClose} style={{background:'none',border:'none',cursor:'pointer',fontSize:18,color:'var(--color-text-faint)'}}>×</button>
         </div>
 
         {/* メニュー */}
@@ -100,9 +100,9 @@ export default function SettingsModal({ show, onClose, profile, userId }: Props)
           <div>
             {items.map((item, idx) => (
               <button key={item.key} onClick={()=>{setTab(item.key);setValue('');setValue2('');setMsg('')}}
-                style={{display:'flex',alignItems:'center',justifyContent:'space-between',width:'100%',padding:'13px 16px',border:'none',borderBottom:idx<items.length-1?'1px solid #FFF1E6':'none',background:'#fff',cursor:'pointer',fontSize:13,color:'#2B211B',textAlign:'left'}}>
+                style={{display:'flex',alignItems:'center',justifyContent:'space-between',width:'100%',padding:'13px 16px',border:'none',borderBottom:idx<items.length-1?'1px solid var(--color-brand-light)':'none',background:'var(--color-bg-card)',cursor:'pointer',fontSize:13,color:'var(--color-text)',textAlign:'left'}}>
                 <span>{item.label}</span>
-                <span style={{color:'#B8AEA8',fontSize:12}}>›</span>
+                <span style={{color:'var(--color-text-faint)',fontSize:12}}>›</span>
               </button>
             ))}
           </div>
@@ -113,60 +113,60 @@ export default function SettingsModal({ show, onClose, profile, userId }: Props)
           <div style={{padding:'20px 16px'}}>
             {tab === 'email' && (
               <div>
-                <div style={{fontSize:12,color:'#77706A',marginBottom:4}}>新しいメールアドレス</div>
+                <div style={{fontSize:12,color:'var(--color-text-muted)',marginBottom:4}}>新しいメールアドレス</div>
                 <input style={inp} type="email" value={value} onChange={e=>setValue(e.target.value)} placeholder="new@example.com"/>
               </div>
             )}
             {tab === 'password' && (
               <div style={{display:'flex',flexDirection:'column',gap:10}}>
                 <div>
-                  <div style={{fontSize:12,color:'#77706A',marginBottom:4}}>新しいパスワード</div>
+                  <div style={{fontSize:12,color:'var(--color-text-muted)',marginBottom:4}}>新しいパスワード</div>
                   <input style={inp} type="password" value={value} onChange={e=>setValue(e.target.value)} placeholder="8文字以上"/>
                 </div>
                 <div>
-                  <div style={{fontSize:12,color:'#77706A',marginBottom:4}}>確認</div>
+                  <div style={{fontSize:12,color:'var(--color-text-muted)',marginBottom:4}}>確認</div>
                   <input style={inp} type="password" value={value2} onChange={e=>setValue2(e.target.value)} placeholder="もう一度入力"/>
                 </div>
               </div>
             )}
             {tab === 'name' && (
               <div>
-                <div style={{fontSize:12,color:'#77706A',marginBottom:4}}>新しい名前</div>
+                <div style={{fontSize:12,color:'var(--color-text-muted)',marginBottom:4}}>新しい名前</div>
                 <input style={inp} value={value} onChange={e=>setValue(e.target.value)} placeholder={profile?.display_name || '名前'}/>
               </div>
             )}
             {tab === 'bio' && (
               <div>
-                <div style={{fontSize:12,color:'#77706A',marginBottom:4}}>自己紹介</div>
+                <div style={{fontSize:12,color:'var(--color-text-muted)',marginBottom:4}}>自己紹介</div>
                 <textarea style={{...inp,resize:'vertical',minHeight:80}} value={value} onChange={e=>setValue(e.target.value)} placeholder={profile?.bio || '自己紹介を入力'}/>
               </div>
             )}
             {tab === 'birthdate' && (
               <div>
-                <div style={{fontSize:12,color:'#77706A',marginBottom:4}}>生年月日</div>
+                <div style={{fontSize:12,color:'var(--color-text-muted)',marginBottom:4}}>生年月日</div>
                 <input style={inp} type="date" value={value} onChange={e=>setValue(e.target.value)}/>
               </div>
             )}
             {tab === 'icon' && (
               <div style={{textAlign:'center',padding:'8px 0'}}>
-                <div style={{fontSize:13,color:'#77706A',lineHeight:1.7}}>
+                <div style={{fontSize:13,color:'var(--color-text-muted)',lineHeight:1.7}}>
                   アイコンの変更はマイページから行えます
                 </div>
-                <a href="/mypage" style={{display:'inline-block',marginTop:12,padding:'8px 20px',background:'#F26A21',color:'#fff',borderRadius:8,fontSize:13,fontWeight:700,textDecoration:'none'}}>
+                <a href="/mypage" style={{display:'inline-block',marginTop:12,padding:'8px 20px',background:'var(--color-brand)',color:'var(--color-bg-card)',borderRadius:8,fontSize:13,fontWeight:700,textDecoration:'none'}}>
                   マイページへ
                 </a>
               </div>
             )}
 
             {msg && (
-              <div style={{marginTop:12,fontSize:12,color:msg.includes('エラー')?'#dc2626':'#10b981',textAlign:'center'}}>
+              <div style={{marginTop:12,fontSize:12,color:msg.includes('エラー')?'var(--color-danger)':'var(--color-success)',textAlign:'center'}}>
                 {msg}
               </div>
             )}
 
             {tab !== 'icon' && (
               <button onClick={handleSave} disabled={loading||!value.trim()}
-                style={{marginTop:16,width:'100%',padding:'10px',background:'#F26A21',color:'#fff',border:'none',borderRadius:8,fontSize:13,fontWeight:700,cursor:'pointer',opacity:loading||!value.trim()?0.5:1}}>
+                style={{marginTop:16,width:'100%',padding:'10px',background:'var(--color-brand)',color:'var(--color-bg-card)',border:'none',borderRadius:8,fontSize:13,fontWeight:700,cursor:'pointer',opacity:loading||!value.trim()?0.5:1}}>
                 {loading ? '保存中...' : '保存する'}
               </button>
             )}
