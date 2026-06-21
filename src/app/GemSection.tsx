@@ -21,10 +21,10 @@ interface Props {
   discoverCommentMap: Record<string, {comment:string;display_name:string}[]>
 }
 
-// 統一した本のテーマカラー（原石航路のブランドカラー系）
-const SPINE_BASE = '#6b3a22'
-const SPINE_DARK = '#4a2715'
-const SPINE_LIGHT = '#8a4f2e'
+// 統一した本のテーマカラー（原石航路のブランドカラー系）。globals.css の --color-spine-* と同じ値。
+const SPINE_BASE = 'var(--color-spine-base)'
+const SPINE_DARK = 'var(--color-spine-dark)'
+const SPINE_LIGHT = 'var(--color-spine-light)'
 
 function BookItem({ n, discoverComments }: { n: Novel; discoverComments: {comment:string;display_name:string}[] }) {
   const [hover, setHover] = useState(false)
@@ -77,7 +77,7 @@ function BookItem({ n, discoverComments }: { n: Novel; discoverComments: {commen
               display:'flex', alignItems:'center', justifyContent:'center',
             }}>
               <div style={{
-                writingMode:'vertical-rl' as any, fontSize:11, fontWeight:700, color:'#fff',
+                writingMode:'vertical-rl' as any, fontSize:11, fontWeight:700, color:'var(--color-bg-card)',
                 letterSpacing:'0.05em', lineHeight:1.65, maxHeight:120, overflow:'hidden',
                 textShadow:'0 1px 2px rgba(0,0,0,0.4)', fontFamily:"'Noto Serif JP',serif",
               }}>
@@ -132,17 +132,17 @@ function BookItem({ n, discoverComments }: { n: Novel; discoverComments: {commen
 
             <div style={{position:'relative',zIndex:1,padding:'18px 16px 10px',flex:1,display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',textAlign:'center'}}>
               <div style={{display:'flex',gap:4,marginBottom:8,flexWrap:'wrap',justifyContent:'center'}}>
-                <span style={{fontSize:8,fontWeight:700,color:'#fff',background:'rgba(255,255,255,0.15)',border:'1px solid rgba(255,230,190,0.5)',padding:'1px 6px',borderRadius:3,letterSpacing:'0.05em'}}>原石</span>
+                <span style={{fontSize:8,fontWeight:700,color:'var(--color-bg-card)',background:'rgba(255,255,255,0.15)',border:'1px solid rgba(255,230,190,0.5)',padding:'1px 6px',borderRadius:3,letterSpacing:'0.05em'}}>原石</span>
                 <span style={{fontSize:8,color:'rgba(255,255,255,0.85)',background:'rgba(255,255,255,0.1)',border:'1px solid rgba(255,230,190,0.3)',padding:'1px 6px',borderRadius:3}}>{n.genre}</span>
               </div>
-              <div style={{fontSize:14,fontWeight:700,color:'#fff',lineHeight:1.5,marginBottom:8,fontFamily:"'Noto Serif JP',serif",textShadow:'0 1px 3px rgba(0,0,0,0.3)',overflow:'hidden',display:'-webkit-box',WebkitLineClamp:3,WebkitBoxOrient:'vertical' as any}}>{n.title}</div>
+              <div style={{fontSize:14,fontWeight:700,color:'var(--color-bg-card)',lineHeight:1.5,marginBottom:8,fontFamily:"'Noto Serif JP',serif",textShadow:'0 1px 3px rgba(0,0,0,0.3)',overflow:'hidden',display:'-webkit-box',WebkitLineClamp:3,WebkitBoxOrient:'vertical' as any}}>{n.title}</div>
               <div style={{width:24,height:1,background:'rgba(255,230,190,0.5)',marginBottom:8}}/>
               <div style={{fontSize:10,color:'rgba(255,230,190,0.9)',overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap',maxWidth:'100%'}}>{n.display_name}</div>
               {n.likeCount2 > 0 && <span style={{fontSize:9,color:'rgba(255,230,190,0.7)',marginTop:4}}>♡ {n.likeCount2}</span>}
             </div>
 
             {/* 帯（読者の声） */}
-            <div style={{position:'relative',zIndex:1,background:'#fff',borderTop:`2px solid ${SPINE_DARK}`}}>
+            <div style={{position:'relative',zIndex:1,background:'var(--color-bg-card)',borderTop:`2px solid ${SPINE_DARK}`}}>
               <GemComment novelId={n.id} discoverCount={n.discoverCount} likeCount={n.likeCount2} discoverComments={discoverComments} />
             </div>
           </div>
@@ -157,13 +157,13 @@ function IntroBlock() {
   return (
     <div style={{
       flex:'0 0 220px', minWidth:220, maxWidth:220, height:195,
-      background:'#FFF9F2', border:`1.5px dashed ${SPINE_BASE}50`, borderRadius:8,
+      background:'var(--color-bg)', border:`1.5px dashed ${SPINE_BASE}`, borderRadius:8,
       display:'flex', flexDirection:'column', justifyContent:'center',
-      padding:'0 20px', boxSizing:'border-box',
+      padding:'0 20px', boxSizing:'border-box', opacity:0.97,
     }}>
-      <h2 style={{fontSize:16,fontWeight:700,color:'#2B211B',marginBottom:8,fontFamily:"'Noto Serif JP',serif"}}>ユーザーの推し</h2>
-      <p style={{fontSize:12,color:'#77706A',marginBottom:14,lineHeight:1.7}}>推しの作品を拡散しよう！</p>
-      <a href="/search" style={{display:'inline-block',fontSize:11,color:'#F26A21',border:'1.5px solid #F26A21',borderRadius:14,padding:'6px 14px',textDecoration:'none',fontWeight:600,width:'fit-content'}}>作品を検索する</a>
+      <h2 style={{fontSize:16,fontWeight:700,color:'var(--color-text)',marginBottom:8,fontFamily:"'Noto Serif JP',serif"}}>ユーザーの推し</h2>
+      <p style={{fontSize:12,color:'var(--color-text-muted)',marginBottom:14,lineHeight:1.7}}>推しの作品を拡散しよう！</p>
+      <a href="/search" style={{display:'inline-block',fontSize:11,color:'var(--color-brand)',border:'1.5px solid var(--color-brand)',borderRadius:14,padding:'6px 14px',textDecoration:'none',fontWeight:600,width:'fit-content'}}>作品を検索する</a>
     </div>
   )
 }
@@ -237,12 +237,12 @@ function EmptyBook() {
             <line x1="16" y1="179" x2="152" y2="179" stroke="rgba(255,230,190,0.55)" strokeWidth="1.2"/>
           </svg>
           <div style={{position:'relative',zIndex:1,padding:'18px 16px',flex:1,display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',textAlign:'center'}}>
-            <span style={{fontSize:8,fontWeight:700,color:'#fff',background:'rgba(255,255,255,0.15)',border:'1px solid rgba(255,230,190,0.4)',padding:'1px 6px',borderRadius:3,marginBottom:10}}>原石</span>
+            <span style={{fontSize:8,fontWeight:700,color:'var(--color-bg-card)',background:'rgba(255,255,255,0.15)',border:'1px solid rgba(255,230,190,0.4)',padding:'1px 6px',borderRadius:3,marginBottom:10}}>原石</span>
             <div style={{fontSize:13,fontWeight:700,color:'rgba(255,255,255,0.8)',fontFamily:"'Noto Serif JP',serif"}}>作品準備中</div>
           </div>
-          <div style={{position:'relative',zIndex:1,background:'#fff',borderTop:`2px solid ${SPINE_DARK}`,padding:'8px 10px'}}>
-            <div style={{fontSize:9,fontWeight:700,color:'#F26A21',marginBottom:3}}>読者の声</div>
-            <div style={{fontSize:10,color:'#B8AEA8',lineHeight:1.55,fontStyle:'italic',textAlign:'center'}}>君の声を届けよう</div>
+          <div style={{position:'relative',zIndex:1,background:'var(--color-bg-card)',borderTop:`2px solid ${SPINE_DARK}`,padding:'8px 10px'}}>
+            <div style={{fontSize:9,fontWeight:700,color:'var(--color-brand)',marginBottom:3}}>読者の声</div>
+            <div style={{fontSize:10,color:'var(--color-text-faint)',lineHeight:1.55,fontStyle:'italic',textAlign:'center'}}>君の声を届けよう</div>
           </div>
         </div>
       </div>
@@ -359,7 +359,7 @@ export default function GemSection({ novels, discoverCommentMap }: Props) {
             display:'flex', alignItems:'center', justifyContent:'center',
             boxShadow:'0 2px 8px rgba(0,0,0,0.15)',
           }}>
-          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#2B211B" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="var(--color-text)" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
         </button>
         <button onClick={()=>jump(1)} aria-label="次へ"
           style={{
@@ -369,27 +369,27 @@ export default function GemSection({ novels, discoverCommentMap }: Props) {
             display:'flex', alignItems:'center', justifyContent:'center',
             boxShadow:'0 2px 8px rgba(0,0,0,0.15)',
           }}>
-          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#2B211B" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="var(--color-text)" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
         </button>
       </div>
 
       {/* モバイル：お知らせ風デザイン（変更なし） */}
       <div className="gem-mobile" style={{display:'none',width:'100%'}}>
         <div>
-          <div style={{background:'#fff',border:'1px solid #F0D9C9',borderRadius:10,overflow:'hidden'}}>
-            <div style={{padding:'10px 16px',borderBottom:'1px solid #F0D9C9',display:'flex',alignItems:'center',justifyContent:'space-between',background:'#FFF9F2'}}>
-              <span style={{fontSize:14,fontWeight:700,color:'#2B211B'}}>ユーザーの推し</span>
-              <a href="/search" style={{fontSize:12,color:'#F26A21',textDecoration:'none'}}>作品を探す ›</a>
+          <div style={{background:'var(--color-bg-card)',border:'1px solid var(--color-brand-border)',borderRadius:10,overflow:'hidden'}}>
+            <div style={{padding:'10px 16px',borderBottom:'1px solid var(--color-brand-border)',display:'flex',alignItems:'center',justifyContent:'space-between',background:'var(--color-bg)'}}>
+              <span style={{fontSize:14,fontWeight:700,color:'var(--color-text)'}}>ユーザーの推し</span>
+              <a href="/search" style={{fontSize:12,color:'var(--color-brand)',textDecoration:'none'}}>作品を探す ›</a>
             </div>
             {novels.slice(0,4).map((n, i) => !n ? null : (
               <NovelPreviewPopup key={n.id} novel={{...n, like_count: n.likeCount2}}>
-                <div style={{padding:'10px 16px',borderBottom:'1px solid #FFF1E6',cursor:'pointer'}}>
+                <div style={{padding:'10px 16px',borderBottom:'1px solid var(--color-brand-light)',cursor:'pointer'}}>
                   <div style={{display:'flex',gap:4,marginBottom:3,flexWrap:'wrap'}}>
-                    <span style={{fontSize:9,fontWeight:700,color:'#F26A21',background:'#FFF1E6',border:'1px solid #f5b080',padding:'1px 5px',borderRadius:3}}>原石</span>
-                    <span style={{fontSize:9,color:'#77706A',background:'#FFF9F2',border:'1px solid #F0D9C9',padding:'1px 5px',borderRadius:3}}>{n.genre}</span>
+                    <span style={{fontSize:9,fontWeight:700,color:'var(--color-brand)',background:'var(--color-brand-light)',border:'1px solid var(--color-tag-border)',padding:'1px 5px',borderRadius:3}}>原石</span>
+                    <span style={{fontSize:9,color:'var(--color-text-muted)',background:'var(--color-bg)',border:'1px solid var(--color-brand-border)',padding:'1px 5px',borderRadius:3}}>{n.genre}</span>
                   </div>
-                  <div style={{fontSize:13,fontWeight:700,color:'#2B211B',marginBottom:2}}>{n.title}</div>
-                  <div style={{fontSize:11,color:'#77706A',marginBottom:(discoverCommentMap[n.id]||[]).length>0?4:0}}>作者：{n.display_name}</div>
+                  <div style={{fontSize:13,fontWeight:700,color:'var(--color-text)',marginBottom:2}}>{n.title}</div>
+                  <div style={{fontSize:11,color:'var(--color-text-muted)',marginBottom:(discoverCommentMap[n.id]||[]).length>0?4:0}}>作者：{n.display_name}</div>
                   {(discoverCommentMap[n.id]||[]).length > 0 && (
                     <div style={{
                       fontSize:11,color:'#5a3a20',

@@ -24,6 +24,14 @@ const M_GAP = 4
 // 中央に完全に見える枚数。左右にそれぞれ半枚分が見切れる（合計 VISIBLE_COUNT+1 枚分の幅）
 const VISIBLE_COUNT = 5
 
+// CSS変数の実際の値（hex等）を取得するヘルパー。
+// JSでstyleを直接書き換えるホバー処理でも、テーマカラーを参照できるようにするため。
+function cssVar(name: string, fallback: string) {
+  if (typeof window === 'undefined') return fallback
+  const v = getComputedStyle(document.documentElement).getPropertyValue(name).trim()
+  return v || fallback
+}
+
 export default function HeroSlider({ items }: Props) {
   const CLONE_COUNT = Math.min(items.length, 4)
   const loopItems = items.length > 1
@@ -158,9 +166,9 @@ export default function HeroSlider({ items }: Props) {
               boxShadow:'0 4px 14px rgba(0,0,0,0.18)', zIndex:2,
               transition:'background .15s ease, transform .15s ease',
             }}
-            onMouseEnter={e=>{e.currentTarget.style.background='#F26A21';e.currentTarget.style.transform='translateY(-50%) scale(1.08)';const svg=e.currentTarget.querySelector('svg') as SVGElement;if(svg)svg.style.color='#fff'}}
-            onMouseLeave={e=>{e.currentTarget.style.background='rgba(255,255,255,0.95)';e.currentTarget.style.transform='translateY(-50%) scale(1)';const svg=e.currentTarget.querySelector('svg') as SVGElement;if(svg)svg.style.color='#2B211B'}}>
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{color:'#2B211B'}}>
+            onMouseEnter={e=>{e.currentTarget.style.background=cssVar('--color-brand','#F26A21');e.currentTarget.style.transform='translateY(-50%) scale(1.08)';const svg=e.currentTarget.querySelector('svg') as SVGElement;if(svg)svg.style.color=cssVar('--color-bg-card','#fff')}}
+            onMouseLeave={e=>{e.currentTarget.style.background='rgba(255,255,255,0.95)';e.currentTarget.style.transform='translateY(-50%) scale(1)';const svg=e.currentTarget.querySelector('svg') as SVGElement;if(svg)svg.style.color=cssVar('--color-text','#2B211B')}}>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{color:'var(--color-text)'}}>
               <polyline points="15 18 9 12 15 6"/>
             </svg>
           </button>
@@ -173,16 +181,16 @@ export default function HeroSlider({ items }: Props) {
               boxShadow:'0 4px 14px rgba(0,0,0,0.18)', zIndex:2,
               transition:'background .15s ease, transform .15s ease',
             }}
-            onMouseEnter={e=>{e.currentTarget.style.background='#F26A21';e.currentTarget.style.transform='translateY(-50%) scale(1.08)';const svg=e.currentTarget.querySelector('svg') as SVGElement;if(svg)svg.style.color='#fff'}}
-            onMouseLeave={e=>{e.currentTarget.style.background='rgba(255,255,255,0.95)';e.currentTarget.style.transform='translateY(-50%) scale(1)';const svg=e.currentTarget.querySelector('svg') as SVGElement;if(svg)svg.style.color='#2B211B'}}>
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{color:'#2B211B'}}>
+            onMouseEnter={e=>{e.currentTarget.style.background=cssVar('--color-brand','#F26A21');e.currentTarget.style.transform='translateY(-50%) scale(1.08)';const svg=e.currentTarget.querySelector('svg') as SVGElement;if(svg)svg.style.color=cssVar('--color-bg-card','#fff')}}
+            onMouseLeave={e=>{e.currentTarget.style.background='rgba(255,255,255,0.95)';e.currentTarget.style.transform='translateY(-50%) scale(1)';const svg=e.currentTarget.querySelector('svg') as SVGElement;if(svg)svg.style.color=cssVar('--color-text','#2B211B')}}>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{color:'var(--color-text)'}}>
               <polyline points="9 18 15 12 9 6"/>
             </svg>
           </button>
 
           <div style={{display:'flex',justifyContent:'center',gap:5,marginTop:6}}>
             {items.map((_, i) => (
-              <button key={i} onClick={()=>goTo(startIndex + i)} style={{width:i===realIndex?16:6,height:6,borderRadius:3,border:'none',cursor:'pointer',background:i===realIndex?'#F26A21':'#F0D9C9',transition:'all .3s',padding:0}}/>
+              <button key={i} onClick={()=>goTo(startIndex + i)} style={{width:i===realIndex?16:6,height:6,borderRadius:3,border:'none',cursor:'pointer',background:i===realIndex?'var(--color-brand)':'var(--color-brand-border)',transition:'all .3s',padding:0}}/>
             ))}
           </div>
         </>
