@@ -22,25 +22,50 @@ interface Route {
   duration: number       // 1サイクルの秒数
 }
 
-// ===== あらかじめ100パターンの「発生位置×移動ルート」を生成 =====
+// 移動の「型」をいくつか用意し、ランダムに割り当てることで軌道の質感に多様性を持たせる。
+// 単純にdriftX/Yをランダムにするだけだと似た動きに偏りやすいため、型ごとに特徴的な比率で生成する。
+type DriftPattern = () => { driftX: number; driftY: number }
+
+const DRIFT_PATTERNS: DriftPattern[] = [
+  // 右上へ大きく流れる
+  () => ({ driftX: 60 + Math.random() * 110, driftY: -150 - Math.random() * 60 }),
+  // 左上へ大きく流れる
+  () => ({ driftX: -60 - Math.random() * 110, driftY: -150 - Math.random() * 60 }),
+  // ほぼ真上にゆっくり昇る
+  () => ({ driftX: -30 + Math.random() * 60, driftY: -170 - Math.random() * 50 }),
+  // 横方向に大きく漂う（縦はあまり動かない）
+  () => ({ driftX: (Math.random() < 0.5 ? -1 : 1) * (160 + Math.random() * 90), driftY: -40 - Math.random() * 50 }),
+  // 小さく短い揺らぎ（近距離でふわっと消える）
+  () => ({ driftX: -50 + Math.random() * 100, driftY: -60 - Math.random() * 40 }),
+  // 弧を描くように斜めに大きく流れる
+  () => ({ driftX: (Math.random() < 0.5 ? -1 : 1) * (140 + Math.random() * 80), driftY: -120 - Math.random() * 80 }),
+]
+
+// ===== あらかじめ200パターンの「発生位置×移動ルート」を生成 =====
 // 動的に毎回計算するのではなく、固定の候補リストから選ぶことで、
 // 軌道計算そのものに起因する表示の乱れ（飛び・吸い寄せ等）を避ける。
 function buildRoutePool(n: number): Route[] {
   const pool: Route[] = []
   for (let i = 0; i < n; i++) {
-    // 疑似乱数だが、ページロード単位では固定。Math.randomで十分（事前生成なので一貫性は保たれる）
+    const pattern = DRIFT_PATTERNS[i % DRIFT_PATTERNS.length]
+    const { driftX, driftY } = pattern()
     pool.push({
       left: 8 + Math.random() * 84,
       top: 10 + Math.random() * 76,
-      driftX: -120 + Math.random() * 240,
-      driftY: -100 + Math.random() * 35,
-      duration: 6 + Math.random() * 4,
+      driftX,
+      driftY,
+      duration: 3.6 + Math.random() * 2.4,
     })
+  }
+  // 型の並びが規則的にならないようプール自体もシャッフル
+  for (let i = pool.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1))
+    ;[pool[i], pool[j]] = [pool[j], pool[i]]
   }
   return pool
 }
 
-const ROUTE_POOL = buildRoutePool(100)
+const ROUTE_POOL = buildRoutePool(200)
 
 function shuffledIndices(count: number, poolSize: number): number[] {
   const all = Array.from({ length: poolSize }, (_, i) => i)
@@ -57,10 +82,10 @@ function shuffledIndices(count: number, poolSize: number): number[] {
 // 文字数に応じてフォントサイズを調整（短い文は大きく目立たせる）
 function sizeFor(text: string) {
   const len = text.length
-  if (len <= 8) return 26
-  if (len <= 16) return 21
-  if (len <= 28) return 17
-  return 14
+  if (len <= 8) return 22
+  if (len <= 16) return 18
+  if (len <= 28) return 15
+  return 12.5
 }
 
 interface AssignedItem {
