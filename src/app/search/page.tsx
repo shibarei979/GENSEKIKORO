@@ -165,7 +165,7 @@ export default async function SearchPage({ searchParams }: Props) {
   const totalPages = Math.ceil(count / PAGE_SIZE)
 
   return (
-    <div style={{minHeight:'100vh',background:'#fff',fontFamily:"'Noto Sans JP',sans-serif"}}>
+    <div style={{minHeight:'100vh',background:'var(--color-bg-card)',fontFamily:"'Noto Sans JP',sans-serif"}}>
       <Header profile={profile} user={user} />
 
       <div className="main-layout" style={{maxWidth:1200,margin:'0 auto',padding:'24px 32px',display:'flex',gap:20,alignItems:'flex-start'}}>
@@ -177,33 +177,33 @@ export default async function SearchPage({ searchParams }: Props) {
             defaultSort={sort} ageVerified={isAgeVerified}
           />
 
-          <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',marginBottom:10,fontSize:13,color:'#77706A'}}>
+          <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',marginBottom:10,fontSize:13,color:'var(--color-text-muted)'}}>
             {hasSearch
-              ? <span>検索結果：<strong style={{color:'#2B211B'}}>{fmtNum(count)}作品</strong></span>
-              : <span style={{color:'#77706A'}}>ランダム表示中</span>
+              ? <span>検索結果：<strong style={{color:'var(--color-text)'}}>{fmtNum(count)}作品</strong></span>
+              : <span style={{color:'var(--color-text-muted)'}}>ランダム表示中</span>
             }
           </div>
 
-          <div style={{background:'#fff',border:'1px solid #F0D9C9',borderRadius:12,overflow:'hidden'}}>
+          <div style={{background:'var(--color-bg-card)',border:'1px solid var(--color-brand-border)',borderRadius:12,overflow:'hidden'}}>
             {novels.length === 0 ? (
-              <div style={{padding:'60px',textAlign:'center',color:'#B8AEA8'}}>
+              <div style={{padding:'60px',textAlign:'center',color:'var(--color-text-faint)'}}>
                 <div style={{fontSize:14,marginBottom:8}}>作品が見つかりませんでした</div>
                 <div style={{fontSize:12}}>検索条件を変えてお試しください</div>
               </div>
             ) : novels.map((n: any, idx: number) => (
               <NovelPreviewPopup key={n.id} novel={{...n, like_count: n.like_count||0}}>
-              <div style={{cursor:'pointer',padding:'16px 20px',borderBottom:idx<novels.length-1?'1px solid #FFF1E6':'none'}}>
+              <div style={{cursor:'pointer',padding:'16px 20px',borderBottom:idx<novels.length-1?'1px solid var(--color-brand-light)':'none'}}>
                 <span style={{display:'flex',gap:5,marginBottom:6,flexWrap:'wrap',alignItems:'center'}}>
-                  <span style={{fontSize:10,background:'#FFF1E6',color:'#F26A21',border:'1px solid #f5b080',padding:'1px 6px',borderRadius:3}}>{n.genre}</span>
-                  <span style={{fontSize:10,background:'#eff6ff',color:'#2563eb',border:'1px solid #bfdbfe',padding:'1px 6px',borderRadius:3}}>{n.novel_type}</span>
+                  <span style={{fontSize:10,background:'var(--color-brand-light)',color:'var(--color-brand)',border:'1px solid var(--color-tag-border)',padding:'1px 6px',borderRadius:3}}>{n.genre}</span>
+                  <span style={{fontSize:10,background:'var(--color-info-bg)',color:'var(--color-info)',border:'1px solid var(--color-info-border)',padding:'1px 6px',borderRadius:3}}>{n.novel_type}</span>
                   {n.is_newbie && <span style={{fontSize:10,background:'#f0fdf4',color:'#16a34a',border:'1px solid #86efac',padding:'1px 6px',borderRadius:3,fontWeight:700}}>新人</span>}
                   {n.is_serial
                     ? <span style={{fontSize:10,background:'#f0fdf4',color:'#15803d',border:'1px solid #86efac',padding:'1px 6px',borderRadius:3}}>連載中</span>
                     : <span style={{fontSize:10,background:'#f5f5f5',color:'#757575',border:'1px solid #e0e0e0',padding:'1px 6px',borderRadius:3}}>完結</span>}
-                  {n.is_r18 && <span style={{fontSize:10,background:'#fef2f2',color:'#dc2626',border:'1px solid #fca5a5',padding:'1px 6px',borderRadius:3}}>R18</span>}
+                  {n.is_r18 && <span style={{fontSize:10,background:'#fef2f2',color:'var(--color-danger)',border:'1px solid #fca5a5',padding:'1px 6px',borderRadius:3}}>R18</span>}
                 </span>
-                <span style={{display:'block',fontSize:17,fontWeight:700,color:'#2B211B',marginBottom:4,lineHeight:1.4}}>{n.title}</span>
-                <span style={{display:'block',fontSize:12,color:'#77706A',marginBottom:6}}>作者：{n.display_name}</span>
+                <span style={{display:'block',fontSize:17,fontWeight:700,color:'var(--color-text)',marginBottom:4,lineHeight:1.4}}>{n.title}</span>
+                <span style={{display:'block',fontSize:12,color:'var(--color-text-muted)',marginBottom:6}}>作者：{n.display_name}</span>
                 {n.summary && (
                   <span style={{display:'block',fontSize:12,color:'#5a3a20',lineHeight:1.7,marginBottom:7,overflow:'hidden',WebkitLineClamp:3,WebkitBoxOrient:'vertical' as any}}>
                     {n.summary}
@@ -212,14 +212,14 @@ export default async function SearchPage({ searchParams }: Props) {
                 {(n.tags||[]).length > 0 && (
                   <span style={{display:'flex',gap:4,flexWrap:'wrap',marginBottom:7}}>
                     {(n.tags as string[]).map((t: string) => (
-                      <span key={t} style={{fontSize:10,background:'#FFF9F2',color:'#77706A',border:'1px solid #F0D9C9',padding:'1px 6px',borderRadius:3}}>#{t}</span>
+                      <span key={t} style={{fontSize:10,background:'var(--color-bg)',color:'var(--color-text-muted)',border:'1px solid var(--color-brand-border)',padding:'1px 6px',borderRadius:3}}>#{t}</span>
                     ))}
                   </span>
                 )}
-                <span style={{display:'flex',gap:12,fontSize:11,color:'#B8AEA8',flexWrap:'wrap'}}>
+                <span style={{display:'flex',gap:12,fontSize:11,color:'var(--color-text-faint)',flexWrap:'wrap'}}>
                   {n.charCount > 0 && <span>{n.charCount >= 10000 ? `${(n.charCount/10000).toFixed(1)}万文字` : `${n.charCount.toLocaleString()}文字`}</span>}
                   {n.updated_at && <span>最終更新：{new Date(n.updated_at).toLocaleDateString('ja-JP',{year:'numeric',month:'numeric',day:'numeric'})}</span>}
-                  {n.likeCount > 0 && <span style={{color:'#77706A',fontWeight:600}}>♡ {fmtNum(n.likeCount)}</span>}
+                  {n.likeCount > 0 && <span style={{color:'var(--color-text-muted)',fontWeight:600}}>♡ {fmtNum(n.likeCount)}</span>}
                 </span>
               </div>
               </NovelPreviewPopup>
@@ -230,14 +230,14 @@ export default async function SearchPage({ searchParams }: Props) {
             <div style={{display:'flex',justifyContent:'center',gap:8,marginTop:20}}>
               {page > 1 && (
                 <Link href={buildUrl({page: String(page-1)})}
-                  style={{padding:'6px 16px',border:'1px solid #F0D9C9',borderRadius:16,fontSize:12,color:'#F26A21',textDecoration:'none',background:'#FFF9F2'}}>
+                  style={{padding:'6px 16px',border:'1px solid var(--color-brand-border)',borderRadius:16,fontSize:12,color:'var(--color-brand)',textDecoration:'none',background:'var(--color-bg)'}}>
                   ‹ 前へ
                 </Link>
               )}
-              <span style={{padding:'6px 12px',fontSize:12,color:'#77706A'}}>{page} / {totalPages}</span>
+              <span style={{padding:'6px 12px',fontSize:12,color:'var(--color-text-muted)'}}>{page} / {totalPages}</span>
               {page < totalPages && (
                 <Link href={buildUrl({page: String(page+1)})}
-                  style={{padding:'6px 16px',border:'1px solid #F0D9C9',borderRadius:16,fontSize:12,color:'#F26A21',textDecoration:'none',background:'#FFF9F2'}}>
+                  style={{padding:'6px 16px',border:'1px solid var(--color-brand-border)',borderRadius:16,fontSize:12,color:'var(--color-brand)',textDecoration:'none',background:'var(--color-bg)'}}>
                   次へ ›
                 </Link>
               )}
