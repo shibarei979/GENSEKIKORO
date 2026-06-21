@@ -7,7 +7,7 @@ import Footer from '@/components/layout/Footer'
 const TYPE_OPTIONS: Record<string, { label: string; color: string }> = {
   info:      { label: 'お知らせ',       color: '#3b82f6' },
   important: { label: '重要なお知らせ', color: '#ef4444' },
-  contest:   { label: 'コンテスト',     color: '#F26A21' },
+  contest:   { label: 'コンテスト',     color: 'var(--color-brand)' },
 }
 
 interface Props { params: { id: string } }
@@ -33,20 +33,20 @@ export default async function AnnouncementDetailPage({ params }: Props) {
   const t = TYPE_OPTIONS[announcement.type] ?? TYPE_OPTIONS['info']
 
   return (
-    <div style={{minHeight:'100vh',background:'#FFF9F2',fontFamily:"'Noto Sans JP',sans-serif"}}>
+    <div style={{minHeight:'100vh',background:'var(--color-bg)',fontFamily:"'Noto Sans JP',sans-serif"}}>
       <Header profile={profile} user={user} />
 
       <div style={{maxWidth:800,margin:'0 auto',padding:'32px 24px'}}>
         {/* パンくず */}
         <div style={{display:'flex',alignItems:'center',gap:6,marginBottom:20,fontSize:12,color:'#94a3b8'}}>
-          <Link href="/" style={{color:'#F26A21',textDecoration:'none'}}>ホーム</Link>
+          <Link href="/" style={{color:'var(--color-brand)',textDecoration:'none'}}>ホーム</Link>
           <span>›</span>
-          <Link href="/announcements" style={{color:'#F26A21',textDecoration:'none'}}>お知らせ一覧</Link>
+          <Link href="/announcements" style={{color:'var(--color-brand)',textDecoration:'none'}}>お知らせ一覧</Link>
           <span>›</span>
-          <span style={{color:'#77706A'}}>{announcement.title}</span>
+          <span style={{color:'var(--color-text-muted)'}}>{announcement.title}</span>
         </div>
 
-        <div style={{background:'#fff',border:'1px solid #F0D9C9',borderRadius:16,overflow:'hidden'}}>
+        <div style={{background:'var(--color-bg-card)',border:'1px solid var(--color-brand-border)',borderRadius:16,overflow:'hidden'}}>
           {/* 画像 */}
           {announcement.image_url && (
             <div style={{padding:'20px 20px 0'}}>
@@ -65,25 +65,25 @@ export default async function AnnouncementDetailPage({ params }: Props) {
               }}>
                 {t.label}
               </span>
-              <span style={{fontSize:12,color:'#B8AEA8'}}>
+              <span style={{fontSize:12,color:'var(--color-text-faint)'}}>
                 {new Date(announcement.created_at).toLocaleDateString('ja-JP')}
               </span>
             </div>
 
             {/* タイトル */}
-            <h1 style={{fontSize:22,fontWeight:700,color:'#2B211B',lineHeight:1.5,marginBottom:20,fontFamily:"'Noto Serif JP',serif"}}>
+            <h1 style={{fontSize:22,fontWeight:700,color:'var(--color-text)',lineHeight:1.5,marginBottom:20,fontFamily:"'Noto Serif JP',serif"}}>
               {announcement.title}
             </h1>
 
             {/* 本文 */}
-            <div style={{fontSize:14,color:'#2B211B',lineHeight:2.0,whiteSpace:'pre-wrap',marginBottom:announcement.link?24:0}}>
+            <div style={{fontSize:14,color:'var(--color-text)',lineHeight:2.0,whiteSpace:'pre-wrap',marginBottom:announcement.link?24:0}}>
               {announcement.body}
             </div>
 
             {/* リンクボタン */}
             {announcement.link && (
               <a href={announcement.link} target="_blank" rel="noopener noreferrer"
-                style={{display:'inline-block',padding:'10px 24px',background:'#F26A21',color:'#fff',
+                style={{display:'inline-block',padding:'10px 24px',background:'var(--color-brand)',color:'var(--color-bg-card)',
                   fontWeight:700,fontSize:14,borderRadius:8,textDecoration:'none'}}>
                 詳しくはこちら →
               </a>
@@ -94,8 +94,8 @@ export default async function AnnouncementDetailPage({ params }: Props) {
         {/* 戻るリンク */}
         <div style={{marginTop:20,textAlign:'center'}}>
           <Link href="/announcements"
-            style={{fontSize:13,color:'#F26A21',textDecoration:'none',border:'1px solid #F0D9C9',
-              padding:'8px 20px',borderRadius:20,background:'#fff',display:'inline-block'}}>
+            style={{fontSize:13,color:'var(--color-brand)',textDecoration:'none',border:'1px solid var(--color-brand-border)',
+              padding:'8px 20px',borderRadius:20,background:'var(--color-bg-card)',display:'inline-block'}}>
             ← お知らせ一覧に戻る
           </Link>
         </div>
