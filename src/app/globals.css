@@ -2,48 +2,97 @@
 @tailwind components;
 @tailwind utilities;
 
+/* ===================================================================
+   原石航路 デザインテーマ（CSS変数）
+   ここで色を変更すると、var(--xxx) を参照しているサイト全体に反映されます。
+   将来のダークモード対応は [data-theme="dark"] のブロックで上書きするだけで可能。
+   =================================================================== */
+:root {
+  /* --- ブランドカラー（オレンジ系） --- */
+  --color-brand:        #F26A21; /* メインのオレンジ（ボタン・アクセント・リンク） */
+  --color-brand-dark:   #d95a18; /* ホバー時など少し濃いオレンジ */
+  --color-brand-light:  #FFF1E6; /* 薄いオレンジ背景（タグ・選択状態など） */
+  --color-brand-border: #F0D9C9; /* ベージュ系の境界線・枠線（サイト全体で多用） */
+
+  /* --- 背景色 --- */
+  --color-bg:           #FFF9F2; /* ページ全体の基本背景（クリーム色） */
+  --color-bg-card:      #ffffff; /* カード・パネルの背景 */
+  --color-bg-subtle:    #FFF9F2; /* セクション内の薄い背景区切り */
+
+  /* --- テキストカラー --- */
+  --color-text:         #2B211B; /* 基本の本文・見出し文字色（濃いブラウン系） */
+  --color-text-muted:   #77706A; /* 補助テキスト・キャプション */
+  --color-text-faint:   #B8AEA8; /* さらに薄い補助テキスト（日付・件数など） */
+
+  /* --- 状態色 --- */
+  --color-success:      #16a34a;
+  --color-danger:       #dc2626;
+  --color-info:         #2563eb;
+  --color-warning:      #92400e;
+
+  /* --- 「文章から探す」「本棚」等のダークセクション用 --- */
+  --color-dark-bg:       #232323;
+  --color-dark-bg-light: #3a3a3a;
+  --color-dark-text:     #ffffff;
+
+  /* --- 本棚（ユーザーの推し）テーマカラー --- */
+  --color-spine-base:  #6b3a22;
+  --color-spine-dark:  #4a2715;
+  --color-spine-light: #8a4f2e;
+}
+
+/* 将来のダークモード対応用（A5実装時にここを拡張する） */
+/*
+[data-theme="dark"] {
+  --color-bg: #1c1610;
+  --color-bg-card: #2a2018;
+  --color-text: #f0e8de;
+  ...
+}
+*/
+
 * { box-sizing: border-box; }
 
 body {
   font-family: 'Noto Sans JP', sans-serif;
-  background: #FFF9F2;
-  color: #2B211B;
+  background: var(--color-bg);
+  color: var(--color-text);
 }
 
 ::-webkit-scrollbar { width: 5px; height: 5px; }
-::-webkit-scrollbar-thumb { background: #F0D9C9; border-radius: 3px; }
-input[type="checkbox"] { accent-color: #F26A21; }
+::-webkit-scrollbar-thumb { background: var(--color-brand-border); border-radius: 3px; }
+input[type="checkbox"] { accent-color: var(--color-brand); }
 button { cursor: pointer; }
 button[style*="background:'#F26A21'"]:hover,
-button[style*='background:"#F26A21"']:hover { background: #d95a18 !important; }
-button[style*="color:'#F26A21'"]:hover { background: #FFF1E6 !important; }
+button[style*='background:"#F26A21"']:hover { background: var(--color-brand-dark) !important; }
+button[style*="color:'#F26A21'"]:hover { background: var(--color-brand-light) !important; }
 a { transition: opacity 0.15s ease; }
 a[href*="/novel"]:hover > div,
-div[style*="cursor:'pointer'"]:hover { background: #FFF9F2 !important; }
+div[style*="cursor:'pointer'"]:hover { background: var(--color-bg) !important; }
 .list-row { transition: background 0.1s; cursor: pointer; }
-.list-row:hover { background: #FFF9F2 !important; }
-.list-row:hover .list-row-title { color: #F26A21 !important; }
-.sw-item:hover { background: #FFF9F2 !important; }
+.list-row:hover { background: var(--color-bg) !important; }
+.list-row:hover .list-row-title { color: var(--color-brand) !important; }
+.sw-item:hover { background: var(--color-bg) !important; }
 .gem-card { transition: transform .15s, box-shadow .15s; cursor: pointer; }
 .gem-card:hover { transform: translateY(-2px); box-shadow: 0 6px 18px rgba(242,106,33,.12); }
-nav a:hover { color: #F26A21 !important; opacity: 1; }
-.pager:hover { border-color: #F26A21; color: #F26A21; }
-.finput:focus, .ftarea:focus, input:focus, textarea:focus { border-color: #F26A21 !important; outline: none; }
+nav a:hover { color: var(--color-brand) !important; opacity: 1; }
+.pager:hover { border-color: var(--color-brand); color: var(--color-brand); }
+.finput:focus, .ftarea:focus, input:focus, textarea:focus { border-color: var(--color-brand) !important; outline: none; }
 [style*="cursor:'pointer'"] { cursor: pointer; }
-a:hover [style*="fontWeight:700"][style*="color:'#2B211B'"] { color: #F26A21 !important; }
+a:hover [style*="fontWeight:700"][style*="color:'#2B211B'"] { color: var(--color-brand) !important; }
 button { transition: background 0.15s ease, transform 0.1s ease, opacity 0.15s ease; }
 button:hover:not(:disabled) { transform: translateY(-1px); }
 button:active:not(:disabled) { transform: translateY(0); }
-.footer-col li:hover { color: #F26A21; }
+.footer-col li:hover { color: var(--color-brand); }
 .user-menu:hover .user-tooltip { opacity: 1 !important; }
-footer a:hover { color: #F26A21 !important; opacity: 1; }
+footer a:hover { color: var(--color-brand) !important; opacity: 1; }
 .header-post-btn { transition: transform 0.15s ease, box-shadow 0.15s ease !important; }
 .header-post-btn:hover { transform: translateY(-3px) !important; box-shadow: 0 4px 12px rgba(242,106,33,0.25) !important; background: #fff8f5 !important; }
 .more-link:hover { transform: scale(1.08) !important; opacity: 1 !important; }
-.search-result-row:hover { background: #FFF9F2 !important; }
+.search-result-row:hover { background: var(--color-bg) !important; }
 .search-banner-link { transition: transform 0.15s ease, box-shadow 0.15s ease; display: block; border-radius: 14px; }
 .search-banner-link:hover { transform: translateY(-4px) !important; box-shadow: 0 8px 24px rgba(242,106,33,0.4) !important; opacity: 1 !important; }
-.announcement-title-link { font-size: 11px; color: #2B211B; line-height: 1.5; text-decoration: none; display: inline-block; }
+.announcement-title-link { font-size: 11px; color: var(--color-text); line-height: 1.5; text-decoration: none; display: inline-block; }
 .announcement-title-link:hover { text-decoration: underline; opacity: 1 !important; }
 
 /* ===== レスポンシブ ===== */

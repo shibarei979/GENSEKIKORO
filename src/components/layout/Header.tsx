@@ -120,10 +120,10 @@ export default function Header({ profile, user, activeGenre }: Props) {
     <>
       {/* ===== 統合ヘッダー（ロゴ＋検索＋ユーザー操作＋ナビを1ブロックに） ===== */}
       <header style={{
-        background: scrolled ? 'rgba(255,255,255,0.88)' : '#fff',
+        background: scrolled ? 'rgba(255,255,255,0.88)' : 'var(--color-bg-card)',
         backdropFilter: scrolled ? 'blur(10px)' : 'none',
         WebkitBackdropFilter: scrolled ? 'blur(10px)' : 'none',
-        borderBottom:'1px solid #F0D9C9',
+        borderBottom:'1px solid var(--color-brand-border)',
         position:'sticky', top:0, zIndex:50,
         boxShadow: scrolled ? '0 2px 12px rgba(242,106,33,.08)' : '0 1px 4px rgba(242,106,33,.07)',
         transition:'background .25s ease, box-shadow .25s ease, backdrop-filter .25s ease',
@@ -150,7 +150,7 @@ export default function Header({ profile, user, activeGenre }: Props) {
               <Link key={item.href} href={item.href} className={`header-nav-link${isActive(item.href)?' header-nav-link-active':''}`}
                 style={{padding:'0 12px',fontSize:14.5,whiteSpace:'nowrap',textDecoration:'none',
                   display:'flex',alignItems:'center',fontWeight:600,
-                  color:isActive(item.href)?'#F26A21':'#4a4038',
+                  color:isActive(item.href)?'var(--color-brand)':'#4a4038',
                   position:'relative',
                 }}>
                 {item.label}
@@ -161,11 +161,11 @@ export default function Header({ profile, user, activeGenre }: Props) {
           <div style={{flex:1}}/>
 
           {/* 検索バー（四角・投稿ボタンの隣） */}
-          <form onSubmit={handleSearch} style={{display:'flex',alignItems:'center',width:340,border:'1.5px solid #F0D9C9',borderRadius:6,background:'#FFF9F2',overflow:'hidden',flexShrink:0}}>
+          <form onSubmit={handleSearch} style={{display:'flex',alignItems:'center',width:340,border:'1.5px solid var(--color-brand-border)',borderRadius:6,background:'var(--color-bg)',overflow:'hidden',flexShrink:0}}>
             <input value={q} onChange={e=>setQ(e.target.value)} placeholder="作品名・作者名・キーワードで検索"
-              style={{flex:1,padding:'7px 12px',border:'none',background:'transparent',fontSize:12,color:'#2B211B',outline:'none',width:'100%',minWidth:0}}/>
-            <button type="submit" style={{padding:'7px 12px',background:'none',border:'none',borderLeft:'1px solid #F0D9C9',cursor:'pointer',display:'flex',alignItems:'center',flexShrink:0}}>
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#F26A21" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+              style={{flex:1,padding:'7px 12px',border:'none',background:'transparent',fontSize:12,color:'var(--color-text)',outline:'none',width:'100%',minWidth:0}}/>
+            <button type="submit" style={{padding:'7px 12px',background:'none',border:'none',borderLeft:'1px solid var(--color-brand-border)',cursor:'pointer',display:'flex',alignItems:'center',flexShrink:0}}>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--color-brand)" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                 <circle cx="11" cy="11" r="7"/><line x1="16.5" y1="16.5" x2="22" y2="22"/>
               </svg>
             </button>
@@ -176,8 +176,8 @@ export default function Header({ profile, user, activeGenre }: Props) {
               <>
                 <Link href="/post" className="header-post-btn"
                   style={{
-                    border:'1.5px solid #F26A21', color:'#F26A21', borderRadius:20,
-                    background:'#fff', fontSize:13, fontWeight:600,
+                    border:'1.5px solid var(--color-brand)', color:'var(--color-brand)', borderRadius:20,
+                    background:'var(--color-bg-card)', fontSize:13, fontWeight:600,
                     display:'flex', alignItems:'center', justifyContent:'center', gap:6,
                     textDecoration:'none', whiteSpace:'nowrap',
                     padding:'7px 18px', flexShrink:0,
@@ -187,24 +187,24 @@ export default function Header({ profile, user, activeGenre }: Props) {
                 </Link>
                 <div ref={notifRef} style={{position:'relative'}}>
                   <button onClick={handleOpenNotif}
-                    style={{position:'relative',width:36,height:36,borderRadius:'50%',border:'none',background:'#fff',cursor:'pointer',display:'flex',alignItems:'center',justifyContent:'center',flexShrink:0}}>
-                    <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="#77706A" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    style={{position:'relative',width:36,height:36,borderRadius:'50%',border:'none',background:'var(--color-bg-card)',cursor:'pointer',display:'flex',alignItems:'center',justifyContent:'center',flexShrink:0}}>
+                    <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="var(--color-text-muted)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                       <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/>
                     </svg>
-                    {unreadCount > 0 && <span style={{position:'absolute',top:0,right:0,width:16,height:16,background:'#F26A21',borderRadius:'50%',fontSize:9,color:'#fff',fontWeight:700,display:'flex',alignItems:'center',justifyContent:'center'}}>{unreadCount > 9 ? '9+' : unreadCount}</span>}
+                    {unreadCount > 0 && <span style={{position:'absolute',top:0,right:0,width:16,height:16,background:'var(--color-brand)',borderRadius:'50%',fontSize:9,color:'var(--color-bg-card)',fontWeight:700,display:'flex',alignItems:'center',justifyContent:'center'}}>{unreadCount > 9 ? '9+' : unreadCount}</span>}
                   </button>
                   {showNotif && (
-                    <div style={{position:'absolute',right:0,top:'calc(100% + 8px)',width:320,background:'#fff',border:'1px solid #F0D9C9',borderRadius:12,boxShadow:'0 8px 32px rgba(0,0,0,0.12)',zIndex:200,overflow:'hidden',maxHeight:showAllNotif?'80vh':'360px',display:'flex',flexDirection:'column'}}>
-                      <div style={{padding:'10px 14px',borderBottom:'1px solid #F0D9C9',display:'flex',alignItems:'center',justifyContent:'space-between'}}>
-                        <span style={{fontSize:13,fontWeight:700,color:'#2B211B'}}>通知</span>
-                        <button onClick={()=>setShowAllNotif(!showAllNotif)} style={{fontSize:11,color:'#F26A21',background:'none',border:'none',cursor:'pointer'}}>{showAllNotif?'‹ 閉じる':'もっと見る ›'}</button>
+                    <div style={{position:'absolute',right:0,top:'calc(100% + 8px)',width:320,background:'var(--color-bg-card)',border:'1px solid var(--color-brand-border)',borderRadius:12,boxShadow:'0 8px 32px rgba(0,0,0,0.12)',zIndex:200,overflow:'hidden',maxHeight:showAllNotif?'80vh':'360px',display:'flex',flexDirection:'column'}}>
+                      <div style={{padding:'10px 14px',borderBottom:'1px solid var(--color-brand-border)',display:'flex',alignItems:'center',justifyContent:'space-between'}}>
+                        <span style={{fontSize:13,fontWeight:700,color:'var(--color-text)'}}>通知</span>
+                        <button onClick={()=>setShowAllNotif(!showAllNotif)} style={{fontSize:11,color:'var(--color-brand)',background:'none',border:'none',cursor:'pointer'}}>{showAllNotif?'‹ 閉じる':'もっと見る ›'}</button>
                       </div>
                       {notifications.length === 0
-                        ? <div style={{padding:'24px',textAlign:'center',fontSize:12,color:'#B8AEA8'}}>通知はありません</div>
+                        ? <div style={{padding:'24px',textAlign:'center',fontSize:12,color:'var(--color-text-faint)'}}>通知はありません</div>
                         : <div style={{overflowY:'auto',flex:1}}>{(showAllNotif?notifications:notifications.slice(0,5)).map(n=>(
-                          <a key={n.id} href={n.link||'#'} onClick={()=>setShowNotif(false)} style={{display:'block',padding:'10px 14px',borderBottom:'1px solid #FFF1E6',textDecoration:'none',background:n.is_read?'#fff':'#FFF9F2'}}>
-                            <div style={{fontSize:12,color:'#2B211B',lineHeight:1.6,marginBottom:2}}>{n.message}</div>
-                            <div style={{fontSize:10,color:'#B8AEA8'}}>{fmtDate(n.created_at)}</div>
+                          <a key={n.id} href={n.link||'#'} onClick={()=>setShowNotif(false)} style={{display:'block',padding:'10px 14px',borderBottom:'1px solid var(--color-brand-light)',textDecoration:'none',background:n.is_read?'var(--color-bg-card)':'var(--color-bg)'}}>
+                            <div style={{fontSize:12,color:'var(--color-text)',lineHeight:1.6,marginBottom:2}}>{n.message}</div>
+                            <div style={{fontSize:10,color:'var(--color-text-faint)'}}>{fmtDate(n.created_at)}</div>
                           </a>
                         ))}</div>}
                     </div>
@@ -212,35 +212,35 @@ export default function Header({ profile, user, activeGenre }: Props) {
                 </div>
                 <div ref={userMenuRef} style={{position:'relative'}}>
                   <button onClick={()=>{setShowUserMenu(!showUserMenu);setShowSettings(false)}}
-                    style={{display:'flex',alignItems:'center',justifyContent:'center',width:38,height:38,borderRadius:'50%',background:'#FFF9F2',border: profile?.icon_url ? '1.5px solid #F0D9C9' : 'none',cursor:'pointer',padding:0,overflow:'hidden'}}>
+                    style={{display:'flex',alignItems:'center',justifyContent:'center',width:38,height:38,borderRadius:'50%',background:'var(--color-bg)',border: profile?.icon_url ? '1.5px solid var(--color-brand-border)' : 'none',cursor:'pointer',padding:0,overflow:'hidden'}}>
                     {profile?.icon_url ? (
                       <img src={profile.icon_url} alt="" style={{width:'100%',height:'100%',objectFit:'cover'}}/>
                     ) : (
-                      <div style={{width:'100%',height:'100%',background:'#F26A21',display:'flex',alignItems:'center',justifyContent:'center',fontSize:15,fontWeight:700,color:'#fff'}}>
+                      <div style={{width:'100%',height:'100%',background:'var(--color-brand)',display:'flex',alignItems:'center',justifyContent:'center',fontSize:15,fontWeight:700,color:'var(--color-bg-card)'}}>
                         {(profile?.display_name||'?').slice(0,1)}
                       </div>
                     )}
                   </button>
                   {showUserMenu && (
-                    <div style={{position:'absolute',right:0,top:'calc(100% + 8px)',width:200,background:'#fff',border:'1px solid #F0D9C9',borderRadius:12,boxShadow:'0 8px 24px rgba(0,0,0,0.12)',zIndex:200,overflow:'hidden'}}>
-                      <div style={{padding:'10px 16px',borderBottom:'1px solid #F0D9C9',background:'#FFF9F2'}}>
-                        <div style={{fontSize:13,fontWeight:700,color:'#2B211B'}}>{profile?.display_name}</div>
-                        {userNumber && <div style={{fontSize:11,color:'#B8AEA8',marginTop:2}}>{userNumber}</div>}
+                    <div style={{position:'absolute',right:0,top:'calc(100% + 8px)',width:200,background:'var(--color-bg-card)',border:'1px solid var(--color-brand-border)',borderRadius:12,boxShadow:'0 8px 24px rgba(0,0,0,0.12)',zIndex:200,overflow:'hidden'}}>
+                      <div style={{padding:'10px 16px',borderBottom:'1px solid var(--color-brand-border)',background:'var(--color-bg)'}}>
+                        <div style={{fontSize:13,fontWeight:700,color:'var(--color-text)'}}>{profile?.display_name}</div>
+                        {userNumber && <div style={{fontSize:11,color:'var(--color-text-faint)',marginTop:2}}>{userNumber}</div>}
                       </div>
-                      <Link href="/mypage" onClick={()=>setShowUserMenu(false)} style={{display:'flex',alignItems:'center',justifyContent:'space-between',padding:'11px 16px',borderBottom:'1px solid #FFF1E6',textDecoration:'none',color:'#2B211B',fontSize:13}}>
-                        <span>マイページ</span><span style={{color:'#B8AEA8',fontSize:12}}>›</span>
+                      <Link href="/mypage" onClick={()=>setShowUserMenu(false)} style={{display:'flex',alignItems:'center',justifyContent:'space-between',padding:'11px 16px',borderBottom:'1px solid var(--color-brand-light)',textDecoration:'none',color:'var(--color-text)',fontSize:13}}>
+                        <span>マイページ</span><span style={{color:'var(--color-text-faint)',fontSize:12}}>›</span>
                       </Link>
-                      <Link href="/history" onClick={()=>setShowUserMenu(false)} style={{display:'flex',alignItems:'center',justifyContent:'space-between',padding:'11px 16px',borderBottom:'1px solid #FFF1E6',textDecoration:'none',color:'#2B211B',fontSize:13}}>
-                        <span>閲覧履歴</span><span style={{color:'#B8AEA8',fontSize:12}}>›</span>
+                      <Link href="/history" onClick={()=>setShowUserMenu(false)} style={{display:'flex',alignItems:'center',justifyContent:'space-between',padding:'11px 16px',borderBottom:'1px solid var(--color-brand-light)',textDecoration:'none',color:'var(--color-text)',fontSize:13}}>
+                        <span>閲覧履歴</span><span style={{color:'var(--color-text-faint)',fontSize:12}}>›</span>
                       </Link>
-                      <Link href="/mission" onClick={()=>setShowUserMenu(false)} style={{display:'flex',alignItems:'center',justifyContent:'space-between',padding:'11px 16px',borderBottom:'1px solid #FFF1E6',textDecoration:'none',color:'#2B211B',fontSize:13}}>
-                        <span>ミッション</span><span style={{color:'#B8AEA8',fontSize:12}}>›</span>
+                      <Link href="/mission" onClick={()=>setShowUserMenu(false)} style={{display:'flex',alignItems:'center',justifyContent:'space-between',padding:'11px 16px',borderBottom:'1px solid var(--color-brand-light)',textDecoration:'none',color:'var(--color-text)',fontSize:13}}>
+                        <span>ミッション</span><span style={{color:'var(--color-text-faint)',fontSize:12}}>›</span>
                       </Link>
                       <button onClick={()=>{setShowSettingsModal(true);setShowUserMenu(false)}}
-                        style={{display:'flex',alignItems:'center',justifyContent:'space-between',width:'100%',padding:'11px 16px',borderBottom:'1px solid #FFF1E6',background:'#fff',border:'none',cursor:'pointer',fontSize:13,color:'#2B211B'}}>
-                        <span>設定</span><span style={{color:'#B8AEA8',fontSize:12}}>›</span>
+                        style={{display:'flex',alignItems:'center',justifyContent:'space-between',width:'100%',padding:'11px 16px',borderBottom:'1px solid var(--color-brand-light)',background:'var(--color-bg-card)',border:'none',cursor:'pointer',fontSize:13,color:'var(--color-text)'}}>
+                        <span>設定</span><span style={{color:'var(--color-text-faint)',fontSize:12}}>›</span>
                       </button>
-                      <button onClick={handleLogout} style={{display:'flex',alignItems:'center',gap:10,padding:'11px 16px',width:'100%',border:'none',background:'#fff',cursor:'pointer',fontSize:13,color:'#dc2626',textAlign:'left'}}>
+                      <button onClick={handleLogout} style={{display:'flex',alignItems:'center',gap:10,padding:'11px 16px',width:'100%',border:'none',background:'var(--color-bg-card)',cursor:'pointer',fontSize:13,color:'var(--color-danger)',textAlign:'left'}}>
                         ログアウト
                       </button>
                     </div>
@@ -249,8 +249,8 @@ export default function Header({ profile, user, activeGenre }: Props) {
               </>
             ) : (
               <>
-                <Link href="/auth/login" style={{border:'1.5px solid #F26A21',color:'#F26A21',padding:'6px 18px',borderRadius:20,background:'#fff',fontSize:13,fontWeight:500,textDecoration:'none'}}>ログイン</Link>
-                <Link href="/auth/register" style={{background:'#F26A21',color:'#fff',padding:'7px 18px',borderRadius:20,fontSize:13,fontWeight:700,textDecoration:'none'}}>新規登録</Link>
+                <Link href="/auth/login" style={{border:'1.5px solid var(--color-brand)',color:'var(--color-brand)',padding:'6px 18px',borderRadius:20,background:'var(--color-bg-card)',fontSize:13,fontWeight:500,textDecoration:'none'}}>ログイン</Link>
+                <Link href="/auth/register" style={{background:'var(--color-brand)',color:'var(--color-bg-card)',padding:'7px 18px',borderRadius:20,fontSize:13,fontWeight:700,textDecoration:'none'}}>新規登録</Link>
               </>
             )}
           </div>
@@ -264,23 +264,23 @@ export default function Header({ profile, user, activeGenre }: Props) {
                 <div ref={notifRef} style={{position:'relative'}}>
                   <button onClick={handleOpenNotif}
                     style={{width:36,height:36,border:'none',background:'transparent',cursor:'pointer',display:'flex',alignItems:'center',justifyContent:'center',position:'relative'}}>
-                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#77706A" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--color-text-muted)" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
                       <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/>
                     </svg>
-                    {unreadCount > 0 && <span style={{position:'absolute',top:4,right:4,width:13,height:13,background:'#F26A21',borderRadius:'50%',fontSize:8,color:'#fff',fontWeight:700,display:'flex',alignItems:'center',justifyContent:'center'}}>{unreadCount > 9 ? '9+' : unreadCount}</span>}
+                    {unreadCount > 0 && <span style={{position:'absolute',top:4,right:4,width:13,height:13,background:'var(--color-brand)',borderRadius:'50%',fontSize:8,color:'var(--color-bg-card)',fontWeight:700,display:'flex',alignItems:'center',justifyContent:'center'}}>{unreadCount > 9 ? '9+' : unreadCount}</span>}
                   </button>
                   {showNotif && (
-                    <div style={{position:'absolute',left:0,top:'calc(100% + 8px)',width:300,background:'#fff',border:'1px solid #F0D9C9',borderRadius:12,boxShadow:'0 8px 32px rgba(0,0,0,0.15)',zIndex:200,overflow:'hidden',maxHeight:'70vh',display:'flex',flexDirection:'column'}}>
-                      <div style={{padding:'10px 14px',borderBottom:'1px solid #F0D9C9',display:'flex',alignItems:'center',justifyContent:'space-between'}}>
-                        <span style={{fontSize:13,fontWeight:700,color:'#2B211B'}}>通知</span>
-                        <button onClick={()=>setShowNotif(false)} style={{fontSize:18,color:'#B8AEA8',background:'none',border:'none',cursor:'pointer',lineHeight:1}}>×</button>
+                    <div style={{position:'absolute',left:0,top:'calc(100% + 8px)',width:300,background:'var(--color-bg-card)',border:'1px solid var(--color-brand-border)',borderRadius:12,boxShadow:'0 8px 32px rgba(0,0,0,0.15)',zIndex:200,overflow:'hidden',maxHeight:'70vh',display:'flex',flexDirection:'column'}}>
+                      <div style={{padding:'10px 14px',borderBottom:'1px solid var(--color-brand-border)',display:'flex',alignItems:'center',justifyContent:'space-between'}}>
+                        <span style={{fontSize:13,fontWeight:700,color:'var(--color-text)'}}>通知</span>
+                        <button onClick={()=>setShowNotif(false)} style={{fontSize:18,color:'var(--color-text-faint)',background:'none',border:'none',cursor:'pointer',lineHeight:1}}>×</button>
                       </div>
                       {notifications.length === 0
-                        ? <div style={{padding:'24px',textAlign:'center',fontSize:12,color:'#B8AEA8'}}>通知はありません</div>
+                        ? <div style={{padding:'24px',textAlign:'center',fontSize:12,color:'var(--color-text-faint)'}}>通知はありません</div>
                         : <div style={{overflowY:'auto',flex:1}}>{notifications.map((n:any)=>(
-                          <a key={n.id} href={n.link||'#'} onClick={()=>setShowNotif(false)} style={{display:'block',padding:'10px 14px',borderBottom:'1px solid #FFF1E6',textDecoration:'none',background:n.is_read?'#fff':'#FFF9F2'}}>
-                            <div style={{fontSize:12,color:'#2B211B',lineHeight:1.6,marginBottom:2}}>{n.message}</div>
-                            <div style={{fontSize:10,color:'#B8AEA8'}}>{fmtDate(n.created_at)}</div>
+                          <a key={n.id} href={n.link||'#'} onClick={()=>setShowNotif(false)} style={{display:'block',padding:'10px 14px',borderBottom:'1px solid var(--color-brand-light)',textDecoration:'none',background:n.is_read?'var(--color-bg-card)':'var(--color-bg)'}}>
+                            <div style={{fontSize:12,color:'var(--color-text)',lineHeight:1.6,marginBottom:2}}>{n.message}</div>
+                            <div style={{fontSize:10,color:'var(--color-text-faint)'}}>{fmtDate(n.created_at)}</div>
                           </a>
                         ))}</div>}
                     </div>
@@ -294,10 +294,10 @@ export default function Header({ profile, user, activeGenre }: Props) {
             </Link>
 
             <button onClick={()=>setShowMobileMenu(!showMobileMenu)}
-              style={{width:36,height:36,borderRadius:8,border:'1px solid #F0D9C9',background:'#FFF9F2',cursor:'pointer',display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',gap:4.5}}>
-              <span style={{display:'block',width:16,height:1.5,background:'#77706A',borderRadius:1}}/>
-              <span style={{display:'block',width:16,height:1.5,background:'#77706A',borderRadius:1}}/>
-              <span style={{display:'block',width:16,height:1.5,background:'#77706A',borderRadius:1}}/>
+              style={{width:36,height:36,borderRadius:8,border:'1px solid var(--color-brand-border)',background:'var(--color-bg)',cursor:'pointer',display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',gap:4.5}}>
+              <span style={{display:'block',width:16,height:1.5,background:'var(--color-text-muted)',borderRadius:1}}/>
+              <span style={{display:'block',width:16,height:1.5,background:'var(--color-text-muted)',borderRadius:1}}/>
+              <span style={{display:'block',width:16,height:1.5,background:'var(--color-text-muted)',borderRadius:1}}/>
             </button>
           </div>
         </div>
@@ -306,15 +306,15 @@ export default function Header({ profile, user, activeGenre }: Props) {
         {showMobileMenu && (
           <div className="mobile-header" style={{position:'fixed',inset:0,zIndex:100}}>
             <div onClick={()=>setShowMobileMenu(false)} style={{position:'absolute',inset:0,background:'rgba(0,0,0,0.4)'}}/>
-            <div style={{position:'absolute',top:0,right:0,width:'78%',maxWidth:300,height:'100%',background:'#fff',display:'flex',flexDirection:'column',overflowY:'auto'}}>
-              <div style={{padding:'14px 16px',borderBottom:'1px solid #F0D9C9',display:'flex',alignItems:'center',justifyContent:'space-between',background:'#FFF9F2'}}>
+            <div style={{position:'absolute',top:0,right:0,width:'78%',maxWidth:300,height:'100%',background:'var(--color-bg-card)',display:'flex',flexDirection:'column',overflowY:'auto'}}>
+              <div style={{padding:'14px 16px',borderBottom:'1px solid var(--color-brand-border)',display:'flex',alignItems:'center',justifyContent:'space-between',background:'var(--color-bg)'}}>
                 <img src="/logo.png" alt="原石航路" draggable={false} style={{height:36,width:'auto',objectFit:'contain',userSelect:'none'}}/>
-                <button onClick={()=>setShowMobileMenu(false)} style={{width:30,height:30,border:'none',background:'none',cursor:'pointer',fontSize:18,color:'#77706A'}}>×</button>
+                <button onClick={()=>setShowMobileMenu(false)} style={{width:30,height:30,border:'none',background:'none',cursor:'pointer',fontSize:18,color:'var(--color-text-muted)'}}>×</button>
               </div>
               {user && (
-                <div style={{padding:'12px 16px',borderBottom:'1px solid #F0D9C9',background:'#FFF9F2'}}>
-                  <div style={{fontSize:13,fontWeight:700,color:'#2B211B'}}>{profile?.display_name}</div>
-                  {userNumber && <div style={{fontSize:11,color:'#B8AEA8',marginTop:1}}>{userNumber}</div>}
+                <div style={{padding:'12px 16px',borderBottom:'1px solid var(--color-brand-border)',background:'var(--color-bg)'}}>
+                  <div style={{fontSize:13,fontWeight:700,color:'var(--color-text)'}}>{profile?.display_name}</div>
+                  {userNumber && <div style={{fontSize:11,color:'var(--color-text-faint)',marginTop:1}}>{userNumber}</div>}
                 </div>
               )}
               <div style={{flex:1}}>
@@ -328,36 +328,36 @@ export default function Header({ profile, user, activeGenre }: Props) {
                   ...(user ? [{label:'投稿する', href:'/post'},{label:'マイページ', href:'/mypage'}] : []),
                 ].map(item=>(
                   <Link key={item.href} href={item.href} onClick={()=>setShowMobileMenu(false)}
-                    style={{display:'flex',alignItems:'center',justifyContent:'space-between',padding:'13px 16px',borderBottom:'1px solid #FFF1E6',textDecoration:'none',
-                      color:isActive(item.href)?'#F26A21':'#2B211B',
+                    style={{display:'flex',alignItems:'center',justifyContent:'space-between',padding:'13px 16px',borderBottom:'1px solid var(--color-brand-light)',textDecoration:'none',
+                      color:isActive(item.href)?'var(--color-brand)':'var(--color-text)',
                       fontSize:14,fontWeight:isActive(item.href)?700:400,
-                      background:isActive(item.href)?'#FFF9F2':'#fff'}}>
+                      background:isActive(item.href)?'var(--color-bg)':'var(--color-bg-card)'}}>
                     {item.label}
-                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#B8AEA8" strokeWidth="2"><polyline points="9 18 15 12 9 6"/></svg>
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="var(--color-text-faint)" strokeWidth="2"><polyline points="9 18 15 12 9 6"/></svg>
                   </Link>
                 ))}
                 {user && (
                   <button onClick={()=>{setShowSettingsModal(true);setShowMobileMenu(false)}}
-                    style={{display:'flex',alignItems:'center',justifyContent:'space-between',width:'100%',padding:'13px 16px',borderBottom:'1px solid #FFF1E6',background:'#fff',border:'none',cursor:'pointer',fontSize:14,color:'#2B211B',textAlign:'left'}}>
+                    style={{display:'flex',alignItems:'center',justifyContent:'space-between',width:'100%',padding:'13px 16px',borderBottom:'1px solid var(--color-brand-light)',background:'var(--color-bg-card)',border:'none',cursor:'pointer',fontSize:14,color:'var(--color-text)',textAlign:'left'}}>
                     設定
-                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#B8AEA8" strokeWidth="2"><polyline points="9 18 15 12 9 6"/></svg>
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="var(--color-text-faint)" strokeWidth="2"><polyline points="9 18 15 12 9 6"/></svg>
                   </button>
                 )}
               </div>
               {user ? (
-                <div style={{padding:'14px 16px',borderTop:'1px solid #F0D9C9'}}>
-                  <button onClick={handleLogout} style={{width:'100%',padding:'11px',border:'1px solid #fca5a5',borderRadius:8,background:'#fff',color:'#dc2626',fontSize:14,cursor:'pointer'}}>
+                <div style={{padding:'14px 16px',borderTop:'1px solid var(--color-brand-border)'}}>
+                  <button onClick={handleLogout} style={{width:'100%',padding:'11px',border:'1px solid #fca5a5',borderRadius:8,background:'var(--color-bg-card)',color:'var(--color-danger)',fontSize:14,cursor:'pointer'}}>
                     ログアウト
                   </button>
                 </div>
               ) : (
-                <div style={{padding:'14px 16px',borderTop:'1px solid #F0D9C9',display:'flex',gap:8}}>
+                <div style={{padding:'14px 16px',borderTop:'1px solid var(--color-brand-border)',display:'flex',gap:8}}>
                   <Link href="/auth/login" onClick={()=>setShowMobileMenu(false)}
-                    style={{flex:1,padding:'11px',border:'1.5px solid #F26A21',borderRadius:8,color:'#F26A21',fontSize:14,fontWeight:600,textDecoration:'none',textAlign:'center',display:'block'}}>
+                    style={{flex:1,padding:'11px',border:'1.5px solid var(--color-brand)',borderRadius:8,color:'var(--color-brand)',fontSize:14,fontWeight:600,textDecoration:'none',textAlign:'center',display:'block'}}>
                     ログイン
                   </Link>
                   <Link href="/auth/register" onClick={()=>setShowMobileMenu(false)}
-                    style={{flex:1,padding:'11px',background:'#F26A21',borderRadius:8,color:'#fff',fontSize:14,fontWeight:700,textDecoration:'none',textAlign:'center',display:'block'}}>
+                    style={{flex:1,padding:'11px',background:'var(--color-brand)',borderRadius:8,color:'var(--color-bg-card)',fontSize:14,fontWeight:700,textDecoration:'none',textAlign:'center',display:'block'}}>
                     新規登録
                   </Link>
                 </div>
@@ -368,21 +368,21 @@ export default function Header({ profile, user, activeGenre }: Props) {
       </header>
 
       {/* ===== ボトムナビ（モバイルのみ） ===== */}
-      <nav className="mobile-header" style={{position:'fixed',bottom:0,left:0,right:0,zIndex:49,background:'#fff',borderTop:'1px solid #F0D9C9',boxShadow:'0 -1px 8px rgba(0,0,0,0.06)'}}>
+      <nav className="mobile-header" style={{position:'fixed',bottom:0,left:0,right:0,zIndex:49,background:'var(--color-bg-card)',borderTop:'1px solid var(--color-brand-border)',boxShadow:'0 -1px 8px rgba(0,0,0,0.06)'}}>
         <div style={{display:'flex',alignItems:'stretch'}}>
           {[
-            {href:'/',      label:'ホーム',     icon:(a:boolean)=><svg width="21" height="21" viewBox="0 0 24 24" fill={a?'#FFF1E6':'none'} stroke={a?'#F26A21':'#77706A'} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>},
-            {href:'/search', label:'探す',      icon:(a:boolean)=><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke={a?'#F26A21':'#77706A'} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="7"/><line x1="16.5" y1="16.5" x2="22" y2="22"/></svg>},
-            {href:'/ranking',label:'ランキング', icon:(a:boolean)=><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke={a?'#F26A21':'#77706A'} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>},
-            {href:'/contests',label:'コンテスト',icon:(a:boolean)=><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke={a?'#F26A21':'#77706A'} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="8" r="6"/><path d="M15.477 12.89 17 22l-5-3-5 3 1.523-9.11"/></svg>},
-            {href:user?'/mypage':'/auth/login', label:'マイページ', icon:(a:boolean)=><svg width="21" height="21" viewBox="0 0 24 24" fill={a?'#FFF1E6':'none'} stroke={a?'#F26A21':'#77706A'} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>},
+            {href:'/',      label:'ホーム',     icon:(a:boolean)=><svg width="21" height="21" viewBox="0 0 24 24" fill={a?'var(--color-brand-light)':'none'} stroke={a?'var(--color-brand)':'var(--color-text-muted)'} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>},
+            {href:'/search', label:'探す',      icon:(a:boolean)=><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke={a?'var(--color-brand)':'var(--color-text-muted)'} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="7"/><line x1="16.5" y1="16.5" x2="22" y2="22"/></svg>},
+            {href:'/ranking',label:'ランキング', icon:(a:boolean)=><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke={a?'var(--color-brand)':'var(--color-text-muted)'} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>},
+            {href:'/contests',label:'コンテスト',icon:(a:boolean)=><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke={a?'var(--color-brand)':'var(--color-text-muted)'} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="8" r="6"/><path d="M15.477 12.89 17 22l-5-3-5 3 1.523-9.11"/></svg>},
+            {href:user?'/mypage':'/auth/login', label:'マイページ', icon:(a:boolean)=><svg width="21" height="21" viewBox="0 0 24 24" fill={a?'var(--color-brand-light)':'none'} stroke={a?'var(--color-brand)':'var(--color-text-muted)'} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>},
           ].map(({href,label,icon})=>{
             const active = href==='/'?pathname==='/':pathname.startsWith(href)
             return (
               <Link key={href} href={href}
                 style={{flex:1,display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',padding:'7px 4px 5px',textDecoration:'none',gap:2,minHeight:54}}>
                 {icon(active)}
-                <span style={{fontSize:9,fontWeight:active?700:400,color:active?'#F26A21':'#77706A',lineHeight:1}}>{label}</span>
+                <span style={{fontSize:9,fontWeight:active?700:400,color:active?'var(--color-brand)':'var(--color-text-muted)',lineHeight:1}}>{label}</span>
               </Link>
             )
           })}
@@ -399,7 +399,7 @@ export default function Header({ profile, user, activeGenre }: Props) {
           .desktop-header { display: none !important; }
           .mobile-header  { display: block !important; }
         }
-        nav a:hover { color: #F26A21 !important; opacity: 1; }
+        nav a:hover { color: var(--color-brand) !important; opacity: 1; }
 
         .header-nav-link::after {
           content: '';
@@ -408,11 +408,11 @@ export default function Header({ profile, user, activeGenre }: Props) {
           right: 12px;
           bottom: 0;
           height: 3px;
-          background: #F26A21;
+          background: var(--color-brand);
           transform: scaleX(0);
           transition: transform .2s ease;
         }
-        .header-nav-link:hover { color: #F26A21 !important; }
+        .header-nav-link:hover { color: var(--color-brand) !important; }
         .header-nav-link:hover::after { transform: scaleX(1); }
         .header-nav-link-active::after { transform: scaleX(1); }
 
