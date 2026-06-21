@@ -9,15 +9,15 @@
    =================================================================== */
 :root {
   /* --- ブランドカラー（ティール系） --- */
-  --color-brand:        #2E8B82; /* メインのティール（ボタン・アクセント・リンク） */
-  --color-brand-dark:   #236E66; /* ホバー時など少し濃いティール */
-  --color-brand-light:  #E6F3F1; /* 薄いティール背景（タグ・選択状態など） */
-  --color-brand-border: #cce5e1; /* ティール系の境界線・枠線（サイト全体で多用） */
+  --color-brand:        #F26A21; /* メインのオレンジ（ボタン・アクセント・リンク） */
+  --color-brand-dark:   #d95a18; /* ホバー時など少し濃いオレンジ */
+  --color-brand-light:  #FFF1E6; /* 薄いオレンジ背景（タグ・選択状態など） */
+  --color-brand-border: #F0D9C9; /* ベージュ系の境界線・枠線（サイト全体で多用） */
 
   /* --- 背景色 --- */
-  --color-bg:           #F2F8F7; /* ページ全体の基本背景（薄いティール系） */
+  --color-bg:           #FFF9F2; /* ページ全体の基本背景（クリーム色） */
   --color-bg-card:      #ffffff; /* カード・パネルの背景 */
-  --color-bg-subtle:    #F2F8F7; /* セクション内の薄い背景区切り */
+  --color-bg-subtle:    #FFF9F2; /* セクション内の薄い背景区切り */
 
   /* --- テキストカラー --- */
   --color-text:         #2B211B; /* 基本の本文・見出し文字色（濃いブラウン系） */
@@ -41,13 +41,13 @@
   --color-spine-light: #8a4f2e;
 
   /* --- ランキング順位カラー（金・銀・銅） --- */
-  --color-rank-gold:   #C9A227; /* 1位（本物のゴールド・ブランドカラーから独立） */
+  --color-rank-gold:   #F26A21; /* 1位（ブランドカラーを流用） */
   --color-rank-silver: #9ca3af; /* 2位 */
   --color-rank-bronze: #cd7f32; /* 3位 */
-  --color-rank-muted:  #D8D8D6; /* 準備中アイテムの薄い番号色（中立グレー） */
+  --color-rank-muted:  #E8C8B0; /* 準備中アイテムの薄い番号色 */
 
   /* --- タグ・補助バッジの追加色 --- */
-  --color-tag-border:  #9ecdc6; /* ジャンルタグの枠線（brand-lightより少し濃い） */
+  --color-tag-border:  #f5b080; /* ジャンルタグの枠線（brand-lightより少し濃い） */
   --color-info-bg:     #eff6ff; /* 「長編／短編」等の青系バッジ背景 */
   --color-info-border: #bfdbfe; /* 同バッジの枠線 */
 
@@ -90,9 +90,9 @@ body {
 ::-webkit-scrollbar-thumb { background: var(--color-brand-border); border-radius: 3px; }
 input[type="checkbox"] { accent-color: var(--color-brand); }
 button { cursor: pointer; }
-button[style*="background:'var(--color-brand)'"]:hover,
-button[style*='background:"var(--color-brand)"']:hover { background: var(--color-brand-dark) !important; }
-button[style*="color:'var(--color-brand)'"]:hover { background: var(--color-brand-light) !important; }
+button[style*="background:'#F26A21'"]:hover,
+button[style*='background:"#F26A21"']:hover { background: var(--color-brand-dark) !important; }
+button[style*="color:'#F26A21'"]:hover { background: var(--color-brand-light) !important; }
 a { transition: opacity 0.15s ease; }
 a[href*="/novel"]:hover > div,
 div[style*="cursor:'pointer'"]:hover { background: var(--color-bg) !important; }
@@ -101,7 +101,7 @@ div[style*="cursor:'pointer'"]:hover { background: var(--color-bg) !important; }
 .list-row:hover .list-row-title { color: var(--color-brand) !important; }
 .sw-item:hover { background: var(--color-bg) !important; }
 .gem-card { transition: transform .15s, box-shadow .15s; cursor: pointer; }
-.gem-card:hover { transform: translateY(-2px); box-shadow: 0 6px 18px rgba(46,139,130,.12); }
+.gem-card:hover { transform: translateY(-2px); box-shadow: 0 6px 18px rgba(242,106,33,.12); }
 nav a:hover { color: var(--color-brand) !important; opacity: 1; }
 .pager:hover { border-color: var(--color-brand); color: var(--color-brand); }
 .finput:focus, .ftarea:focus, input:focus, textarea:focus { border-color: var(--color-brand) !important; outline: none; }
@@ -114,11 +114,11 @@ button:active:not(:disabled) { transform: translateY(0); }
 .user-menu:hover .user-tooltip { opacity: 1 !important; }
 footer a:hover { color: var(--color-brand) !important; opacity: 1; }
 .header-post-btn { transition: transform 0.15s ease, box-shadow 0.15s ease !important; }
-.header-post-btn:hover { transform: translateY(-3px) !important; box-shadow: 0 4px 12px rgba(46,139,130,0.25) !important; background: #f0faf8 !important; }
+.header-post-btn:hover { transform: translateY(-3px) !important; box-shadow: 0 4px 12px rgba(242,106,33,0.25) !important; background: #fff8f5 !important; }
 .more-link:hover { transform: scale(1.08) !important; opacity: 1 !important; }
 .search-result-row:hover { background: var(--color-bg) !important; }
 .search-banner-link { transition: transform 0.15s ease, box-shadow 0.15s ease; display: block; border-radius: 14px; }
-.search-banner-link:hover { transform: translateY(-4px) !important; box-shadow: 0 8px 24px rgba(46,139,130,0.4) !important; opacity: 1 !important; }
+.search-banner-link:hover { transform: translateY(-4px) !important; box-shadow: 0 8px 24px rgba(242,106,33,0.4) !important; opacity: 1 !important; }
 .announcement-title-link { font-size: 11px; color: var(--color-text); line-height: 1.5; text-decoration: none; display: inline-block; }
 .announcement-title-link:hover { text-decoration: underline; opacity: 1 !important; }
 
@@ -514,6 +514,6 @@ footer a:hover { color: var(--color-brand) !important; opacity: 1; }
 /* ===== モバイルのタップハイライト ===== */
 @media (max-width: 768px) {
   a, button {
-    -webkit-tap-highlight-color: rgba(46,139,130,0.08);
+    -webkit-tap-highlight-color: rgba(242,106,33,0.08);
   }
 }
