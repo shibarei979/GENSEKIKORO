@@ -174,7 +174,7 @@ export default function VoicesFloat({ voices }: Props) {
       position:'relative', width:'100%',
       height:'calc(100vh - 66px)', minHeight:560,
       overflow:'hidden',
-      background:'radial-gradient(ellipse at 50% 30%, #3a3a3a 0%, #232323 70%)',
+      background:'radial-gradient(ellipse at 50% 30%, var(--color-dark-bg-light) 0%, var(--color-dark-bg) 70%)',
     }}>
       {/* 中央の案内テキスト */}
       <div style={{
