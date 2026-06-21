@@ -39,6 +39,17 @@
   --color-spine-base:  #6b3a22;
   --color-spine-dark:  #4a2715;
   --color-spine-light: #8a4f2e;
+
+  /* --- ランキング順位カラー（金・銀・銅） --- */
+  --color-rank-gold:   #F26A21; /* 1位（ブランドカラーを流用） */
+  --color-rank-silver: #9ca3af; /* 2位 */
+  --color-rank-bronze: #cd7f32; /* 3位 */
+  --color-rank-muted:  #E8C8B0; /* 準備中アイテムの薄い番号色 */
+
+  /* --- タグ・補助バッジの追加色 --- */
+  --color-tag-border:  #f5b080; /* ジャンルタグの枠線（brand-lightより少し濃い） */
+  --color-info-bg:     #eff6ff; /* 「長編／短編」等の青系バッジ背景 */
+  --color-info-border: #bfdbfe; /* 同バッジの枠線 */
 }
 
 /* 将来のダークモード対応用（A5実装時にここを拡張する） */
