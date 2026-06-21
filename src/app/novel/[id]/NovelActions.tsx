@@ -126,13 +126,13 @@ export default function NovelActions({ novelId, userId, authorId, novelTitle, is
     window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(url)}`, '_blank', 'noopener,noreferrer')
   }
 
-  const btn = (active: boolean, color: string) => ({
+  const btn = (active: boolean, colorVar: string, activeBgFallback: string) => ({
     display:'inline-flex' as const, alignItems:'center' as const, gap:5,
     padding:'8px 14px', borderRadius:20, border:'1.5px solid', cursor:'pointer' as const,
     fontSize:13, fontWeight:500 as const,
-    background: active ? (color==='#dc2626'?'#fef2f2':'#FFF1E6') : '#fff',
-    borderColor: active ? color : '#F0D9C9',
-    color: active ? color : '#77706A',
+    background: active ? activeBgFallback : 'var(--color-bg-card)',
+    borderColor: active ? colorVar : 'var(--color-brand-border)',
+    color: active ? colorVar : 'var(--color-text-muted)',
     transition: 'all .15s',
     opacity: loading ? 0.7 : 1,
   })
@@ -142,24 +142,24 @@ export default function NovelActions({ novelId, userId, authorId, novelTitle, is
       <LoginPromptModal show={showLogin} onClose={()=>setShowLogin(false)} message={loginMsg} />
 
       <div style={{display:'flex',gap:8,flexWrap:'wrap',alignItems:'center'}}>
-        <button onClick={toggleLike} style={btn(liked,'#dc2626')}>
+        <button onClick={toggleLike} style={btn(liked,'var(--color-danger)','#fef2f2')}>
           {liked?'♥':'♡'} {fmtNum(likes)}
         </button>
-        <button onClick={toggleBookmark} style={btn(bookmarked,'#F26A21')}>
-          <svg width="13" height="13" viewBox="0 0 24 24" fill={bookmarked?'#F26A21':'none'} stroke={bookmarked?'#F26A21':'#B8AEA8'} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <button onClick={toggleBookmark} style={btn(bookmarked,'var(--color-brand)','var(--color-brand-light)')}>
+          <svg width="13" height="13" viewBox="0 0 24 24" fill={bookmarked?'var(--color-brand)':'none'} stroke={bookmarked?'var(--color-brand)':'var(--color-text-faint)'} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
             <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/>
           </svg>
           {fmtNum(bookmarks)}
         </button>
         <button onClick={handleDiscover}
           disabled={isAuthor}
-          style={isAuthor ? {...btn(false,'#B8AEA8'), cursor:'not-allowed' as const, opacity:0.4} : btn(discovered,'#F26A21')}
+          style={isAuthor ? {...btn(false,'var(--color-text-faint)','transparent'), cursor:'not-allowed' as const, opacity:0.4} : btn(discovered,'var(--color-brand)','var(--color-brand-light)')}
           title={isAuthor ? '自分の作品は拡散できません' : 'この作品をもっと広めたい！という気持ちを伝える'}>
           拡散する {discovers > 0 && fmtNum(discovers)}
         </button>
         <button onClick={handleXShare}
           style={{display:'inline-flex',alignItems:'center',gap:5,padding:'8px 14px',borderRadius:20,
-            border:'1.5px solid #e2e8f0',background:'#fff',color:'#374151',
+            border:'1.5px solid #e2e8f0',background:'var(--color-bg-card)',color:'#374151',
             fontSize:13,fontWeight:500,cursor:'pointer',transition:'all .15s'}}>
           <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor">
             <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.748l7.73-8.835L1.254 2.25H8.08l4.253 5.622 5.911-5.622zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
@@ -170,25 +170,25 @@ export default function NovelActions({ novelId, userId, authorId, novelTitle, is
 
       {/* 拡散コメント入力 */}
       {showComment && (
-        <div style={{marginTop:12,background:'#FFF1E6',border:'1.5px solid #f5b080',borderRadius:12,padding:'14px'}}>
-          <div style={{fontSize:13,fontWeight:700,color:'#F26A21',marginBottom:6}}>この作品の魅力を伝えよう！</div>
-          <div style={{fontSize:11,color:'#2B211B',marginBottom:8,lineHeight:1.6}}>紹介コメントを書いてください。作品ページに表示されます。</div>
+        <div style={{marginTop:12,background:'var(--color-brand-light)',border:'1.5px solid var(--color-tag-border)',borderRadius:12,padding:'14px'}}>
+          <div style={{fontSize:13,fontWeight:700,color:'var(--color-brand)',marginBottom:6}}>この作品の魅力を伝えよう！</div>
+          <div style={{fontSize:11,color:'var(--color-text)',marginBottom:8,lineHeight:1.6}}>紹介コメントを書いてください。作品ページに表示されます。</div>
           <textarea value={comment} onChange={e=>setComment(e.target.value)}
             placeholder="例：世界観が独特で、主人公の成長が胸に刺さります！続きが気になりすぎる作品です。"
             rows={3}
             style={{width:'100%',padding:'10px 12px',border:'1.5px solid #c4b5fd',borderRadius:8,
               fontSize:13,resize:'none',outline:'none',fontFamily:'inherit',boxSizing:'border-box',
-              background:'#fff',lineHeight:1.7}}/>
+              background:'var(--color-bg-card)',lineHeight:1.7}}/>
           <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginTop:8,flexWrap:'wrap',gap:8}}>
-            <span style={{fontSize:11,color:'#77706A'}}>{comment.length}/200文字</span>
+            <span style={{fontSize:11,color:'var(--color-text-muted)'}}>{comment.length}/200文字</span>
             <div style={{display:'flex',gap:8}}>
               <button onClick={()=>{setShowComment(false);setComment('')}}
-                style={{padding:'6px 14px',border:'1px solid #f5b080',borderRadius:16,background:'#fff',color:'#F26A21',fontSize:12,cursor:'pointer'}}>
+                style={{padding:'6px 14px',border:'1px solid var(--color-tag-border)',borderRadius:16,background:'var(--color-bg-card)',color:'var(--color-brand)',fontSize:12,cursor:'pointer'}}>
                 キャンセル
               </button>
               <button onClick={submitDiscover} disabled={submitting||!comment.trim()}
-                style={{padding:'6px 16px',border:'none',borderRadius:16,background:'#F26A21',
-                  color:'#fff',fontSize:12,fontWeight:700,cursor:'pointer',opacity:submitting||!comment.trim()?0.5:1}}>
+                style={{padding:'6px 16px',border:'none',borderRadius:16,background:'var(--color-brand)',
+                  color:'var(--color-bg-card)',fontSize:12,fontWeight:700,cursor:'pointer',opacity:submitting||!comment.trim()?0.5:1}}>
                 {submitting?'送信中...':'拡散する'}
               </button>
             </div>
