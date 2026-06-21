@@ -23,7 +23,6 @@ interface FloatItem {
   size: number        // px（文字サイズ）
   driftX: number       // px（横の漂い幅）
   driftY: number       // px（縦の漂い幅）
-  wobble: number        // px（揺れの振幅）
 }
 
 // 文字数に応じてフォントサイズを調整（短い文は大きく目立たせる）
@@ -37,17 +36,16 @@ function sizeFor(text: string) {
 
 function buildItems(voices: Voice[]): FloatItem[] {
   return voices.map((v) => {
-    const duration = 4 + Math.random() * 3
+    const duration = 5.5 + Math.random() * 3.5
     return {
       voice: v,
-      left: 2 + Math.random() * 94,
-      top: 4 + Math.random() * 88,
+      left: 10 + Math.random() * 80,
+      top: 12 + Math.random() * 72,
       delay: -Math.random() * duration,
       duration,
       size: sizeFor(v.text),
-      driftX: -70 + Math.random() * 140,
-      driftY: -60 + Math.random() * 30,
-      wobble: 14 + Math.random() * 18,
+      driftX: -130 + Math.random() * 260,
+      driftY: -110 + Math.random() * 40,
     }
   })
 }
@@ -110,14 +108,13 @@ export default function VoicesFloat({ voices }: Props) {
             textOverflow:'ellipsis',
             textShadow:'0 0 12px rgba(255,255,255,0.4), 0 0 4px rgba(242,106,33,0.3)',
             padding:'4px 8px',
-            animationName:'voiceFloat, voiceWobble',
-            animationDuration:`${item.duration}s, ${(item.duration*0.35).toFixed(2)}s`,
-            animationDelay:`${item.delay}s, ${item.delay}s`,
-            animationIterationCount:'infinite, infinite',
-            animationTimingFunction:'ease-in-out, ease-in-out',
+            animationName:'voiceFloat',
+            animationDuration:`${item.duration}s`,
+            animationDelay:`${item.delay}s`,
+            animationIterationCount:'infinite',
+            animationTimingFunction:'ease-in-out',
             ['--voice-driftx' as any]: `${item.driftX}px`,
             ['--voice-drifty' as any]: `${item.driftY}px`,
-            ['--voice-wobble' as any]: `${item.wobble}px`,
           } as React.CSSProperties}
         >
           {item.voice.text.length > 34 ? item.voice.text.slice(0,34)+'…' : item.voice.text}
@@ -126,26 +123,18 @@ export default function VoicesFloat({ voices }: Props) {
 
       <style>{`
         @keyframes voiceFloat {
-          0%   { opacity: 0;    transform: translate(-50%,-50%) translate(0px, 24px) scale(0.85); }
-          8%   { opacity: 0.9;  transform: translate(-50%,-50%) translate(calc(var(--voice-driftx) * 0.15), calc(var(--voice-drifty) * 0.15 + 10px)) scale(1); }
-          20%  { opacity: 1;    transform: translate(-50%,-50%) translate(calc(var(--voice-driftx) * 0.4), calc(var(--voice-drifty) * 0.4)) scale(1.04); }
-          50%  { opacity: 0.9;  transform: translate(-50%,-50%) translate(var(--voice-driftx), var(--voice-drifty)) scale(1); }
-          78%  { opacity: 0.5;  transform: translate(-50%,-50%) translate(calc(var(--voice-driftx) * 1.3), calc(var(--voice-drifty) * 1.5)) scale(0.96); }
-          92%  { opacity: 0.12; transform: translate(-50%,-50%) translate(calc(var(--voice-driftx) * 1.5), calc(var(--voice-drifty) * 1.8)) scale(0.9); }
-          100% { opacity: 0;    transform: translate(-50%,-50%) translate(calc(var(--voice-driftx) * 1.6), calc(var(--voice-drifty) * 2)) scale(0.85); }
-        }
-        @keyframes voiceWobble {
-          0%   { margin-left: 0px; }
-          25%  { margin-left: calc(var(--voice-wobble) * 0.5); }
-          50%  { margin-left: 0px; }
-          75%  { margin-left: calc(var(--voice-wobble) * -0.5); }
-          100% { margin-left: 0px; }
+          0%   { opacity: 0;    transform: translate(-50%,-50%) translate(0px, 30px) scale(0.85); }
+          10%  { opacity: 0.9;  transform: translate(-50%,-50%) translate(calc(var(--voice-driftx) * 0.2), calc(var(--voice-drifty) * 0.25 + 14px)) scale(1); }
+          25%  { opacity: 1;    transform: translate(-50%,-50%) translate(calc(var(--voice-driftx) * 0.5), calc(var(--voice-drifty) * 0.55)) scale(1.04); }
+          55%  { opacity: 0.85; transform: translate(-50%,-50%) translate(var(--voice-driftx), var(--voice-drifty)) scale(1); }
+          80%  { opacity: 0.4;  transform: translate(-50%,-50%) translate(calc(var(--voice-driftx) * 1.4), calc(var(--voice-drifty) * 1.6)) scale(0.96); }
+          100% { opacity: 0;    transform: translate(-50%,-50%) translate(calc(var(--voice-driftx) * 1.7), calc(var(--voice-drifty) * 2)) scale(0.85); }
         }
         .voice-float-item { transition: text-shadow .2s ease, color .2s ease; }
         .voice-float-item:hover {
           color: #ffd9b0 !important;
           text-shadow: 0 0 20px rgba(242,106,33,0.7) !important;
-          animation-play-state: paused, paused;
+          animation-play-state: paused;
         }
       `}</style>
     </div>
