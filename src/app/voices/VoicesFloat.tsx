@@ -1,5 +1,5 @@
 'use client'
-import { useEffect, useState, useMemo } from 'react'
+import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 
 interface Voice {
@@ -18,10 +18,12 @@ interface FloatItem {
   voice: Voice
   left: number      // %
   top: number       // %
-  delay: number      // s
+  delay: number      // s（負の値で開始位置をずらす）
   duration: number   // s（1サイクルの長さ）
   size: number        // px（文字サイズ）
-  drift: number        // px（漂う横移動量）
+  driftX: number       // px（横の漂い幅）
+  driftY: number       // px（縦の漂い幅）
+  wobble: number        // px（揺れの振幅）
 }
 
 // 文字数に応じてフォントサイズを調整（短い文は大きく目立たせる）
@@ -33,28 +35,32 @@ function sizeFor(text: string) {
   return 14
 }
 
+function buildItems(voices: Voice[]): FloatItem[] {
+  return voices.map((v) => {
+    const duration = 4 + Math.random() * 3
+    return {
+      voice: v,
+      left: 2 + Math.random() * 94,
+      top: 4 + Math.random() * 88,
+      delay: -Math.random() * duration,
+      duration,
+      size: sizeFor(v.text),
+      driftX: -70 + Math.random() * 140,
+      driftY: -60 + Math.random() * 30,
+      wobble: 14 + Math.random() * 18,
+    }
+  })
+}
+
 export default function VoicesFloat({ voices }: Props) {
   const router = useRouter()
-  const [mounted, setMounted] = useState(false)
+  const [items, setItems] = useState<FloatItem[] | null>(null)
 
-  useEffect(() => { setMounted(true) }, [])
-
-  // 各文の浮遊パラメータをランダムに、ただし初回のみ計算して固定する
-  const items: FloatItem[] = useMemo(() => {
-    return voices.map((v) => {
-      const duration = 3 + Math.random() * 2.5
-      return {
-        voice: v,
-        left: 2 + Math.random() * 94,
-        top: 4 + Math.random() * 88,
-        // 負のdelayでアニメーション開始位置をランダムにずらし、
-        // 表示直後から「すでにバラバラのタイミングで漂っている」状態にする
-        delay: -Math.random() * duration,
-        duration,
-        size: sizeFor(v.text),
-        drift: -24 + Math.random() * 48,
-      }
-    })
+  // クライアント側でマウントされてから初めてランダム値を計算する。
+  // サーバーでのレンダリング結果がキャッシュ・共有されても、
+  // 各ユーザーのブラウザで毎回新しい配置になるようにするため。
+  useEffect(() => {
+    setItems(buildItems(voices))
   }, [voices])
 
   function goToNovel(v: Voice) {
@@ -66,7 +72,7 @@ export default function VoicesFloat({ voices }: Props) {
       position:'relative', width:'100%',
       height:'calc(100vh - 66px)', minHeight:560,
       overflow:'hidden',
-      background:'radial-gradient(ellipse at 50% 30%, #2a2018 0%, #1c1610 70%)',
+      background:'radial-gradient(ellipse at 50% 30%, #3a3a3a 0%, #232323 70%)',
     }}>
       {/* 中央の案内テキスト（うっすら常時表示、文字の邪魔をしすぎない位置） */}
       <div style={{
@@ -84,9 +90,9 @@ export default function VoicesFloat({ voices }: Props) {
         </div>
       )}
 
-      {mounted && items.map((item, i) => (
+      {items && items.map((item, i) => (
         <button
-          key={item.voice.id}
+          key={`${item.voice.id}-${i}`}
           onClick={()=>goToNovel(item.voice)}
           title={item.voice.novelTitle}
           className="voice-float-item"
@@ -94,7 +100,6 @@ export default function VoicesFloat({ voices }: Props) {
             position:'absolute',
             left:`${item.left}%`,
             top:`${item.top}%`,
-            transform:'translate(-50%,-50%)',
             fontSize:item.size,
             color:'rgba(255,255,255,0.92)',
             background:'none', border:'none', cursor:'pointer',
@@ -105,12 +110,14 @@ export default function VoicesFloat({ voices }: Props) {
             textOverflow:'ellipsis',
             textShadow:'0 0 12px rgba(255,255,255,0.4), 0 0 4px rgba(242,106,33,0.3)',
             padding:'4px 8px',
-            animationName:'voiceFloat',
-            animationDuration:`${item.duration}s`,
-            animationDelay:`${item.delay}s`,
-            animationIterationCount:'infinite',
-            animationTimingFunction:'ease-in-out',
-            ['--voice-drift' as any]: `${item.drift}px`,
+            animationName:'voiceFloat, voiceWobble',
+            animationDuration:`${item.duration}s, ${(item.duration*0.35).toFixed(2)}s`,
+            animationDelay:`${item.delay}s, ${item.delay}s`,
+            animationIterationCount:'infinite, infinite',
+            animationTimingFunction:'ease-in-out, ease-in-out',
+            ['--voice-driftx' as any]: `${item.driftX}px`,
+            ['--voice-drifty' as any]: `${item.driftY}px`,
+            ['--voice-wobble' as any]: `${item.wobble}px`,
           } as React.CSSProperties}
         >
           {item.voice.text.length > 34 ? item.voice.text.slice(0,34)+'…' : item.voice.text}
@@ -119,19 +126,26 @@ export default function VoicesFloat({ voices }: Props) {
 
       <style>{`
         @keyframes voiceFloat {
-          0%   { opacity: 0;    transform: translate(-50%,-50%) translateX(0) translateY(18px) scale(0.85); }
-          8%   { opacity: 0.9;  transform: translate(-50%,-50%) translateX(calc(var(--voice-drift) * 0.15)) translateY(8px) scale(1); }
-          20%  { opacity: 1;    transform: translate(-50%,-50%) translateX(calc(var(--voice-drift) * 0.35)) translateY(-2px) scale(1.04); }
-          50%  { opacity: 0.9;  transform: translate(-50%,-50%) translateX(var(--voice-drift)) translateY(-16px) scale(1); }
-          78%  { opacity: 0.5;  transform: translate(-50%,-50%) translateX(calc(var(--voice-drift) * 0.7)) translateY(-26px) scale(0.96); }
-          92%  { opacity: 0.12; transform: translate(-50%,-50%) translateX(calc(var(--voice-drift) * 0.85)) translateY(-34px) scale(0.9); }
-          100% { opacity: 0;    transform: translate(-50%,-50%) translateX(var(--voice-drift)) translateY(-40px) scale(0.85); }
+          0%   { opacity: 0;    transform: translate(-50%,-50%) translate(0px, 24px) scale(0.85); }
+          8%   { opacity: 0.9;  transform: translate(-50%,-50%) translate(calc(var(--voice-driftx) * 0.15), calc(var(--voice-drifty) * 0.15 + 10px)) scale(1); }
+          20%  { opacity: 1;    transform: translate(-50%,-50%) translate(calc(var(--voice-driftx) * 0.4), calc(var(--voice-drifty) * 0.4)) scale(1.04); }
+          50%  { opacity: 0.9;  transform: translate(-50%,-50%) translate(var(--voice-driftx), var(--voice-drifty)) scale(1); }
+          78%  { opacity: 0.5;  transform: translate(-50%,-50%) translate(calc(var(--voice-driftx) * 1.3), calc(var(--voice-drifty) * 1.5)) scale(0.96); }
+          92%  { opacity: 0.12; transform: translate(-50%,-50%) translate(calc(var(--voice-driftx) * 1.5), calc(var(--voice-drifty) * 1.8)) scale(0.9); }
+          100% { opacity: 0;    transform: translate(-50%,-50%) translate(calc(var(--voice-driftx) * 1.6), calc(var(--voice-drifty) * 2)) scale(0.85); }
+        }
+        @keyframes voiceWobble {
+          0%   { margin-left: 0px; }
+          25%  { margin-left: calc(var(--voice-wobble) * 0.5); }
+          50%  { margin-left: 0px; }
+          75%  { margin-left: calc(var(--voice-wobble) * -0.5); }
+          100% { margin-left: 0px; }
         }
         .voice-float-item { transition: text-shadow .2s ease, color .2s ease; }
         .voice-float-item:hover {
           color: #ffd9b0 !important;
           text-shadow: 0 0 20px rgba(242,106,33,0.7) !important;
-          animation-play-state: paused;
+          animation-play-state: paused, paused;
         }
       `}</style>
     </div>
