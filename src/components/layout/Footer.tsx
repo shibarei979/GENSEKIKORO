@@ -31,20 +31,20 @@ export default function Footer({ user }: Props) {
   ]
 
   return (
-    <footer style={{background:'#2B211B',color:'rgba(255,255,255,.75)',padding:'32px 32px 16px',marginTop:20}}>
+    <footer style={{background:'var(--color-text)',color:'rgba(255,255,255,.75)',padding:'32px 32px 16px',marginTop:20}}>
       {/* デスクトップ */}
       <div className="footer-desktop" style={{maxWidth:1200,margin:'0 auto',display:'grid',gridTemplateColumns:'2fr 1fr 1fr 1fr 1fr',gap:24,marginBottom:24}}>
         <div>
           <img src="/logo.png" alt="原石航路" style={{height:44,objectFit:'contain',marginBottom:8,filter:'brightness(0) invert(1)',opacity:.8}}/>
           <p style={{fontSize:12,lineHeight:1.8,color:'rgba(255,255,255,.55)'}}>原石航路は、書き手と読み手をつなぐ場所。<br/>あなたの物語が、誰かの心を照らします。</p>
           <div style={{display:'flex',gap:8,marginTop:10}}>
-            <Link href={user?'/post':'/auth/register'} style={{padding:'6px 14px',borderRadius:14,background:'#F26A21',color:'#fff',fontSize:12,fontWeight:700}}>作品を投稿する</Link>
+            <Link href={user?'/post':'/auth/register'} style={{padding:'6px 14px',borderRadius:14,background:'var(--color-brand)',color:'var(--color-bg-card)',fontSize:12,fontWeight:700}}>作品を投稿する</Link>
             <Link href="/search" style={{padding:'5px 14px',border:'1px solid rgba(255,255,255,.3)',borderRadius:14,background:'none',color:'rgba(255,255,255,.75)',fontSize:12}}>作品を探す</Link>
           </div>
         </div>
         {cols.map(col => (
           <div key={col.title}>
-            <h4 style={{fontSize:12,fontWeight:700,color:'#fff',marginBottom:9,whiteSpace:'nowrap'}}>{col.title}</h4>
+            <h4 style={{fontSize:12,fontWeight:700,color:'var(--color-bg-card)',marginBottom:9,whiteSpace:'nowrap'}}>{col.title}</h4>
             <ul style={{listStyle:'none',padding:0}}>
               {col.links.map(link => (
                 <li key={link.href} style={{fontSize:12,marginBottom:6}}>
@@ -61,7 +61,7 @@ export default function Footer({ user }: Props) {
         <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',marginBottom:12}}>
           <img src="/logo.png" alt="原石航路" style={{height:32,objectFit:'contain',filter:'brightness(0) invert(1)',opacity:.8}}/>
           <div style={{display:'flex',gap:8}}>
-            <Link href={user?'/post':'/auth/register'} style={{padding:'5px 12px',borderRadius:12,background:'#F26A21',color:'#fff',fontSize:11,fontWeight:700,textDecoration:'none'}}>投稿する</Link>
+            <Link href={user?'/post':'/auth/register'} style={{padding:'5px 12px',borderRadius:12,background:'var(--color-brand)',color:'var(--color-bg-card)',fontSize:11,fontWeight:700,textDecoration:'none'}}>投稿する</Link>
             <Link href="/search" style={{padding:'4px 12px',border:'1px solid rgba(255,255,255,.3)',borderRadius:12,color:'rgba(255,255,255,.75)',fontSize:11,textDecoration:'none'}}>作品を探す</Link>
           </div>
         </div>
