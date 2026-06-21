@@ -1,5 +1,5 @@
 'use client'
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 
 interface Voice {
@@ -96,18 +96,18 @@ interface AssignedItem {
 
 export default function VoicesFloat({ voices }: Props) {
   const router = useRouter()
-  const [mounted, setMounted] = useState(false)
+  const [items, setItems] = useState<AssignedItem[]>([])
 
-  useEffect(() => { setMounted(true) }, [])
-
-  // 各文に、100パターンの中からシャッフルで1つずつルートを割り当てる
-  const items: AssignedItem[] = useMemo(() => {
+  // マウント後（=必ずブラウザ上）にのみ計算する。
+  // サーバー側でのレンダリングやキャッシュの影響を一切受けないようにするため、
+  // SSR時点では空配列のままにしておき、初期HTMLに座標を含めない。
+  useEffect(() => {
     const routeIdxs = shuffledIndices(voices.length, ROUTE_POOL.length)
-    return voices.map((v, i) => ({
+    setItems(voices.map((v, i) => ({
       voice: v,
       route: ROUTE_POOL[routeIdxs[i]],
       delay: Math.random() * 3,
-    }))
+    })))
   }, [voices])
 
   function goToNovel(v: Voice) {
@@ -137,7 +137,7 @@ export default function VoicesFloat({ voices }: Props) {
         </div>
       )}
 
-      {mounted && items.map((item, i) => (
+      {items.map((item, i) => (
         <button
           key={`${item.voice.id}-${i}`}
           onClick={()=>goToNovel(item.voice)}
