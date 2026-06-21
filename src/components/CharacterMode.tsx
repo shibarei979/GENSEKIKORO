@@ -241,52 +241,52 @@ export default function CharacterMode({ userId }: { userId: string }) {
 
   return (
     <div style={{width:'100%',height:'100%',display:'flex',flexDirection:'column'}}>
-      <div style={{display:'flex',alignItems:'center',gap:8,padding:'10px 14px',background:'#FFF9F2',borderBottom:'1px solid #F0D9C9',flexWrap:'wrap',flexShrink:0}}>
-        <span style={{fontSize:11,color:saving?'#F26A21':saved?'#22c55e':'transparent',minWidth:70,fontWeight:600}}>{saving?'保存中…':saved?'保存済み':'　'}</span>
-        <div style={{width:1,height:30,background:'#F0D9C9'}}/>
+      <div style={{display:'flex',alignItems:'center',gap:8,padding:'10px 14px',background:'var(--color-bg)',borderBottom:'1px solid var(--color-brand-border)',flexWrap:'wrap',flexShrink:0}}>
+        <span style={{fontSize:11,color:saving?'var(--color-brand)':saved?'#22c55e':'transparent',minWidth:70,fontWeight:600}}>{saving?'保存中…':saved?'保存済み':'　'}</span>
+        <div style={{width:1,height:30,background:'var(--color-brand-border)'}}/>
         <button onClick={()=>{setMode('select');connectFromRef.current=null}}
-          style={{padding:'9px 16px',fontSize:13,borderRadius:9,border:'1.5px solid',cursor:'pointer',background:mode==='select'?'#F26A21':'#fff',color:mode==='select'?'#fff':'#2B211B',borderColor:mode==='select'?'#F26A21':'#F0D9C9',fontWeight:mode==='select'?700:400}}>
+          style={{padding:'9px 16px',fontSize:13,borderRadius:9,border:'1.5px solid',cursor:'pointer',background:mode==='select'?'var(--color-brand)':'var(--color-bg-card)',color:mode==='select'?'var(--color-bg-card)':'var(--color-text)',borderColor:mode==='select'?'var(--color-brand)':'var(--color-brand-border)',fontWeight:mode==='select'?700:400}}>
           選択
         </button>
         <button onClick={()=>{setMode('add');connectFromRef.current=null}}
-          style={{padding:'9px 16px',fontSize:13,borderRadius:9,border:'1.5px solid',cursor:'pointer',background:mode==='add'?'#F26A21':'#fff',color:mode==='add'?'#fff':'#2B211B',borderColor:mode==='add'?'#F26A21':'#F0D9C9',fontWeight:mode==='add'?700:400}}>
+          style={{padding:'9px 16px',fontSize:13,borderRadius:9,border:'1.5px solid',cursor:'pointer',background:mode==='add'?'var(--color-brand)':'var(--color-bg-card)',color:mode==='add'?'var(--color-bg-card)':'var(--color-text)',borderColor:mode==='add'?'var(--color-brand)':'var(--color-brand-border)',fontWeight:mode==='add'?700:400}}>
           ＋ キャラ追加
         </button>
         <button onClick={()=>{setMode('connect');setSelected(null)}}
-          style={{padding:'9px 16px',fontSize:13,borderRadius:9,border:'1.5px solid',cursor:'pointer',background:mode==='connect'?'#F26A21':'#fff',color:mode==='connect'?'#fff':'#2B211B',borderColor:mode==='connect'?'#F26A21':'#F0D9C9',fontWeight:mode==='connect'?700:400}}>
+          style={{padding:'9px 16px',fontSize:13,borderRadius:9,border:'1.5px solid',cursor:'pointer',background:mode==='connect'?'var(--color-brand)':'var(--color-bg-card)',color:mode==='connect'?'var(--color-bg-card)':'var(--color-text)',borderColor:mode==='connect'?'var(--color-brand)':'var(--color-brand-border)',fontWeight:mode==='connect'?700:400}}>
           関係性をつなぐ
         </button>
 
         {mode==='add' && (
           <div style={{display:'flex',gap:4,alignItems:'center'}}>
-            {CHAR_COLORS.map(c=>(<button key={c} onClick={()=>setNewColor(c)} style={{width:24,height:24,borderRadius:'50%',border:'none',cursor:'pointer',background:c,outline:newColor===c?'2.5px solid #2B211B':'1px solid rgba(0,0,0,0.2)',outlineOffset:1}}/>))}
+            {CHAR_COLORS.map(c=>(<button key={c} onClick={()=>setNewColor(c)} style={{width:24,height:24,borderRadius:'50%',border:'none',cursor:'pointer',background:c,outline:newColor===c?'2.5px solid var(--color-text)':'1px solid rgba(0,0,0,0.2)',outlineOffset:1}}/>))}
           </div>
         )}
 
         {selectedChar && mode==='select' && (
           <>
-            <button onClick={()=>setEditingChar(selectedChar)} style={{padding:'8px 14px',fontSize:12,border:'1px solid #F0D9C9',borderRadius:8,background:'#fff',color:'#2B211B',cursor:'pointer',fontWeight:600}}>編集</button>
-            <button onClick={handleDeleteChar} style={{padding:'8px 14px',fontSize:12,border:'1px solid #fca5a5',borderRadius:8,background:'#fef2f2',color:'#dc2626',cursor:'pointer',fontWeight:600}}>削除</button>
+            <button onClick={()=>setEditingChar(selectedChar)} style={{padding:'8px 14px',fontSize:12,border:'1px solid var(--color-brand-border)',borderRadius:8,background:'var(--color-bg-card)',color:'var(--color-text)',cursor:'pointer',fontWeight:600}}>編集</button>
+            <button onClick={handleDeleteChar} style={{padding:'8px 14px',fontSize:12,border:'1px solid #fca5a5',borderRadius:8,background:'#fef2f2',color:'var(--color-danger)',cursor:'pointer',fontWeight:600}}>削除</button>
           </>
         )}
 
         <div style={{flex:1}}/>
-        <div style={{display:'flex',alignItems:'center',gap:4,background:'#fff',border:'1px solid #F0D9C9',borderRadius:10,padding:4}}>
-          <button onClick={()=>zoomBy(0.9)} style={{width:30,height:30,border:'none',background:'#FFF9F2',borderRadius:7,cursor:'pointer',fontSize:15,fontWeight:700,color:'#77706A'}}>＋</button>
-          <span style={{minWidth:44,textAlign:'center',fontSize:12,fontWeight:700,color:'#2B211B'}}>{zoomPercent}%</span>
-          <button onClick={()=>zoomBy(1.1)} style={{width:30,height:30,border:'none',background:'#FFF9F2',borderRadius:7,cursor:'pointer',fontSize:15,fontWeight:700,color:'#77706A'}}>−</button>
-          <div style={{width:1,height:18,background:'#F0D9C9',margin:'0 2px'}}/>
-          <button onClick={fitToScreen} style={{padding:'0 10px',height:30,border:'none',background:'#FFF9F2',borderRadius:7,cursor:'pointer',fontSize:11,fontWeight:600,color:'#77706A'}}>全体表示</button>
+        <div style={{display:'flex',alignItems:'center',gap:4,background:'var(--color-bg-card)',border:'1px solid var(--color-brand-border)',borderRadius:10,padding:4}}>
+          <button onClick={()=>zoomBy(0.9)} style={{width:30,height:30,border:'none',background:'var(--color-bg)',borderRadius:7,cursor:'pointer',fontSize:15,fontWeight:700,color:'var(--color-text-muted)'}}>＋</button>
+          <span style={{minWidth:44,textAlign:'center',fontSize:12,fontWeight:700,color:'var(--color-text)'}}>{zoomPercent}%</span>
+          <button onClick={()=>zoomBy(1.1)} style={{width:30,height:30,border:'none',background:'var(--color-bg)',borderRadius:7,cursor:'pointer',fontSize:15,fontWeight:700,color:'var(--color-text-muted)'}}>−</button>
+          <div style={{width:1,height:18,background:'var(--color-brand-border)',margin:'0 2px'}}/>
+          <button onClick={fitToScreen} style={{padding:'0 10px',height:30,border:'none',background:'var(--color-bg)',borderRadius:7,cursor:'pointer',fontSize:11,fontWeight:600,color:'var(--color-text-muted)'}}>全体表示</button>
         </div>
       </div>
 
       {mode==='add' && (
-        <div style={{padding:'6px 14px',background:'#FFF1E6',borderBottom:'1px solid #F0D9C9',fontSize:12,color:'#F26A21',fontWeight:600}}>
+        <div style={{padding:'6px 14px',background:'var(--color-brand-light)',borderBottom:'1px solid var(--color-brand-border)',fontSize:12,color:'var(--color-brand)',fontWeight:600}}>
           ボード上をクリックしてキャラクターを追加
         </div>
       )}
       {mode==='connect' && (
-        <div style={{padding:'6px 14px',background:'#FFF1E6',borderBottom:'1px solid #F0D9C9',fontSize:12,color:'#F26A21',fontWeight:600}}>
+        <div style={{padding:'6px 14px',background:'var(--color-brand-light)',borderBottom:'1px solid var(--color-brand-border)',fontSize:12,color:'var(--color-brand)',fontWeight:600}}>
           {connectFromRef.current ? '関係をつなぐ相手のカードをクリック' : '関係をつなぐ1人目のカードをクリック'}
         </div>
       )}
@@ -343,13 +343,13 @@ export default function CharacterMode({ userId }: { userId: string }) {
         )}
 
         {characters.length===0 && (
-          <div style={{position:'absolute',top:'50%',left:'50%',transform:'translate(-50%,-50%)',textAlign:'center',color:'#B8AEA8',pointerEvents:'none'}}>
+          <div style={{position:'absolute',top:'50%',left:'50%',transform:'translate(-50%,-50%)',textAlign:'center',color:'var(--color-text-faint)',pointerEvents:'none'}}>
             <div style={{fontSize:14,marginBottom:6}}>キャラクターがまだいません</div>
             <div style={{fontSize:12}}>「＋ キャラ追加」を押してボードをクリック</div>
           </div>
         )}
 
-        <div style={{position:'absolute',bottom:12,right:12,fontSize:11,color:'#B8AEA8',background:'rgba(255,255,255,0.8)',padding:'4px 10px',borderRadius:8,pointerEvents:'none'}}>
+        <div style={{position:'absolute',bottom:12,right:12,fontSize:11,color:'var(--color-text-faint)',background:'rgba(255,255,255,0.8)',padding:'4px 10px',borderRadius:8,pointerEvents:'none'}}>
           ホイールで拡大縮小・背景ドラッグで移動
         </div>
       </div>
@@ -357,23 +357,23 @@ export default function CharacterMode({ userId }: { userId: string }) {
       {/* キャラ編集モーダル */}
       {editingChar && (
         <div style={{position:'absolute',inset:0,zIndex:100,display:'flex',alignItems:'center',justifyContent:'center',background:'rgba(0,0,0,0.4)'}}>
-          <div style={{background:'#fff',borderRadius:14,padding:'22px',width:320,boxShadow:'0 8px 32px rgba(0,0,0,0.2)'}}>
-            <div style={{fontSize:14,fontWeight:700,color:'#2B211B',marginBottom:14}}>キャラクターを編集</div>
-            <label style={{fontSize:11,color:'#77706A',fontWeight:600,display:'block',marginBottom:4}}>名前</label>
+          <div style={{background:'var(--color-bg-card)',borderRadius:14,padding:'22px',width:320,boxShadow:'0 8px 32px rgba(0,0,0,0.2)'}}>
+            <div style={{fontSize:14,fontWeight:700,color:'var(--color-text)',marginBottom:14}}>キャラクターを編集</div>
+            <label style={{fontSize:11,color:'var(--color-text-muted)',fontWeight:600,display:'block',marginBottom:4}}>名前</label>
             <input value={editingChar.name} onChange={e=>setEditingChar({...editingChar,name:e.target.value})}
-              style={{width:'100%',padding:'8px 10px',border:'1.5px solid #F0D9C9',borderRadius:8,fontSize:13,outline:'none',marginBottom:12,boxSizing:'border-box'}}/>
-            <label style={{fontSize:11,color:'#77706A',fontWeight:600,display:'block',marginBottom:4}}>一言メモ（性格・役割など）</label>
+              style={{width:'100%',padding:'8px 10px',border:'1.5px solid var(--color-brand-border)',borderRadius:8,fontSize:13,outline:'none',marginBottom:12,boxSizing:'border-box'}}/>
+            <label style={{fontSize:11,color:'var(--color-text-muted)',fontWeight:600,display:'block',marginBottom:4}}>一言メモ（性格・役割など）</label>
             <input value={editingChar.memo} onChange={e=>setEditingChar({...editingChar,memo:e.target.value})}
               placeholder="例：主人公の幼馴染、活発"
-              style={{width:'100%',padding:'8px 10px',border:'1.5px solid #F0D9C9',borderRadius:8,fontSize:13,outline:'none',marginBottom:12,boxSizing:'border-box'}}/>
-            <label style={{fontSize:11,color:'#77706A',fontWeight:600,display:'block',marginBottom:6}}>カラー</label>
+              style={{width:'100%',padding:'8px 10px',border:'1.5px solid var(--color-brand-border)',borderRadius:8,fontSize:13,outline:'none',marginBottom:12,boxSizing:'border-box'}}/>
+            <label style={{fontSize:11,color:'var(--color-text-muted)',fontWeight:600,display:'block',marginBottom:6}}>カラー</label>
             <div style={{display:'flex',gap:6,marginBottom:18}}>
               {CHAR_COLORS.map(c=>(<button key={c} onClick={()=>setEditingChar({...editingChar,color:c})}
-                style={{width:26,height:26,borderRadius:'50%',border:'none',cursor:'pointer',background:c,outline:editingChar.color===c?'2.5px solid #2B211B':'1px solid rgba(0,0,0,0.2)',outlineOffset:1}}/>))}
+                style={{width:26,height:26,borderRadius:'50%',border:'none',cursor:'pointer',background:c,outline:editingChar.color===c?'2.5px solid var(--color-text)':'1px solid rgba(0,0,0,0.2)',outlineOffset:1}}/>))}
             </div>
             <div style={{display:'flex',gap:8}}>
-              <button onClick={()=>setEditingChar(null)} style={{flex:1,padding:'10px',border:'1px solid #F0D9C9',borderRadius:8,background:'#fff',color:'#77706A',fontSize:13,cursor:'pointer'}}>キャンセル</button>
-              <button onClick={handleSaveCharEdit} style={{flex:1,padding:'10px',border:'none',borderRadius:8,background:'#F26A21',color:'#fff',fontSize:13,fontWeight:700,cursor:'pointer'}}>保存</button>
+              <button onClick={()=>setEditingChar(null)} style={{flex:1,padding:'10px',border:'1px solid var(--color-brand-border)',borderRadius:8,background:'var(--color-bg-card)',color:'var(--color-text-muted)',fontSize:13,cursor:'pointer'}}>キャンセル</button>
+              <button onClick={handleSaveCharEdit} style={{flex:1,padding:'10px',border:'none',borderRadius:8,background:'var(--color-brand)',color:'var(--color-bg-card)',fontSize:13,fontWeight:700,cursor:'pointer'}}>保存</button>
             </div>
           </div>
         </div>
@@ -382,30 +382,30 @@ export default function CharacterMode({ userId }: { userId: string }) {
       {/* 関係性ラベル選択モーダル */}
       {relationPicker && (
         <div style={{position:'absolute',inset:0,zIndex:100,display:'flex',alignItems:'center',justifyContent:'center',background:'rgba(0,0,0,0.4)'}}>
-          <div style={{background:'#fff',borderRadius:14,padding:'22px',width:300,boxShadow:'0 8px 32px rgba(0,0,0,0.2)'}}>
-            <div style={{fontSize:14,fontWeight:700,color:'#2B211B',marginBottom:14}}>関係性を選択</div>
+          <div style={{background:'var(--color-bg-card)',borderRadius:14,padding:'22px',width:300,boxShadow:'0 8px 32px rgba(0,0,0,0.2)'}}>
+            <div style={{fontSize:14,fontWeight:700,color:'var(--color-text)',marginBottom:14}}>関係性を選択</div>
             <div style={{display:'flex',flexDirection:'column',gap:8,marginBottom:14}}>
               {RELATION_COLORS.map(r=>(
                 <button key={r.label} onClick={()=>confirmRelation(r.label,r.color)}
-                  style={{display:'flex',alignItems:'center',gap:10,padding:'10px 14px',border:'1.5px solid #F0D9C9',borderRadius:9,background:'#fff',cursor:'pointer',textAlign:'left'}}>
+                  style={{display:'flex',alignItems:'center',gap:10,padding:'10px 14px',border:'1.5px solid var(--color-brand-border)',borderRadius:9,background:'var(--color-bg-card)',cursor:'pointer',textAlign:'left'}}>
                   <div style={{width:14,height:14,borderRadius:'50%',background:r.color}}/>
-                  <span style={{fontSize:13,color:'#2B211B',fontWeight:600}}>{r.label}</span>
+                  <span style={{fontSize:13,color:'var(--color-text)',fontWeight:600}}>{r.label}</span>
                 </button>
               ))}
             </div>
-            <label style={{fontSize:11,color:'#77706A',fontWeight:600,display:'block',marginBottom:6}}>自由入力</label>
+            <label style={{fontSize:11,color:'var(--color-text-muted)',fontWeight:600,display:'block',marginBottom:6}}>自由入力</label>
             <div style={{display:'flex',gap:8}}>
               <input value={customLabel} onChange={e=>setCustomLabel(e.target.value.slice(0,6))}
                 placeholder="例：家族"
-                style={{flex:1,padding:'8px 10px',border:'1.5px solid #F0D9C9',borderRadius:8,fontSize:13,outline:'none'}}/>
+                style={{flex:1,padding:'8px 10px',border:'1.5px solid var(--color-brand-border)',borderRadius:8,fontSize:13,outline:'none'}}/>
               <button onClick={()=>customLabel.trim()&&confirmRelation(customLabel.trim(),'#77706A')}
                 disabled={!customLabel.trim()}
-                style={{padding:'8px 16px',border:'none',borderRadius:8,background:customLabel.trim()?'#F26A21':'#F0D9C9',color:'#fff',fontSize:13,fontWeight:700,cursor:customLabel.trim()?'pointer':'not-allowed'}}>
+                style={{padding:'8px 16px',border:'none',borderRadius:8,background:customLabel.trim()?'var(--color-brand)':'var(--color-brand-border)',color:'var(--color-bg-card)',fontSize:13,fontWeight:700,cursor:customLabel.trim()?'pointer':'not-allowed'}}>
                 追加
               </button>
             </div>
             <button onClick={()=>{setRelationPicker(null);setCustomLabel('')}}
-              style={{width:'100%',marginTop:14,padding:'9px',border:'1px solid #F0D9C9',borderRadius:8,background:'#fff',color:'#77706A',fontSize:13,cursor:'pointer'}}>
+              style={{width:'100%',marginTop:14,padding:'9px',border:'1px solid var(--color-brand-border)',borderRadius:8,background:'var(--color-bg-card)',color:'var(--color-text-muted)',fontSize:13,cursor:'pointer'}}>
               キャンセル
             </button>
           </div>
