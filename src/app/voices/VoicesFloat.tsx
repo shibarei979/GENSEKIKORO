@@ -25,7 +25,6 @@ interface SlotState {
   runId: number   // この回の表示を一意に識別するID（key用）
 }
 
-const SLOT_COUNT = 14          // 画面に同時に存在する文の数
 const DURATION_MIN = 3.6       // 表示時間（短め）
 const DURATION_MAX = 5.0       // 表示時間（長め）
 
@@ -37,36 +36,74 @@ function sizeFor(text: string) {
   return 12.5
 }
 
-function randomState(voicesLen: number, runId: number): SlotState {
+// activeIdxs（現在表示中の文のインデックス集合）を避けて、まだ使われていない文を選ぶ。
+// 文の数がスロット数より少ない等で選びようがない場合のみ、やむを得ず重複を許容する。
+function pickVoiceIdx(voicesLen: number, excludeIdx: number, activeIdxs: Set<number>): number {
+  const candidates: number[] = []
+  for (let i = 0; i < voicesLen; i++) {
+    if (i === excludeIdx) continue
+    if (activeIdxs.has(i)) continue
+    candidates.push(i)
+  }
+  if (candidates.length > 0) {
+    return candidates[Math.floor(Math.random() * candidates.length)]
+  }
+  // 候補が無い場合は、せめて自分の直前の文以外から選ぶ
+  const fallback: number[] = []
+  for (let i = 0; i < voicesLen; i++) { if (i !== excludeIdx) fallback.push(i) }
+  if (fallback.length > 0) return fallback[Math.floor(Math.random() * fallback.length)]
+  return excludeIdx
+}
+
+function randomMotion() {
   const angle = Math.random() * Math.PI * 2
   const dist = 90 + Math.random() * 140
   return {
-    voiceIdx: Math.floor(Math.random() * voicesLen),
     left: 8 + Math.random() * 84,
     top: 10 + Math.random() * 76,
     driftX: Math.cos(angle) * dist,
     driftY: -Math.abs(Math.sin(angle) * dist) - 40, // 必ず上方向寄りに漂う
     duration: DURATION_MIN + Math.random() * (DURATION_MAX - DURATION_MIN),
-    runId,
   }
 }
 
-function SlotItem({ voices, slotIndex, onClick }: { voices: Voice[]; slotIndex: number; onClick: (v: Voice) => void }) {
+interface SlotItemProps {
+  voices: Voice[]
+  slotIndex: number
+  slotCount: number
+  activeIdxsRef: React.MutableRefObject<Map<number, number>> // slotIndex -> voiceIdx
+  onClick: (v: Voice) => void
+}
+
+function SlotItem({ voices, slotIndex, slotCount, activeIdxsRef, onClick }: SlotItemProps) {
   const runIdRef = useRef(0)
-  const [state, setState] = useState<SlotState>(() => randomState(voices.length, 0))
+  const initialVoiceIdx = slotIndex % voices.length
+  const [state, setState] = useState<SlotState>(() => {
+    const m = randomMotion()
+    return { voiceIdx: initialVoiceIdx, ...m, runId: 0 }
+  })
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
   useEffect(() => {
+    activeIdxsRef.current.set(slotIndex, state.voiceIdx)
     // 各スロットの開始タイミングをずらすための初回ディレイ
-    const initialDelay = (slotIndex / SLOT_COUNT) * DURATION_MIN * 1000 * 0.6 + Math.random() * 600
+    const initialDelay = (slotIndex / slotCount) * DURATION_MIN * 1000 * 0.6 + Math.random() * 600
 
-    function schedule(state: SlotState) {
+    function schedule(current: SlotState) {
       timerRef.current = setTimeout(() => {
         runIdRef.current += 1
-        const next = randomState(voices.length, runIdRef.current)
+        const others = new Set(
+          Array.from(activeIdxsRef.current.entries())
+            .filter(([k]) => k !== slotIndex)
+            .map(([, v]) => v)
+        )
+        const nextIdx = pickVoiceIdx(voices.length, current.voiceIdx, others)
+        const m = randomMotion()
+        const next: SlotState = { voiceIdx: nextIdx, ...m, runId: runIdRef.current }
+        activeIdxsRef.current.set(slotIndex, nextIdx)
         setState(next)
         schedule(next)
-      }, state.duration * 1000)
+      }, current.duration * 1000)
     }
 
     const t0 = setTimeout(() => {
@@ -76,6 +113,7 @@ function SlotItem({ voices, slotIndex, onClick }: { voices: Voice[]; slotIndex: 
     return () => {
       clearTimeout(t0)
       if (timerRef.current) clearTimeout(timerRef.current)
+      activeIdxsRef.current.delete(slotIndex)
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [voices.length])
@@ -119,12 +157,17 @@ function SlotItem({ voices, slotIndex, onClick }: { voices: Voice[]; slotIndex: 
 export default function VoicesFloat({ voices }: Props) {
   const router = useRouter()
   const [mounted, setMounted] = useState(false)
+  const activeIdxsRef = useRef<Map<number, number>>(new Map())
 
   useEffect(() => { setMounted(true) }, [])
 
   function goToNovel(v: Voice) {
     router.push(`/novel/${v.novelId}`)
   }
+
+  // スロット数は「文の数」と「見栄えのための上限14」の小さい方。
+  // 文がスロット数より少なければ、その分だけ表示して重複を構造的に防ぐ。
+  const slotCount = Math.max(1, Math.min(14, voices.length))
 
   return (
     <div style={{
@@ -138,8 +181,8 @@ export default function VoicesFloat({ voices }: Props) {
         position:'absolute', top:24, left:0, right:0, textAlign:'center', zIndex:1,
         pointerEvents:'none',
       }}>
-        <div style={{fontSize:13,color:'rgba(255,180,120,0.7)',letterSpacing:'0.08em',marginBottom:4,fontWeight:700}}>1-LINE SEARCH</div>
-        <h1 style={{fontSize:18,fontWeight:700,color:'rgba(255,255,255,0.9)',fontFamily:"'Noto Serif JP',serif",marginBottom:4}}>1文検索</h1>
+        <div style={{fontSize:13,color:'rgba(255,180,120,0.7)',letterSpacing:'0.08em',marginBottom:4,fontWeight:700}}>EXPLORE</div>
+        <h1 style={{fontSize:18,fontWeight:700,color:'rgba(255,255,255,0.9)',fontFamily:"'Noto Serif JP',serif",marginBottom:4}}>文章から探す</h1>
         <p style={{fontSize:11.5,color:'rgba(255,255,255,0.55)'}}>気になる言葉をクリックすると、その作品に出会えます</p>
       </div>
 
@@ -149,8 +192,8 @@ export default function VoicesFloat({ voices }: Props) {
         </div>
       )}
 
-      {mounted && voices.length > 0 && Array.from({length: Math.min(SLOT_COUNT, Math.max(voices.length, 4))}).map((_, i) => (
-        <SlotItem key={i} voices={voices} slotIndex={i} onClick={goToNovel}/>
+      {mounted && voices.length > 0 && Array.from({length: slotCount}).map((_, i) => (
+        <SlotItem key={i} voices={voices} slotIndex={i} slotCount={slotCount} activeIdxsRef={activeIdxsRef} onClick={goToNovel}/>
       ))}
 
       <style>{`

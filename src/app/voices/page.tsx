@@ -4,7 +4,7 @@ import Footer from '@/components/layout/Footer'
 import VoicesFloat from './VoicesFloat'
 
 export const metadata = {
-  title: '1文検索 | 原石航路',
+  title: '文章から探す | 原石航路',
   description: '読者が心を動かされた一文が漂うページ。気になる言葉をクリックすると、その作品に出会えます。',
 }
 
