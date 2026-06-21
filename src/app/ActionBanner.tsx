@@ -92,8 +92,8 @@ export default function ActionBanner({ isLoggedIn }: Props) {
         <svg viewBox={`0 0 ${W} ${H}`} preserveAspectRatio="none" style={{width:'100%',height:'100%',display:'block',overflow:'visible'}}>
           <defs>
             <linearGradient id="leftGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-              <stop offset="0%" stopColor="#2B211B"/>
-              <stop offset="100%" stopColor="#4a3a2e"/>
+              <stop offset="0%" style={{stopColor:'var(--color-text)'}}/>
+              <stop offset="100%" style={{stopColor:'var(--color-spine-light)'}}/>
             </linearGradient>
             <filter id="leftShadow" x="-20%" y="-20%" width="140%" height="160%">
               <feDropShadow dx="0" dy="6" stdDeviation="10" floodColor="#000" floodOpacity="0.18"/>
@@ -107,7 +107,7 @@ export default function ActionBanner({ isLoggedIn }: Props) {
         <div style={{position:'absolute', inset:0, display:'flex', alignItems:'center', padding:'0 22% 0 7%', pointerEvents:'none'}}>
           <div>
             <div style={{fontSize:13,color:'rgba(255,255,255,0.6)',fontWeight:600,letterSpacing:'0.1em',marginBottom:8}}>READ</div>
-            <div style={{fontSize:30,fontWeight:700,color:'#fff',fontFamily:"'Noto Serif JP',serif",marginBottom:14,lineHeight:1.45}}>
+            <div style={{fontSize:30,fontWeight:700,color:'var(--color-bg-card)',fontFamily:"'Noto Serif JP',serif",marginBottom:14,lineHeight:1.45}}>
               次に読みたい一冊が、<br/>ここにある
             </div>
             <div style={{display:'inline-flex',alignItems:'center',gap:6,fontSize:15,color:'#FFD9B8',fontWeight:600,cursor:'pointer',pointerEvents:'auto'}}
@@ -132,8 +132,8 @@ export default function ActionBanner({ isLoggedIn }: Props) {
         <svg viewBox={`0 0 ${W} ${H}`} preserveAspectRatio="none" style={{width:'100%',height:'100%',display:'block',overflow:'visible'}}>
           <defs>
             <linearGradient id="rightGrad" x1="100%" y1="0%" x2="0%" y2="100%">
-              <stop offset="0%" stopColor="#F26A21"/>
-              <stop offset="100%" stopColor="#f08a4f"/>
+              <stop offset="0%" style={{stopColor:'var(--color-brand)'}}/>
+              <stop offset="100%" style={{stopColor:'#f08a4f'}}/>
             </linearGradient>
             <filter id="rightShadow" x="-20%" y="-40%" width="140%" height="160%">
               <feDropShadow dx="0" dy="-6" stdDeviation="10" floodColor="#000" floodOpacity="0.18"/>
@@ -147,13 +147,13 @@ export default function ActionBanner({ isLoggedIn }: Props) {
         <div style={{position:'absolute', inset:0, display:'flex', alignItems:'center', justifyContent:'flex-end', padding:'0 7% 0 22%', pointerEvents:'none'}}>
           <div style={{textAlign:'right'}}>
             <div style={{fontSize:13,color:'rgba(255,255,255,0.75)',fontWeight:600,letterSpacing:'0.1em',marginBottom:8}}>WRITE</div>
-            <div style={{fontSize:30,fontWeight:700,color:'#fff',fontFamily:"'Noto Serif JP',serif",marginBottom:14,lineHeight:1.45}}>
+            <div style={{fontSize:30,fontWeight:700,color:'var(--color-bg-card)',fontFamily:"'Noto Serif JP',serif",marginBottom:14,lineHeight:1.45}}>
               あなたの物語を、<br/>世界に届けよう
             </div>
-            <div style={{display:'inline-flex',alignItems:'center',gap:6,fontSize:15,color:'#fff',fontWeight:600,cursor:'pointer',pointerEvents:'auto'}}
+            <div style={{display:'inline-flex',alignItems:'center',gap:6,fontSize:15,color:'var(--color-bg-card)',fontWeight:600,cursor:'pointer',pointerEvents:'auto'}}
               onClick={()=>router.push(isLoggedIn ? '/post' : '/auth/register')}
               onMouseEnter={()=>setHoverRight(true)} onMouseLeave={()=>setHoverRight(false)}>
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{transform:'rotate(180deg)'}}><polyline points="9 18 15 12 9 6"/></svg>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--color-bg-card)" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{transform:'rotate(180deg)'}}><polyline points="9 18 15 12 9 6"/></svg>
               作品を投稿する
             </div>
           </div>
