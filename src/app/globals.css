@@ -11,12 +11,12 @@
   /* --- ブランドカラー（オレンジ系・アクセントとして維持） --- */
   --color-brand:        #F26A21; /* メインのオレンジ（ボタン・アクセント・リンク） */
   --color-brand-dark:   #d95a18; /* ホバー時など少し濃いオレンジ */
-  --color-brand-light:  #f5f5f5; /* 薄い背景（タグ・選択状態など） */
+  --color-brand-light:  transparent; /* 選択状態の背景（透明） */
   --color-brand-border: #000000; /* 黒の境界線・枠線 */
 
   /* --- 背景色 --- */
   --color-bg:           #ffffff; /* ページ全体の基本背景（白） */
-  --color-bg-card:      #ffffff; /* カード・パネルの背景（白） */
+  --color-bg-card:      transparent; /* カード・パネルの背景（透明） */
   --color-bg-subtle:    #ffffff; /* セクション内の背景区切り（白） */
 
   /* --- テキストカラー --- */
