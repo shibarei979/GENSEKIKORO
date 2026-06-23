@@ -22,172 +22,192 @@ interface Props {
   discoverCommentMap: Record<string, {comment:string;display_name:string}[]>
 }
 
-const BOOK_W = 110
-const BOOK_H = 160
-const BOOK_W_CENTER = 150
-const BOOK_H_CENTER = 210
-const GAP = 10
+// 本のサイズ定数
+const BOOK_W = 130
+const BOOK_H = 195
+const GAP = 6
 
-// 元の茶色系（globals.css の --color-spine-* と同じ）
-const SPINE_BASE  = 'var(--color-spine-base)'
-const SPINE_DARK  = 'var(--color-spine-dark)'
-const SPINE_LIGHT = 'var(--color-spine-light)'
-const SPINE_GOLD  = 'rgba(255,215,150,0.7)'
+// カラーパレット
+const C = {
+  base:    '#7A4A2A',
+  dark:    '#4A2A18',
+  light:   '#A56B3A',
+  bright:  '#C08A55',
+  brightest:'#D2A06A',
+  gold:    '#D6A85A',
+  goldFaint:'rgba(214,168,90,0.5)',
+  text:    '#FFF7ED',
+  textSub: '#F5E6D0',
+  accent:  '#F97316',
+  darkLine:'#3A2416',
+  shelf1:  '#D6A15F',
+  shelf2:  '#B9824A',
+  shelf3:  '#8B5A35',
+}
 
-function BookCover({ n, isCenter, discoverComments }: {
+// 本の共通シェル（背表紙帯・小口・影など）
+function BookShell({ w, h, bg, hovered, children }: {
+  w: number; h: number; bg: string; hovered: boolean; children: React.ReactNode
+}) {
+  return (
+    <div style={{
+      width: w, height: h, flexShrink: 0,
+      position: 'relative',
+      transition: 'transform .2s ease, box-shadow .2s ease',
+      transform: hovered ? 'translateY(-6px)' : 'translateY(0)',
+      boxShadow: hovered
+        ? `0 18px 30px rgba(64,36,18,0.32), 3px 3px 0 rgba(0,0,0,0.12)`
+        : `0 6px 14px rgba(64,36,18,0.22), 2px 2px 0 rgba(0,0,0,0.08)`,
+      borderRadius: '2px 5px 5px 2px',
+    }}>
+      {/* 本体 */}
+      <div style={{
+        width: '100%', height: '100%',
+        borderRadius: '2px 5px 5px 2px',
+        background: bg,
+        border: `1.5px solid ${C.darkLine}`,
+        overflow: 'hidden',
+        position: 'relative',
+      }}>
+        {/* 左側の背表紙帯 */}
+        <div style={{
+          position: 'absolute', left: 0, top: 0, bottom: 0, width: 10,
+          background: `linear-gradient(90deg, ${C.darkLine} 0%, ${C.dark} 60%, transparent 100%)`,
+          pointerEvents: 'none', zIndex: 2,
+        }}/>
+        {/* 光沢 */}
+        <div style={{
+          position: 'absolute', inset: 0,
+          background: `radial-gradient(ellipse at 30% 15%, rgba(255,255,255,0.13) 0%, transparent 55%)`,
+          pointerEvents: 'none', zIndex: 1,
+        }}/>
+        {children}
+      </div>
+      {/* 右端のページの重なり（小口） */}
+      <div style={{
+        position: 'absolute', top: 4, bottom: 4, right: -5, width: 5,
+        background: 'repeating-linear-gradient(180deg, #f5ede0 0px, #f5ede0 1.5px, #e0d0b8 1.5px, #e0d0b8 3px)',
+        borderRadius: '0 3px 3px 0',
+        boxShadow: '2px 0 4px rgba(0,0,0,0.15)',
+        zIndex: 0,
+      }}/>
+    </div>
+  )
+}
+
+// 装飾枠SVG
+function DecoFrame({ w, h }: { w: number; h: number }) {
+  return (
+    <svg width="100%" height="100%" style={{position:'absolute',inset:0,pointerEvents:'none',zIndex:1}}
+      viewBox={`0 0 ${w} ${h}`} preserveAspectRatio="none">
+      <rect x="8" y="8" width={w-16} height={h-16} rx="3"
+        fill="none" stroke={C.goldFaint} strokeWidth="1.2"/>
+      <rect x="13" y="13" width={w-26} height={h-26} rx="2"
+        fill="none" stroke={C.goldFaint} strokeWidth="0.6" opacity="0.5"/>
+      <path d={`M ${w*0.15} ${h*0.115} Q ${w*0.5} ${h*0.055} ${w*0.85} ${h*0.115}`}
+        fill="none" stroke={C.goldFaint} strokeWidth="0.9" opacity="0.8"/>
+      <path d={`M ${w*0.15} ${h*0.885} Q ${w*0.5} ${h*0.945} ${w*0.85} ${h*0.885}`}
+        fill="none" stroke={C.goldFaint} strokeWidth="0.9" opacity="0.8"/>
+    </svg>
+  )
+}
+
+// 画像なし作品カード
+function BookCoverText({ n, w, h }: { n: Novel; w: number; h: number }) {
+  return (
+    <div style={{
+      position: 'relative', zIndex: 2,
+      padding: '16px 14px 12px',
+      height: '100%', display: 'flex', flexDirection: 'column',
+      alignItems: 'center', justifyContent: 'space-between',
+      textAlign: 'center', boxSizing: 'border-box',
+    }}>
+      {/* 上部：小さな装飾アイコン */}
+      <div style={{ display:'flex', flexDirection:'column', alignItems:'center', gap:4 }}>
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+          <path d="M12 2L13.8 8.2H20.2L14.9 12L16.8 18.2L12 14.4L7.2 18.2L9.1 12L3.8 8.2H10.2L12 2Z"
+            fill={C.gold} opacity="0.75"/>
+        </svg>
+        <div style={{ width:24, height:1, background:C.goldFaint }}/>
+      </div>
+
+      {/* 中央：タイトル */}
+      <div style={{
+        flex: 1, display:'flex', alignItems:'center', justifyContent:'center',
+        padding:'8px 0',
+      }}>
+        <div style={{
+          fontSize: w >= 140 ? 13 : 12,
+          fontWeight: 700,
+          color: C.text,
+          lineHeight: 1.6,
+          fontFamily: "'Noto Serif JP',serif",
+          textShadow: `0 1px 4px rgba(0,0,0,0.5)`,
+          overflow: 'hidden',
+          display: '-webkit-box',
+          WebkitLineClamp: 4,
+          WebkitBoxOrient: 'vertical' as any,
+        }}>{n.title || '作品タイトル'}</div>
+      </div>
+
+      {/* 作者名 */}
+      <div style={{
+        fontSize: 10, color: C.textSub, opacity: 0.88,
+        overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap', width:'100%',
+        marginBottom: 6,
+      }}>{n.display_name}</div>
+
+      {/* ジャンルタグ */}
+      <span style={{
+        fontSize: 8, color: C.textSub,
+        background: 'rgba(255,255,255,0.1)',
+        border: `1px solid ${C.goldFaint}`,
+        padding: '2px 7px', borderRadius: 10,
+        letterSpacing: '0.06em', fontWeight: 600,
+      }}>{n.genre}</span>
+    </div>
+  )
+}
+
+// メインの本カード
+function BookItem({ n, discoverComments }: {
   n: Novel
-  isCenter: boolean
   discoverComments: {comment:string;display_name:string}[]
 }) {
   const [hovered, setHovered] = useState(false)
-  const w = isCenter ? BOOK_W_CENTER : BOOK_W
-  const h = isCenter ? BOOK_H_CENTER : BOOK_H
+  const w = BOOK_W
+  const h = BOOK_H
+  const bg = `linear-gradient(150deg, ${C.light} 0%, ${C.base} 55%, ${C.dark} 100%)`
 
   return (
     <NovelPreviewPopup novel={{...n, like_count: n.likeCount2}}>
       <div
         onMouseEnter={() => setHovered(true)}
         onMouseLeave={() => setHovered(false)}
-        style={{
-          width: w, height: h, flexShrink: 0,
-          cursor: 'pointer',
-          transition: 'transform .25s ease, box-shadow .25s ease',
-          transform: hovered
-            ? 'translateY(-12px) scale(1.04)'
-            : isCenter ? 'translateY(-10px)' : 'translateY(0)',
-          boxShadow: hovered
-            ? `0 24px 40px rgba(0,0,0,0.35), 4px 4px 0 rgba(0,0,0,0.15)`
-            : isCenter
-            ? `0 18px 32px rgba(0,0,0,0.28), 3px 3px 0 rgba(0,0,0,0.12)`
-            : `0 6px 16px rgba(0,0,0,0.18), 2px 2px 0 rgba(0,0,0,0.08)`,
-          borderRadius: '2px 5px 5px 2px',
-          position: 'relative',
-          zIndex: isCenter ? 3 : hovered ? 4 : 1,
-        }}
+        style={{ cursor:'pointer', position:'relative' }}
       >
-        <div style={{
-          width: '100%', height: '100%',
-          borderRadius: '2px 5px 5px 2px',
-          overflow: 'hidden',
-          position: 'relative',
-          background: n.cover_url
-            ? '#e8dcc8'
-            : `linear-gradient(150deg, ${SPINE_LIGHT} 0%, ${SPINE_BASE} 55%, ${SPINE_DARK} 100%)`,
-          border: `1.5px solid ${SPINE_DARK}`,
-        }}>
-          {/* 表紙画像あり */}
+        <BookShell w={w} h={h} bg={bg} hovered={hovered}>
+          <DecoFrame w={w} h={h}/>
           {n.cover_url ? (
+            /* 画像あり */
             <img src={n.cover_url} alt={n.title}
-              style={{width:'100%', height:'100%', objectFit:'cover', display:'block'}}/>
+              style={{width:'100%', height:'100%', objectFit:'cover', display:'block', position:'relative', zIndex:2}}/>
           ) : (
-            <>
-              {/* 光沢グラデーション */}
-              <div style={{
-                position:'absolute', inset:0,
-                background:`radial-gradient(ellipse at 28% 18%, rgba(255,255,255,0.18) 0%, transparent 55%)`,
-                pointerEvents:'none',
-              }}/>
-
-              {/* 装飾二重枠 */}
-              <svg width="100%" height="100%" style={{position:'absolute',inset:0,pointerEvents:'none'}} viewBox={`0 0 ${w} ${h}`} preserveAspectRatio="none">
-                <rect x="7" y="7" width={w-14} height={h-14} rx="3"
-                  fill="none" stroke={SPINE_GOLD} strokeWidth="1.2"/>
-                <rect x="11" y="11" width={w-22} height={h-22} rx="2"
-                  fill="none" stroke={SPINE_GOLD} strokeWidth="0.6" opacity="0.5"/>
-                {/* 上下のアーチ装飾 */}
-                <path d={`M ${w*0.14} ${h*0.11} Q ${w*0.5} ${h*0.05} ${w*0.86} ${h*0.11}`}
-                  fill="none" stroke={SPINE_GOLD} strokeWidth="0.8" opacity="0.7"/>
-                <path d={`M ${w*0.14} ${h*0.89} Q ${w*0.5} ${h*0.95} ${w*0.86} ${h*0.89}`}
-                  fill="none" stroke={SPINE_GOLD} strokeWidth="0.8" opacity="0.7"/>
-              </svg>
-
-              {/* テキスト表紙（参考画像スタイル） */}
-              <div style={{
-                position:'relative', zIndex:1,
-                padding: isCenter ? '20px 14px 14px' : '14px 10px 10px',
-                height:'100%', display:'flex', flexDirection:'column',
-                alignItems:'center', justifyContent:'space-between',
-                textAlign:'center', boxSizing:'border-box',
-              }}>
-                {/* ジャンルバッジ */}
-                <span style={{
-                  fontSize: isCenter ? 9 : 8,
-                  color:'rgba(255,255,255,0.88)',
-                  background:'rgba(255,255,255,0.12)',
-                  border:`1px solid ${SPINE_GOLD}`,
-                  padding:'2px 8px', borderRadius:10,
-                  letterSpacing:'0.06em', fontWeight:600,
-                }}>{n.genre}</span>
-
-                {/* タイトル */}
-                <div style={{
-                  flex:1, display:'flex', alignItems:'center',
-                  justifyContent:'center', padding:'8px 0',
-                }}>
-                  <div style={{
-                    fontSize: isCenter ? 14 : 12,
-                    fontWeight:700,
-                    color:'rgba(255,255,255,0.97)',
-                    lineHeight:1.6,
-                    fontFamily:"'Noto Serif JP',serif",
-                    textShadow:`0 1px 4px rgba(0,0,0,0.45)`,
-                    overflow:'hidden',
-                    display:'-webkit-box',
-                    WebkitLineClamp: isCenter ? 4 : 3,
-                    WebkitBoxOrient:'vertical' as any,
-                  }}>{n.title}</div>
-                </div>
-
-                {/* 区切り線 */}
-                <div style={{
-                  width:28, height:1,
-                  background:SPINE_GOLD,
-                  marginBottom: isCenter ? 8 : 6,
-                  opacity:0.85,
-                }}/>
-
-                {/* 作者名 */}
-                <div style={{
-                  fontSize: isCenter ? 10 : 9,
-                  color:'rgba(255,255,255,0.82)',
-                  overflow:'hidden', textOverflow:'ellipsis',
-                  whiteSpace:'nowrap', width:'100%',
-                }}>{n.display_name}</div>
-              </div>
-            </>
+            /* 画像なし */
+            <BookCoverText n={n} w={w} h={h}/>
           )}
 
-          {/* 綴じ目の影 */}
-          <div style={{
-            position:'absolute', left:0, top:0, bottom:0, width:10,
-            background:'linear-gradient(90deg, rgba(0,0,0,0.28) 0%, transparent 100%)',
-            pointerEvents:'none',
-          }}/>
-
-          {/* イチオシバッジ（中央のみ） */}
-          {isCenter && (
-            <div style={{
-              position:'absolute', top:10, right:-2,
-              background:'var(--color-brand)',
-              color:'#fff', fontSize:8, fontWeight:700,
-              padding:'4px 8px 4px 6px',
-              borderRadius:'3px 0 0 3px',
-              boxShadow:'-2px 1px 6px rgba(0,0,0,0.25)',
-              letterSpacing:'0.04em',
-            }}>イチオシ!</div>
-          )}
-
-          {/* ホバー時：読者の声オーバーレイ */}
+          {/* ホバー：読者の声 */}
           {hovered && discoverComments.length > 0 && (
             <div style={{
-              position:'absolute', inset:0,
-              background:'rgba(0,0,0,0.6)',
+              position:'absolute', inset:0, zIndex:10,
+              background:'rgba(42,20,10,0.72)',
               display:'flex', alignItems:'center', justifyContent:'center',
               padding:10, boxSizing:'border-box',
             }}>
               <div style={{
                 background:'#FFF9A0',
-                borderRadius:6, padding:'8px 10px',
+                borderRadius:5, padding:'8px 10px',
                 fontSize:10, color:'#5a3a20', lineHeight:1.65,
                 textAlign:'center', transform:'rotate(-1deg)',
                 boxShadow:'2px 2px 8px rgba(0,0,0,0.3)',
@@ -200,93 +220,127 @@ function BookCover({ n, isCenter, discoverComments }: {
               </div>
             </div>
           )}
-        </div>
-
-        {/* 中央本のみ：下にタイトル・作者 */}
-        {isCenter && (
-          <div style={{
-            position:'absolute', bottom: -46, left:'50%',
-            transform:'translateX(-50%)',
-            width: BOOK_W_CENTER + 20,
-            textAlign:'center',
-            pointerEvents:'none',
-          }}>
-            <div style={{
-              fontSize:11, fontWeight:700, color:'var(--color-text)',
-              lineHeight:1.4, marginBottom:2,
-              overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap',
-            }}>{n.title}</div>
-            <div style={{fontSize:10, color:'var(--color-text-muted)'}}>{n.display_name}</div>
-          </div>
-        )}
+        </BookShell>
       </div>
     </NovelPreviewPopup>
   )
 }
 
-function EmptyBook({ isCenter }: { isCenter?: boolean }) {
-  const w = isCenter ? BOOK_W_CENTER : BOOK_W
-  const h = isCenter ? BOOK_H_CENTER : BOOK_H
+// 準備中カード（EmptyBook）
+function EmptyBook() {
+  const [hovered, setHovered] = useState(false)
+  const w = BOOK_W
+  const h = BOOK_H
+  const bg = `linear-gradient(150deg, #9A6A42 0%, #7A4A2A 55%, #4A2A18 100%)`
+
   return (
-    <div style={{
-      width: w, height: h, flexShrink: 0,
-      borderRadius: '2px 5px 5px 2px',
-      background:`linear-gradient(150deg, #c8b8a8 0%, #b0a090 55%, #988070 100%)`,
-      border:`1.5px solid #806050`,
-      boxShadow:`0 4px 12px rgba(0,0,0,0.15), 2px 2px 0 rgba(0,0,0,0.08)`,
-      display:'flex', flexDirection:'column',
-      alignItems:'center', justifyContent:'space-between',
-      padding: isCenter ? '18px 14px' : '12px 10px',
-      boxSizing:'border-box',
-      transform: isCenter ? 'translateY(-10px)' : 'translateY(0)',
-      position:'relative', overflow:'hidden',
-    }}>
-      <div style={{position:'absolute', left:0, top:0, bottom:0, width:10,
-        background:'linear-gradient(90deg, rgba(0,0,0,0.2) 0%, transparent 100%)'}}/>
-      <svg width="100%" height="100%" style={{position:'absolute',inset:0,pointerEvents:'none'}} viewBox={`0 0 ${w} ${h}`} preserveAspectRatio="none">
-        <rect x="7" y="7" width={w-14} height={h-14} rx="3"
-          fill="none" stroke="rgba(255,255,255,0.35)" strokeWidth="1"/>
-      </svg>
-      <span style={{
-        fontSize:8, color:'rgba(255,255,255,0.7)',
-        background:'rgba(255,255,255,0.12)',
-        border:'1px solid rgba(255,255,255,0.3)',
-        padding:'2px 8px', borderRadius:10,
-        letterSpacing:'0.06em', fontWeight:600,
-        position:'relative', zIndex:1,
-      }}>準備中</span>
-      <div style={{
-        fontSize: isCenter ? 13 : 11, fontWeight:700,
-        color:'rgba(255,255,255,0.5)',
-        fontFamily:"'Noto Serif JP',serif",
-        position:'relative', zIndex:1,
-      }}>···</div>
-      <div style={{width:24, height:1, background:'rgba(255,255,255,0.3)', position:'relative', zIndex:1}}/>
+    <div
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
+      style={{ cursor:'default', position:'relative' }}
+    >
+      <BookShell w={w} h={h} bg={bg} hovered={hovered}>
+        <DecoFrame w={w} h={h}/>
+        <div style={{
+          position:'relative', zIndex:2,
+          padding:'16px 14px 12px',
+          height:'100%', display:'flex', flexDirection:'column',
+          alignItems:'center', justifyContent:'space-between',
+          textAlign:'center', boxSizing:'border-box',
+        }}>
+          {/* 上部装飾 */}
+          <div style={{ display:'flex', flexDirection:'column', alignItems:'center', gap:4 }}>
+            <div style={{ width:20, height:1, background:C.goldFaint }}/>
+            <div style={{ width:12, height:1, background:C.goldFaint, opacity:0.5 }}/>
+          </div>
+
+          {/* 中央：羽アイコン */}
+          <div style={{ flex:1, display:'flex', alignItems:'center', justifyContent:'center' }}>
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none">
+              <path d="M20.24 12.24a6 6 0 0 0-8.49-8.49L5 10.5V19h8.5l6.74-6.76z"
+                fill="none" stroke={C.goldFaint} strokeWidth="1.2"/>
+              <line x1="16" y1="8" x2="2" y2="22" stroke={C.goldFaint} strokeWidth="1"/>
+              <line x1="17.5" y1="15" x2="9" y2="15" stroke={C.goldFaint} strokeWidth="0.8"/>
+            </svg>
+          </div>
+
+          {/* 下部：準備中ラベル（極小・目立たせない） */}
+          <span style={{
+            fontSize: 9, opacity: 0.4,
+            color: C.textSub,
+            background: 'rgba(255,247,237,0.08)',
+            border: '1px solid rgba(255,247,237,0.15)',
+            padding: '1px 6px', borderRadius: 8,
+            letterSpacing: '0.06em',
+          }}>coming soon</span>
+        </div>
+      </BookShell>
     </div>
   )
 }
 
+// ユーザーの推しカード（特別な推薦本）
 function IntroBlock() {
+  const [hovered, setHovered] = useState(false)
+  const w = 160
+  const h = BOOK_H
+  const bg = `linear-gradient(150deg, #B9824A 0%, #8B5A35 45%, #5A3420 100%)`
+
   return (
-    <div style={{
-      width:180, height:BOOK_H, flexShrink:0,
-      background:'var(--color-bg-card)',
-      border:`1.5px dashed var(--color-brand-border)`,
-      borderRadius:8,
-      display:'flex', flexDirection:'column', justifyContent:'center',
-      padding:'0 18px', boxSizing:'border-box',
-    }}>
-      <h2 style={{fontSize:15,fontWeight:700,color:'var(--color-text)',marginBottom:6,fontFamily:"'Noto Serif JP',serif"}}>
-        ユーザーの推し
-      </h2>
-      <p style={{fontSize:11,color:'var(--color-text-muted)',marginBottom:12,lineHeight:1.7}}>
-        推しの作品を拡散しよう！
-      </p>
-      <a href="/search" style={{
-        display:'inline-block', fontSize:11, color:'var(--color-brand)',
-        border:'1.5px solid var(--color-brand)', borderRadius:14,
-        padding:'5px 12px', textDecoration:'none', fontWeight:600, width:'fit-content',
-      }}>作品を検索する</a>
+    <div
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
+      style={{ cursor:'pointer', position:'relative' }}
+    >
+      <BookShell w={w} h={h} bg={bg} hovered={hovered}>
+        <DecoFrame w={w} h={h}/>
+        <div style={{
+          position:'relative', zIndex:2,
+          padding:'18px 16px 14px',
+          height:'100%', display:'flex', flexDirection:'column',
+          alignItems:'center', justifyContent:'space-between',
+          textAlign:'center', boxSizing:'border-box',
+        }}>
+          {/* 上部：PICK */}
+          <div style={{ display:'flex', flexDirection:'column', alignItems:'center', gap:5 }}>
+            <span style={{
+              fontSize:8, fontWeight:700, letterSpacing:'0.12em',
+              color:C.gold, opacity:0.9,
+            }}>✦ PICK ✦</span>
+            <div style={{ width:28, height:1, background:C.goldFaint }}/>
+          </div>
+
+          {/* 中央：タイトル + 説明 */}
+          <div style={{ flex:1, display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center', gap:8, padding:'10px 0' }}>
+            <div style={{
+              fontSize:15, fontWeight:700,
+              color:C.text,
+              fontFamily:"'Noto Serif JP',serif",
+              textShadow:`0 1px 4px rgba(0,0,0,0.5)`,
+              lineHeight:1.5,
+            }}>ユーザーの推し</div>
+            <div style={{ width:20, height:1, background:C.goldFaint, opacity:0.7 }}/>
+            <div style={{
+              fontSize:9.5, color:C.textSub, opacity:0.82,
+              lineHeight:1.65,
+            }}>読者が見つけた、{'\n'}まだ知られていない物語</div>
+          </div>
+
+          {/* 下部：ボタン */}
+          <a href="/search" style={{
+            display:'inline-block',
+            fontSize:9, fontWeight:700,
+            color:C.gold,
+            border:`1px solid ${C.goldFaint}`,
+            borderRadius:12,
+            padding:'5px 12px',
+            textDecoration:'none',
+            letterSpacing:'0.04em',
+            background:'rgba(214,168,90,0.12)',
+            transition:'background .15s',
+          }}>作品を検索する</a>
+        </div>
+      </BookShell>
     </div>
   )
 }
@@ -307,7 +361,6 @@ export default function GemSection({ novels, discoverCommentMap }: Props) {
     ...rawBookList.slice(introIndex),
   ]
   const loopList = [...bookList, ...bookList, ...bookList]
-  const centerIdxInSet = Math.floor(bookList.length / 2)
 
   const trackRef = useRef<HTMLDivElement>(null)
   const set1StartRef = useRef<HTMLDivElement>(null)
@@ -316,7 +369,7 @@ export default function GemSection({ novels, discoverCommentMap }: Props) {
   const oneSetWidthRef = useRef(0)
   const pausedRef = useRef(false)
   const rafRef = useRef<number | null>(null)
-  const SPEED = 0.4
+  const SPEED = 0.45
 
   const measure = useCallback(() => {
     if (!set1StartRef.current || !set2StartRef.current) return
@@ -360,18 +413,16 @@ export default function GemSection({ novels, discoverCommentMap }: Props) {
   return (
     <>
       {/* デスクトップ */}
-      <div className="gem-desktop" style={{flex:1, overflow:'hidden', position:'relative', paddingBottom:74}}
+      <div className="gem-desktop" style={{flex:1, overflow:'hidden', position:'relative', paddingBottom:52}}
         onMouseEnter={() => { pausedRef.current = true }}
         onMouseLeave={() => { pausedRef.current = false }}
       >
         <div ref={trackRef} style={{
-          display:'flex', gap:GAP, paddingTop:24, paddingBottom:20,
+          display:'flex', gap:GAP, paddingTop:20, paddingBottom:16,
           alignItems:'flex-end', width:'max-content', willChange:'transform',
         }}>
           {loopList.map((item, i) => {
             const setLen = bookList.length
-            const idxInSet = i % setLen
-            const isCenter = idxInSet === centerIdxInSet
             const isSet1Start = i === 0
             const isSet2Start = i === setLen
             const refProp = isSet1Start ? set1StartRef : isSet2Start ? set2StartRef : undefined
@@ -379,8 +430,8 @@ export default function GemSection({ novels, discoverCommentMap }: Props) {
             const el = item === 'INTRO'
               ? <IntroBlock key={`intro-${i}`}/>
               : item
-                ? <BookCover key={`${item.id}-${i}`} n={item} isCenter={isCenter} discoverComments={discoverCommentMap[item.id]||[]}/>
-                : <EmptyBook key={`empty-${i}`} isCenter={isCenter}/>
+                ? <BookItem key={`${item.id}-${i}`} n={item} discoverComments={discoverCommentMap[item.id]||[]}/>
+                : <EmptyBook key={`empty-${i}`}/>
 
             if (refProp) {
               return <div key={`ref-${i}`} ref={refProp} style={{display:'flex', alignItems:'flex-end'}}>{el}</div>
@@ -389,37 +440,37 @@ export default function GemSection({ novels, discoverCommentMap }: Props) {
           })}
         </div>
 
-        {/* 木製棚板（厚みあり・立体的） */}
+        {/* 木製棚板 */}
         <div style={{
-          position:'absolute', left:0, right:0, bottom:46,
-          height:26,
-          background:'linear-gradient(180deg, #f0d080 0%, #d4a040 20%, #b07820 60%, #8a5810 100%)',
-          borderRadius:'0 0 3px 3px',
-          boxShadow:'0 6px 18px rgba(0,0,0,0.3), inset 0 3px 6px rgba(255,255,255,0.22), inset 0 -2px 4px rgba(0,0,0,0.18)',
+          position:'absolute', left:0, right:0, bottom:0,
+          height:24,
+          background:`linear-gradient(180deg, ${C.shelf1} 0%, ${C.shelf2} 30%, ${C.shelf3} 100%)`,
+          borderRadius:'0 0 4px 4px',
+          boxShadow:`0 5px 16px rgba(80,45,20,0.28), inset 0 2px 5px rgba(255,255,255,0.2), inset 0 -2px 4px rgba(0,0,0,0.18)`,
           zIndex:2, overflow:'hidden',
         }}>
           {/* 木目 */}
           <div style={{
             position:'absolute', inset:0,
             background:`repeating-linear-gradient(90deg,
-              transparent 0px, transparent 55px,
-              rgba(0,0,0,0.05) 55px, rgba(0,0,0,0.05) 56px,
-              transparent 56px, transparent 78px,
-              rgba(0,0,0,0.035) 78px, rgba(0,0,0,0.035) 78.5px
+              transparent 0px, transparent 52px,
+              rgba(80,45,20,0.06) 52px, rgba(80,45,20,0.06) 53px,
+              transparent 53px, transparent 75px,
+              rgba(80,45,20,0.04) 75px, rgba(80,45,20,0.04) 75.5px
             )`,
           }}/>
           {/* 上面ハイライト */}
           <div style={{
             position:'absolute', top:0, left:0, right:0, height:5,
-            background:'linear-gradient(180deg, rgba(255,255,255,0.32) 0%, transparent 100%)',
+            background:'linear-gradient(180deg, rgba(255,255,255,0.28) 0%, transparent 100%)',
           }}/>
         </div>
 
         {/* 本が棚に落とす影 */}
         <div style={{
-          position:'absolute', left:0, right:0, bottom:70,
-          height:8,
-          background:'rgba(0,0,0,0.14)',
+          position:'absolute', left:0, right:0, bottom:22,
+          height:7,
+          background:'rgba(80,45,20,0.18)',
           filter:'blur(3px)',
           zIndex:1,
         }}/>
@@ -430,11 +481,11 @@ export default function GemSection({ novels, discoverCommentMap }: Props) {
             style={{
               position:'absolute', ...pos, top:'40%', transform:'translateY(-50%)',
               width:34, height:34, borderRadius:'50%',
-              border:'1px solid rgba(242,106,33,0.25)',
+              border:`1px solid rgba(242,106,33,0.25)`,
               background:'rgba(255,255,255,0.94)',
               cursor:'pointer', zIndex:10,
               display:'flex', alignItems:'center', justifyContent:'center',
-              boxShadow:'0 3px 10px rgba(0,0,0,0.16)',
+              boxShadow:'0 3px 10px rgba(64,36,18,0.2)',
             }}>
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--color-text)" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
               {dir === -1 ? <polyline points="15 18 9 12 15 6"/> : <polyline points="9 18 15 12 9 6"/>}
