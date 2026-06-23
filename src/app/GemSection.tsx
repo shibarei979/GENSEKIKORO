@@ -226,12 +226,12 @@ function BookItem({ n, discoverComments }: {
   )
 }
 
-// 準備中カード（EmptyBook）
+// 準備中カード（EmptyBook）- 薄茶色
 function EmptyBook() {
   const [hovered, setHovered] = useState(false)
   const w = BOOK_W
   const h = BOOK_H
-  const bg = `linear-gradient(150deg, #9A6A42 0%, #7A4A2A 55%, #4A2A18 100%)`
+  const bg = `linear-gradient(150deg, #D2A06A 0%, #C08A55 50%, #A56B3A 100%)`
 
   return (
     <div
@@ -250,28 +250,26 @@ function EmptyBook() {
         }}>
           {/* 上部装飾 */}
           <div style={{ display:'flex', flexDirection:'column', alignItems:'center', gap:4 }}>
-            <div style={{ width:20, height:1, background:C.goldFaint }}/>
-            <div style={{ width:12, height:1, background:C.goldFaint, opacity:0.5 }}/>
+            <div style={{ width:22, height:1, background:C.goldFaint }}/>
+            <div style={{ width:14, height:1, background:C.goldFaint, opacity:0.5 }}/>
           </div>
-
-          {/* 中央：羽アイコン */}
+          {/* 羽アイコン */}
           <div style={{ flex:1, display:'flex', alignItems:'center', justifyContent:'center' }}>
-            <svg width="28" height="28" viewBox="0 0 24 24" fill="none">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" style={{opacity:0.5}}>
               <path d="M20.24 12.24a6 6 0 0 0-8.49-8.49L5 10.5V19h8.5l6.74-6.76z"
                 fill="none" stroke={C.goldFaint} strokeWidth="1.2"/>
               <line x1="16" y1="8" x2="2" y2="22" stroke={C.goldFaint} strokeWidth="1"/>
               <line x1="17.5" y1="15" x2="9" y2="15" stroke={C.goldFaint} strokeWidth="0.8"/>
             </svg>
           </div>
-
-          {/* 下部：準備中ラベル（極小・目立たせない） */}
+          {/* coming soon（極小・目立たない） */}
           <span style={{
-            fontSize: 9, opacity: 0.4,
-            color: C.textSub,
-            background: 'rgba(255,247,237,0.08)',
-            border: '1px solid rgba(255,247,237,0.15)',
-            padding: '1px 6px', borderRadius: 8,
-            letterSpacing: '0.06em',
+            fontSize:9, opacity:0.4,
+            color:C.textSub,
+            background:'rgba(255,247,237,0.1)',
+            border:'1px solid rgba(255,247,237,0.18)',
+            padding:'1px 7px', borderRadius:8,
+            letterSpacing:'0.06em',
           }}>coming soon</span>
         </div>
       </BookShell>
@@ -443,26 +441,22 @@ export default function GemSection({ novels, discoverCommentMap }: Props) {
         {/* 木製棚板 */}
         <div style={{
           position:'absolute', left:0, right:0, bottom:0,
-          height:24,
-          background:`linear-gradient(180deg, ${C.shelf1} 0%, ${C.shelf2} 30%, ${C.shelf3} 100%)`,
-          borderRadius:'0 0 4px 4px',
-          boxShadow:`0 5px 16px rgba(80,45,20,0.28), inset 0 2px 5px rgba(255,255,255,0.2), inset 0 -2px 4px rgba(0,0,0,0.18)`,
+          height:22,
+          borderRadius:8,
+          background:`linear-gradient(180deg, #d2a06a 0%, #b9824a 55%, #8b5a35 100%)`,
+          boxShadow:`0 8px 18px rgba(70,40,20,0.24), inset 0 1px 0 rgba(255,245,220,0.4)`,
           zIndex:2, overflow:'hidden',
         }}>
           {/* 木目 */}
           <div style={{
-            position:'absolute', inset:0,
+            position:'absolute',
+            top:4, bottom:4, left:12, right:12,
             background:`repeating-linear-gradient(90deg,
-              transparent 0px, transparent 52px,
-              rgba(80,45,20,0.06) 52px, rgba(80,45,20,0.06) 53px,
-              transparent 53px, transparent 75px,
-              rgba(80,45,20,0.04) 75px, rgba(80,45,20,0.04) 75.5px
+              rgba(90,50,25,0.14) 0px, rgba(90,50,25,0.14) 1px,
+              transparent 1px, transparent 38px
             )`,
-          }}/>
-          {/* 上面ハイライト */}
-          <div style={{
-            position:'absolute', top:0, left:0, right:0, height:5,
-            background:'linear-gradient(180deg, rgba(255,255,255,0.28) 0%, transparent 100%)',
+            opacity:0.45,
+            pointerEvents:'none',
           }}/>
         </div>
 
