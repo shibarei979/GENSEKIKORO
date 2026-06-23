@@ -12,7 +12,6 @@ import Footer from '@/components/layout/Footer'
 import AdBanner from '@/components/layout/AdBanner'
 import HeroSlider from './HeroSlider'
 import GemSection from './GemSection'
-import RankingSection from './RankingSection'
 import LatestEpisodesSection from './LatestEpisodesSection'
 
 function getContestStatusKey(deadline: string | null, judging_end: string | null) {
@@ -122,26 +121,6 @@ export default async function HomePage() {
     .limit(50)
   const shuffledLatest = [...(allLatestRaw||[])].sort(()=>Math.random()-0.5).slice(0,8)
 
-  const { data: weeklyLikes } = await supabase
-    .from('weekly_likes')
-    .select('novel_id, like_count')
-    .order('like_count', { ascending: false })
-    .limit(20)
-  const weeklyNovelIds = (weeklyLikes || []).map((w: any) => w.novel_id)
-  const weeklyLikeMap = Object.fromEntries((weeklyLikes || []).map((w: any) => [w.novel_id, w.like_count]))
-  let rankingLongRaw: any[] = []
-  let rankingShortRaw: any[] = []
-  if (weeklyNovelIds.length > 0) {
-    const { data: weeklyNovels } = await supabase
-      .from('novels')
-      .select('id, title, genre, novel_type, author_id, summary, catchcopy, tags')
-      .in('id', weeklyNovelIds)
-      .eq('published', true)
-    const sorted = (weeklyNovels || []).sort((a: any, b: any) => (weeklyLikeMap[b.id]||0) - (weeklyLikeMap[a.id]||0))
-    rankingLongRaw  = sorted.filter((n: any) => n.novel_type === '長編').slice(0, 5)
-    rankingShortRaw = sorted.filter((n: any) => n.novel_type === '短編').slice(0, 5)
-  }
-
   const latestNovelsBase = await addAuthorNames(supabase, shuffledLatest || [])
   const latestIds = latestNovelsBase.map((n: any) => n.id)
   let latestLikeMap: Record<string,number> = {}
@@ -229,9 +208,6 @@ export default async function HomePage() {
     })
   }
 
-  const rankingLong  = (await addAuthorNames(supabase, rankingLongRaw  || [])).map((n: any) => ({...n, like_count: weeklyLikeMap[n.id]||0}))
-  const rankingShort = (await addAuthorNames(supabase, rankingShortRaw || [])).map((n: any) => ({...n, like_count: weeklyLikeMap[n.id]||0}))
-
   // モバイル用：募集中コンテストを1件取得（バナー表示用）
   const activeContest = (allContests || []).find((c: any) => c.image_url && getContestStatusKey(c.deadline, c.judging_end) === '募集中')
 
@@ -302,7 +278,7 @@ export default async function HomePage() {
         </div>
       </div>
 
-      {/* ===== ユーザーの推し（見出しは本棚内のIntroBlockに統合） ===== */}
+      {/* ===== ユーザーの推し ===== */}
       <div className="gem-section-wrap" style={{background:'var(--color-bg-card)',padding:'16px 0',overflow:'hidden'}}>
         <div style={{width:'100%'}}>
           <GemSection novels={gemNovels} discoverCommentMap={discoverCommentMap} />
@@ -319,15 +295,6 @@ export default async function HomePage() {
       {/* ===== デスクトップ：メインエリア ===== */}
       <div className="desktop-only main-layout" style={{maxWidth:1200,margin:'0 auto',padding:'20px 32px',display:'flex',gap:20,alignItems:'flex-start'}}>
         <div style={{flex:1,minWidth:0,display:'flex',flexDirection:'column',gap:16}}>
-          <div style={{background:'var(--color-bg-card)',border:'1px solid var(--color-brand-border)',borderRadius:10,overflow:'hidden'}}>
-            <div style={{padding:'10px 16px',borderBottom:'1px solid var(--color-brand-border)',display:'flex',alignItems:'center',justifyContent:'space-between',background:'var(--color-bg)'}}>
-              <span style={{fontSize:14,fontWeight:700,color:'var(--color-text)'}}>週間ランキング</span>
-            </div>
-            <RankingSection rankingLong={rankingLong} rankingShort={rankingShort} />
-            <div style={{padding:'9px 16px',textAlign:'center',borderTop:'1px solid var(--color-brand-border)'}}>
-              <Link href='/ranking' className='more-link' style={{fontSize:12,color:'var(--color-brand)',textDecoration:'none',display:'inline-block'}}>もっと見る ›</Link>
-            </div>
-          </div>
           <RecommendedNovels novels={recommended} />
           <div style={{background:'var(--color-bg-card)',border:'1px solid var(--color-brand-border)',borderRadius:10,overflow:'hidden'}}>
             <div style={{padding:'10px 16px',borderBottom:'1px solid var(--color-brand-border)',display:'flex',alignItems:'center',justifyContent:'space-between',background:'var(--color-bg)'}}>
@@ -348,20 +315,9 @@ export default async function HomePage() {
         <div><HomeSidebar announcements={sidebarAnnouncements||[]} contests={sidebarContests} /></div>
       </div>
 
-      {/* ===== 投稿・検索 台形バナー（新着作品の下） ===== */}
+      {/* ===== 投稿・検索 台形バナー ===== */}
       <div className="desktop-only" style={{background:'var(--color-bg-card)',padding:'24px 0',width:'100%'}}>
         <ActionBanner isLoggedIn={!!user} />
-      </div>
-
-      {/* ===== モバイル：週間ランキング ===== */}
-      <div className="mobile-only" style={{padding:'12px 16px 0'}}>
-        <div style={{background:'var(--color-bg-card)',border:'1px solid var(--color-brand-border)',borderRadius:10,overflow:'hidden'}}>
-          <div style={{padding:'10px 16px',borderBottom:'1px solid var(--color-brand-border)',display:'flex',alignItems:'center',justifyContent:'space-between',background:'var(--color-bg)'}}>
-            <span style={{fontSize:14,fontWeight:700,color:'var(--color-text)'}}>週間ランキング</span>
-            <Link href="/ranking" style={{fontSize:12,color:'var(--color-brand)',textDecoration:'none'}}>もっと見る ›</Link>
-          </div>
-          <RankingSection rankingLong={rankingLong} rankingShort={rankingShort} />
-        </div>
       </div>
 
       {/* ===== モバイル：おすすめ作品 ===== */}
