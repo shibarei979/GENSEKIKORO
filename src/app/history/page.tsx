@@ -148,8 +148,8 @@ export default async function HistoryPage() {
                     : <span style={{fontSize:10,background:'#f5f5f5',color:'#757575',border:'1px solid #e0e0e0',padding:'1px 6px',borderRadius:3}}>完結</span>}
                 </div>
                 {/* タイトル・作者 */}
-                <Link href={`/novel/${item.novelId}`} style={{textDecoration:'none',color:'inherit'}}>
-                  <div style={{fontSize:17,fontWeight:700,color:'var(--color-text)',marginBottom:3,lineHeight:1.4}}>{item.novelTitle}</div>
+                <Link href={`/novel/${item.novelId}`} style={{textDecoration:'none',color:'inherit',display:'block',marginBottom:3}}>
+                  <div style={{fontSize:17,fontWeight:700,color:'var(--color-text)',lineHeight:1.4}}>{item.novelTitle}</div>
                 </Link>
                 <div style={{fontSize:12,color:'var(--color-text-muted)',marginBottom:6}}>作者：{item.displayName}</div>
                 {/* あらすじ */}
