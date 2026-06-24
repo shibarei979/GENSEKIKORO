@@ -303,17 +303,14 @@ export default function MypageClient({
           <button onClick={()=>setShowBdModal(true)} style={{padding:'6px 14px',background:'var(--color-brand)',color:'#fff',border:'none',borderRadius:8,fontSize:12,fontWeight:600,cursor:'pointer',flexShrink:0}}>設定する</button>
         </div>
       )}
-      {/* アイコン＋プロフィール */}
-      <div style={{display:'flex',alignItems:'flex-start',gap:20,marginBottom:24}}>
+      <div style={{display:'flex',alignItems:'flex-start',gap:20,marginBottom:20}}>
         <div style={{position:'relative',flexShrink:0,cursor:'pointer'}} onClick={()=>iconInputRef.current?.click()}>
           <input ref={iconInputRef} type="file" accept="image/*" style={{display:'none'}} onChange={e=>{const f=e.target.files?.[0];if(f){handleIconUpload(f);e.target.value=''}}}/>
           {iconUrl
-            ? <img src={iconUrl} alt={profile.display_name} style={{width:72,height:72,borderRadius:'50%',objectFit:'cover',border:'3px solid var(--color-brand)'}}/>
-            : <div style={{width:72,height:72,borderRadius:'50%',background:'var(--color-brand)',display:'flex',alignItems:'center',justifyContent:'center',fontSize:28,fontWeight:700,color:'#fff'}}>{initial}</div>
+            ? <img src={iconUrl} alt={profile.display_name} style={{width:60,height:60,borderRadius:'50%',objectFit:'cover',border:'3px solid var(--color-brand)'}}/>
+            : <div style={{width:60,height:60,borderRadius:'50%',background:'var(--color-brand)',display:'flex',alignItems:'center',justifyContent:'center',fontSize:24,fontWeight:700,color:'#fff'}}>{initial}</div>
           }
-          <div style={{position:'absolute',bottom:0,right:0,width:20,height:20,background:'#fff',borderRadius:'50%',border:'2px solid var(--color-brand)',display:'flex',alignItems:'center',justifyContent:'center',fontSize:10}}>
-            {iconUploading?'⟳':'📷'}
-          </div>
+          <div style={{position:'absolute',bottom:0,right:0,width:18,height:18,background:'#fff',borderRadius:'50%',border:'2px solid var(--color-brand)',display:'flex',alignItems:'center',justifyContent:'center',fontSize:9}}>{iconUploading?'⟳':'📷'}</div>
         </div>
         <div style={{flex:1}}>
           <div style={{display:'flex',alignItems:'center',gap:8,marginBottom:3}}>
@@ -321,87 +318,45 @@ export default function MypageClient({
               <div style={{display:'flex',alignItems:'center',gap:8,flexWrap:'wrap'}}>
                 <input value={nameInput} onChange={e=>setNameInput(e.target.value)}
                   onKeyDown={e=>{if(e.key==='Enter')handleSaveName();if(e.key==='Escape')setEditingName(false)}}
-                  style={{fontSize:18,fontWeight:700,border:'1.5px solid var(--color-brand)',borderRadius:6,padding:'3px 10px',outline:'none',width:180}} autoFocus/>
+                  style={{fontSize:16,fontWeight:700,border:'1.5px solid var(--color-brand)',borderRadius:6,padding:'3px 10px',outline:'none',width:160}} autoFocus/>
                 <button onClick={handleSaveName} disabled={nameSaving} style={{fontSize:12,background:'var(--color-brand)',color:'#fff',border:'none',borderRadius:6,padding:'5px 12px',cursor:'pointer'}}>{nameSaving?'保存中':'保存'}</button>
                 <button onClick={()=>{setEditingName(false);setNameInput(profile.display_name);setNameError('')}} style={{fontSize:12,background:'none',color:'var(--color-text-muted)',border:'1px solid var(--color-brand-border)',borderRadius:6,padding:'5px 10px',cursor:'pointer'}}>×</button>
                 {nameError && <span style={{fontSize:11,color:'var(--color-danger)'}}>{nameError}</span>}
               </div>
             ) : (
               <>
-                <div style={{fontSize:22,fontWeight:700,color:'var(--color-text)'}}>{nameInput}</div>
+                <div style={{fontSize:18,fontWeight:700,color:'var(--color-text)'}}>{nameInput}</div>
                 {nameSaved && <span style={{fontSize:11,color:'var(--color-success)'}}>✓</span>}
               </>
             )}
           </div>
-          {userNumber && <div style={{fontSize:11,color:'var(--color-text-faint)',marginBottom:8}}>{userNumber}</div>}
-          <div style={{display:'flex',gap:20,flexWrap:'wrap',marginBottom:8}}>
-            <span style={{fontSize:13,color:'var(--color-text-muted)'}}><strong style={{color:'var(--color-text)',fontSize:16}}>{followerCount}</strong> フォロワー</span>
-            <span style={{fontSize:13,color:'var(--color-text-muted)'}}><strong style={{color:'var(--color-text)',fontSize:16}}>{followingCount}</strong> フォロー中</span>
-            <span style={{fontSize:13,color:'var(--color-brand)'}}><strong style={{fontSize:16}}>{published.length}</strong> 公開作品</span>
-            <span style={{fontSize:13,color:'var(--color-text-muted)'}}><strong style={{color:'var(--color-text)',fontSize:16}}>{drafts.length}</strong> 下書き</span>
+          {userNumber && <div style={{fontSize:11,color:'var(--color-text-faint)',marginBottom:6}}>{userNumber}</div>}
+          <div style={{display:'flex',gap:16,flexWrap:'wrap',marginBottom:6}}>
+            <span style={{fontSize:12,color:'var(--color-text-muted)'}}><strong style={{color:'var(--color-text)'}}>{followerCount}</strong> フォロワー</span>
+            <span style={{fontSize:12,color:'var(--color-text-muted)'}}><strong style={{color:'var(--color-text)'}}>{followingCount}</strong> フォロー中</span>
+            <span style={{fontSize:12,color:'var(--color-brand)'}}><strong>{published.length}</strong> 公開作品</span>
           </div>
-          <div style={{fontSize:13,color:'var(--color-text-muted)',marginBottom:10}}>{profile.email}</div>
-          {profile.bio && <div style={{fontSize:13,color:'var(--color-text)',lineHeight:1.8,marginBottom:10}}>{profile.bio}</div>}
+          <div style={{fontSize:12,color:'var(--color-text-muted)',marginBottom:8}}>{profile.email}</div>
+          {profile.bio && <div style={{fontSize:12,color:'var(--color-text)',lineHeight:1.7,marginBottom:8}}>{profile.bio}</div>}
           <div style={{display:'flex',gap:8,flexWrap:'wrap'}}>
             <button onClick={()=>setEditingName(true)} style={{fontSize:12,border:'1px solid var(--color-brand-border)',padding:'5px 12px',borderRadius:8,background:'none',color:'var(--color-text-muted)',cursor:'pointer'}}>名前を変更</button>
             <button onClick={()=>setShowBioModal(true)} style={{fontSize:12,border:'1px solid var(--color-brand-border)',padding:'5px 12px',borderRadius:8,background:'none',color:'var(--color-text-muted)',cursor:'pointer'}}>自己紹介を編集</button>
-            <button onClick={()=>setShowBoard(true)} style={{fontSize:12,border:'1px solid var(--color-brand-border)',padding:'5px 12px',borderRadius:8,background:'none',color:'var(--color-text-muted)',cursor:'pointer'}}>ストーリーボード</button>
           </div>
         </div>
       </div>
-
-      {/* 獲得バッジ */}
-      {claimedSet.size > 0 && (
-        <div style={{marginBottom:24}}>
-          <div style={{fontSize:13,fontWeight:700,color:'var(--color-text)',marginBottom:10}}>獲得バッジ（{claimedSet.size}/{ALL_BADGES.filter(b=>!b.id.startsWith('_')).length}）</div>
-          <div style={{display:'flex',gap:8,flexWrap:'wrap'}}>
-            {ALL_BADGES.filter(b => claimedSet.has(b.id)).map(badge => (
-              <div key={badge.id} style={{
-                padding:'4px 12px',borderRadius:20,fontSize:11,fontWeight:700,
-                background:badge.color,color:'#fff',
-                boxShadow:`0 2px 6px ${badge.color}66`,
-              }}>{badge.name}</div>
-            ))}
-          </div>
-          <button onClick={()=>{setShowBadgeBook(true);setBadgePage(0)}} style={{marginTop:8,fontSize:11,color:'var(--color-brand)',background:'none',border:'none',cursor:'pointer',padding:0}}>バッジ図鑑を見る →</button>
-        </div>
-      )}
-
-      {/* フォロー中の作者 */}
       {followingAuthors.length > 0 && (
-        <div style={{marginBottom:24}}>
-          <div style={{fontSize:13,fontWeight:700,color:'var(--color-text)',marginBottom:10}}>フォロー中の作者（{followingAuthors.length}）</div>
+        <div style={{marginTop:16}}>
+          <div style={{fontSize:12,fontWeight:700,color:'var(--color-text-muted)',marginBottom:8}}>フォロー中の作者（{followingAuthors.length}）</div>
           <div style={{display:'flex',flexWrap:'wrap',gap:8}}>
             {followingAuthors.map((a:any) => (
-              <a key={a.user_id} href={`/author/${a.user_id}`}
-                style={{display:'flex',alignItems:'center',gap:6,padding:'6px 12px',background:'var(--color-bg)',border:'1px solid var(--color-brand-border)',borderRadius:20,textDecoration:'none'}}>
-                {a.icon_url
-                  ? <img src={a.icon_url} style={{width:20,height:20,borderRadius:'50%',objectFit:'cover'}} alt=""/>
-                  : <div style={{width:20,height:20,borderRadius:'50%',background:'var(--color-brand-border)',display:'flex',alignItems:'center',justifyContent:'center',fontSize:9,color:'var(--color-brand)',fontWeight:700}}>{a.display_name?.[0]}</div>
-                }
+              <a key={a.user_id} href={`/author/${a.user_id}`} style={{display:'flex',alignItems:'center',gap:6,padding:'5px 10px',background:'var(--color-bg)',border:'1px solid var(--color-brand-border)',borderRadius:16,textDecoration:'none'}}>
+                {a.icon_url ? <img src={a.icon_url} style={{width:18,height:18,borderRadius:'50%',objectFit:'cover'}} alt=""/> : <div style={{width:18,height:18,borderRadius:'50%',background:'var(--color-brand-border)',display:'flex',alignItems:'center',justifyContent:'center',fontSize:8,color:'var(--color-brand)',fontWeight:700}}>{a.display_name?.[0]}</div>}
                 <span style={{fontSize:12,color:'var(--color-text)'}}>{a.display_name}</span>
               </a>
             ))}
           </div>
         </div>
       )}
-
-      {/* 活動サマリー */}
-      <div style={{display:'grid',gridTemplateColumns:'repeat(3,1fr)',gap:12}}>
-        {[
-          {label:'いいね', value:missionStats.likeCount, color:'var(--color-brand)'},
-          {label:'コメント', value:missionStats.commentCount, color:'#3b82f6'},
-          {label:'拡散', value:missionStats.discoverCount, color:'#22c55e'},
-          {label:'保存', value:missionStats.bookmarkCount, color:'#8b5cf6'},
-          {label:'フォロー', value:missionStats.followCount, color:'#f59e0b'},
-          {label:'投稿話数', value:missionStats.episodeCount, color:'#ec4899'},
-        ].map(item => (
-          <div key={item.label} style={{padding:'12px 14px',background:'var(--color-bg)',borderRadius:10,textAlign:'center'}}>
-            <div style={{fontSize:22,fontWeight:800,color:item.color}}>{item.value}</div>
-            <div style={{fontSize:11,color:'var(--color-text-muted)',marginTop:2}}>{item.label}</div>
-          </div>
-        ))}
-      </div>
     </div>
   )
 
@@ -430,14 +385,7 @@ export default function MypageClient({
                 <span style={{fontSize:10,background:novel.published?'#e8f5e9':'#f5f5f5',color:novel.published?'var(--color-success)':'#757575',border:`1px solid ${novel.published?'#a5d6a7':'#e0e0e0'}`,padding:'1px 7px',borderRadius:4}}>{novel.published?'公開中':'下書き'}</span>
                 {(novel as any).novel_type && <span style={{fontSize:10,background:'var(--color-info-bg)',color:'var(--color-info)',border:'1px solid var(--color-info-border)',padding:'1px 7px',borderRadius:4}}>{(novel as any).novel_type}</span>}
               </div>
-              <div style={{fontSize:15,fontWeight:700,color:'var(--color-text)',marginBottom:4}}>{novel.title}</div>
-              {/* 統計バー */}
-              <div style={{display:'flex',gap:14,flexWrap:'wrap',fontSize:12,color:'var(--color-text-muted)'}}>
-                <span>♡ {fmtNum(novelLikeMap[novel.id]||0)}</span>
-                <span>💬 {fmtNum(novelCommentMap[novel.id]||0)}</span>
-                <span>👁 {fmtNum(novelViewMap[novel.id]||0)}</span>
-                <span>{novelEpCountMap[novel.id]||0}話</span>
-              </div>
+              <div style={{fontSize:14,fontWeight:700,color:'var(--color-text)'}}>{novel.title}</div>
             </div>
           </div>
           {/* 操作ボタン */}
@@ -474,16 +422,8 @@ export default function MypageClient({
                 ? <span style={{fontSize:10,background:'#f0fdf4',color:'#15803d',border:'1px solid #86efac',padding:'1px 6px',borderRadius:4}}>連載中</span>
                 : <span style={{fontSize:10,background:'#f5f5f5',color:'#757575',border:'1px solid #e0e0e0',padding:'1px 6px',borderRadius:4}}>完結</span>}
             </div>
-            <div style={{fontSize:15,fontWeight:700,color:'var(--color-text)',marginBottom:2}}>{n.title}</div>
-            <div style={{fontSize:12,color:'var(--color-text-muted)',marginBottom:5}}>作者：{authorName}</div>
-            {n.summary && <div style={{fontSize:12,color:'#5a3a20',lineHeight:1.7,marginBottom:5,overflow:'hidden',display:'-webkit-box',WebkitLineClamp:2,WebkitBoxOrient:'vertical' as any}}>{n.summary}</div>}
-            {(n.tags||[]).length > 0 && (
-              <div style={{display:'flex',gap:4,flexWrap:'wrap'}}>
-                {(n.tags as string[]).slice(0,5).map((t:string) => (
-                  <span key={t} style={{fontSize:10,background:'var(--color-bg)',color:'var(--color-text-muted)',border:'1px solid var(--color-brand-border)',padding:'1px 6px',borderRadius:3}}>#{t}</span>
-                ))}
-              </div>
-            )}
+            <div style={{fontSize:14,fontWeight:700,color:'var(--color-text)',marginBottom:2}}>{n.title}</div>
+            <div style={{fontSize:12,color:'var(--color-text-muted)'}}>{authorName}</div>
           </div>
         )
       })}
