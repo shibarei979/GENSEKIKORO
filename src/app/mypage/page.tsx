@@ -67,13 +67,82 @@ export default async function MypagePage() {
     .select('contest_id, novel_id')
     .eq('user_id', user.id)
 
-  // バッジ獲得済みIDを取得
   const { data: claimedMissions } = await supabase
     .from('user_missions')
     .select('mission_id')
     .eq('user_id', user.id)
 
   const claimedMissionIds = (claimedMissions || []).map((r: any) => r.mission_id)
+
+  // 閲覧履歴
+  const { data: views } = await supabase
+    .from('page_views')
+    .select('episode_id, viewed_at')
+    .eq('user_id', user.id)
+    .order('viewed_at', { ascending: false })
+    .limit(200)
+
+  const epIds = Array.from(new Set((views||[]).map((v:any) => v.episode_id).filter(Boolean)))
+  const latestViewMap: Record<string,string> = {}
+  views?.forEach((v:any) => {
+    if (v.episode_id && !latestViewMap[v.episode_id]) latestViewMap[v.episode_id] = v.viewed_at
+  })
+
+  let historyItems: any[] = []
+  if (epIds.length > 0) {
+    const { data: episodes } = await supabase
+      .from('episodes')
+      .select('id, title, ep_number, novel_id, novels(id, title, genre, author_id, summary, tags, novel_type, is_serial)')
+      .in('id', epIds as string[])
+
+    const authorIds2 = Array.from(new Set((episodes||[]).map((e:any) => e.novels?.author_id).filter(Boolean)))
+    const authorMap2: Record<string,string> = {}
+    if (authorIds2.length > 0) {
+      const { data: authors2 } = await supabase.from('profiles').select('user_id, display_name').in('user_id', authorIds2 as string[])
+      authors2?.forEach((a:any) => { authorMap2[a.user_id] = a.display_name })
+    }
+
+    const novelMap: Record<string,any> = {}
+    episodes?.forEach((ep:any) => {
+      const novel = ep.novels
+      if (!novel) return
+      const viewedAt = latestViewMap[ep.id]
+      if (!novelMap[novel.id] || viewedAt > novelMap[novel.id].viewedAt) {
+        novelMap[novel.id] = {
+          novelId: novel.id, novelTitle: novel.title,
+          genre: novel.genre, novelType: novel.novel_type||'',
+          isSerial: novel.is_serial, authorId: novel.author_id,
+          displayName: authorMap2[novel.author_id]||'',
+          summary: novel.summary||'', tags: novel.tags||[],
+          epId: ep.id, epTitle: ep.title, epNumber: ep.ep_number, viewedAt,
+        }
+      }
+    })
+    historyItems = Object.values(novelMap).sort((a,b) => b.viewedAt > a.viewedAt ? 1 : -1)
+  }
+
+  // 第1話マップ
+  const historyNovelIds = historyItems.map((i:any) => i.novelId)
+  const firstEpMap: Record<string,string> = {}
+  if (historyNovelIds.length > 0) {
+    const { data: firstEps } = await supabase
+      .from('episodes').select('id, novel_id, ep_number')
+      .in('novel_id', historyNovelIds).eq('published', true)
+      .order('ep_number', { ascending: true })
+    firstEps?.forEach((ep:any) => { if (!firstEpMap[ep.novel_id]) firstEpMap[ep.novel_id] = ep.id })
+  }
+
+  // いいね・文字数
+  const charCountMap: Record<string,number> = {}
+  const likeMap2: Record<string,number> = {}
+  if (historyNovelIds.length > 0) {
+    const [epData, likeData] = await Promise.all([
+      supabase.from('episodes').select('novel_id, body').in('novel_id', historyNovelIds),
+      supabase.from('likes').select('novel_id').in('novel_id', historyNovelIds),
+    ])
+    epData.data?.forEach((ep:any) => { charCountMap[ep.novel_id] = (charCountMap[ep.novel_id]||0)+(ep.body?.length||0) })
+    likeData.data?.forEach((l:any) => { likeMap2[l.novel_id] = (likeMap2[l.novel_id]||0)+1 })
+  }
 
   const defaultProfile = {
     user_id: user.id,
@@ -98,6 +167,10 @@ export default async function MypagePage() {
       contests={contests || []}
       initialEntries={entries || []}
       claimedMissionIds={claimedMissionIds}
+      historyItems={historyItems}
+      firstEpMap={firstEpMap}
+      charCountMap={charCountMap}
+      likeMap={likeMap2}
     />
   )
 }
