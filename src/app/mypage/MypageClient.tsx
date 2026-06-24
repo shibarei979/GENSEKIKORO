@@ -336,62 +336,59 @@ export default function MypageClient({
           </button>
         </div>
       )}
-      <div style={{background:'var(--color-bg-card)',border:'1px solid var(--color-brand-border)',borderRadius:12,padding:'20px 24px'}}>
-        {/* アイコン＋名前＋統計 */}
-        <div style={{display:'flex',alignItems:'center',gap:16,marginBottom:16}}>
-          <div style={{position:'relative',flexShrink:0,cursor:'pointer'}} onClick={()=>iconInputRef.current?.click()}>
-            <input ref={iconInputRef} type="file" accept="image/*" style={{display:'none'}}
-              onChange={e=>{const f=e.target.files?.[0];if(f){handleIconUpload(f);e.target.value=''}}}/>
-            {iconUrl
-              ? <img src={iconUrl} alt={profile.display_name} style={{width:56,height:56,borderRadius:'50%',objectFit:'cover',border:'3px solid var(--color-brand)'}}/>
-              : <div style={{width:56,height:56,borderRadius:'50%',background:'var(--color-brand)',display:'flex',alignItems:'center',justifyContent:'center',fontSize:22,fontWeight:700,color:'var(--color-bg-card)'}}>{initial}</div>
-            }
-            <div style={{position:'absolute',bottom:0,right:0,width:16,height:16,background:'var(--color-bg-card)',borderRadius:'50%',border:'2px solid var(--color-brand)',display:'flex',alignItems:'center',justifyContent:'center',fontSize:9}}>
-              {iconUploading ? '⟳' : '📷'}
-            </div>
-          </div>
-          <div style={{flex:1,minWidth:0}}>
-            <div style={{display:'flex',alignItems:'center',gap:8,marginBottom:2}}>
-              <div style={{fontSize:18,fontWeight:700,color:'var(--color-text)'}}>{nameInput}</div>
-              {nameSaved && <span style={{fontSize:11,color:'var(--color-success)'}}>✓</span>}
-            </div>
-            {userNumber && <div style={{fontSize:11,color:'var(--color-text-faint)',marginBottom:6}}>{userNumber}</div>}
-            <div style={{display:'flex',gap:16,flexWrap:'wrap'}}>
-              <span style={{fontSize:12,color:'var(--color-text-muted)'}}><strong style={{color:'var(--color-text)'}}>{followerCount}</strong> フォロワー</span>
-              <span style={{fontSize:12,color:'var(--color-text-muted)'}}><strong style={{color:'var(--color-text)'}}>{followingCount}</strong> フォロー中</span>
-              <span style={{fontSize:12,color:'var(--color-brand)'}}><strong>{published.length}</strong> 公開作品</span>
-            </div>
+      {/* アイコン＋名前＋統計 */}
+      <div style={{display:'flex',alignItems:'center',gap:16,marginBottom:20}}>
+        <div style={{position:'relative',flexShrink:0,cursor:'pointer'}} onClick={()=>iconInputRef.current?.click()}>
+          <input ref={iconInputRef} type="file" accept="image/*" style={{display:'none'}}
+            onChange={e=>{const f=e.target.files?.[0];if(f){handleIconUpload(f);e.target.value=''}}}/>
+          {iconUrl
+            ? <img src={iconUrl} alt={profile.display_name} style={{width:60,height:60,borderRadius:'50%',objectFit:'cover',border:'3px solid var(--color-brand)'}}/>
+            : <div style={{width:60,height:60,borderRadius:'50%',background:'var(--color-brand)',display:'flex',alignItems:'center',justifyContent:'center',fontSize:24,fontWeight:700,color:'#fff'}}>{initial}</div>
+          }
+          <div style={{position:'absolute',bottom:0,right:0,width:18,height:18,background:'#fff',borderRadius:'50%',border:'2px solid var(--color-brand)',display:'flex',alignItems:'center',justifyContent:'center',fontSize:9}}>
+            {iconUploading ? '⟳' : '📷'}
           </div>
         </div>
-        <div style={{height:1,background:'var(--color-brand-border)',marginBottom:16}}/>
-        <div style={{fontSize:13,color:'var(--color-text-muted)',marginBottom:4}}>{profile.email}</div>
-        {profile.bio && <div style={{fontSize:13,color:'var(--color-text)',lineHeight:1.7,marginTop:6,marginBottom:4}}>{profile.bio}</div>}
-        <div style={{height:1,background:'var(--color-brand-border)',margin:'14px 0'}}/>
-        <div style={{display:'flex',gap:8,flexWrap:'wrap'}}>
-          <button onClick={()=>setEditingName(true)}
-            style={{fontSize:12,border:'1px solid var(--color-brand-border)',padding:'6px 14px',borderRadius:8,background:'var(--color-bg-card)',color:'var(--color-text-muted)',cursor:'pointer'}}>
-            名前を変更
-          </button>
-          <button onClick={()=>setShowBioModal(true)}
-            style={{fontSize:12,border:'1px solid var(--color-brand-border)',padding:'6px 14px',borderRadius:8,background:'var(--color-bg-card)',color:'var(--color-text-muted)',cursor:'pointer'}}>
-            自己紹介を編集
-          </button>
-        </div>
-        {editingName && (
-          <div style={{marginTop:12,display:'flex',alignItems:'center',gap:8,flexWrap:'wrap'}}>
-            <input value={nameInput} onChange={e=>setNameInput(e.target.value)}
-              onKeyDown={e=>{if(e.key==='Enter')handleSaveName();if(e.key==='Escape')setEditingName(false)}}
-              style={{fontSize:14,fontWeight:700,border:'1.5px solid var(--color-brand)',borderRadius:6,padding:'4px 10px',outline:'none',width:160}} autoFocus/>
-            <button onClick={handleSaveName} disabled={nameSaving}
-              style={{fontSize:12,background:'var(--color-brand)',color:'var(--color-bg-card)',border:'none',borderRadius:6,padding:'5px 12px',cursor:'pointer'}}>
-              {nameSaving ? '保存中' : '保存'}
-            </button>
-            <button onClick={()=>{setEditingName(false);setNameInput(profile.display_name);setNameError('')}}
-              style={{fontSize:12,background:'none',color:'var(--color-text-muted)',border:'1px solid var(--color-brand-border)',borderRadius:6,padding:'5px 10px',cursor:'pointer'}}>×</button>
-            {nameError && <span style={{fontSize:11,color:'var(--color-danger)'}}>{nameError}</span>}
+        <div>
+          <div style={{display:'flex',alignItems:'center',gap:8,marginBottom:3}}>
+            <div style={{fontSize:20,fontWeight:700,color:'var(--color-text)'}}>{nameInput}</div>
+            {nameSaved && <span style={{fontSize:11,color:'var(--color-success)'}}>✓</span>}
           </div>
-        )}
+          {userNumber && <div style={{fontSize:11,color:'var(--color-text-faint)',marginBottom:6}}>{userNumber}</div>}
+          <div style={{display:'flex',gap:18,flexWrap:'wrap'}}>
+            <span style={{fontSize:13,color:'var(--color-text-muted)'}}><strong style={{color:'var(--color-text)'}}>{followerCount}</strong> フォロワー</span>
+            <span style={{fontSize:13,color:'var(--color-text-muted)'}}><strong style={{color:'var(--color-text)'}}>{followingCount}</strong> フォロー中</span>
+            <span style={{fontSize:13,color:'var(--color-brand)'}}><strong>{published.length}</strong> 公開作品</span>
+          </div>
+        </div>
       </div>
+      <div style={{height:1,background:'var(--color-brand-border)',marginBottom:16}}/>
+      <div style={{fontSize:13,color:'var(--color-text-muted)',marginBottom:12}}>{profile.email}</div>
+      {profile.bio && <div style={{fontSize:13,color:'var(--color-text)',lineHeight:1.8,marginBottom:12}}>{profile.bio}</div>}
+      <div style={{display:'flex',gap:8,flexWrap:'wrap'}}>
+        <button onClick={()=>setEditingName(true)}
+          style={{fontSize:12,border:'1px solid var(--color-brand-border)',padding:'6px 14px',borderRadius:8,background:'none',color:'var(--color-text-muted)',cursor:'pointer'}}>
+          名前を変更
+        </button>
+        <button onClick={()=>setShowBioModal(true)}
+          style={{fontSize:12,border:'1px solid var(--color-brand-border)',padding:'6px 14px',borderRadius:8,background:'none',color:'var(--color-text-muted)',cursor:'pointer'}}>
+          自己紹介を編集
+        </button>
+      </div>
+      {editingName && (
+        <div style={{marginTop:12,display:'flex',alignItems:'center',gap:8,flexWrap:'wrap'}}>
+          <input value={nameInput} onChange={e=>setNameInput(e.target.value)}
+            onKeyDown={e=>{if(e.key==='Enter')handleSaveName();if(e.key==='Escape')setEditingName(false)}}
+            style={{fontSize:14,fontWeight:700,border:'1.5px solid var(--color-brand)',borderRadius:6,padding:'4px 10px',outline:'none',width:160}} autoFocus/>
+          <button onClick={handleSaveName} disabled={nameSaving}
+            style={{fontSize:12,background:'var(--color-brand)',color:'#fff',border:'none',borderRadius:6,padding:'5px 12px',cursor:'pointer'}}>
+            {nameSaving ? '保存中' : '保存'}
+          </button>
+          <button onClick={()=>{setEditingName(false);setNameInput(profile.display_name);setNameError('')}}
+            style={{fontSize:12,background:'none',color:'var(--color-text-muted)',border:'1px solid var(--color-brand-border)',borderRadius:6,padding:'5px 10px',cursor:'pointer'}}>×</button>
+          {nameError && <span style={{fontSize:11,color:'var(--color-danger)'}}>{nameError}</span>}
+        </div>
+      )}
       {followingAuthors.length > 0 && (
         <div style={{background:'var(--color-bg-card)',border:'1px solid var(--color-brand-border)',borderRadius:12,overflow:'hidden'}}>
           <div style={{padding:'12px 16px',borderBottom:'1px solid var(--color-brand-border)',background:'var(--color-bg)'}}>
@@ -417,10 +414,10 @@ export default function MypageClient({
   // ===== 作品管理タブ =====
   const WorksTab = () => (
     <div style={{padding: isMobile ? '16px' : '0',display:'flex',flexDirection:'column',gap:0}}>
-      <div style={{background:'var(--color-bg-card)',border:'1px solid var(--color-brand-border)',borderRadius:12,overflow:'hidden'}}>
-        <div style={{padding:'12px 16px',borderBottom:'1px solid var(--color-brand-border)',display:'flex',alignItems:'center',justifyContent:'space-between',background:'var(--color-bg)'}}>
-          <span style={{fontSize:14,fontWeight:700,color:'var(--color-text)'}}>投稿作品（{myNovels.length}）</span>
-          <Link href="/post" style={{background:'var(--color-brand)',color:'var(--color-bg-card)',fontSize:12,fontWeight:700,padding:'6px 16px',borderRadius:16,textDecoration:'none'}}>＋ 新しく投稿する</Link>
+      <div>
+        <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',marginBottom:16}}>
+          <span style={{fontSize:15,fontWeight:700,color:'var(--color-text)'}}>投稿作品（{myNovels.length}）</span>
+          <Link href="/post" style={{background:'var(--color-brand)',color:'#fff',fontSize:12,fontWeight:700,padding:'6px 16px',borderRadius:16,textDecoration:'none'}}>＋ 新しく投稿する</Link>
         </div>
         {myNovels.length === 0 ? (
           <div style={{textAlign:'center',padding:'60px 0',color:'var(--color-text-muted)'}}>
@@ -428,7 +425,7 @@ export default function MypageClient({
             <Link href="/post" style={{background:'var(--color-brand)',color:'var(--color-bg-card)',fontSize:13,fontWeight:700,padding:'10px 24px',borderRadius:20,display:'inline-block',textDecoration:'none',marginTop:12}}>最初の作品を投稿する</Link>
           </div>
         ) : myNovels.map((novel, i) => (
-          <div key={novel.id} style={{padding:'14px 16px',borderBottom:i<myNovels.length-1?'1px solid var(--color-brand-light)':'none'}}>
+          <div key={novel.id} style={{padding:'14px 0',borderBottom:'1px solid var(--color-brand-border)'}}>
             <div style={{display:'flex',alignItems:'flex-start',gap:8,marginBottom:8,cursor:'pointer'}}
               onClick={()=>router.push(`/novel/${novel.id}`)}>
               <div style={{flex:1,minWidth:0}}>
@@ -475,16 +472,16 @@ export default function MypageClient({
   // ===== 保存済みタブ =====
   const BookmarksTab = () => (
     <div style={{padding: isMobile ? '16px' : '0'}}>
-      <div style={{background:'var(--color-bg-card)',border:'1px solid var(--color-brand-border)',borderRadius:12,overflow:'hidden'}}>
-        <div style={{padding:'12px 16px',borderBottom:'1px solid var(--color-brand-border)',background:'var(--color-bg)'}}>
-          <span style={{fontSize:14,fontWeight:700,color:'var(--color-text)'}}>保存済み作品（{bookmarkedNovels.length}）</span>
+      <div>
+        <div style={{marginBottom:16}}>
+          <span style={{fontSize:15,fontWeight:700,color:'var(--color-text)'}}>保存済み作品（{bookmarkedNovels.length}）</span>
         </div>
         {bookmarkedNovels.length === 0 ? (
           <div style={{textAlign:'center',padding:'40px',color:'var(--color-text-muted)',fontSize:13}}>保存した作品がありません</div>
         ) : bookmarkedNovels.map((bm:any) => {
           const n = bm.novels; if (!n) return null
           return (
-            <div key={bm.novel_id} style={{display:'flex',alignItems:'center',gap:12,padding:'12px 16px',borderBottom:'1px solid var(--color-brand-light)',cursor:'pointer'}}
+            <div key={bm.novel_id} style={{display:'flex',alignItems:'center',gap:12,padding:'12px 0',borderBottom:'1px solid var(--color-brand-border)',cursor:'pointer'}}
               onClick={()=>router.push(`/novel/${n.id}`)}>
               <div style={{flex:1,minWidth:0}}>
                 <div style={{display:'flex',gap:5,marginBottom:2,flexWrap:'wrap'}}>
@@ -505,14 +502,14 @@ export default function MypageClient({
   // ===== 閲覧履歴タブ =====
   const HistoryTab = () => (
     <div style={{padding: isMobile ? '16px' : '0'}}>
-      <div style={{background:'var(--color-bg-card)',border:'1px solid var(--color-brand-border)',borderRadius:12,overflow:'hidden'}}>
-        <div style={{padding:'12px 16px',borderBottom:'1px solid var(--color-brand-border)',background:'var(--color-bg)'}}>
-          <span style={{fontSize:14,fontWeight:700,color:'var(--color-text)'}}>閲覧履歴（最大200件）</span>
+      <div>
+        <div style={{marginBottom:16}}>
+          <span style={{fontSize:15,fontWeight:700,color:'var(--color-text)'}}>閲覧履歴（最大200件）</span>
         </div>
         {historyItems.length === 0 ? (
           <div style={{textAlign:'center',padding:'40px',color:'var(--color-text-muted)',fontSize:13}}>まだ閲覧履歴がありません</div>
         ) : historyItems.map((item:any) => (
-          <div key={item.novelId} style={{padding:'14px 16px',borderBottom:'1px solid var(--color-brand-light)'}}>
+          <div key={item.novelId} style={{padding:'14px 0',borderBottom:'1px solid var(--color-brand-border)'}}>
             <div style={{display:'flex',gap:5,marginBottom:5,flexWrap:'wrap',alignItems:'center'}}>
               <span style={{fontSize:10,background:'var(--color-brand-light)',color:'var(--color-brand)',border:'1px solid var(--color-tag-border)',padding:'1px 6px',borderRadius:3}}>{item.genre}</span>
               {item.novelType && <span style={{fontSize:10,background:'var(--color-info-bg)',color:'var(--color-info)',border:'1px solid var(--color-info-border)',padding:'1px 6px',borderRadius:3}}>{item.novelType}</span>}
@@ -564,61 +561,66 @@ export default function MypageClient({
   // ===== つぶやきタブ =====
   const TweetTab = () => (
     <div style={{padding: isMobile ? '16px' : '0'}}>
-      <div style={{background:'var(--color-bg-card)',border:'1px solid var(--color-brand-border)',borderRadius:12,overflow:'hidden'}}>
-        <div style={{padding:'12px 16px',borderBottom:'1px solid var(--color-brand-border)',background:'var(--color-bg)'}}>
-          <span style={{fontSize:14,fontWeight:700,color:'var(--color-text)'}}>つぶやき</span>
-        </div>
-        <div style={{padding:'14px 16px'}}>
-          <TweetSection authorId={profile.user_id} currentUserId={profile.user_id} currentUserName={profile.display_name} currentUserIconUrl={profile.icon_url||null} isOwner={true}/>
-        </div>
-      </div>
+      <div style={{fontSize:15,fontWeight:700,color:'var(--color-text)',marginBottom:16}}>つぶやき</div>
+      <TweetSection authorId={profile.user_id} currentUserId={profile.user_id} currentUserName={profile.display_name} currentUserIconUrl={profile.icon_url||null} isOwner={true}/>
     </div>
   )
 
   // ===== ミッションタブ =====
   const MissionTab = () => (
     <div style={{padding: isMobile ? '16px' : '0'}}>
-      <div style={{background:'var(--color-bg-card)',border:'1px solid var(--color-brand-border)',borderRadius:12,overflow:'hidden'}}>
-        <div style={{padding:'12px 16px',borderBottom:'1px solid var(--color-brand-border)',background:'var(--color-bg)',display:'flex',alignItems:'center',justifyContent:'space-between'}}>
-          <span style={{fontSize:14,fontWeight:700,color:'var(--color-text)'}}>ミッション・バッジ</span>
-          <button onClick={()=>{setShowBadgeBook(true);setBadgePage(0)}}
-            style={{fontSize:12,border:'1px solid var(--color-brand-border)',padding:'5px 12px',borderRadius:8,background:'var(--color-bg-card)',color:'var(--color-text-muted)',cursor:'pointer'}}>
-            バッジ図鑑を見る
-          </button>
-        </div>
-        <div style={{padding:'16px',textAlign:'center',color:'var(--color-text-muted)',fontSize:13}}>
-          <Link href="/mission" style={{color:'var(--color-brand)',textDecoration:'none',fontWeight:600}}>ミッションページへ →</Link>
-        </div>
+      <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',marginBottom:16}}>
+        <span style={{fontSize:15,fontWeight:700,color:'var(--color-text)'}}>ミッション・バッジ</span>
+        <button onClick={()=>{setShowBadgeBook(true);setBadgePage(0)}}
+          style={{fontSize:12,border:'1px solid var(--color-brand-border)',padding:'5px 12px',borderRadius:8,background:'none',color:'var(--color-text-muted)',cursor:'pointer'}}>
+          バッジ図鑑を見る
+        </button>
       </div>
+      <Link href="/mission" style={{color:'var(--color-brand)',textDecoration:'none',fontSize:13,fontWeight:600}}>ミッションページへ →</Link>
     </div>
   )
 
   // ===== コンテストタブ =====
   const ContestTab = () => (
     <div style={{padding: isMobile ? '16px' : '0'}}>
+      <div style={{fontSize:15,fontWeight:700,color:'var(--color-text)',marginBottom:16}}>コンテスト応募</div>
       <ContestEntry novels={myNovels} contests={contests} initialEntries={initialEntries} userId={profile.user_id}/>
     </div>
   )
 
   // ===== 設定タブ =====
   const SettingsTab = () => (
-    <div style={{padding: isMobile ? '16px' : '0',display:'flex',flexDirection:'column',gap:12}}>
-      <div style={{background:'var(--color-bg-card)',border:'1px solid var(--color-brand-border)',borderRadius:12,overflow:'hidden'}}>
-        <div style={{padding:'12px 16px',borderBottom:'1px solid var(--color-brand-border)',background:'var(--color-bg)'}}>
-          <span style={{fontSize:14,fontWeight:700,color:'var(--color-text)'}}>アカウント設定</span>
-        </div>
+    <div style={{padding: isMobile ? '16px' : '0'}}>
+      <div style={{fontSize:15,fontWeight:700,color:'var(--color-text)',marginBottom:20}}>設定</div>
+      <div style={{display:'flex',flexDirection:'column'}}>
         {profile.login_provider !== 'google' && (
-          <button onClick={()=>setShowEmailModal(true)} style={settingBtn}>メールアドレスを変更</button>
+          <button onClick={()=>setShowEmailModal(true)}
+            style={{padding:'13px 0',fontSize:13,color:'var(--color-text)',background:'none',border:'none',borderBottom:'1px solid var(--color-brand-border)',cursor:'pointer',textAlign:'left' as const}}>
+            メールアドレスを変更
+          </button>
         )}
         {profile.login_provider !== 'google' && (
-          <button onClick={()=>setShowPwModal(true)} style={settingBtn}>パスワードを変更</button>
+          <button onClick={()=>setShowPwModal(true)}
+            style={{padding:'13px 0',fontSize:13,color:'var(--color-text)',background:'none',border:'none',borderBottom:'1px solid var(--color-brand-border)',cursor:'pointer',textAlign:'left' as const}}>
+            パスワードを変更
+          </button>
         )}
-        <button onClick={()=>iconInputRef.current?.click()} style={settingBtn}>アイコンを変更</button>
-        <button onClick={()=>setShowBdModal(true)} style={settingBtn}>生年月日を設定</button>
+        <button onClick={()=>iconInputRef.current?.click()}
+          style={{padding:'13px 0',fontSize:13,color:'var(--color-text)',background:'none',border:'none',borderBottom:'1px solid var(--color-brand-border)',cursor:'pointer',textAlign:'left' as const}}>
+          アイコンを変更
+        </button>
+        <button onClick={()=>setShowBdModal(true)}
+          style={{padding:'13px 0',fontSize:13,color:'var(--color-text)',background:'none',border:'none',borderBottom:'1px solid var(--color-brand-border)',cursor:'pointer',textAlign:'left' as const}}>
+          生年月日を設定
+        </button>
         <button onClick={()=>handleSignOut()} disabled={loading}
-          style={settingBtn}>{loading ? '...' : 'ログアウト'}</button>
+          style={{padding:'13px 0',fontSize:13,color:'var(--color-text)',background:'none',border:'none',borderBottom:'1px solid var(--color-brand-border)',cursor:'pointer',textAlign:'left' as const}}>
+          {loading ? '...' : 'ログアウト'}
+        </button>
         <button onClick={()=>setShowWithdraw(true)}
-          style={{...settingBtn,color:'var(--color-danger)',borderBottom:'none'}}>退会する</button>
+          style={{padding:'13px 0',fontSize:13,color:'var(--color-danger)',background:'none',border:'none',cursor:'pointer',textAlign:'left' as const}}>
+          退会する
+        </button>
       </div>
     </div>
   )
