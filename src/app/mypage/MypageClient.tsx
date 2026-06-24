@@ -678,13 +678,77 @@ export default function MypageClient({
     <div style={{minHeight:'100vh',background:'var(--color-bg)'}}>
       <Header profile={profile} user={true} />
 
-      <div style={{maxWidth:860,margin:'0 auto',padding: isMobile ? '0' : '24px 24px 0'}}>
+      <div style={{maxWidth:1100,margin:'0 auto',padding: isMobile ? '0' : '24px 24px 0'}}>
         <ProfileHeader/>
-        <TabBar/>
-        <div style={{minHeight:400}}>
-          {tabContent[activeTab]}
-        </div>
-        <div className="mobile-only" style={{height:80}}/>
+
+        {isMobile ? (
+          // モバイル：横スクロールタブ
+          <>
+            <div style={{
+              background:'var(--color-bg-card)',
+              borderBottom:'1px solid var(--color-brand-border)',
+              overflowX:'auto', scrollbarWidth:'none' as any,
+              position:'sticky', top:54, zIndex:10,
+            }}>
+              <div style={{display:'flex',minWidth:'max-content'}}>
+                {TABS.map(tab => (
+                  <button key={tab.id} onClick={()=>setActiveTab(tab.id)}
+                    style={{
+                      padding:'10px 14px', fontSize:12,
+                      fontWeight: activeTab===tab.id ? 700 : 400,
+                      color: activeTab===tab.id ? 'var(--color-brand)' : 'var(--color-text-muted)',
+                      background:'none', border:'none', cursor:'pointer',
+                      borderBottom: activeTab===tab.id ? '2px solid var(--color-brand)' : '2px solid transparent',
+                      whiteSpace:'nowrap' as const,
+                    }}>
+                    {tab.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+            <div style={{minHeight:400, padding:'16px'}}>
+              {tabContent[activeTab]}
+            </div>
+            <div style={{height:80}}/>
+          </>
+        ) : (
+          // デスクトップ：左サイドナビ＋右コンテンツ
+          <div style={{display:'flex',gap:0,marginTop:0,alignItems:'flex-start'}}>
+            {/* 左サイドナビ */}
+            <div style={{
+              width:180, flexShrink:0,
+              background:'var(--color-bg-card)',
+              border:'1px solid var(--color-brand-border)',
+              borderTop:'none',
+              position:'sticky', top:60,
+              borderRadius:'0 0 0 12px',
+            }}>
+              {TABS.map((tab, i) => (
+                <button key={tab.id} onClick={()=>setActiveTab(tab.id)}
+                  style={{
+                    width:'100%', padding:'13px 20px',
+                    textAlign:'left' as const,
+                    fontSize:13,
+                    fontWeight: activeTab===tab.id ? 700 : 400,
+                    color: activeTab===tab.id ? 'var(--color-brand)' : 'var(--color-text-muted)',
+                    background: activeTab===tab.id ? 'var(--color-brand-light)' : 'none',
+                    border:'none',
+                    borderBottom: i < TABS.length-1 ? '1px solid var(--color-brand-border)' : 'none',
+                    borderLeft: activeTab===tab.id ? '3px solid var(--color-brand)' : '3px solid transparent',
+                    cursor:'pointer',
+                    transition:'all .15s',
+                    borderRadius: i === TABS.length-1 ? '0 0 0 12px' : '0',
+                  }}>
+                  {tab.label}
+                </button>
+              ))}
+            </div>
+            {/* 右コンテンツ */}
+            <div style={{flex:1,minWidth:0,padding:'0 0 0 20px',minHeight:400}}>
+              {tabContent[activeTab]}
+            </div>
+          </div>
+        )}
       </div>
 
       {/* ===== 話の公開管理モーダル（S9） ===== */}
