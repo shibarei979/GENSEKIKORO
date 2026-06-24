@@ -314,8 +314,8 @@ export default function SearchForm({
             padding:'5px 12px',
             border:'1.5px solid var(--color-brand-border)',
             borderRadius:16,
-            background:'var(--color-bg)',
-            color:'#ffffff',
+            background:'#ffffff',
+            color:'var(--color-text-muted)',
             fontSize:12,fontWeight:600,cursor:'pointer',whiteSpace:'nowrap' as const,
           }}>
           気分で探す
@@ -327,8 +327,8 @@ export default function SearchForm({
             padding:'5px 12px',
             border:'1.5px solid var(--color-brand-border)',
             borderRadius:16,
-            background:'var(--color-bg)',
-            color:'#ffffff',
+            background:'#ffffff',
+            color:'var(--color-text-muted)',
             fontSize:12,fontWeight:600,cursor:'pointer',whiteSpace:'nowrap' as const,
           }}>
           詳細条件

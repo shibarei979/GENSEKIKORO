@@ -62,11 +62,11 @@ export default async function ContestsPage() {
                   const entryCount = entryCountMap[c.id] || 0
                   return (
                     <Link key={c.id} href={`/contests/${c.id}`} style={{textDecoration:'none'}}>
-                      <div style={{background:'var(--color-bg-card)',border:'1px solid var(--color-brand-border)',borderRadius:12,overflow:'hidden',width:356}}>
+                      <div style={{background:'var(--color-bg-card)',border:'1px solid var(--color-brand-border)',borderRadius:12,overflow:'hidden',width:284}}>
                         <div className="desktop-only">
                           {c.image_url && (
                             <img src={c.image_url} alt={c.title}
-                              style={{width:356,height:200,objectFit:'cover',display:'block'}}/>
+                              style={{width:284,height:160,objectFit:'cover',display:'block'}}/>
                           )}
                           <div style={{padding:'10px 14px',display:'flex',alignItems:'center',gap:10,flexWrap:'wrap'}}>
                             <span style={{fontSize:11,fontWeight:700,color:status.color,background:status.bg,border:`1px solid ${status.border}`,padding:'2px 10px',borderRadius:10}}>{status.label}</span>
@@ -77,7 +77,7 @@ export default async function ContestsPage() {
                           </div>
                         </div>
                         <div className="mobile-only">
-                          {c.image_url && <img src={c.image_url} alt={c.title} style={{width:356,height:200,objectFit:'cover',display:'block'}}/>}
+                          {c.image_url && <img src={c.image_url} alt={c.title} style={{width:284,height:160,objectFit:'cover',display:'block'}}/>}
                           <div style={{padding:'10px 14px',display:'flex',alignItems:'center',gap:10,flexWrap:'wrap'}}>
                             <span style={{fontSize:11,fontWeight:700,color:status.color,background:status.bg,border:`1px solid ${status.border}`,padding:'2px 10px',borderRadius:10}}>{status.label}</span>
                             <Link href={`/contests/${c.id}`}
@@ -104,11 +104,11 @@ export default async function ContestsPage() {
                 {externalContests.map((c:any) => {
                   const status = getStatusLabel(c.deadline, c.judging_end)
                   return (
-                    <div key={c.id} style={{background:'var(--color-bg-card)',border:'1px solid var(--color-brand-border)',borderRadius:12,overflow:'hidden',width:356}}>
+                    <div key={c.id} style={{background:'var(--color-bg-card)',border:'1px solid var(--color-brand-border)',borderRadius:12,overflow:'hidden',width:284}}>
                         <div className="desktop-only">
                           {c.image_url && (
                             <img src={c.image_url} alt={c.title}
-                              style={{width:356,height:200,objectFit:'cover',display:'block'}}/>
+                              style={{width:284,height:160,objectFit:'cover',display:'block'}}/>
                           )}
                           <div style={{padding:'10px 14px',display:'flex',alignItems:'center',gap:10,flexWrap:'wrap'}}>
                             <span style={{fontSize:11,fontWeight:700,color:status.color,background:status.bg,border:`1px solid ${status.border}`,padding:'2px 10px',borderRadius:10}}>{status.label}</span>
@@ -119,7 +119,7 @@ export default async function ContestsPage() {
                           </div>
                         </div>
                         <div className="mobile-only">
-                          {c.image_url && <img src={c.image_url} alt={c.title} style={{width:356,height:200,objectFit:'cover',display:'block'}}/>}
+                          {c.image_url && <img src={c.image_url} alt={c.title} style={{width:284,height:160,objectFit:'cover',display:'block'}}/>}
                           <div style={{padding:'10px 14px',display:'flex',alignItems:'center',gap:10,flexWrap:'wrap'}}>
                             <span style={{fontSize:11,fontWeight:700,color:status.color,background:status.bg,border:`1px solid ${status.border}`,padding:'2px 10px',borderRadius:10}}>{status.label}</span>
                             <a href={c.apply_url||'#'} target="_blank" rel="noopener noreferrer"
