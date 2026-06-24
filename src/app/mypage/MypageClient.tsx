@@ -89,6 +89,7 @@ export default function MypageClient({
   followingAuthors=[], followerCount=0, followingCount=0,
   contests=[], initialEntries=[], claimedMissionIds=[],
   historyItems=[], firstEpMap={}, charCountMap={}, likeMap={},
+  missionStats={ likeCount:0, discoverCount:0, commentCount:0, bookmarkCount:0, novelCount:0, episodeCount:0, followCount:0 },
 }: Props) {
   const router   = useRouter()
   const supabase = createClient()
