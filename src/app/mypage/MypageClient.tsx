@@ -321,38 +321,36 @@ export default function MypageClient({
 
   // ===== プロフィールヘッダー（全タブ共通） =====
   const ProfileHeader = () => (
-    <div style={{background:'var(--color-bg-card)',borderBottom:'1px solid var(--color-brand-border)',padding: isMobile ? '16px' : '24px 40px',marginBottom:0}}>
+    <div style={{background:'var(--color-bg-card)',borderBottom:'1px solid var(--color-brand-border)',padding: isMobile ? '16px' : '20px 40px',marginBottom:0}}>
       <div style={{display:'flex',alignItems:'center',gap: isMobile ? 12 : 16}}>
+        {/* アイコン */}
         <div style={{position:'relative',flexShrink:0,cursor:'pointer'}} onClick={()=>iconInputRef.current?.click()}>
           <input ref={iconInputRef} type="file" accept="image/*" style={{display:'none'}}
             onChange={e=>{const f=e.target.files?.[0];if(f){handleIconUpload(f);e.target.value=''}}}/>
           {iconUrl
-            ? <img src={iconUrl} alt={profile.display_name} style={{width: isMobile ? 52 : 64,height: isMobile ? 52 : 64,borderRadius:'50%',objectFit:'cover',border:'3px solid var(--color-brand)'}}/>
-            : <div style={{width: isMobile ? 52 : 64,height: isMobile ? 52 : 64,borderRadius:'50%',background:'var(--color-brand)',display:'flex',alignItems:'center',justifyContent:'center',fontSize: isMobile ? 20 : 24,fontWeight:700,color:'var(--color-bg-card)'}}>{initial}</div>
+            ? <img src={iconUrl} alt={profile.display_name} style={{width: isMobile ? 48 : 56,height: isMobile ? 48 : 56,borderRadius:'50%',objectFit:'cover',border:'3px solid var(--color-brand)'}}/>
+            : <div style={{width: isMobile ? 48 : 56,height: isMobile ? 48 : 56,borderRadius:'50%',background:'var(--color-brand)',display:'flex',alignItems:'center',justifyContent:'center',fontSize: isMobile ? 18 : 22,fontWeight:700,color:'var(--color-bg-card)'}}>{initial}</div>
           }
-          <div style={{position:'absolute',bottom:0,right:0,width:18,height:18,background:'var(--color-bg-card)',borderRadius:'50%',border:'2px solid var(--color-brand)',display:'flex',alignItems:'center',justifyContent:'center',fontSize:10}}>
+          <div style={{position:'absolute',bottom:0,right:0,width:16,height:16,background:'var(--color-bg-card)',borderRadius:'50%',border:'2px solid var(--color-brand)',display:'flex',alignItems:'center',justifyContent:'center',fontSize:9}}>
             {iconUploading ? '⟳' : '📷'}
           </div>
         </div>
+        {/* 名前・番号のみ（統計はマイページタブに） */}
         <div style={{flex:1,minWidth:0}}>
           <div style={{display:'flex',alignItems:'center',gap:8,marginBottom:2}}>
-            <div style={{fontSize: isMobile ? 17 : 19,fontWeight:700,color:'var(--color-text)'}}>{nameInput}</div>
-            {nameSaved && <span style={{fontSize:11,color:'var(--color-success)'}}>✓ 保存</span>}
+            <div style={{fontSize: isMobile ? 16 : 18,fontWeight:700,color:'var(--color-text)'}}>{nameInput}</div>
+            {nameSaved && <span style={{fontSize:11,color:'var(--color-success)'}}>✓</span>}
           </div>
-          {userNumber && <div style={{fontSize:11,color:'var(--color-text-faint)',letterSpacing:'.05em',fontWeight:600}}>{userNumber}</div>}
-          <div style={{display:'flex',gap:16,marginTop:6,flexWrap:'wrap'}}>
-            <span style={{fontSize:12,color:'var(--color-text-muted)'}}><strong style={{color:'var(--color-text)'}}>{followerCount}</strong> フォロワー</span>
-            <span style={{fontSize:12,color:'var(--color-text-muted)'}}><strong style={{color:'var(--color-text)'}}>{followingCount}</strong> フォロー中</span>
-            <span style={{fontSize:12,color:'var(--color-brand)'}}><strong>{published.length}</strong> 公開作品</span>
-          </div>
+          {userNumber && <div style={{fontSize:11,color:'var(--color-text-faint)',letterSpacing:'.05em'}}>{userNumber}</div>}
         </div>
+        {/* ボード・バッジ図鑑ボタン */}
         <div style={{display:'flex',gap:8,flexShrink:0}}>
           <button onClick={()=>setShowBoard(true)}
-            style={{border:'1px solid var(--color-brand-border)',borderRadius:8,padding:'7px 12px',background:'var(--color-bg-card)',cursor:'pointer',fontSize:12,color:'var(--color-text-muted)'}}>
+            style={{border:'1px solid var(--color-brand-border)',borderRadius:8,padding:'6px 12px',background:'var(--color-bg-card)',cursor:'pointer',fontSize:12,color:'var(--color-text-muted)'}}>
             ボード
           </button>
           <button onClick={()=>{setShowBadgeBook(true);setBadgePage(0)}}
-            style={{border:'1px solid var(--color-brand-border)',borderRadius:8,padding:'7px 12px',background:'var(--color-bg-card)',cursor:'pointer',fontSize:12,color:'var(--color-text-muted)'}}>
+            style={{border:'1px solid var(--color-brand-border)',borderRadius:8,padding:'6px 12px',background:'var(--color-bg-card)',cursor:'pointer',fontSize:12,color:'var(--color-text-muted)'}}>
             バッジ図鑑
           </button>
         </div>
@@ -403,11 +401,26 @@ export default function MypageClient({
           </button>
         </div>
       )}
-      <div style={{background:'var(--color-bg-card)',border:'1px solid var(--color-brand-border)',borderRadius:12,padding:'16px 20px'}}>
-        <div style={{fontSize:13,fontWeight:700,color:'var(--color-text)',marginBottom:12}}>プロフィール</div>
+      <div style={{background:'var(--color-bg-card)',border:'1px solid var(--color-brand-border)',borderRadius:12,padding:'20px 24px'}}>
+        {/* 名前・統計 */}
+        <div style={{marginBottom:16}}>
+          <div style={{fontSize:18,fontWeight:700,color:'var(--color-text)',marginBottom:4}}>{nameInput}</div>
+          {userNumber && <div style={{fontSize:11,color:'var(--color-text-faint)',marginBottom:10}}>{userNumber}</div>}
+          <div style={{display:'flex',gap:20,flexWrap:'wrap'}}>
+            <span style={{fontSize:13,color:'var(--color-text-muted)'}}><strong style={{color:'var(--color-text)'}}>{followerCount}</strong> フォロワー</span>
+            <span style={{fontSize:13,color:'var(--color-text-muted)'}}><strong style={{color:'var(--color-text)'}}>{followingCount}</strong> フォロー中</span>
+            <span style={{fontSize:13,color:'var(--color-brand)'}}><strong>{published.length}</strong> 公開作品</span>
+          </div>
+        </div>
+        {/* 区切り線 */}
+        <div style={{height:1,background:'var(--color-brand-border)',margin:'0 0 16px'}}/>
+        {/* プロフィール情報 */}
         <div style={{fontSize:13,color:'var(--color-text-muted)',marginBottom:4}}>{profile.email}</div>
-        {profile.bio && <div style={{fontSize:13,color:'var(--color-text)',lineHeight:1.7,marginTop:8}}>{profile.bio}</div>}
-        <div style={{display:'flex',gap:8,marginTop:12,flexWrap:'wrap'}}>
+        {profile.bio && <div style={{fontSize:13,color:'var(--color-text)',lineHeight:1.7,marginTop:8,marginBottom:4}}>{profile.bio}</div>}
+        {/* 区切り線 */}
+        <div style={{height:1,background:'var(--color-brand-border)',margin:'16px 0'}}/>
+        {/* 操作ボタン */}
+        <div style={{display:'flex',gap:8,flexWrap:'wrap'}}>
           <button onClick={()=>setEditingName(true)}
             style={{fontSize:12,border:'1px solid var(--color-brand-border)',padding:'6px 14px',borderRadius:8,background:'var(--color-bg-card)',color:'var(--color-text-muted)',cursor:'pointer'}}>
             名前を変更
@@ -718,6 +731,8 @@ export default function MypageClient({
             <div style={{
               width:160, flexShrink:0,
               position:'sticky', top:90,
+              borderRight:'1px solid var(--color-brand-border)',
+              paddingRight:8,
             }}>
               {TABS.map((tab) => (
                 <button key={tab.id} onClick={()=>setActiveTab(tab.id)}
