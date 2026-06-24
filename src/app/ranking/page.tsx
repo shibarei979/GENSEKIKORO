@@ -28,7 +28,6 @@ export default async function RankingPage({ searchParams }: Props) {
   const novelType = searchParams.type   || '長編'
   const serial    = searchParams.serial || 'all'
   const page      = showMore ? 1 : Math.max(1, parseInt(searchParams.page || '1'))
-  const displaySize = showMore ? 100 : PAGE_SIZE
   const offset    = (page - 1) * PAGE_SIZE
 
   async function getRanking(): Promise<{ items: any[]; total: number }> {
@@ -153,29 +152,27 @@ export default async function RankingPage({ searchParams }: Props) {
     { value:'rising',    label:'急上昇' },
   ]
   const genres = ['全て','異世界','ファンタジー','SF','恋愛','学園','ミステリー','ホラー','歴史・時代','日常','アクション','コメディ','その他']
-  const typeOptions   = [{ value:'全て',label:'全て' },{ value:'長編',label:'長編' },{ value:'短編',label:'短編' }]
-  const serialOptions = [{ value:'all',label:'すべて' },{ value:'serial',label:'連載中' },{ value:'complete',label:'完結' },{ value:'new',label:'新作（1ヶ月以内）' },{ value:'newbie',label:'新人作家' }]
-
-  function buildUrl(p: string, t: string, s: string, pg = 1) {
-    return `/ranking?period=${p}&type=${encodeURIComponent(t)}&serial=${s}&genre=${encodeURIComponent(genre)}&page=${pg}`
-  }
+  const serialOptions = [
+    { value:'all',      label:'すべて' },
+    { value:'serial',   label:'連載中' },
+    { value:'complete', label:'完結' },
+    { value:'new',      label:'新作（1ヶ月以内）' },
+    { value:'newbie',   label:'新人作家' },
+  ]
 
   const periodLabel = periodOptions.find(o=>o.value===period)?.label||'週間'
   const scoreLabel  = period === 'rising' ? '↑' : '♡'
 
-  // 共通ピルスタイル
-  const pill = (active: boolean, small = false) => ({
-    padding: small ? '4px 10px' : '4px 11px',
-    borderRadius: 20,
-    fontSize: small ? 11 : 12,
-    fontWeight: 600 as const,
-    textDecoration: 'none' as const,
-    whiteSpace: 'nowrap' as const,
-    flexShrink: 0 as const,
-    background: active ? 'var(--color-brand)' : 'var(--color-brand-light)',
-    color: active ? 'var(--color-bg-card)' : 'var(--color-brand)',
-    border: `1px solid ${active ? 'var(--color-brand)' : 'var(--color-tag-border)'}`,
-  })
+  const sel = {
+    padding:'6px 10px',
+    fontSize:13,
+    border:'1px solid var(--color-brand-border)',
+    borderRadius:8,
+    background:'var(--color-bg-card)',
+    color:'var(--color-text)',
+    cursor:'pointer',
+    outline:'none',
+  } as const
 
   return (
     <div style={{minHeight:'100vh',background:'var(--color-bg-card)',fontFamily:"'Noto Sans JP',sans-serif"}}>
@@ -183,78 +180,38 @@ export default async function RankingPage({ searchParams }: Props) {
 
       <div className="main-layout" style={{maxWidth:1200,margin:'0 auto',padding:'20px 32px',display:'flex',gap:20,alignItems:'flex-start'}}>
         <div style={{flex:1,minWidth:0}}>
-          <div style={{marginBottom:12}}>
-            <h1 style={{fontSize:20,fontWeight:700,color:'var(--color-text)',marginBottom:0}}>ランキング</h1>
-          </div>
+          <h1 style={{fontSize:20,fontWeight:700,color:'var(--color-text)',marginBottom:12}}>ランキング</h1>
 
-          {/* ===== フィルターバー（枠は共通・中身はデスクトップwrap／モバイル横スクロール） ===== */}
-          <div className="ranking-filter" style={{background:'var(--color-bg)',border:'1px solid var(--color-brand-border)',borderRadius:12,padding:'14px 18px',marginBottom:16}}>
-
-            {/* 期間 */}
-            <div style={{marginBottom:10}}>
-              <div style={{fontSize:11,color:'var(--color-text-muted)',fontWeight:600,marginBottom:5}}>期間</div>
-              <div style={{overflowX:'auto',msOverflowStyle:'none',scrollbarWidth:'none'} as any}>
-                <div style={{display:'flex',gap:6,flexWrap:'nowrap'}}>
-                  {periodOptions.map(o => (
-                    <Link key={o.value} href={buildUrl(o.value,novelType,serial)} style={pill(period===o.value)}>
-                      {o.label}
-                    </Link>
-                  ))}
-                </div>
-              </div>
-            </div>
-
-            {/* 作品の長さ */}
-            <div style={{marginBottom:10}}>
-              <div style={{fontSize:11,color:'var(--color-text-muted)',fontWeight:600,marginBottom:5}}>作品の長さ</div>
-              <div style={{overflowX:'auto',msOverflowStyle:'none',scrollbarWidth:'none'} as any}>
-                <div style={{display:'flex',gap:6,flexWrap:'nowrap'}}>
-                  {typeOptions.map(o => (
-                    <Link key={o.value} href={buildUrl(period,o.value,serial)} style={pill(novelType===o.value)}>
-                      {o.label}
-                    </Link>
-                  ))}
-                </div>
-              </div>
-            </div>
-
-            {/* ジャンル */}
-            <div style={{marginBottom:10}}>
-              <div style={{fontSize:11,color:'var(--color-text-muted)',fontWeight:600,marginBottom:5}}>ジャンル</div>
-              <div style={{overflowX:'auto',msOverflowStyle:'none',scrollbarWidth:'none'} as any}>
-                <div style={{display:'flex',gap:5,flexWrap:'nowrap'}}>
-                  {genres.map(g => (
-                    <Link key={g} href={`/ranking?period=${period}&type=${encodeURIComponent(novelType)}&serial=${serial}&genre=${encodeURIComponent(g)}&page=1`}
-                      style={pill(genre===g, true)}>
-                      {g}
-                    </Link>
-                  ))}
-                </div>
-              </div>
-            </div>
-
-            {/* 絞り込み */}
-            <div>
-              <div style={{fontSize:11,color:'var(--color-text-muted)',fontWeight:600,marginBottom:5}}>絞り込み</div>
-              <div style={{overflowX:'auto',msOverflowStyle:'none',scrollbarWidth:'none'} as any}>
-                <div style={{display:'flex',gap:6,flexWrap:'nowrap'}}>
-                  {serialOptions.map(o => (
-                    <Link key={o.value} href={buildUrl(period,novelType,o.value)} style={pill(serial===o.value)}>
-                      {o.label}
-                    </Link>
-                  ))}
-                </div>
-              </div>
-            </div>
-          </div>
+          {/* フィルターバー：セレクトボックス */}
+          <form method="get" action="/ranking"
+            style={{display:'flex',gap:8,flexWrap:'wrap',alignItems:'center',marginBottom:16}}>
+            <select name="period" defaultValue={period} style={sel}
+              onChange={(e:any)=>e.currentTarget.form?.submit()}>
+              {periodOptions.map(o=><option key={o.value} value={o.value}>{o.label}</option>)}
+            </select>
+            <select name="genre" defaultValue={genre} style={sel}
+              onChange={(e:any)=>e.currentTarget.form?.submit()}>
+              {genres.map(g=><option key={g} value={g}>{g}</option>)}
+            </select>
+            <select name="type" defaultValue={novelType} style={sel}
+              onChange={(e:any)=>e.currentTarget.form?.submit()}>
+              <option value="全て">長さ：全て</option>
+              <option value="長編">長編</option>
+              <option value="短編">短編</option>
+            </select>
+            <select name="serial" defaultValue={serial} style={sel}
+              onChange={(e:any)=>e.currentTarget.form?.submit()}>
+              {serialOptions.map(o=><option key={o.value} value={o.value}>{o.label}</option>)}
+            </select>
+            <noscript>
+              <button type="submit" style={{padding:'6px 14px',background:'var(--color-brand)',color:'#fff',border:'none',borderRadius:8,fontSize:13,cursor:'pointer'}}>絞り込む</button>
+            </noscript>
+          </form>
 
           {/* ランキング本体 */}
           <div style={{background:'var(--color-bg-card)',border:'1px solid var(--color-brand-border)',borderRadius:12,overflow:'hidden'}}>
             <div style={{padding:'10px 14px',borderBottom:'1px solid var(--color-brand-border)',background:'var(--color-bg)',display:'flex',alignItems:'center',justifyContent:'space-between'}}>
-              <div style={{display:'flex',alignItems:'center',gap:8}}>
-                <span style={{fontSize:15,fontWeight:700,color:'var(--color-text)'}}>{periodLabel}ランキング</span>
-                <span style={{fontSize:11,color:'var(--color-text-muted)'}}>{novelType!=='全て'&&novelType}{serial==='serial'?' 連載中':serial==='complete'?' 完結':serial==='new'?' 新作':''}</span>
-              </div>
+              <span style={{fontSize:15,fontWeight:700,color:'var(--color-text)'}}>{periodLabel}ランキング</span>
               <span style={{fontSize:12,color:'var(--color-text-muted)'}}>{total}件</span>
             </div>
 
@@ -316,15 +273,15 @@ export default async function RankingPage({ searchParams }: Props) {
           {totalPages > 1 && (
             <div style={{display:'flex',justifyContent:'center',gap:8,marginTop:20,flexWrap:'wrap'}}>
               {page > 1 && (
-                <Link href={buildUrl(period,novelType,serial,page-1)}
+                <Link href={`/ranking?period=${period}&type=${encodeURIComponent(novelType)}&serial=${serial}&genre=${encodeURIComponent(genre)}&page=${page-1}`}
                   style={{padding:'6px 16px',border:'1px solid var(--color-brand-border)',borderRadius:20,fontSize:13,color:'var(--color-brand)',textDecoration:'none',background:'var(--color-bg)'}}>
                   ‹ 前へ
                 </Link>
               )}
-              {Array.from({length:totalPages},(_,i)=>i+1).filter(p=>p===1||p===totalPages||Math.abs(p-page)<=2).map((p,i,arr)=>(
+              {Array.from({length:totalPages},(_,i)=>i+1).filter(p=>p===1||p===totalPages||Math.abs(p-page)<=2).map((p,idx,arr)=>(
                 <span key={p} style={{display:'flex',alignItems:'center',gap:8}}>
-                  {i>0&&arr[i-1]!==p-1&&<span style={{color:'var(--color-text-faint)'}}>…</span>}
-                  <Link href={buildUrl(period,novelType,serial,p)}
+                  {idx>0&&arr[idx-1]!==p-1&&<span style={{color:'var(--color-text-faint)'}}>…</span>}
+                  <Link href={`/ranking?period=${period}&type=${encodeURIComponent(novelType)}&serial=${serial}&genre=${encodeURIComponent(genre)}&page=${p}`}
                     style={{padding:'6px 14px',border:'1px solid',borderRadius:20,fontSize:13,textDecoration:'none',
                       borderColor:p===page?'var(--color-brand)':'var(--color-brand-border)',
                       background:p===page?'var(--color-brand)':'var(--color-bg-card)',
@@ -335,7 +292,7 @@ export default async function RankingPage({ searchParams }: Props) {
                 </span>
               ))}
               {page < totalPages && (
-                <Link href={buildUrl(period,novelType,serial,page+1)}
+                <Link href={`/ranking?period=${period}&type=${encodeURIComponent(novelType)}&serial=${serial}&genre=${encodeURIComponent(genre)}&page=${page+1}`}
                   style={{padding:'6px 16px',border:'1px solid var(--color-brand-border)',borderRadius:20,fontSize:13,color:'var(--color-brand)',textDecoration:'none',background:'var(--color-bg)'}}>
                   次へ ›
                 </Link>
@@ -351,11 +308,12 @@ export default async function RankingPage({ searchParams }: Props) {
       <AdBanner />
       <Footer user={user} />
 
-      <style>{`
-        @media (max-width: 768px) {
-          .ranking-filter > div > div { flex-wrap: nowrap !important; }
-        }
-      `}</style>
+      {/* セレクト変更で即サブミット */}
+      <script dangerouslySetInnerHTML={{__html:`
+        document.querySelectorAll('form[action="/ranking"] select').forEach(function(sel){
+          sel.addEventListener('change',function(){ this.closest('form').submit(); });
+        });
+      `}}/>
     </div>
   )
 }
