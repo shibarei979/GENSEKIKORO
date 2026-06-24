@@ -30,6 +30,18 @@ const KEYWORD_CATEGORIES = [
   { label: '要素', items: ['魔王討伐','内政','転生','転移','タイムトラベル','ゲーム世界','タイムリープ','獣耳','魔法少女','精霊','神様','鑑定スキル','無双','ざまぁ','婚約破棄'] },
 ]
 
+// S4: 並び順の選択肢
+const SORT_OPTIONS = [
+  { v: 'new',      l: '新着順' },
+  { v: 'old',      l: '古い順' },
+  { v: 'like',     l: 'いいね順' },
+  { v: 'bookmark', l: 'ブックマーク順' },
+  { v: 'view',     l: '閲覧数順' },
+  { v: 'comment',  l: 'コメント順' },
+  { v: 'rising',   l: '急上昇順' },
+  { v: 'ep_count', l: '話数順' },
+]
+
 interface Props {
   defaultQ?: string; defaultExclude?: string; defaultGenre?: string
   defaultType?: string; defaultSerial?: string; defaultTag?: string
@@ -163,7 +175,7 @@ export default function SearchForm({
         </Link>
       </div>
 
-      {/* キーワード・除外：モバイルは1列、デスクトップは2列 */}
+      {/* キーワード・除外 */}
       <div style={{display:'flex',flexDirection: isMobile ? 'column' : 'row',gap:10,marginBottom:12}}>
         <div style={{flex:1}}>
           <div style={{fontSize:11,color:'var(--color-text-muted)',fontWeight:600,marginBottom:4}}>キーワード</div>
@@ -338,7 +350,6 @@ export default function SearchForm({
               ))}
             </div>
           </div>
-          {/* モバイルは1列、デスクトップは2列 */}
           <div style={{display:'grid',gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr',gap:12,marginBottom:12}}>
             <div>
               <div style={{fontSize:11,color:'var(--color-text-muted)',fontWeight:600,marginBottom:6}}>作品の長さ</div>
@@ -401,6 +412,7 @@ export default function SearchForm({
         </div>
       )}
 
+      {/* S4: 並び順（豊富に） */}
       <div style={{
         display:'flex',
         flexDirection: isMobile ? 'column' : 'row',
@@ -409,10 +421,14 @@ export default function SearchForm({
         justifyContent: isMobile ? 'flex-start' : 'space-between',
         marginTop:12,
       }}>
-        <div style={{display:'flex',alignItems:'center',gap:8}}>
-          <span style={{fontSize:11,color:'var(--color-text-muted)',fontWeight:600}}>並び順</span>
-          <button onClick={()=>setSort('new')}  style={pill(sort==='new'&&!discoverMode)}>新着順</button>
-          <button onClick={()=>setSort('like')} style={pill(sort==='like'&&!discoverMode)}>いいね順</button>
+        <div style={{display:'flex',alignItems:'center',gap:6,flexWrap:'wrap'}}>
+          <span style={{fontSize:11,color:'var(--color-text-muted)',fontWeight:600,whiteSpace:'nowrap'}}>並び順</span>
+          {SORT_OPTIONS.map(({v,l})=>(
+            <button key={v} onClick={()=>{setSort(v);setDiscoverMode(false)}}
+              style={pill(sort===v&&!discoverMode)}>
+              {l}
+            </button>
+          ))}
         </div>
         <div style={{display:'flex',gap:8,alignItems:'center',justifyContent: isMobile ? 'space-between' : 'flex-end'}}>
           {(q||exclude||genre||type||serial||tags.length>0||author) && (
