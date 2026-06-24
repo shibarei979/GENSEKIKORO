@@ -129,11 +129,25 @@ export default function PostClient({ profile, userId }: Props) {
   const [isR18,         setIsR18]         = useState(false)
   const [isR15,         setIsR15]         = useState(false)
   const [editMode,      setEditMode]      = useState(false)
+  const [contests,      setContests]      = useState<any[]>([])
+  const [selectedContestIds, setSelectedContestIds] = useState<string[]>([])
   const [editEpisodes,  setEditEpisodes]  = useState<any[]>([])
   const [editEpId,      setEditEpId]      = useState<string>('')
 
   const aiMarkers = detectAiMarkers(body)
   const hasAiMarkers = aiMarkers.length > 0
+
+  useEffect(() => {
+    // 募集中のコンテストを取得
+    const now = new Date().toISOString()
+    supabase.from('contests')
+      .select('id, title, deadline, is_site_contest')
+      .eq('is_published', true)
+      .eq('is_site_contest', true)
+      .or(`deadline.is.null,deadline.gt.${now}`)
+      .order('created_at', { ascending: false })
+      .then(({ data }) => setContests(data || []))
+  }, [])
 
   useEffect(() => {
     supabase.from('novels').select('id,title,genre').eq('author_id', userId).eq('published', true)
@@ -407,6 +421,14 @@ export default function PostClient({ profile, userId }: Props) {
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ novel_id: novelId, ep_title: epTitle.trim() }),
           }).catch(() => {})
+        }
+
+        // コンテスト応募
+        if (selectedContestIds.length > 0 && novelId) {
+          const entries = selectedContestIds.map(cid => ({
+            contest_id: cid, novel_id: novelId, user_id: userId
+          }))
+          await supabase.from('contest_entries').upsert(entries, { onConflict: 'contest_id,novel_id' })
         }
 
         setTimeout(() => router.push(`/novel/${novelId}`), 1500)
@@ -765,6 +787,37 @@ export default function PostClient({ profile, userId }: Props) {
                   {errors.novel && <div style={er}>{errors.novel}</div>}
                 </>
               )}
+            </div>
+          </div>
+        )}
+
+        {/* コンテスト応募 */}
+        {contests.length > 0 && (mode === 'new' || editMode) && (
+          <div style={sec}>
+            <div style={sh}>コンテストに応募する（任意）</div>
+            <div style={{padding:'14px 18px'}}>
+              <div style={{fontSize:12,color:'var(--color-text-muted)',marginBottom:10,lineHeight:1.6}}>
+                投稿と同時にコンテストに応募できます。複数選択可。
+              </div>
+              <div style={{display:'flex',flexDirection:'column',gap:8}}>
+                {contests.map(c => {
+                  const checked = selectedContestIds.includes(c.id)
+                  return (
+                    <label key={c.id} style={{display:'flex',alignItems:'flex-start',gap:10,cursor:'pointer',padding:'10px 12px',borderRadius:8,border:`1.5px solid ${checked?'var(--color-brand)':'var(--color-brand-border)'}`,background:checked?'var(--color-brand-light)':'var(--color-bg-card)'}}>
+                      <input type="checkbox" checked={checked}
+                        onChange={e=>{
+                          if(e.target.checked) setSelectedContestIds(prev=>[...prev,c.id])
+                          else setSelectedContestIds(prev=>prev.filter(id=>id!==c.id))
+                        }}
+                        style={{width:16,height:16,accentColor:'var(--color-brand)',marginTop:2,flexShrink:0}}/>
+                      <div>
+                        <div style={{fontSize:13,fontWeight:600,color:'var(--color-text)'}}>{c.title}</div>
+                        {c.deadline && <div style={{fontSize:11,color:'var(--color-text-muted)',marginTop:2}}>締切：{new Date(c.deadline).toLocaleDateString('ja-JP')}</div>}
+                      </div>
+                    </label>
+                  )
+                })}
+              </div>
             </div>
           </div>
         )}
