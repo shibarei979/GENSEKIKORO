@@ -336,7 +336,7 @@ export default function SearchForm({
       </div>
 
       {showMoods && (
-        <div style={{marginBottom:12,display:'flex',flexWrap:'wrap',gap:6}}>
+        <div style={{marginBottom:12,padding:'12px 14px',border:'1px solid var(--color-brand-border)',borderRadius:8,background:'var(--color-bg)',display:'flex',flexWrap:'wrap',gap:6}}>
           {MOODS.map(mood => (
             <button key={mood.label} type="button" onClick={()=>handleMoodSelect(mood)}
               style={{padding:'5px 12px',borderRadius:16,fontSize:12,cursor:'pointer',
