@@ -107,6 +107,8 @@ nav a:hover { color: var(--color-brand) !important; opacity: 1; }
 .finput:focus, .ftarea:focus, input:focus, textarea:focus { border-color: var(--color-brand) !important; outline: none; }
 [style*="cursor:'pointer'"] { cursor: pointer; }
 a:hover [style*="fontWeight:700"][style*="color:'#2B211B'"] { color: var(--color-brand) !important; }
+.history-title:hover > div { color: var(--color-text) !important; background: transparent !important; }
+.history-title:hover { color: var(--color-text) !important; opacity: 1 !important; }
 button { transition: background 0.15s ease, transform 0.1s ease, opacity 0.15s ease; }
 button:hover:not(:disabled) { transform: translateY(-1px); }
 button:active:not(:disabled) { transform: translateY(0); }
