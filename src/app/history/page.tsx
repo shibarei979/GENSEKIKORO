@@ -179,7 +179,7 @@ export default async function HistoryPage() {
                       <Link href={`/novel/${item.novelId}/episode/${firstEpMap[item.novelId]}`}
                         style={{display:'inline-block',padding:'5px 12px',background:'var(--color-brand)',color:'var(--color-bg-card)',borderRadius:12,fontSize:11,fontWeight:600,textDecoration:'none',whiteSpace:'nowrap'}}>
                         最初から読む
-                      </div>
+                      </Link>
                     )}
                     <Link href={`/novel/${item.novelId}/episode/${item.epId}`}
                       style={{display:'inline-block',padding:'5px 12px',background:'var(--color-brand)',color:'var(--color-bg-card)',borderRadius:12,fontSize:11,fontWeight:600,textDecoration:'none',whiteSpace:'nowrap'}}>
@@ -187,7 +187,7 @@ export default async function HistoryPage() {
                     </Link>
                   </div>
                 </div>
-              </Link>
+              </div>
             ))}
           </div>
         </div>
