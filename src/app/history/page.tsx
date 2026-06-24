@@ -128,19 +128,21 @@ export default async function HistoryPage() {
                   </span>
                 </Link>
 
-                {/* 右側：日時＋ボタン2つ */}
-                <span style={{flexShrink:0,textAlign:'right',display:'flex',flexDirection:'column',alignItems:'flex-end',gap:6}}>
+                {/* 右側：日時＋ボタン2つ横並び */}
+                <span style={{flexShrink:0,display:'flex',flexDirection:'column',alignItems:'flex-end',gap:6}}>
                   <span style={{fontSize:11,color:'var(--color-text-faint)'}}>{fmtDate(item.viewedAt)}</span>
-                  <Link href={`/novel/${item.novelId}/episode/${item.epId}`}
-                    style={{display:'inline-block',padding:'5px 12px',background:'var(--color-brand)',color:'var(--color-bg-card)',borderRadius:12,fontSize:11,fontWeight:600,textDecoration:'none',whiteSpace:'nowrap'}}>
-                    続きを読む
-                  </Link>
-                  {firstEpMap[item.novelId] && firstEpMap[item.novelId] !== item.epId && (
-                    <Link href={`/novel/${item.novelId}/episode/${firstEpMap[item.novelId]}`}
-                      style={{display:'inline-block',padding:'5px 12px',background:'var(--color-bg)',color:'var(--color-text-muted)',border:'1px solid var(--color-brand-border)',borderRadius:12,fontSize:11,fontWeight:600,textDecoration:'none',whiteSpace:'nowrap'}}>
-                      最初から読む
+                  <span style={{display:'flex',gap:6,flexWrap:'wrap',justifyContent:'flex-end'}}>
+                    {firstEpMap[item.novelId] && firstEpMap[item.novelId] !== item.epId && (
+                      <Link href={`/novel/${item.novelId}/episode/${firstEpMap[item.novelId]}`}
+                        style={{display:'inline-block',padding:'5px 12px',background:'var(--color-brand)',color:'var(--color-bg-card)',borderRadius:12,fontSize:11,fontWeight:600,textDecoration:'none',whiteSpace:'nowrap'}}>
+                        最初から読む
+                      </Link>
+                    )}
+                    <Link href={`/novel/${item.novelId}/episode/${item.epId}`}
+                      style={{display:'inline-block',padding:'5px 12px',background:'var(--color-brand)',color:'var(--color-bg-card)',borderRadius:12,fontSize:11,fontWeight:600,textDecoration:'none',whiteSpace:'nowrap'}}>
+                      続きを読む
                     </Link>
-                  )}
+                  </span>
                 </span>
               </div>
             ))}
