@@ -13,6 +13,14 @@ const FONT_SIZES = [{label:'小',size:13},{label:'標準',size:15},{label:'大',
 
 // （S2用定数は削除：ヒントはインラインで表示）
 
+// S3: タグの例
+const TAG_EXAMPLES: Record<string, string[]> = {
+  '設定・世界観': ['異世界転生','現代ファンタジー','魔法','ドラゴン','剣と魔法','近未来','宇宙','学園','王宮','戦国時代'],
+  'キャラクター': ['最強主人公','無自覚チート','悪役令嬢','聖女','騎士','魔王','勇者','転生者','無能から覚醒'],
+  'テーマ・展開': ['スローライフ','復讐','溺愛','ざまぁ','ハーレム','純愛','友情','成長','逆転','バディもの'],
+  'ジャンル補足': ['ほのぼの','シリアス','コメディ','ダーク','謎解き','バトル','恋愛メイン','群像劇'],
+}
+
 // 縦書き変換（NovelPreviewPopupと同じロジック）
 function toVerticalText(text: string): string {
   return text
@@ -68,6 +76,7 @@ export default function PostClient({ profile, userId }: Props) {
   const [isMobile, setIsMobile] = useState(false)
   // S2: キャッチコピーのヒント表示
   const [showCatchcopyHint, setShowCatchcopyHint] = useState(false)
+  const [showTagExamples, setShowTagExamples] = useState(false)
   const [mounted, setMounted] = useState(false)
 
   useEffect(() => {
@@ -656,8 +665,71 @@ export default function PostClient({ profile, userId }: Props) {
                     style={{padding:'8px 14px',border:'1px solid var(--color-brand-border)',borderRadius:6,fontSize:12,color:'var(--color-text-muted)',background:'var(--color-bg-card)',cursor:'pointer',whiteSpace:'nowrap'}}>
                     追加
                   </button>
+                  {/* S3: ＋ボタンで例を表示 */}
+                  <button onClick={()=>setShowTagExamples(!showTagExamples)} type="button"
+                    title="タグの例を見る"
+                    style={{
+                      padding:'8px 12px',
+                      border:'1px solid var(--color-brand-border)',
+                      borderRadius:6, fontSize:14, fontWeight:700,
+                      color: showTagExamples ? 'var(--color-bg-card)' : 'var(--color-brand)',
+                      background: showTagExamples ? 'var(--color-brand)' : 'var(--color-bg-card)',
+                      cursor:'pointer', whiteSpace:'nowrap',
+                    }}>
+                    ＋
+                  </button>
                 </div>
-                <div style={{fontSize:10,color:'var(--color-text-faint)',marginTop:2}}>{tags.length}/10</div>
+
+                {/* タグ例パネル */}
+                {showTagExamples && (
+                  <div style={{
+                    marginTop:8,
+                    background:'var(--color-brand-light)',
+                    border:'1px solid var(--color-brand-border)',
+                    borderRadius:8, padding:'12px 14px',
+                  }}>
+                    <div style={{fontSize:11,fontWeight:700,color:'var(--color-brand)',marginBottom:10}}>
+                      💡 タグの例（クリックで追加）
+                    </div>
+                    {Object.entries(TAG_EXAMPLES).map(([category, examples]) => (
+                      <div key={category} style={{marginBottom:10}}>
+                        <div style={{fontSize:10,color:'var(--color-text-muted)',fontWeight:600,marginBottom:5}}>{category}</div>
+                        <div style={{display:'flex',flexWrap:'wrap',gap:5}}>
+                          {examples.map(ex => {
+                            const alreadyAdded = tags.includes(ex)
+                            return (
+                              <button key={ex} type="button"
+                                onClick={()=>{
+                                  if (!alreadyAdded && tags.length < 10) {
+                                    setTags([...tags, ex])
+                                  }
+                                }}
+                                disabled={alreadyAdded || tags.length >= 10}
+                                style={{
+                                  padding:'3px 10px',
+                                  fontSize:11,
+                                  border:'1.5px solid',
+                                  borderRadius:12,
+                                  cursor: alreadyAdded || tags.length >= 10 ? 'default' : 'pointer',
+                                  borderColor: alreadyAdded ? 'var(--color-success)' : 'var(--color-brand-border)',
+                                  background: alreadyAdded ? '#f0fdf4' : 'var(--color-bg-card)',
+                                  color: alreadyAdded ? 'var(--color-success)' : 'var(--color-text-muted)',
+                                  opacity: tags.length >= 10 && !alreadyAdded ? 0.4 : 1,
+                                }}>
+                                {alreadyAdded ? '✓ ' : ''}{ex}
+                              </button>
+                            )
+                          })}
+                        </div>
+                      </div>
+                    ))}
+                    <div style={{fontSize:10,color:'var(--color-text-faint)',marginTop:4}}>
+                      ※ 例はあくまでヒントです。自由に入力もできます。
+                    </div>
+                  </div>
+                )}
+
+                <div style={{fontSize:10,color:'var(--color-text-faint)',marginTop:6}}>{tags.length}/10</div>
                 {tags.length > 0 && (
                   <div style={{display:'flex',flexWrap:'wrap',gap:4,marginTop:6}}>
                     {tags.map(t=>(
