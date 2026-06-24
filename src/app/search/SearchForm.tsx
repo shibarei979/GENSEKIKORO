@@ -99,14 +99,14 @@ export default function SearchForm({
     } catch {}
   }, [])
 
+  // 気分タグは裏でのみ使用（タグ欄には表示しない）
+  const moodTags = activeMoods.flatMap(label => MOODS.find(m => m.label === label)?.tags.slice(0,3) || [])
+
   function handleMoodSelect(mood: typeof MOODS[0]) {
     if (activeMoods.includes(mood.label)) {
       setActiveMoods(activeMoods.filter(m => m !== mood.label))
-      setTags(tags.filter(t => !mood.tags.includes(t)))
     } else {
       setActiveMoods([...activeMoods, mood.label])
-      const newTags = Array.from(new Set([...tags, ...mood.tags.slice(0,3)]))
-      setTags(newTags)
     }
   }
 
@@ -118,7 +118,8 @@ export default function SearchForm({
     if (genre)           params.set('genre',   genre)
     if (type)            params.set('type',    type)
     if (serial)          params.set('serial',  serial)
-    if (tags.length > 0) params.set('tag',     tags.join(','))
+    const allTags = Array.from(new Set([...tags, ...moodTags]))
+    if (allTags.length > 0) params.set('tag', allTags.join(','))
     if (discoverMode)    params.set('sort',    'discover')
     else if (sort)       params.set('sort',    sort)
     if (q.trim()) {
