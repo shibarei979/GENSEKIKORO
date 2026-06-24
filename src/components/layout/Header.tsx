@@ -209,10 +209,10 @@ export default function Header({ profile, user, activeGenre }: Props) {
                       <div style={{padding:'10px 14px',borderBottom:'1px solid var(--color-brand-border)',display:'flex',alignItems:'center',justifyContent:'space-between'}}>
                         <span style={{fontSize:13,fontWeight:700,color:'var(--color-text)'}}>通知</span>
                         {/* S1: 「もっと見る」→お知らせページへ遷移 */}
-                        <Link href="/announcements" onClick={()=>setShowNotif(false)}
-                          style={{fontSize:11,color:'var(--color-brand)',textDecoration:'none',fontWeight:600}}>
+                        <button onClick={()=>{setShowNotif(false);router.push('/announcements')}}
+                          style={{fontSize:11,color:'var(--color-brand)',background:'none',border:'none',cursor:'pointer',fontWeight:600,padding:0}}>
                           もっと見る ›
-                        </Link>
+                        </button>
                       </div>
                       {notifications.length === 0
                         ? <div style={{padding:'24px',textAlign:'center',fontSize:12,color:'var(--color-text-faint)'}}>通知はありません</div>
@@ -223,10 +223,10 @@ export default function Header({ profile, user, activeGenre }: Props) {
                           </a>
                         ))}</div>}
                       {/* 下部にもお知らせページへのリンク */}
-                      <Link href="/announcements" onClick={()=>setShowNotif(false)}
-                        style={{display:'block',padding:'9px 14px',textAlign:'center',fontSize:11,color:'var(--color-brand)',textDecoration:'none',fontWeight:600,borderTop:'1px solid var(--color-brand-border)',background:'var(--color-bg)'}}>
+                      <button onClick={()=>{setShowNotif(false);router.push('/announcements')}}
+                        style={{display:'block',width:'100%',padding:'9px 14px',textAlign:'center',fontSize:11,color:'var(--color-brand)',background:'var(--color-bg)',border:'none',borderTop:'1px solid var(--color-brand-border)',cursor:'pointer',fontWeight:600}}>
                         お知らせ一覧を見る →
-                      </Link>
+                      </button>
                     </div>
                   )}
                 </div>
@@ -304,10 +304,10 @@ export default function Header({ profile, user, activeGenre }: Props) {
                           </a>
                         ))}</div>}
                       {/* S1: モバイル版もお知らせページへ */}
-                      <Link href="/announcements" onClick={()=>setShowNotif(false)}
-                        style={{display:'block',padding:'10px 14px',textAlign:'center',fontSize:12,color:'var(--color-brand)',textDecoration:'none',fontWeight:600,borderTop:'1px solid var(--color-brand-border)',background:'var(--color-bg)'}}>
+                      <button onClick={()=>{setShowNotif(false);router.push('/announcements')}}
+                        style={{display:'block',width:'100%',padding:'10px 14px',textAlign:'center',fontSize:12,color:'var(--color-brand)',background:'var(--color-bg)',border:'none',borderTop:'1px solid var(--color-brand-border)',cursor:'pointer',fontWeight:600}}>
                         お知らせ一覧を見る →
-                      </Link>
+                      </button>
                     </div>
                   )}
                 </div>
