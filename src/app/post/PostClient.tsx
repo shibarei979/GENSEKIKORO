@@ -552,16 +552,7 @@ export default function PostClient({ profile, userId }: Props) {
                       </div>
                       {/* 本文エリア */}
                       <div style={{flex:1,overflowY:'auto',minHeight:0,padding:'12px 0',background:'var(--color-bg-card)'}}>
-                        {/* キャッチコピー表示位置を示すラベル */}
-                        <div style={{
-                          margin:'0 14px 10px',
-                          background:'var(--color-brand)',
-                          color:'#fff', fontSize:10, fontWeight:700,
-                          padding:'4px 10px', borderRadius:6,
-                          textAlign:'center',
-                        }}>
-                          👆 キャッチコピーはここに縦書きで表示されます
-                        </div>
+
                         <div style={{fontSize:10,color:'#999',marginBottom:6,textAlign:'center',letterSpacing:'0.1em'}}>
                           {catchcopy ? '― キャッチコピー ―' : '― あらすじ ―'}
                         </div>
@@ -574,7 +565,7 @@ export default function PostClient({ profile, userId }: Props) {
                               ))}
                             </div>
                             {Array.from({length:5},(_,col)=>{
-                              const rawT = catchcopy||summary||'（キャッチコピーまたはあらすじがここに縦書きで表示されます）'
+                              const rawT = catchcopy||summary||''
                               const converted = toVerticalText(rawT)
                               const chars = converted.split('')
                               const actualCol = 4-col
