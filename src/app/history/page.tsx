@@ -148,9 +148,9 @@ export default async function HistoryPage() {
                     : <span style={{fontSize:10,background:'#f5f5f5',color:'#757575',border:'1px solid #e0e0e0',padding:'1px 6px',borderRadius:3}}>完結</span>}
                 </div>
                 {/* タイトル・作者 */}
-                <a href={`/novel/${item.novelId}`} style={{textDecoration:'none',display:'block',marginBottom:3,color:'var(--color-text)',cursor:'pointer'}} onMouseOver={e=>{(e.currentTarget as HTMLElement).style.color='var(--color-text)'}} onMouseOut={e=>{(e.currentTarget as HTMLElement).style.color='var(--color-text)'}}>
+                <Link href={`/novel/${item.novelId}`} className="history-title" style={{textDecoration:'none',display:'block',marginBottom:3,color:'var(--color-text)'}}>
                   <div style={{fontSize:17,fontWeight:700,color:'var(--color-text)',lineHeight:1.4}}>{item.novelTitle}</div>
-                </a>
+                </Link>
                 <div style={{fontSize:12,color:'var(--color-text-muted)',marginBottom:6}}>作者：{item.displayName}</div>
                 {/* あらすじ */}
                 {item.summary && (
@@ -194,6 +194,7 @@ export default async function HistoryPage() {
         <div className="desktop-only"><Sidebar /></div>
       </div>
 
+      <style>{`.history-title:hover,.history-title:hover div{color:var(--color-text)!important;opacity:1!important}`}</style>
       <AdBanner />
       <Footer user={user} />
     </div>
