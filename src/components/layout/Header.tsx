@@ -225,42 +225,15 @@ export default function Header({ profile, user, activeGenre }: Props) {
                     </div>
                   )}
                 </div>
-                <div ref={userMenuRef} style={{position:'relative'}}>
-                  <button onClick={()=>{setShowUserMenu(!showUserMenu);setShowSettings(false)}}
-                    style={{display:'flex',alignItems:'center',justifyContent:'center',width:38,height:38,borderRadius:'50%',background:'var(--color-bg)',border: profile?.icon_url ? '1.5px solid var(--color-brand-border)' : 'none',cursor:'pointer',padding:0,overflow:'hidden'}}>
-                    {profile?.icon_url ? (
-                      <img src={profile.icon_url} alt="" style={{width:'100%',height:'100%',objectFit:'cover'}}/>
-                    ) : (
-                      <div style={{width:'100%',height:'100%',background:'var(--color-brand)',display:'flex',alignItems:'center',justifyContent:'center',fontSize:15,fontWeight:700,color:'var(--color-bg-card)'}}>
-                        {(profile?.display_name||'?').slice(0,1)}
-                      </div>
-                    )}
-                  </button>
-                  {showUserMenu && (
-                    <div style={{position:'absolute',right:0,top:'calc(100% + 8px)',width:200,background:'var(--color-bg-card)',border:'1px solid var(--color-brand-border)',borderRadius:12,boxShadow:'0 8px 24px rgba(0,0,0,0.12)',zIndex:200,overflow:'hidden'}}>
-                      <div style={{padding:'10px 16px',borderBottom:'1px solid var(--color-brand-border)',background:'var(--color-bg)'}}>
-                        <div style={{fontSize:13,fontWeight:700,color:'var(--color-text)'}}>{profile?.display_name}</div>
-                        {userNumber && <div style={{fontSize:11,color:'var(--color-text-faint)',marginTop:2}}>{userNumber}</div>}
-                      </div>
-                      <Link href="/mypage" onClick={()=>setShowUserMenu(false)} style={{display:'flex',alignItems:'center',justifyContent:'space-between',padding:'11px 16px',borderBottom:'1px solid var(--color-brand-light)',textDecoration:'none',color:'var(--color-text)',fontSize:13}}>
-                        <span>マイページ</span><span style={{color:'var(--color-text-faint)',fontSize:12}}>›</span>
-                      </Link>
-                      <Link href="/history" onClick={()=>setShowUserMenu(false)} style={{display:'flex',alignItems:'center',justifyContent:'space-between',padding:'11px 16px',borderBottom:'1px solid var(--color-brand-light)',textDecoration:'none',color:'var(--color-text)',fontSize:13}}>
-                        <span>閲覧履歴</span><span style={{color:'var(--color-text-faint)',fontSize:12}}>›</span>
-                      </Link>
-                      <Link href="/mission" onClick={()=>setShowUserMenu(false)} style={{display:'flex',alignItems:'center',justifyContent:'space-between',padding:'11px 16px',borderBottom:'1px solid var(--color-brand-light)',textDecoration:'none',color:'var(--color-text)',fontSize:13}}>
-                        <span>ミッション</span><span style={{color:'var(--color-text-faint)',fontSize:12}}>›</span>
-                      </Link>
-                      <button onClick={()=>{setShowSettingsModal(true);setShowUserMenu(false)}}
-                        style={{display:'flex',alignItems:'center',justifyContent:'space-between',width:'100%',padding:'11px 16px',borderBottom:'1px solid var(--color-brand-light)',background:'var(--color-bg-card)',border:'none',cursor:'pointer',fontSize:13,color:'var(--color-text)'}}>
-                        <span>設定</span><span style={{color:'var(--color-text-faint)',fontSize:12}}>›</span>
-                      </button>
-                      <button onClick={handleLogout} style={{display:'flex',alignItems:'center',gap:10,padding:'11px 16px',width:'100%',border:'none',background:'var(--color-bg-card)',cursor:'pointer',fontSize:13,color:'var(--color-danger)',textAlign:'left'}}>
-                        ログアウト
-                      </button>
+                <Link href="/mypage" style={{display:'flex',alignItems:'center',justifyContent:'center',width:38,height:38,borderRadius:'50%',background:'var(--color-bg)',border: profile?.icon_url ? '1.5px solid var(--color-brand-border)' : 'none',cursor:'pointer',padding:0,overflow:'hidden',textDecoration:'none'}}>
+                  {profile?.icon_url ? (
+                    <img src={profile.icon_url} alt="" style={{width:'100%',height:'100%',objectFit:'cover'}}/>
+                  ) : (
+                    <div style={{width:'100%',height:'100%',background:'var(--color-brand)',display:'flex',alignItems:'center',justifyContent:'center',fontSize:15,fontWeight:700,color:'var(--color-bg-card)'}}>
+                      {(profile?.display_name||'?').slice(0,1)}
                     </div>
                   )}
-                </div>
+                </Link>
               </>
             ) : (
               <>
