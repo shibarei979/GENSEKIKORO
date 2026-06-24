@@ -10,18 +10,24 @@ import Footer from '@/components/layout/Footer'
 const GENRES = ['異世界','ファンタジー','SF','恋愛','学園','ミステリー','ホラー','歴史・時代','日常','アクション','コメディ','官能','その他']
 const FONT_SIZES = [{label:'小',size:13},{label:'標準',size:15},{label:'大',size:18},{label:'特大',size:22}]
 
+// キャッチコピーの例文
+const CATCHCOPY_EXAMPLES = [
+  '「私は絶対に、あなたを守ってみせる」',
+  '記憶を失った少女が辿り着いたのは、嘘で塗り固められた王宮だった。',
+  '最弱と呼ばれた魔法使いが、世界を救う唯一の鍵だった。',
+  '転生先は、自分が書いた小説の悪役——しかも処刑5日前。',
+  '冷酷な騎士団長の溺愛が、今日も止まらない。',
+  'ライバルと協力して謎を解くはずが、いつの間にか恋をしていた。',
+]
+
 interface Props { profile: any; userId: string }
 
-// AI検出：**〜** パターンを検出
 function detectAiMarkers(text: string): string[] {
   const patterns: string[] = []
-  // **太字** パターン
   const boldMatches = text.match(/\*\*[^*]+\*\*/g) || []
   if (boldMatches.length > 0) patterns.push(`**太字**パターン ${boldMatches.length}箇所（例：${(boldMatches[0] ?? '').slice(0,30)}）`)
-  // # 見出しパターン
   const headingMatches = text.match(/^#{1,3}\s+.+/gm) || []
   if (headingMatches.length > 0) patterns.push(`Markdown見出しパターン ${headingMatches.length}箇所`)
-  // - リストパターン（連続3行以上）
   const lines = text.split('\n')
   let listCount = 0, maxList = 0
   for (const line of lines) {
@@ -31,10 +37,9 @@ function detectAiMarkers(text: string): string[] {
   return patterns
 }
 
-// ===== 予約投稿用：現在時刻より1時間後をデフォルトに、ローカルのdatetime-local文字列を作る =====
 function defaultScheduleValue(): string {
-  const d = new Date(Date.now() + 60 * 60 * 1000) // 1時間後
-  d.setMinutes(Math.ceil(d.getMinutes() / 5) * 5, 0, 0) // 5分単位に切り上げ
+  const d = new Date(Date.now() + 60 * 60 * 1000)
+  d.setMinutes(Math.ceil(d.getMinutes() / 5) * 5, 0, 0)
   const pad = (n: number) => String(n).padStart(2, '0')
   return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`
 }
@@ -50,6 +55,8 @@ export default function PostClient({ profile, userId }: Props) {
   const [illustPreview, setIllustPreview] = useState<string>('')
   const [illustUploading, setIllustUploading] = useState(false)
   const [isMobile, setIsMobile] = useState(false)
+  // S2: キャッチコピーのヒント表示
+  const [showCatchcopyHint, setShowCatchcopyHint] = useState(false)
 
   useEffect(() => {
     const check = () => setIsMobile(window.innerWidth <= 768)
@@ -82,7 +89,6 @@ export default function PostClient({ profile, userId }: Props) {
   const [replaceTo,    setReplaceTo]    = useState('')
   const [replaceCount, setReplaceCount] = useState<number|null>(null)
 
-  // ===== 予約投稿 =====
   const [useSchedule,    setUseSchedule]    = useState(false)
   const [scheduleValue,  setScheduleValue]  = useState(defaultScheduleValue())
   const [scheduledAtSaved, setScheduledAtSaved] = useState<string | null>(null)
@@ -98,7 +104,6 @@ export default function PostClient({ profile, userId }: Props) {
   const [editEpisodes,  setEditEpisodes]  = useState<any[]>([])
   const [editEpId,      setEditEpId]      = useState<string>('')
 
-  // AI検出警告
   const aiMarkers = detectAiMarkers(body)
   const hasAiMarkers = aiMarkers.length > 0
 
@@ -262,11 +267,8 @@ export default function PostClient({ profile, userId }: Props) {
     if (Object.keys(errs).length) { setErrors(errs); return }
     setErrors({}); setLoading(true)
 
-    // 予約投稿か即時公開かを判定
     const isScheduled = publish && useSchedule
     const scheduledIso = isScheduled ? new Date(scheduleValue).toISOString() : null
-    // 予約投稿の場合、episodesテーブルのpublishedはfalseのまま、scheduled_atのみセット
-    // 即時公開の場合、publishedはtrue、scheduled_atはnull
 
     try {
       let novelId = savedNovelId || selectedNovelId
@@ -295,7 +297,6 @@ export default function PostClient({ profile, userId }: Props) {
       let epErr
       let episodeId = ''
 
-      // episodesテーブルに保存するpublished/scheduled_atの値
       const epPublished = publish && !isScheduled
       const epScheduledAt = scheduledIso
 
@@ -345,7 +346,6 @@ export default function PostClient({ profile, userId }: Props) {
       }
       if (epErr) throw epErr
 
-      // ===== AI検出チェック（即時公開時のみ） =====
       if (publish && !isScheduled && hasAiMarkers && novelId && episodeId) {
         void supabase.from('ai_reviews').insert({
           novel_id:     novelId,
@@ -360,7 +360,6 @@ export default function PostClient({ profile, userId }: Props) {
       }
 
       if (isScheduled) {
-        // ===== 予約投稿 =====
         const d = new Date(scheduleValue)
         const fmt = `${d.getMonth()+1}/${d.getDate()} ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`
         setToast(`予約投稿を設定しました（${fmt}に公開されます）`)
@@ -479,16 +478,66 @@ export default function PostClient({ profile, userId }: Props) {
                 <label style={lbl}>あらすじ</label>
                 <textarea style={{...inp,resize:'vertical',minHeight:80}} value={summary} onChange={e=>setSummary(e.target.value)} placeholder="作品のあらすじ（省略可）"/>
               </div>
+
+              {/* ===== S2: キャッチコピー欄 with ？ヒント ===== */}
               <div style={fg}>
-                <label style={lbl}>
-                  キャッチコピー
-                  <span style={{fontWeight:400,color:'var(--color-text-faint)',fontSize:11,marginLeft:6}}>作品カードに表示（省略可・100文字以内）</span>
-                </label>
+                <div style={{display:'flex',alignItems:'center',gap:6,marginBottom:4}}>
+                  <label style={{...lbl,marginBottom:0}}>キャッチコピー</label>
+                  <span style={{fontWeight:400,color:'var(--color-text-faint)',fontSize:11}}>作品カードに表示（省略可・100文字以内）</span>
+                  <button
+                    type="button"
+                    onClick={()=>setShowCatchcopyHint(!showCatchcopyHint)}
+                    title="キャッチコピーの例を見る"
+                    style={{
+                      width:18, height:18, borderRadius:'50%',
+                      border:'1.5px solid var(--color-brand-border)',
+                      background: showCatchcopyHint ? 'var(--color-brand)' : 'var(--color-bg-card)',
+                      color: showCatchcopyHint ? 'var(--color-bg-card)' : 'var(--color-text-muted)',
+                      fontSize:11, fontWeight:700, cursor:'pointer',
+                      display:'flex', alignItems:'center', justifyContent:'center',
+                      flexShrink:0, lineHeight:1, padding:0,
+                    }}>
+                    ？
+                  </button>
+                </div>
+
+                {/* ヒントパネル */}
+                {showCatchcopyHint && (
+                  <div style={{
+                    background:'var(--color-brand-light)',
+                    border:'1px solid var(--color-brand-border)',
+                    borderRadius:8, padding:'12px 14px', marginBottom:8,
+                  }}>
+                    <div style={{fontSize:11,fontWeight:700,color:'var(--color-brand)',marginBottom:8}}>
+                      💡 キャッチコピーの例（クリックで入力）
+                    </div>
+                    <div style={{display:'flex',flexDirection:'column',gap:6}}>
+                      {CATCHCOPY_EXAMPLES.map((ex, i) => (
+                        <button key={i} type="button"
+                          onClick={()=>{ setCatchcopy(ex); setShowCatchcopyHint(false) }}
+                          style={{
+                            textAlign:'left', padding:'7px 10px',
+                            background:'var(--color-bg-card)',
+                            border:'1px solid var(--color-brand-border)',
+                            borderRadius:6, fontSize:12, color:'var(--color-text)',
+                            cursor:'pointer', lineHeight:1.5,
+                          }}>
+                          {ex}
+                        </button>
+                      ))}
+                    </div>
+                    <div style={{fontSize:10,color:'var(--color-text-muted)',marginTop:8}}>
+                      ※ 例はヒントです。ご自身の作品に合わせて自由に書いてください。
+                    </div>
+                  </div>
+                )}
+
                 <textarea style={{...inp,resize:'vertical',minHeight:60}} value={catchcopy}
                   onChange={e=>setCatchcopy(e.target.value.slice(0,100))}
                   placeholder="例：「私は絶対に、あなたを守ってみせる」"/>
                 <div style={{fontSize:10,color:'var(--color-text-faint)',textAlign:'right',marginTop:2}}>{catchcopy.length}/100</div>
               </div>
+
               <div style={fg}>
                 <label style={lbl}>作品の長さ <span style={{color:'var(--color-danger)'}}>*</span></label>
                 <div style={{display:'flex',gap:10}}>
@@ -699,7 +748,6 @@ export default function PostClient({ profile, userId }: Props) {
                   </div>
                 )}
 
-                {/* AI検出警告バナー */}
                 {hasAiMarkers && (
                   <div style={{background:'#fffbeb',border:'1.5px solid #f59e0b',borderRadius:8,padding:'10px 14px',marginBottom:8}}>
                     <div style={{display:'flex',alignItems:'center',gap:6,marginBottom:4}}>
@@ -740,7 +788,7 @@ export default function PostClient({ profile, userId }: Props) {
           </div>
         )}
 
-        {/* ===== 予約投稿 ===== */}
+        {/* 予約投稿 */}
         {(!editMode || editEpId) && (
           <div style={sec}>
             <div style={sh}>公開タイミング</div>
