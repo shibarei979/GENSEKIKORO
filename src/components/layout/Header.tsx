@@ -19,7 +19,6 @@ export default function Header({ profile, user, activeGenre }: Props) {
   const [notifications, setNotifications] = useState<any[]>([])
   const [showNotif, setShowNotif] = useState(false)
   const [unreadCount, setUnreadCount] = useState(0)
-  const [showAllNotif, setShowAllNotif] = useState(false)
   const [showUserMenu, setShowUserMenu] = useState(false)
   const [showSettings, setShowSettings] = useState(false)
   const [showSettingsModal, setShowSettingsModal] = useState(false)
@@ -61,7 +60,6 @@ export default function Header({ profile, user, activeGenre }: Props) {
     return () => { document.body.style.overflow = '' }
   }, [showMobileMenu])
 
-  // ===== A7: スクロール検知でヘッダーを縮小・半透明化 =====
   useEffect(() => {
     function handleScroll() {
       setScrolled(window.scrollY > 24)
@@ -118,7 +116,6 @@ export default function Header({ profile, user, activeGenre }: Props) {
 
   return (
     <>
-      {/* ===== 統合ヘッダー（ロゴ＋検索＋ユーザー操作＋ナビを1ブロックに） ===== */}
       <header style={{
         background: scrolled ? 'rgba(255,255,255,0.88)' : 'var(--color-bg-card)',
         backdropFilter: scrolled ? 'blur(10px)' : 'none',
@@ -129,7 +126,7 @@ export default function Header({ profile, user, activeGenre }: Props) {
         transition:'background .25s ease, box-shadow .25s ease, backdrop-filter .25s ease',
       }}>
 
-        {/* ===== デスクトップ：ヘッダー1行に統合（ロゴ・ナビ・検索・ユーザー操作） ===== */}
+        {/* ===== デスクトップ ===== */}
         <div className="desktop-header" style={{
           maxWidth:1360, margin:'0 auto', padding:'0 32px',
           display:'flex', alignItems:'center', gap:28,
@@ -144,7 +141,6 @@ export default function Header({ profile, user, activeGenre }: Props) {
             }}/>
           </Link>
 
-          {/* ナビ3項目（ホームはロゴが兼ねるため省略） */}
           <nav style={{display:'flex',alignItems:'stretch',gap:4,flexShrink:0,height:'100%'}}>
             {NAV_LEFT.map(item=>(
               <Link key={item.href} href={item.href} className={`header-nav-link${isActive(item.href)?' header-nav-link-active':''}`}
@@ -160,7 +156,6 @@ export default function Header({ profile, user, activeGenre }: Props) {
 
           <div style={{flex:1}}/>
 
-          {/* 検索バー（四角・投稿ボタンの隣） */}
           <form onSubmit={handleSearch} style={{display:'flex',alignItems:'center',width:340,border:'1.5px solid var(--color-brand-border)',borderRadius:6,background:'var(--color-bg)',overflow:'hidden',flexShrink:0}}>
             <input value={q} onChange={e=>setQ(e.target.value)} placeholder="作品名・作者名・キーワードで検索"
               style={{flex:1,padding:'7px 12px',border:'none',background:'transparent',fontSize:12,color:'var(--color-text)',outline:'none',width:'100%',minWidth:0}}/>
@@ -194,19 +189,28 @@ export default function Header({ profile, user, activeGenre }: Props) {
                     {unreadCount > 0 && <span style={{position:'absolute',top:0,right:0,width:16,height:16,background:'var(--color-brand)',borderRadius:'50%',fontSize:9,color:'var(--color-bg-card)',fontWeight:700,display:'flex',alignItems:'center',justifyContent:'center'}}>{unreadCount > 9 ? '9+' : unreadCount}</span>}
                   </button>
                   {showNotif && (
-                    <div style={{position:'absolute',right:0,top:'calc(100% + 8px)',width:320,background:'var(--color-bg-card)',border:'1px solid var(--color-brand-border)',borderRadius:12,boxShadow:'0 8px 32px rgba(0,0,0,0.12)',zIndex:200,overflow:'hidden',maxHeight:showAllNotif?'80vh':'360px',display:'flex',flexDirection:'column'}}>
+                    <div style={{position:'absolute',right:0,top:'calc(100% + 8px)',width:320,background:'var(--color-bg-card)',border:'1px solid var(--color-brand-border)',borderRadius:12,boxShadow:'0 8px 32px rgba(0,0,0,0.12)',zIndex:200,overflow:'hidden',display:'flex',flexDirection:'column'}}>
                       <div style={{padding:'10px 14px',borderBottom:'1px solid var(--color-brand-border)',display:'flex',alignItems:'center',justifyContent:'space-between'}}>
                         <span style={{fontSize:13,fontWeight:700,color:'var(--color-text)'}}>通知</span>
-                        <button onClick={()=>setShowAllNotif(!showAllNotif)} style={{fontSize:11,color:'var(--color-brand)',background:'none',border:'none',cursor:'pointer'}}>{showAllNotif?'‹ 閉じる':'もっと見る ›'}</button>
+                        {/* S1: 「もっと見る」→お知らせページへ遷移 */}
+                        <Link href="/announcements" onClick={()=>setShowNotif(false)}
+                          style={{fontSize:11,color:'var(--color-brand)',textDecoration:'none',fontWeight:600}}>
+                          もっと見る ›
+                        </Link>
                       </div>
                       {notifications.length === 0
                         ? <div style={{padding:'24px',textAlign:'center',fontSize:12,color:'var(--color-text-faint)'}}>通知はありません</div>
-                        : <div style={{overflowY:'auto',flex:1}}>{(showAllNotif?notifications:notifications.slice(0,5)).map(n=>(
+                        : <div style={{overflowY:'auto',flex:1,maxHeight:320}}>{notifications.slice(0,5).map(n=>(
                           <a key={n.id} href={n.link||'#'} onClick={()=>setShowNotif(false)} style={{display:'block',padding:'10px 14px',borderBottom:'1px solid var(--color-brand-light)',textDecoration:'none',background:n.is_read?'var(--color-bg-card)':'var(--color-bg)'}}>
                             <div style={{fontSize:12,color:'var(--color-text)',lineHeight:1.6,marginBottom:2}}>{n.message}</div>
                             <div style={{fontSize:10,color:'var(--color-text-faint)'}}>{fmtDate(n.created_at)}</div>
                           </a>
                         ))}</div>}
+                      {/* 下部にもお知らせページへのリンク */}
+                      <Link href="/announcements" onClick={()=>setShowNotif(false)}
+                        style={{display:'block',padding:'9px 14px',textAlign:'center',fontSize:11,color:'var(--color-brand)',textDecoration:'none',fontWeight:600,borderTop:'1px solid var(--color-brand-border)',background:'var(--color-bg)'}}>
+                        お知らせ一覧を見る →
+                      </Link>
                     </div>
                   )}
                 </div>
@@ -283,6 +287,11 @@ export default function Header({ profile, user, activeGenre }: Props) {
                             <div style={{fontSize:10,color:'var(--color-text-faint)'}}>{fmtDate(n.created_at)}</div>
                           </a>
                         ))}</div>}
+                      {/* S1: モバイル版もお知らせページへ */}
+                      <Link href="/announcements" onClick={()=>setShowNotif(false)}
+                        style={{display:'block',padding:'10px 14px',textAlign:'center',fontSize:12,color:'var(--color-brand)',textDecoration:'none',fontWeight:600,borderTop:'1px solid var(--color-brand-border)',background:'var(--color-bg)'}}>
+                        お知らせ一覧を見る →
+                      </Link>
                     </div>
                   )}
                 </div>
@@ -400,13 +409,10 @@ export default function Header({ profile, user, activeGenre }: Props) {
           .mobile-header  { display: block !important; }
         }
         nav a:hover { color: var(--color-brand) !important; opacity: 1; }
-
         .header-nav-link::after {
           content: '';
           position: absolute;
-          left: 12px;
-          right: 12px;
-          bottom: 0;
+          left: 12px; right: 12px; bottom: 0;
           height: 3px;
           background: var(--color-brand);
           transform: scaleX(0);
@@ -415,7 +421,6 @@ export default function Header({ profile, user, activeGenre }: Props) {
         .header-nav-link:hover { color: var(--color-brand) !important; }
         .header-nav-link:hover::after { transform: scaleX(1); }
         .header-nav-link-active::after { transform: scaleX(1); }
-
         .header-post-btn { transition: transform .18s ease, box-shadow .18s ease, background .18s ease; }
         .header-post-btn:hover {
           background: #fff8f5;
