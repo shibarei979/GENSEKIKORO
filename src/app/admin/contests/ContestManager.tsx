@@ -6,7 +6,7 @@ import Link from 'next/link'
 interface Contest {
   id: string; title: string; description: string | null; prize: string | null;
   deadline: string | null; judging_end: string | null; apply_url: string | null;
-  image_url: string | null; is_published: boolean; is_site_contest: boolean; created_at: string
+  image_url: string | null; is_published: boolean; is_site_contest: boolean; created_at: string; exclusive: boolean
 }
 
 interface Entry {
@@ -56,14 +56,14 @@ export default function ContestManager({ initialContests, entriesMap }: Props) {
   const [items, setItems] = useState(initialContests)
   const [editing, setEditing] = useState<Contest | null>(null)
   const [creating, setCreating] = useState(false)
-  const [form, setForm] = useState({ title:'', description:'', deadline:'', judging_end:'', apply_url:'', image_url:'', is_published:true, is_site_contest:false })
+  const [form, setForm] = useState({ title:'', description:'', deadline:'', judging_end:'', apply_url:'', image_url:'', is_published:true, is_site_contest:false, exclusive:false })
   const [errors, setErrors] = useState<Record<string, string>>({})
   const [loading, setLoading] = useState(false)
   const [uploading, setUploading] = useState(false)
   const [expandedId, setExpandedId] = useState<string | null>(null)
 
   function openCreate() {
-    setForm({title:'',description:'',deadline:'',judging_end:'',apply_url:'',image_url:'',is_published:true,is_site_contest:false})
+    setForm({title:'',description:'',deadline:'',judging_end:'',apply_url:'',image_url:'',is_published:true,is_site_contest:false,exclusive:false})
     setErrors({})
     setCreating(true); setEditing(null)
   }
@@ -72,7 +72,9 @@ export default function ContestManager({ initialContests, entriesMap }: Props) {
       title:c.title, description:c.description||'',
       deadline:c.deadline?c.deadline.slice(0,16):'',
       judging_end:c.judging_end?c.judging_end.slice(0,16):'',
-      apply_url:c.apply_url||'', image_url:c.image_url||'', is_published:c.is_published, is_site_contest:c.is_site_contest||false
+      apply_url:c.apply_url||'', image_url:c.image_url||'',
+      is_published:c.is_published, is_site_contest:c.is_site_contest||false,
+      exclusive:c.exclusive||false,
     })
     setErrors({})
     setEditing(c); setCreating(false)
@@ -143,7 +145,6 @@ export default function ContestManager({ initialContests, entriesMap }: Props) {
                 style={inputStyle('title')} placeholder="第XX回 原石航路小説コンテスト"/>
               {errors.title && <div style={{fontSize:11,color:'#ef4444',marginTop:3}}>{errors.title}</div>}
             </div>
-            {/* 外部コンテストのみ応募URL表示 */}
             {!form.is_site_contest && (
               <div>
                 <label style={{fontSize:12,color:'#64748b',display:'block',marginBottom:4}}>応募URL <span style={{color:'#ef4444'}}>*</span></label>
@@ -188,24 +189,45 @@ export default function ContestManager({ initialContests, entriesMap }: Props) {
                 </div>
               )}
             </div>
-            <label style={{display:'flex',alignItems:'center',gap:8,fontSize:13,cursor:'pointer'}}>
-              <input type="checkbox" checked={form.is_published} onChange={e=>setForm({...form,is_published:e.target.checked})}/>公開する
-            </label>
-            <div>
-              <label style={{fontSize:12,color:'#64748b',display:'block',marginBottom:4}}>コンテスト種別</label>
-              <div style={{display:'flex',gap:12}}>
-                <label style={{display:'flex',alignItems:'center',gap:6,fontSize:13,cursor:'pointer'}}>
-                  <input type="radio" name="contest_type" checked={!form.is_site_contest} onChange={()=>setForm({...form,is_site_contest:false})}/>
-                  外部コンテスト（応募URLへ誘導）
-                </label>
-                <label style={{display:'flex',alignItems:'center',gap:6,fontSize:13,cursor:'pointer'}}>
-                  <input type="radio" name="contest_type" checked={form.is_site_contest} onChange={()=>setForm({...form,is_site_contest:true})}/>
-                  サイトコンテスト（原石航路内で応募）
-                </label>
+
+            {/* 公開・種別・専任 */}
+            <div style={{display:'flex',flexDirection:'column',gap:10}}>
+              <label style={{display:'flex',alignItems:'center',gap:8,fontSize:13,cursor:'pointer'}}>
+                <input type="checkbox" checked={form.is_published} onChange={e=>setForm({...form,is_published:e.target.checked})}/>公開する
+              </label>
+              <div>
+                <div style={{fontSize:12,color:'#64748b',marginBottom:4}}>コンテスト種別</div>
+                <div style={{display:'flex',gap:16}}>
+                  <label style={{display:'flex',alignItems:'center',gap:6,fontSize:13,cursor:'pointer'}}>
+                    <input type="radio" name="contest_type" checked={!form.is_site_contest} onChange={()=>setForm({...form,is_site_contest:false})}/>
+                    外部コンテスト（応募URLへ誘導）
+                  </label>
+                  <label style={{display:'flex',alignItems:'center',gap:6,fontSize:13,cursor:'pointer'}}>
+                    <input type="radio" name="contest_type" checked={form.is_site_contest} onChange={()=>setForm({...form,is_site_contest:true})}/>
+                    サイトコンテスト（原石航路内で応募）
+                  </label>
+                </div>
+                <div style={{fontSize:10,color:'#94a3b8',marginTop:3}}>
+                  {form.is_site_contest ? 'マイページから作品を応募でき、コンテストページに応募作品が表示されます' : '外部の応募URLへ誘導します'}
+                </div>
               </div>
-              <div style={{fontSize:10,color:'#94a3b8',marginTop:3}}>
-                {form.is_site_contest ? 'マイページから作品を応募でき、コンテストページに応募作品が表示されます' : '外部の応募URLへ誘導します'}
-              </div>
+
+              {/* 専任フラグ（サイトコンテストのみ） */}
+              {form.is_site_contest && (
+                <div style={{padding:'12px 14px',background:'#fef2f2',border:'1px solid #fca5a5',borderRadius:8}}>
+                  <label style={{display:'flex',alignItems:'flex-start',gap:8,cursor:'pointer'}}>
+                    <input type="checkbox" checked={form.exclusive} onChange={e=>setForm({...form,exclusive:e.target.checked})}
+                      style={{marginTop:2,accentColor:'#dc2626'}}/>
+                    <div>
+                      <div style={{fontSize:13,fontWeight:600,color:'#dc2626'}}>専任コンテスト</div>
+                      <div style={{fontSize:11,color:'#7f1d1d',marginTop:2,lineHeight:1.5}}>
+                        ONにすると、このコンテストを選んだ場合に他のコンテストへの同時応募ができなくなります。<br/>
+                        投稿ページで「専任」バッジが表示されます。
+                      </div>
+                    </div>
+                  </label>
+                </div>
+              )}
             </div>
           </div>
           <div style={{display:'flex',gap:8,marginTop:16,justifyContent:'flex-end'}}>
@@ -232,10 +254,11 @@ export default function ContestManager({ initialContests, entriesMap }: Props) {
                   : <div style={{width:90,height:30,borderRadius:6,flexShrink:0,background:'#f1f5f9',display:'flex',alignItems:'center',justifyContent:'center',fontSize:10,color:'#94a3b8'}}>画像なし</div>
                 }
                 <div style={{flex:1,minWidth:0}}>
-                  <div style={{display:'flex',alignItems:'center',gap:6,marginBottom:3}}>
+                  <div style={{display:'flex',alignItems:'center',gap:6,marginBottom:3,flexWrap:'wrap'}}>
                     <span style={{fontSize:10,fontWeight:700,color:status.color,background:status.bg,border:`1px solid ${status.border}`,padding:'1px 7px',borderRadius:10}}>
                       {status.label}
                     </span>
+                    {c.exclusive && <span style={{fontSize:10,fontWeight:700,color:'#dc2626',background:'#fef2f2',border:'1px solid #fca5a5',padding:'1px 7px',borderRadius:10}}>専任</span>}
                     {!c.is_published && <span style={{fontSize:10,color:'#94a3b8',background:'#f1f5f9',padding:'1px 7px',borderRadius:10}}>非公開</span>}
                   </div>
                   <div style={{fontSize:13,fontWeight:600,color:'#1e293b',marginBottom:2}}>{c.title}</div>
@@ -245,7 +268,6 @@ export default function ContestManager({ initialContests, entriesMap }: Props) {
                   </div>
                 </div>
                 <div style={{display:'flex',gap:6,flexShrink:0,alignItems:'center'}}>
-                  {/* 応募一覧ボタン */}
                   <button onClick={()=>setExpandedId(isExpanded ? null : c.id)}
                     style={{...btn('#F26A21','#FFF1E6','#f5b080'),fontSize:11}}>
                     応募 {contestEntries.length}件 {isExpanded ? '▲' : '▼'}
@@ -264,7 +286,6 @@ export default function ContestManager({ initialContests, entriesMap }: Props) {
                   <button onClick={()=>handleDelete(c.id)} style={btn('#dc2626','#fef2f2','#fca5a5')}>削除</button>
                 </div>
               </div>
-              {/* 応募一覧 */}
               {isExpanded && (
                 <div style={{borderTop:'1px solid #f1f5f9',background:'#f8fafc',padding:'12px 20px'}}>
                   <div style={{fontSize:12,fontWeight:700,color:'#1e293b',marginBottom:8}}>応募作品一覧（{contestEntries.length}件）</div>
