@@ -54,22 +54,23 @@ export default async function ContestsPage() {
                   const href = c.is_site_contest ? `/contests/${c.id}` : (c.apply_url || '#')
                   const isExternal = !c.is_site_contest
                   return (
-                    <div key={c.id} style={{background:'var(--color-bg-card)',border:'1px solid var(--color-brand-border)',borderRadius:12,overflow:'hidden'}}>
-                      {/* 画像 */}
+                    <div key={c.id} style={{background:'var(--color-bg-card)',border:'1px solid var(--color-brand-border)',borderRadius:12,overflow:'hidden',display:'flex',alignItems:'stretch'}}>
+                      {/* 画像（左固定幅） */}
                       {c.image_url && (
                         <a href={href} target={isExternal?'_blank':'_self'} rel={isExternal?'noopener noreferrer':undefined}
-                          style={{display:'block',textDecoration:'none'}}>
+                          style={{display:'block',textDecoration:'none',flexShrink:0,width:180}}>
                           <img src={c.image_url} alt={c.title}
-                            style={{width:'100%',aspectRatio:'16/9',objectFit:'cover',display:'block'}}/>
+                            style={{width:'100%',height:'100%',objectFit:'cover',display:'block'}}/>
                         </a>
                       )}
                       {/* ボタン */}
-                      <div style={{padding:'12px 16px',display:'flex',alignItems:'center',gap:10}}>
+                      <div style={{padding:'16px 20px',display:'flex',flexDirection:'column',justifyContent:'center',gap:10}}>
                         <span style={{
                           fontSize:11,fontWeight:700,
                           color:status.color,background:status.bg,
                           border:`1px solid ${status.border}`,
-                          padding:'2px 10px',borderRadius:10,whiteSpace:'nowrap' as const,
+                          padding:'2px 10px',borderRadius:10,
+                          alignSelf:'flex-start',
                         }}>{status.label}</span>
                         <a href={href}
                           target={isExternal?'_blank':'_self'}
@@ -81,7 +82,7 @@ export default async function ContestsPage() {
                             color:'var(--color-bg-card)',
                             fontWeight:700, fontSize:13,
                             borderRadius:8, textDecoration:'none',
-                            whiteSpace:'nowrap' as const,
+                            alignSelf:'flex-start',
                           }}>
                           {isExternal ? '外部サイトで応募する ↗' : c.is_site_contest && status.label==='募集中' ? '応募する →' : '詳細を見る →'}
                         </a>
@@ -108,7 +109,7 @@ export default async function ContestsPage() {
                       {c.image_url && (
                         <a href={href} style={{display:'block',textDecoration:'none'}}>
                           <img src={c.image_url} alt={c.title}
-                            style={{width:'100%',aspectRatio:'16/9',objectFit:'cover',display:'block'}}/>
+                            style={{width:'100%',maxHeight:200,objectFit:'cover',display:'block'}}/>
                         </a>
                       )}
                       <div style={{padding:'10px 14px',display:'flex',alignItems:'center',gap:10}}>
