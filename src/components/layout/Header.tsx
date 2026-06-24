@@ -69,6 +69,22 @@ export default function Header({ profile, user, activeGenre }: Props) {
     return () => window.removeEventListener('scroll', handleScroll)
   }, [])
 
+  // 通知データ取得
+  useEffect(() => {
+    if (!user) return
+    supabase.from('notifications')
+      .select('*')
+      .eq('user_id', user.id)
+      .order('created_at', { ascending: false })
+      .limit(20)
+      .then(({ data }) => {
+        if (data) {
+          setNotifications(data)
+          setUnreadCount(data.filter((n: any) => !n.is_read).length)
+        }
+      })
+  }, [user])
+
   const userNumber = profile?.user_number
     ? '#' + String(profile.user_number).padStart(4, '0')
     : null

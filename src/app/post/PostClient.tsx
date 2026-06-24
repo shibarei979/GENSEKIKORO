@@ -10,15 +10,7 @@ import Footer from '@/components/layout/Footer'
 const GENRES = ['異世界','ファンタジー','SF','恋愛','学園','ミステリー','ホラー','歴史・時代','日常','アクション','コメディ','官能','その他']
 const FONT_SIZES = [{label:'小',size:13},{label:'標準',size:15},{label:'大',size:18},{label:'特大',size:22}]
 
-// キャッチコピーの例文
-const CATCHCOPY_EXAMPLES = [
-  '「私は絶対に、あなたを守ってみせる」',
-  '記憶を失った少女が辿り着いたのは、嘘で塗り固められた王宮だった。',
-  '最弱と呼ばれた魔法使いが、世界を救う唯一の鍵だった。',
-  '転生先は、自分が書いた小説の悪役——しかも処刑5日前。',
-  '冷酷な騎士団長の溺愛が、今日も止まらない。',
-  'ライバルと協力して謎を解くはずが、いつの間にか恋をしていた。',
-]
+// （S2用定数は削除：ヒントはインラインで表示）
 
 interface Props { profile: any; userId: string }
 
@@ -501,7 +493,7 @@ export default function PostClient({ profile, userId }: Props) {
                   </button>
                 </div>
 
-                {/* ヒントパネル */}
+                {/* S2: キャッチコピー プレビュー説明パネル */}
                 {showCatchcopyHint && (
                   <div style={{
                     background:'var(--color-brand-light)',
@@ -509,25 +501,29 @@ export default function PostClient({ profile, userId }: Props) {
                     borderRadius:8, padding:'12px 14px', marginBottom:8,
                   }}>
                     <div style={{fontSize:11,fontWeight:700,color:'var(--color-brand)',marginBottom:8}}>
-                      💡 キャッチコピーの例（クリックで入力）
+                      💡 キャッチコピーはここに表示されます
                     </div>
-                    <div style={{display:'flex',flexDirection:'column',gap:6}}>
-                      {CATCHCOPY_EXAMPLES.map((ex, i) => (
-                        <button key={i} type="button"
-                          onClick={()=>{ setCatchcopy(ex); setShowCatchcopyHint(false) }}
-                          style={{
-                            textAlign:'left', padding:'7px 10px',
-                            background:'var(--color-bg-card)',
-                            border:'1px solid var(--color-brand-border)',
-                            borderRadius:6, fontSize:12, color:'var(--color-text)',
-                            cursor:'pointer', lineHeight:1.5,
-                          }}>
-                          {ex}
-                        </button>
-                      ))}
+                    {/* 作品カードのプレビューイメージ */}
+                    <div style={{
+                      background:'var(--color-bg-card)',
+                      border:'1px solid var(--color-brand-border)',
+                      borderRadius:8, padding:'10px 12px',
+                      maxWidth:260,
+                    }}>
+                      <div style={{fontSize:10,color:'var(--color-text-faint)',marginBottom:4}}>作品カードのイメージ</div>
+                      <div style={{fontSize:13,fontWeight:700,color:'var(--color-text)',marginBottom:4}}>作品タイトル</div>
+                      <div style={{
+                        fontSize:11, color:'var(--color-brand)',
+                        fontStyle:'italic', lineHeight:1.5,
+                        borderLeft:'2px solid var(--color-brand)',
+                        paddingLeft:8, marginBottom:4,
+                      }}>
+                        {catchcopy || '「ここにキャッチコピーが表示されます」'}
+                      </div>
+                      <div style={{fontSize:10,color:'var(--color-text-faint)'}}>作者名 / ジャンル</div>
                     </div>
-                    <div style={{fontSize:10,color:'var(--color-text-muted)',marginTop:8}}>
-                      ※ 例はヒントです。ご自身の作品に合わせて自由に書いてください。
+                    <div style={{fontSize:10,color:'var(--color-text-muted)',marginTop:8,lineHeight:1.6}}>
+                      読者が最初に目にする一文です。作品の雰囲気や魅力が伝わる言葉を入れましょう。
                     </div>
                   </div>
                 )}
