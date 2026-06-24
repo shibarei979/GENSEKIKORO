@@ -10,10 +10,11 @@ import NovelPreviewPopup from '@/components/NovelPreviewPopup'
 const PAGE_SIZE = 50
 
 interface Props {
-  searchParams: { period?: string; type?: string; serial?: string; page?: string; genre?: string }
+  searchParams: Promise<{ period?: string; type?: string; serial?: string; page?: string; genre?: string; sort?: string }>
 }
 
-export default async function RankingPage({ searchParams }: Props) {
+export default async function RankingPage({ searchParams: searchParamsPromise }: Props) {
+  const searchParams = await searchParamsPromise
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   let profile = null
@@ -23,6 +24,7 @@ export default async function RankingPage({ searchParams }: Props) {
   }
 
   const period    = searchParams.period || 'weekly'
+  const sortBy    = searchParams.sort   || 'score'
   const genre     = searchParams.genre  || '全て'
   const showMore  = searchParams.page === 'all'
   const novelType = searchParams.type   || '長編'
@@ -101,16 +103,25 @@ export default async function RankingPage({ searchParams }: Props) {
         if (!lastUpdateMap[ep.novel_id] || ep.created_at > lastUpdateMap[ep.novel_id]) lastUpdateMap[ep.novel_id] = ep.created_at
       })
     }
-    return {
-      total,
-      items: paged.map((n: any) => ({
-        ...n,
-        display_name:  authorMap[n.author_id]||'',
-        score:         likeMap[n.id]||0,
-        char_count:    charCountMap[n.id]||0,
-        last_updated:  lastUpdateMap[n.id]||n.created_at,
-      }))
+    let finalItems = paged.map((n: any) => ({
+      ...n,
+      display_name:  authorMap[n.author_id]||'',
+      score:         likeMap[n.id]||0,
+      char_count:    charCountMap[n.id]||0,
+      last_updated:  lastUpdateMap[n.id]||n.created_at,
+    }))
+
+    // 追加ソート
+    if (sortBy === 'new') {
+      finalItems = finalItems.slice().sort((a:any,b:any) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
+    } else if (sortBy === 'char_count') {
+      finalItems = finalItems.slice().sort((a:any,b:any) => b.char_count - a.char_count)
+    } else if (sortBy === 'last_updated') {
+      finalItems = finalItems.slice().sort((a:any,b:any) => new Date(b.last_updated).getTime() - new Date(a.last_updated).getTime())
     }
+    // score（デフォルト）はlikeIds順のまま
+
+    return { total, items: finalItems }
   }
 
   const { items: ranking, total } = await getRanking()
@@ -202,6 +213,12 @@ export default async function RankingPage({ searchParams }: Props) {
             <select name="serial" defaultValue={serial} style={sel}
               onChange={(e:any)=>e.currentTarget.form?.submit()}>
               {serialOptions.map(o=><option key={o.value} value={o.value}>{o.label}</option>)}
+            </select>
+            <select name="sort" defaultValue={sortBy} style={sel}>
+              <option value="score">いいね順</option>
+              <option value="new">新着順</option>
+              <option value="char_count">文字数順</option>
+              <option value="last_updated">更新順</option>
             </select>
             <noscript>
               <button type="submit" style={{padding:'6px 14px',background:'var(--color-brand)',color:'#fff',border:'none',borderRadius:8,fontSize:13,cursor:'pointer'}}>絞り込む</button>
