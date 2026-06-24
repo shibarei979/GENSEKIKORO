@@ -37,7 +37,7 @@ export default async function HistoryPage() {
   if (epIds.length > 0) {
     const { data: episodes } = await supabase
       .from('episodes')
-      .select('id, title, ep_number, novel_id, novels(id, title, genre, author_id)')
+      .select('id, title, ep_number, novel_id, novels(id, title, genre, author_id, summary)')
       .in('id', epIds as string[])
 
     const authorIds = Array.from(new Set((episodes||[]).map((e: any) => e.novels?.author_id).filter(Boolean)))
@@ -59,6 +59,7 @@ export default async function HistoryPage() {
           genre: novel.genre,
           authorId: novel.author_id,
           displayName: authorMap[novel.author_id] || '',
+          summary: novel.summary || '',
           epId: ep.id,
           epTitle: ep.title,
           epNumber: ep.ep_number,
@@ -123,9 +124,24 @@ export default async function HistoryPage() {
                   </span>
                   <span style={{display:'block',fontSize:15,fontWeight:700,color:'var(--color-text)',marginBottom:2}}>{item.novelTitle}</span>
                   <span style={{display:'block',fontSize:12,color:'var(--color-text-muted)',marginBottom:4}}>作者：{item.displayName}</span>
-                  <span style={{display:'block',fontSize:11,color:'var(--color-text-faint)'}}>
+                  <span style={{display:'block',fontSize:11,color:'var(--color-text-faint)',marginBottom: item.summary ? 4 : 0}}>
                     最後に読んだ話：<span style={{color:'var(--color-brand)'}}>{item.epTitle}</span>
                   </span>
+                  {item.summary && (
+                    <details style={{marginTop:4}}>
+                      <summary style={{
+                        fontSize:11, color:'var(--color-brand)',
+                        cursor:'pointer', listStyle:'none',
+                        display:'inline-flex', alignItems:'center', gap:4,
+                        userSelect:'none' as any,
+                      }}>
+                        <span style={{fontSize:10,border:'1px solid var(--color-brand-border)',borderRadius:8,padding:'1px 8px',color:'var(--color-text-muted)',background:'var(--color-bg)'}}>あらすじ ▾</span>
+                      </summary>
+                      <span style={{display:'block',fontSize:12,color:'var(--color-text-muted)',lineHeight:1.75,marginTop:6,padding:'8px 10px',background:'var(--color-bg)',borderRadius:6,borderLeft:'2px solid var(--color-brand-border)'}}>
+                        {item.summary}
+                      </span>
+                    </details>
+                  )}
                 </Link>
 
                 {/* 右側：日時＋ボタン2つ横並び */}
