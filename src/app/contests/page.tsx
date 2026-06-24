@@ -66,7 +66,7 @@ export default async function ContestsPage() {
                         <div className="desktop-only">
                           {c.image_url && (
                             <img src={c.image_url} alt={c.title}
-                              style={{width:'100%',aspectRatio:'9/16',objectFit:'cover',display:'block',maxHeight:480}}/>
+                              style={{width:533,height:300,objectFit:'cover',display:'block'}}/>
                           )}
                           <div style={{padding:'10px 14px',display:'flex',alignItems:'center',gap:10,flexWrap:'wrap'}}>
                             <span style={{fontSize:11,fontWeight:700,color:status.color,background:status.bg,border:`1px solid ${status.border}`,padding:'2px 10px',borderRadius:10}}>{status.label}</span>
@@ -77,7 +77,7 @@ export default async function ContestsPage() {
                           </div>
                         </div>
                         <div className="mobile-only">
-                          {c.image_url && <img src={c.image_url} alt={c.title} style={{width:'100%',aspectRatio:'9/16',objectFit:'cover',display:'block'}}/>}
+                          {c.image_url && <img src={c.image_url} alt={c.title} style={{width:533,height:300,objectFit:'cover',display:'block'}}/>}
                           <div style={{padding:'10px 14px',display:'flex',alignItems:'center',gap:10,flexWrap:'wrap'}}>
                             <span style={{fontSize:11,fontWeight:700,color:status.color,background:status.bg,border:`1px solid ${status.border}`,padding:'2px 10px',borderRadius:10}}>{status.label}</span>
                             <Link href={`/contests/${c.id}`}
@@ -108,7 +108,7 @@ export default async function ContestsPage() {
                         <div className="desktop-only">
                           {c.image_url && (
                             <img src={c.image_url} alt={c.title}
-                              style={{width:'100%',aspectRatio:'9/16',objectFit:'cover',display:'block',maxHeight:480}}/>
+                              style={{width:533,height:300,objectFit:'cover',display:'block'}}/>
                           )}
                           <div style={{padding:'10px 14px',display:'flex',alignItems:'center',gap:10,flexWrap:'wrap'}}>
                             <span style={{fontSize:11,fontWeight:700,color:status.color,background:status.bg,border:`1px solid ${status.border}`,padding:'2px 10px',borderRadius:10}}>{status.label}</span>
@@ -119,7 +119,7 @@ export default async function ContestsPage() {
                           </div>
                         </div>
                         <div className="mobile-only">
-                          {c.image_url && <img src={c.image_url} alt={c.title} style={{width:'100%',aspectRatio:'9/16',objectFit:'cover',display:'block'}}/>}
+                          {c.image_url && <img src={c.image_url} alt={c.title} style={{width:533,height:300,objectFit:'cover',display:'block'}}/>}
                           <div style={{padding:'10px 14px',display:'flex',alignItems:'center',gap:10,flexWrap:'wrap'}}>
                             <span style={{fontSize:11,fontWeight:700,color:status.color,background:status.bg,border:`1px solid ${status.border}`,padding:'2px 10px',borderRadius:10}}>{status.label}</span>
                             <a href={c.apply_url||'#'} target="_blank" rel="noopener noreferrer"
