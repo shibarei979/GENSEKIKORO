@@ -141,7 +141,7 @@ export default function PostClient({ profile, userId }: Props) {
     // 募集中のコンテストを取得
     const now = new Date().toISOString()
     supabase.from('contests')
-      .select('id, title, deadline, is_site_contest')
+      .select('id, title, deadline, is_site_contest, exclusive')
       .eq('is_published', true)
       .eq('is_site_contest', true)
       .or(`deadline.is.null,deadline.gt.${now}`)
@@ -799,20 +799,53 @@ export default function PostClient({ profile, userId }: Props) {
               <div style={{fontSize:12,color:'var(--color-text-muted)',marginBottom:10,lineHeight:1.6}}>
                 投稿と同時にコンテストに応募できます。複数選択可。
               </div>
+              {/* 専任コンテスト選択中の警告 */}
+              {selectedContestIds.some(id => contests.find(c=>c.id===id)?.exclusive) && (
+                <div style={{background:'#fffbeb',border:'1px solid #f59e0b',borderRadius:8,padding:'8px 12px',marginBottom:10,fontSize:12,color:'#92400e'}}>
+                  ⚠️ 専任コンテストに応募中です。他のコンテストには同時応募できません。
+                </div>
+              )}
               <div style={{display:'flex',flexDirection:'column',gap:8}}>
                 {contests.map(c => {
                   const checked = selectedContestIds.includes(c.id)
+                  // 他の専任コンテストが選ばれている場合はdisabled
+                  const otherExclusiveSelected = selectedContestIds.some(id => id!==c.id && contests.find(cc=>cc.id===id)?.exclusive)
+                  // 自分が専任で他が選ばれている場合もdisabled
+                  const disabled = !checked && (otherExclusiveSelected || (c.exclusive && selectedContestIds.length > 0))
                   return (
-                    <label key={c.id} style={{display:'flex',alignItems:'flex-start',gap:10,cursor:'pointer',padding:'10px 12px',borderRadius:8,border:`1.5px solid ${checked?'var(--color-brand)':'var(--color-brand-border)'}`,background:checked?'var(--color-brand-light)':'var(--color-bg-card)'}}>
-                      <input type="checkbox" checked={checked}
+                    <label key={c.id} style={{
+                      display:'flex',alignItems:'flex-start',gap:10,
+                      cursor:disabled?'not-allowed':'pointer',
+                      padding:'10px 12px',borderRadius:8,
+                      border:`1.5px solid ${checked?'var(--color-brand)':disabled?'var(--color-brand-border)':'var(--color-brand-border)'}`,
+                      background:checked?'var(--color-brand-light)':disabled?'#f5f5f5':'var(--color-bg-card)',
+                      opacity:disabled?0.5:1,
+                    }}>
+                      <input type="checkbox" checked={checked} disabled={disabled}
                         onChange={e=>{
-                          if(e.target.checked) setSelectedContestIds(prev=>[...prev,c.id])
-                          else setSelectedContestIds(prev=>prev.filter(id=>id!==c.id))
+                          if(e.target.checked) {
+                            if(c.exclusive) {
+                              // 専任：他を全解除して自分だけ選択
+                              setSelectedContestIds([c.id])
+                            } else {
+                              setSelectedContestIds(prev=>[...prev,c.id])
+                            }
+                          } else {
+                            setSelectedContestIds(prev=>prev.filter(id=>id!==c.id))
+                          }
                         }}
                         style={{width:16,height:16,accentColor:'var(--color-brand)',marginTop:2,flexShrink:0}}/>
-                      <div>
-                        <div style={{fontSize:13,fontWeight:600,color:'var(--color-text)'}}>{c.title}</div>
+                      <div style={{flex:1,minWidth:0}}>
+                        <div style={{display:'flex',alignItems:'center',gap:6,flexWrap:'wrap'}}>
+                          <div style={{fontSize:13,fontWeight:600,color:'var(--color-text)'}}>{c.title}</div>
+                          {c.exclusive && (
+                            <span style={{fontSize:10,background:'#fef2f2',color:'#dc2626',border:'1px solid #fca5a5',padding:'1px 6px',borderRadius:8,fontWeight:700,flexShrink:0}}>専任</span>
+                          )}
+                        </div>
                         {c.deadline && <div style={{fontSize:11,color:'var(--color-text-muted)',marginTop:2}}>締切：{new Date(c.deadline).toLocaleDateString('ja-JP')}</div>}
+                        {c.exclusive && !checked && !disabled && (
+                          <div style={{fontSize:10,color:'#dc2626',marginTop:2}}>※ 選ぶと他のコンテストには応募できません</div>
+                        )}
                       </div>
                     </label>
                   )
