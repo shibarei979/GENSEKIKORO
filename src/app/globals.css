@@ -94,7 +94,7 @@ button[style*="background:'#F26A21'"]:hover,
 button[style*='background:"#F26A21"']:hover { background: var(--color-brand-dark) !important; }
 button[style*="color:'#F26A21'"]:hover { background: var(--color-brand-light) !important; }
 a { transition: opacity 0.15s ease; }
-a[href*="/novel"]:hover > div,
+a[href*="/novel"]:not(.history-title):hover > div,
 div[style*="cursor:'pointer'"]:hover { background: var(--color-bg) !important; }
 .list-row { transition: background 0.1s; cursor: pointer; }
 .list-row:hover { background: var(--color-bg) !important; }
@@ -106,7 +106,7 @@ nav a:hover { color: var(--color-brand) !important; opacity: 1; }
 .pager:hover { border-color: var(--color-brand); color: var(--color-brand); }
 .finput:focus, .ftarea:focus, input:focus, textarea:focus { border-color: var(--color-brand) !important; outline: none; }
 [style*="cursor:'pointer'"] { cursor: pointer; }
-a:hover [style*="fontWeight:700"][style*="color:'#2B211B'"] { color: var(--color-brand) !important; }
+a:not(.history-title):hover [style*="fontWeight:700"][style*="color:'#2B211B'"] { color: var(--color-brand) !important; }
 .history-title:hover > div { color: var(--color-text) !important; background: transparent !important; }
 .history-title:hover { color: var(--color-text) !important; opacity: 1 !important; }
 button { transition: background 0.15s ease, transform 0.1s ease, opacity 0.15s ease; }
