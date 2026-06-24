@@ -9,12 +9,23 @@ import Footer from '@/components/layout/Footer'
 import AdBanner from '@/components/layout/AdBanner'
 import type { Profile, Novel } from '@/types'
 import ContestEntry from './ContestEntry'
+import MissionClient from './MissionClient'
 import TweetSection from '@/components/TweetSection'
 import StoryBoard from '@/components/StoryBoard'
 import ChapterEditModal from './ChapterEditModal'
 
 interface Contest { id: string; title: string; deadline: string | null; is_site_contest: boolean }
 interface Entry { contest_id: string; novel_id: string }
+
+interface MissionStats {
+  likeCount: number
+  discoverCount: number
+  commentCount: number
+  bookmarkCount: number
+  novelCount: number
+  episodeCount: number
+  followCount: number
+}
 
 interface Props {
   profile: Profile & { birthdate?: string | null }
@@ -30,6 +41,7 @@ interface Props {
   firstEpMap?: Record<string,string>
   charCountMap?: Record<string,number>
   likeMap?: Record<string,number>
+  missionStats?: MissionStats
 }
 
 const ALL_BADGES = [
@@ -567,16 +579,11 @@ export default function MypageClient({
   )
 
   // ===== ミッションタブ =====
+  // MissionTab用のstats（page.tsxから渡す必要があるが、ここでは0で初期化）
+  // 実際のstatsはpage.tsxで取得してpropsで渡す
   const MissionTab = () => (
     <div style={{padding: isMobile ? '16px' : '0'}}>
-      <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',marginBottom:16}}>
-        <span style={{fontSize:15,fontWeight:700,color:'var(--color-text)'}}>ミッション・バッジ</span>
-        <button onClick={()=>{setShowBadgeBook(true);setBadgePage(0)}}
-          style={{fontSize:12,border:'1px solid var(--color-brand-border)',padding:'5px 12px',borderRadius:8,background:'none',color:'var(--color-text-muted)',cursor:'pointer'}}>
-          バッジ図鑑を見る
-        </button>
-      </div>
-      <Link href="/mission" style={{color:'var(--color-brand)',textDecoration:'none',fontSize:13,fontWeight:600}}>ミッションページへ →</Link>
+      <MissionClient user={true} stats={missionStats} initialClaimedIds={claimedMissionIds}/>
     </div>
   )
 

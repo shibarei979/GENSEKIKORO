@@ -144,6 +144,31 @@ export default async function MypagePage() {
     likeData.data?.forEach((l:any) => { likeMap2[l.novel_id] = (likeMap2[l.novel_id]||0)+1 })
   }
 
+  // ミッション用stats
+  let missionStats = { likeCount:0, discoverCount:0, commentCount:0, bookmarkCount:0, novelCount:0, episodeCount:0, followCount:0 }
+  if (user) {
+    const [likes, discovers, comments, bookmarks, novelsCount, followsCount] = await Promise.all([
+      supabase.from('likes').select('*',{count:'exact',head:true}).eq('user_id',user.id),
+      supabase.from('discovers').select('*',{count:'exact',head:true}).eq('user_id',user.id),
+      supabase.from('comments').select('*',{count:'exact',head:true}).eq('user_id',user.id),
+      supabase.from('bookmarks').select('*',{count:'exact',head:true}).eq('user_id',user.id),
+      supabase.from('novels').select('*',{count:'exact',head:true}).eq('author_id',user.id).eq('published',true),
+      supabase.from('follows').select('*',{count:'exact',head:true}).eq('follower_id',user.id),
+    ])
+    const myNovelIds2 = (await supabase.from('novels').select('id').eq('author_id',user.id)).data?.map((n:any)=>n.id)||[]
+    let episodeCount2 = 0
+    if (myNovelIds2.length > 0) {
+      const {count} = await supabase.from('episodes').select('*',{count:'exact',head:true}).in('novel_id',myNovelIds2)
+      episodeCount2 = count||0
+    }
+    missionStats = {
+      likeCount: likes.count||0, discoverCount: discovers.count||0,
+      commentCount: comments.count||0, bookmarkCount: bookmarks.count||0,
+      novelCount: novelsCount.count||0, episodeCount: episodeCount2,
+      followCount: followsCount.count||0,
+    }
+  }
+
   const defaultProfile = {
     user_id: user.id,
     display_name: user.email?.split('@')[0] || 'ユーザー',
@@ -167,6 +192,7 @@ export default async function MypagePage() {
       contests={contests || []}
       initialEntries={entries || []}
       claimedMissionIds={claimedMissionIds}
+      missionStats={missionStats}
       historyItems={historyItems}
       firstEpMap={firstEpMap}
       charCountMap={charCountMap}
