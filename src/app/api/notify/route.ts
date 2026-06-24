@@ -18,15 +18,15 @@ export async function POST(req: Request) {
     .single()
 
   if (profile) {
-    const allowed = {
+    const allowed: Record<string, boolean> = {
       like:        profile.notify_like        !== false,
       comment:     profile.notify_comment     !== false,
+      reply:       profile.notify_comment     !== false,
       follow:      profile.notify_follow      !== false,
       new_episode: profile.notify_new_episode !== false,
       new_work:    profile.notify_new_work    !== false,
-      discover:    true, // 拡散は常に通知
-    } as Record<string, boolean>
-
+      discover:    true,
+    }
     if (allowed[type] === false) return NextResponse.json({ ok: true, skipped: true })
   }
 
