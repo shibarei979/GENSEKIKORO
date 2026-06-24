@@ -70,6 +70,24 @@ export default async function HistoryPage() {
     historyItems = Object.values(novelMap).sort((a,b) => b.viewedAt > a.viewedAt ? 1 : -1)
   }
 
+  // S7: 各作品の第1話IDを取得
+  const novelIds = historyItems.map((item: any) => item.novelId)
+  const firstEpMap: Record<string, string> = {}
+  if (novelIds.length > 0) {
+    const { data: firstEps } = await supabase
+      .from('episodes')
+      .select('id, novel_id, ep_number')
+      .in('novel_id', novelIds)
+      .eq('published', true)
+      .order('ep_number', { ascending: true })
+    // 各novelの最小ep_numberのidを取得
+    firstEps?.forEach((ep: any) => {
+      if (!firstEpMap[ep.novel_id]) {
+        firstEpMap[ep.novel_id] = ep.id
+      }
+    })
+  }
+
   function fmtDate(s: string) {
     const d = new Date(s)
     const now = new Date()
@@ -97,8 +115,9 @@ export default async function HistoryPage() {
                 まだ閲覧履歴がありません
               </div>
             ) : historyItems.map((item) => (
-              <Link key={item.novelId} href={`/novel/${item.novelId}`} className="history-card" style={{textDecoration:'none',display:'flex',gap:14,padding:'14px 20px',borderBottom:'1px solid var(--color-brand-light)',background:'var(--color-bg-card)',alignItems:'center',color:'inherit'}}>
-                <span style={{flex:1,minWidth:0,display:'block'}}>
+              <div key={item.novelId} style={{display:'flex',gap:14,padding:'14px 20px',borderBottom:'1px solid var(--color-brand-light)',background:'var(--color-bg-card)',alignItems:'center'}}>
+                {/* 作品情報 */}
+                <Link href={`/novel/${item.novelId}`} style={{flex:1,minWidth:0,textDecoration:'none',color:'inherit'}}>
                   <span style={{display:'flex',gap:6,marginBottom:4,flexWrap:'wrap',alignItems:'center'}}>
                     <span style={{fontSize:10,background:'var(--color-brand-light)',color:'var(--color-brand)',border:'1px solid var(--color-tag-border)',padding:'1px 6px',borderRadius:3}}>{item.genre}</span>
                   </span>
@@ -107,14 +126,23 @@ export default async function HistoryPage() {
                   <span style={{display:'block',fontSize:11,color:'var(--color-text-faint)'}}>
                     最後に読んだ話：<span style={{color:'var(--color-brand)'}}>{item.epTitle}</span>
                   </span>
-                </span>
-                <span style={{fontSize:11,color:'var(--color-text-faint)',flexShrink:0,textAlign:'right',display:'block'}}>
-                  <span style={{display:'block'}}>{fmtDate(item.viewedAt)}</span>
-                  <span style={{marginTop:6,display:'inline-block',padding:'5px 12px',background:'var(--color-brand)',color:'var(--color-bg-card)',borderRadius:12,fontSize:11,fontWeight:600}}>
+                </Link>
+
+                {/* 右側：日時＋ボタン2つ */}
+                <span style={{flexShrink:0,textAlign:'right',display:'flex',flexDirection:'column',alignItems:'flex-end',gap:6}}>
+                  <span style={{fontSize:11,color:'var(--color-text-faint)'}}>{fmtDate(item.viewedAt)}</span>
+                  <Link href={`/novel/${item.novelId}/episode/${item.epId}`}
+                    style={{display:'inline-block',padding:'5px 12px',background:'var(--color-brand)',color:'var(--color-bg-card)',borderRadius:12,fontSize:11,fontWeight:600,textDecoration:'none',whiteSpace:'nowrap'}}>
                     続きを読む
-                  </span>
+                  </Link>
+                  {firstEpMap[item.novelId] && firstEpMap[item.novelId] !== item.epId && (
+                    <Link href={`/novel/${item.novelId}/episode/${firstEpMap[item.novelId]}`}
+                      style={{display:'inline-block',padding:'5px 12px',background:'var(--color-bg)',color:'var(--color-text-muted)',border:'1px solid var(--color-brand-border)',borderRadius:12,fontSize:11,fontWeight:600,textDecoration:'none',whiteSpace:'nowrap'}}>
+                      最初から読む
+                    </Link>
+                  )}
                 </span>
-              </Link>
+              </div>
             ))}
           </div>
         </div>
