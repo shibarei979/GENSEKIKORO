@@ -20,7 +20,7 @@ interface MissionStats {
 }
 
 interface Props {
-  profile: Profile & { birthdate?: string | null; notify_like?: boolean; notify_comment?: boolean; notify_follow?: boolean; notify_new_episode?: boolean; notify_new_work?: boolean }
+  profile: Profile & { birthdate?: string | null; notify_like?: boolean; notify_comment?: boolean; notify_follow?: boolean; notify_new_episode?: boolean; notify_new_work?: boolean; gender?: string | null; x_account?: string | null; allow_comments?: boolean }
   novels: Novel[]
   bookmarkedNovels: any[]
   followingAuthors?: any[]
@@ -145,6 +145,12 @@ export default function MypageClient({
   const [notifyNewEpisode, setNotifyNewEpisode] = useState(profile.notify_new_episode !== false)
   const [notifyNewWork,    setNotifyNewWork]    = useState(profile.notify_new_work   !== false)
   const [notifySaving,     setNotifySaving]     = useState(false)
+  const [gender,           setGender]           = useState<string>((profile as any).gender || '')
+  const [xAccount,         setXAccount]         = useState<string>((profile as any).x_account || '')
+  const [xSaving,          setXSaving]          = useState(false)
+  const [allowComments,    setAllowComments]    = useState((profile as any).allow_comments !== false)
+  const [showGenderModal,  setShowGenderModal]  = useState(false)
+  const [showXModal,       setShowXModal]       = useState(false)
 
   useEffect(() => {
     const check = () => setIsMobile(window.innerWidth <= 768)
@@ -169,6 +175,29 @@ export default function MypageClient({
   }
   function fmtNum(n:number) { return n>=10000?`${(n/10000).toFixed(1)}万`:n.toString() }
   function fmtChars(n:number) { return n>=10000?`${(n/10000).toFixed(1)}万文字`:`${n.toLocaleString()}文字` }
+
+  async function handleSaveGender(val: string) {
+    setGender(val)
+    await supabase.from('profiles').update({ gender: val||null }).eq('user_id', profile.user_id)
+    setShowGenderModal(false)
+    setToast('性別を保存しました'); setTimeout(()=>setToast(''),2000)
+  }
+
+  async function handleSaveXAccount() {
+    setXSaving(true)
+    const cleaned = xAccount.replace(/^@/, '').trim()
+    setXAccount(cleaned)
+    await supabase.from('profiles').update({ x_account: cleaned||null }).eq('user_id', profile.user_id)
+    setXSaving(false); setShowXModal(false)
+    setToast('Xアカウントを保存しました'); setTimeout(()=>setToast(''),2000)
+  }
+
+  async function handleToggleAllowComments() {
+    const next = !allowComments
+    setAllowComments(next)
+    await supabase.from('profiles').update({ allow_comments: next }).eq('user_id', profile.user_id)
+    setToast(next?'コメントを許可しました':'コメントを不許可にしました'); setTimeout(()=>setToast(''),2000)
+  }
 
   async function handleSaveNotify(key: string, value: boolean) {
     setNotifySaving(true)
@@ -555,6 +584,42 @@ export default function MypageClient({
         ))}
       </div>
 
+      {/* プロフィール設定 */}
+      <div style={{marginBottom:24}}>
+        <div style={{fontSize:12,fontWeight:700,color:'var(--color-text-muted)',letterSpacing:'.05em',marginBottom:10}}>プロフィール設定</div>
+        <button onClick={()=>setShowGenderModal(true)}
+          style={{width:'100%',padding:'13px 0',display:'flex',alignItems:'center',justifyContent:'space-between',background:'none',border:'none',borderBottom:'1px solid var(--color-brand-border)',cursor:'pointer',textAlign:'left' as const}}>
+          <div>
+            <div style={{fontSize:13,color:'var(--color-text)'}}>性別</div>
+            {gender && <div style={{fontSize:11,color:'var(--color-text-faint)',marginTop:2}}>{gender}</div>}
+          </div>
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--color-text-faint)" strokeWidth="2"><polyline points="9 18 15 12 9 6"/></svg>
+        </button>
+        <button onClick={()=>setShowXModal(true)}
+          style={{width:'100%',padding:'13px 0',display:'flex',alignItems:'center',justifyContent:'space-between',background:'none',border:'none',borderBottom:'1px solid var(--color-brand-border)',cursor:'pointer',textAlign:'left' as const}}>
+          <div>
+            <div style={{fontSize:13,color:'var(--color-text)'}}>Xアカウント</div>
+            {xAccount && <div style={{fontSize:11,color:'var(--color-text-faint)',marginTop:2}}>@{xAccount}</div>}
+          </div>
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--color-text-faint)" strokeWidth="2"><polyline points="9 18 15 12 9 6"/></svg>
+        </button>
+      </div>
+
+      {/* コメント設定 */}
+      <div style={{marginBottom:24}}>
+        <div style={{fontSize:12,fontWeight:700,color:'var(--color-text-muted)',letterSpacing:'.05em',marginBottom:10}}>コメント設定</div>
+        <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',padding:'13px 0',borderBottom:'1px solid var(--color-brand-border)'}}>
+          <div>
+            <div style={{fontSize:13,color:'var(--color-text)'}}>エピソードへのコメントを許可</div>
+            <div style={{fontSize:11,color:'var(--color-text-faint)',marginTop:2}}>{allowComments?'許可中':'不許可'}</div>
+          </div>
+          <button onClick={handleToggleAllowComments}
+            style={{width:44,height:24,borderRadius:12,border:'none',cursor:'pointer',background:allowComments?'var(--color-brand)':'#d1d5db',position:'relative',transition:'background .2s',flexShrink:0}}>
+            <div style={{position:'absolute',top:3,left:allowComments?23:3,width:18,height:18,borderRadius:'50%',background:'#fff',transition:'left .2s',boxShadow:'0 1px 3px rgba(0,0,0,0.2)'}}/>
+          </button>
+        </div>
+      </div>
+
       <div style={{fontSize:12,fontWeight:700,color:'var(--color-text-muted)',letterSpacing:'.05em',marginBottom:10}}>アカウント設定</div>
       <div style={{display:'flex',flexDirection:'column'}}>
         {[
@@ -645,6 +710,42 @@ export default function MypageClient({
           </div>
         )}
       </div>
+
+      {/* 性別モーダル */}
+      {showGenderModal && (
+        <div style={{position:'fixed',inset:0,background:'rgba(0,0,0,0.5)',zIndex:1000,display:'flex',alignItems:'center',justifyContent:'center',padding:24}}>
+          <div style={{background:'var(--color-bg-card)',borderRadius:16,padding:'28px',maxWidth:360,width:'100%',boxShadow:'0 20px 60px rgba(0,0,0,0.2)'}}>
+            <div style={{fontSize:16,fontWeight:700,color:'var(--color-text)',marginBottom:16}}>性別を設定</div>
+            <div style={{display:'flex',flexDirection:'column',gap:8,marginBottom:16}}>
+              {['男性','女性','その他','未設定'].map(g => (
+                <button key={g} onClick={()=>handleSaveGender(g==='未設定'?'':g)}
+                  style={{padding:'12px 16px',borderRadius:8,border:`1.5px solid ${gender===g||(!gender&&g==='未設定')?'var(--color-brand)':'var(--color-brand-border)'}`,background:gender===g||(!gender&&g==='未設定')?'var(--color-brand-light)':'none',fontSize:13,color:'var(--color-text)',cursor:'pointer',textAlign:'left' as const,fontWeight:gender===g?700:400}}>
+                  {g}
+                </button>
+              ))}
+            </div>
+            <button onClick={()=>setShowGenderModal(false)} style={{width:'100%',padding:'10px',border:'1px solid var(--color-brand-border)',borderRadius:8,background:'none',color:'var(--color-text-muted)',fontSize:13,cursor:'pointer'}}>キャンセル</button>
+          </div>
+        </div>
+      )}
+
+      {/* Xアカウントモーダル */}
+      {showXModal && (
+        <div style={{position:'fixed',inset:0,background:'rgba(0,0,0,0.5)',zIndex:1000,display:'flex',alignItems:'center',justifyContent:'center',padding:24}}>
+          <div style={{background:'var(--color-bg-card)',borderRadius:16,padding:'28px',maxWidth:420,width:'100%',boxShadow:'0 20px 60px rgba(0,0,0,0.2)'}}>
+            <div style={{fontSize:16,fontWeight:700,color:'var(--color-text)',marginBottom:16}}>Xアカウントを設定</div>
+            <div style={{display:'flex',alignItems:'center',border:'1.5px solid var(--color-brand-border)',borderRadius:8,overflow:'hidden',marginBottom:16}}>
+              <span style={{padding:'10px 12px',background:'var(--color-bg)',color:'var(--color-text-muted)',fontSize:13,borderRight:'1px solid var(--color-brand-border)',flexShrink:0}}>@</span>
+              <input value={xAccount} onChange={e=>setXAccount(e.target.value.replace(/^@/,''))}
+                placeholder="ユーザー名" style={{flex:1,padding:'10px 12px',border:'none',outline:'none',fontSize:13,background:'var(--color-bg-card)'}}/>
+            </div>
+            <div style={{display:'flex',gap:10}}>
+              <button onClick={()=>{setShowXModal(false);setXAccount((profile as any).x_account||'')}} style={{flex:1,padding:'10px',border:'1px solid var(--color-brand-border)',borderRadius:8,background:'none',color:'var(--color-text-muted)',fontSize:13,cursor:'pointer'}}>キャンセル</button>
+              <button onClick={handleSaveXAccount} disabled={xSaving} style={{flex:1,padding:'10px',border:'none',borderRadius:8,background:'var(--color-brand)',color:'#fff',fontSize:13,fontWeight:700,cursor:'pointer',opacity:xSaving?0.6:1}}>{xSaving?'保存中...':'保存する'}</button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* 話の公開管理モーダル */}
       {epManageTarget && (
