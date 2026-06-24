@@ -321,7 +321,7 @@ export default function MypageClient({
 
   // ===== プロフィールヘッダー（全タブ共通） =====
   const ProfileHeader = () => (
-    <div style={{background:'var(--color-bg-card)',border:'1px solid var(--color-brand-border)',borderRadius:16,padding: isMobile ? '16px' : '20px 28px',marginBottom:0}}>
+    <div style={{background:'var(--color-bg-card)',border:'1px solid var(--color-brand-border)',borderRadius:16,padding: isMobile ? '16px' : '24px 32px',marginBottom:0}}>
       <div style={{display:'flex',alignItems:'center',gap: isMobile ? 12 : 16}}>
         <div style={{position:'relative',flexShrink:0,cursor:'pointer'}} onClick={()=>iconInputRef.current?.click()}>
           <input ref={iconInputRef} type="file" accept="image/*" style={{display:'none'}}
@@ -391,7 +391,7 @@ export default function MypageClient({
 
   // ===== マイページタブ =====
   const MypageTab = () => (
-    <div style={{padding: isMobile ? '16px' : '20px 0',display:'flex',flexDirection:'column',gap:16}}>
+    <div style={{padding: isMobile ? '16px' : '0',display:'flex',flexDirection:'column',gap:16}}>
       {!profile.birthdate && (
         <div style={{background:'var(--color-brand-light)',border:'1px solid #f5b080',borderRadius:10,padding:'12px 16px',display:'flex',alignItems:'center',gap:12}}>
           <div style={{flex:1,fontSize:13,color:'var(--color-text)',lineHeight:1.6}}>
@@ -456,7 +456,7 @@ export default function MypageClient({
 
   // ===== 作品管理タブ =====
   const WorksTab = () => (
-    <div style={{padding: isMobile ? '16px' : '20px 0',display:'flex',flexDirection:'column',gap:0}}>
+    <div style={{padding: isMobile ? '16px' : '0',display:'flex',flexDirection:'column',gap:0}}>
       <div style={{background:'var(--color-bg-card)',border:'1px solid var(--color-brand-border)',borderRadius:12,overflow:'hidden'}}>
         <div style={{padding:'12px 16px',borderBottom:'1px solid var(--color-brand-border)',display:'flex',alignItems:'center',justifyContent:'space-between',background:'var(--color-bg)'}}>
           <span style={{fontSize:14,fontWeight:700,color:'var(--color-text)'}}>投稿作品（{myNovels.length}）</span>
@@ -514,7 +514,7 @@ export default function MypageClient({
 
   // ===== 保存済みタブ =====
   const BookmarksTab = () => (
-    <div style={{padding: isMobile ? '16px' : '20px 0'}}>
+    <div style={{padding: isMobile ? '16px' : '0'}}>
       <div style={{background:'var(--color-bg-card)',border:'1px solid var(--color-brand-border)',borderRadius:12,overflow:'hidden'}}>
         <div style={{padding:'12px 16px',borderBottom:'1px solid var(--color-brand-border)',background:'var(--color-bg)'}}>
           <span style={{fontSize:14,fontWeight:700,color:'var(--color-text)'}}>保存済み作品（{bookmarkedNovels.length}）</span>
@@ -544,7 +544,7 @@ export default function MypageClient({
 
   // ===== 閲覧履歴タブ =====
   const HistoryTab = () => (
-    <div style={{padding: isMobile ? '16px' : '20px 0'}}>
+    <div style={{padding: isMobile ? '16px' : '0'}}>
       <div style={{background:'var(--color-bg-card)',border:'1px solid var(--color-brand-border)',borderRadius:12,overflow:'hidden'}}>
         <div style={{padding:'12px 16px',borderBottom:'1px solid var(--color-brand-border)',background:'var(--color-bg)'}}>
           <span style={{fontSize:14,fontWeight:700,color:'var(--color-text)'}}>閲覧履歴（最大200件）</span>
@@ -603,7 +603,7 @@ export default function MypageClient({
 
   // ===== つぶやきタブ =====
   const TweetTab = () => (
-    <div style={{padding: isMobile ? '16px' : '20px 0'}}>
+    <div style={{padding: isMobile ? '16px' : '0'}}>
       <div style={{background:'var(--color-bg-card)',border:'1px solid var(--color-brand-border)',borderRadius:12,overflow:'hidden'}}>
         <div style={{padding:'12px 16px',borderBottom:'1px solid var(--color-brand-border)',background:'var(--color-bg)'}}>
           <span style={{fontSize:14,fontWeight:700,color:'var(--color-text)'}}>つぶやき</span>
@@ -617,7 +617,7 @@ export default function MypageClient({
 
   // ===== ミッションタブ =====
   const MissionTab = () => (
-    <div style={{padding: isMobile ? '16px' : '20px 0'}}>
+    <div style={{padding: isMobile ? '16px' : '0'}}>
       <div style={{background:'var(--color-bg-card)',border:'1px solid var(--color-brand-border)',borderRadius:12,overflow:'hidden'}}>
         <div style={{padding:'12px 16px',borderBottom:'1px solid var(--color-brand-border)',background:'var(--color-bg)',display:'flex',alignItems:'center',justifyContent:'space-between'}}>
           <span style={{fontSize:14,fontWeight:700,color:'var(--color-text)'}}>ミッション・バッジ</span>
@@ -635,14 +635,14 @@ export default function MypageClient({
 
   // ===== コンテストタブ =====
   const ContestTab = () => (
-    <div style={{padding: isMobile ? '16px' : '20px 0'}}>
+    <div style={{padding: isMobile ? '16px' : '0'}}>
       <ContestEntry novels={myNovels} contests={contests} initialEntries={initialEntries} userId={profile.user_id}/>
     </div>
   )
 
   // ===== 設定タブ =====
   const SettingsTab = () => (
-    <div style={{padding: isMobile ? '16px' : '20px 0',display:'flex',flexDirection:'column',gap:12}}>
+    <div style={{padding: isMobile ? '16px' : '0',display:'flex',flexDirection:'column',gap:12}}>
       <div style={{background:'var(--color-bg-card)',border:'1px solid var(--color-brand-border)',borderRadius:12,overflow:'hidden'}}>
         <div style={{padding:'12px 16px',borderBottom:'1px solid var(--color-brand-border)',background:'var(--color-bg)'}}>
           <span style={{fontSize:14,fontWeight:700,color:'var(--color-text)'}}>アカウント設定</span>
@@ -713,38 +713,37 @@ export default function MypageClient({
           </>
         ) : (
           // デスクトップ：左サイドナビ＋右コンテンツ
-          <div style={{display:'flex',gap:0,marginTop:0,alignItems:'flex-start'}}>
+          <div style={{display:'flex',gap:24,marginTop:20,alignItems:'flex-start'}}>
             {/* 左サイドナビ */}
             <div style={{
-              width:180, flexShrink:0,
-              background:'var(--color-bg-card)',
-              border:'1px solid var(--color-brand-border)',
-              borderTop:'none',
-              position:'sticky', top:60,
-              borderRadius:'0 0 0 12px',
+              width:160, flexShrink:0,
+              position:'sticky', top:80,
             }}>
-              {TABS.map((tab, i) => (
+              {TABS.map((tab) => (
                 <button key={tab.id} onClick={()=>setActiveTab(tab.id)}
                   style={{
-                    width:'100%', padding:'13px 20px',
+                    width:'100%', padding:'10px 16px',
                     textAlign:'left' as const,
-                    fontSize:13,
+                    fontSize:14,
                     fontWeight: activeTab===tab.id ? 700 : 400,
                     color: activeTab===tab.id ? 'var(--color-brand)' : 'var(--color-text-muted)',
-                    background: activeTab===tab.id ? 'var(--color-brand-light)' : 'none',
+                    background: 'none',
                     border:'none',
-                    borderBottom: i < TABS.length-1 ? '1px solid var(--color-brand-border)' : 'none',
-                    borderLeft: activeTab===tab.id ? '3px solid var(--color-brand)' : '3px solid transparent',
+                    borderRadius:8,
                     cursor:'pointer',
-                    transition:'all .15s',
-                    borderRadius: i === TABS.length-1 ? '0 0 0 12px' : '0',
-                  }}>
+                    transition:'all .12s',
+                    display:'block',
+                    marginBottom:2,
+                  }}
+                  onMouseEnter={e=>{if(activeTab!==tab.id)(e.currentTarget as HTMLElement).style.color='var(--color-text)'}}
+                  onMouseLeave={e=>{if(activeTab!==tab.id)(e.currentTarget as HTMLElement).style.color='var(--color-text-muted)'}}
+                >
                   {tab.label}
                 </button>
               ))}
             </div>
             {/* 右コンテンツ */}
-            <div style={{flex:1,minWidth:0,padding:'0 0 0 20px',minHeight:400}}>
+            <div style={{flex:1,minWidth:0,minHeight:400}}>
               {tabContent[activeTab]}
             </div>
           </div>
