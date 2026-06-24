@@ -32,19 +32,19 @@ const KEYWORD_CATEGORIES = [
 
 // S4: 並び順の選択肢（セレクトボックス用）
 const SORT_OPTIONS = [
-  { v: 'new',          l: '新しい作品から' },
-  { v: 'old',          l: '古い作品から' },
-  { v: 'like',         l: 'よく読まれている（総合）' },
-  { v: 'like_daily',   l: 'いま熱い（今日）' },
-  { v: 'like_weekly',  l: 'いま熱い（今週）' },
-  { v: 'like_monthly', l: 'いま熱い（今月）' },
-  { v: 'bookmark',     l: 'お気に入りが多い' },
-  { v: 'view',         l: 'たくさん読まれている' },
-  { v: 'comment',      l: '盛り上がっている' },
-  { v: 'rising',       l: '急上昇中' },
-  { v: 'ep_count',     l: '話数が多い' },
-  { v: 'char_count',   l: '文字数が多い' },
-  { v: 'award',        l: '受賞・注目作品' },
+  { v: 'new',          l: '新着' },
+  { v: 'old',          l: '古い' },
+  { v: 'like',         l: 'いいね（総合）' },
+  { v: 'like_daily',   l: 'いいね（日間）' },
+  { v: 'like_weekly',  l: 'いいね（週間）' },
+  { v: 'like_monthly', l: 'いいね（月間）' },
+  { v: 'bookmark',     l: 'ブックマーク' },
+  { v: 'view',         l: '閲覧数' },
+  { v: 'comment',      l: 'コメント' },
+  { v: 'rising',       l: '急上昇' },
+  { v: 'ep_count',     l: '話数' },
+  { v: 'char_count',   l: '文字数' },
+  { v: 'award',        l: '受賞・注目' },
 ]
 
 interface Props {
