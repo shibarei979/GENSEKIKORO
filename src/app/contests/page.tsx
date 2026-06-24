@@ -63,38 +63,27 @@ export default async function ContestsPage() {
                   return (
                     <Link key={c.id} href={`/contests/${c.id}`} style={{textDecoration:'none'}}>
                       <div style={{background:'var(--color-bg-card)',border:'1px solid var(--color-brand-border)',borderRadius:12,overflow:'hidden'}}>
-                        <div className="desktop-only" style={{display:'flex',gap:0}}>
+                        <div className="desktop-only">
                           {c.image_url && (
-                            <div style={{width:200,flexShrink:0,overflow:'hidden',background:'var(--color-bg)'}}>
-                              <img src={c.image_url} alt={c.title} style={{width:'100%',height:'100%',objectFit:'cover',display:'block'}}/>
-                            </div>
+                            <img src={c.image_url} alt={c.title}
+                              style={{width:'100%',aspectRatio:'9/16',objectFit:'cover',display:'block',maxHeight:480}}/>
                           )}
-                          <div style={{padding:'20px 24px',flex:1,minWidth:0}}>
-                            <div style={{display:'flex',alignItems:'center',gap:8,marginBottom:8,flexWrap:'wrap'}}>
-                              <span style={{fontSize:11,fontWeight:700,color:status.color,background:status.bg,border:`1px solid ${status.border}`,padding:'2px 10px',borderRadius:10}}>{status.label}</span>
-                              {c.deadline && <span style={{fontSize:11,color:'#94a3b8'}}>締切：{new Date(c.deadline).toLocaleDateString('ja-JP')}</span>}
-                              <span style={{fontSize:11,color:'var(--color-text-muted)',marginLeft:'auto'}}>応募数：{entryCount}作品</span>
-                            </div>
-                            <h3 style={{fontSize:17,fontWeight:700,color:'var(--color-text)',marginBottom:8,lineHeight:1.4,fontFamily:"'Noto Serif JP',serif"}}>{c.title}</h3>
-                            {c.description && <p style={{fontSize:12,color:'var(--color-text-muted)',lineHeight:1.8,overflow:'hidden',display:'-webkit-box',WebkitLineClamp:2,WebkitBoxOrient:'vertical' as any}}>{c.description}</p>}
-                            {status.label === '募集中' && (
-                              <div style={{marginTop:10}}>
-                                <span style={{display:'inline-block',padding:'6px 16px',background:'var(--color-brand)',color:'var(--color-bg-card)',fontWeight:700,fontSize:12,borderRadius:6}}>応募受付中 →</span>
-                              </div>
-                            )}
+                          <div style={{padding:'10px 14px',display:'flex',alignItems:'center',gap:10,flexWrap:'wrap'}}>
+                            <span style={{fontSize:11,fontWeight:700,color:status.color,background:status.bg,border:`1px solid ${status.border}`,padding:'2px 10px',borderRadius:10}}>{status.label}</span>
+                            <Link href={`/contests/${c.id}`}
+                              style={{display:'inline-block',padding:'6px 18px',background:'var(--color-brand)',color:'var(--color-bg-card)',fontWeight:700,fontSize:12,borderRadius:6,textDecoration:'none'}}>
+                              {status.label==='募集中'?'応募受付中 →':'詳細を見る →'}
+                            </Link>
                           </div>
                         </div>
                         <div className="mobile-only">
-                          {c.image_url && <img src={c.image_url} alt={c.title} style={{width:'100%',height:130,objectFit:'cover',display:'block'}}/>}
-                          <div style={{padding:'14px 16px'}}>
-                            <div style={{display:'flex',alignItems:'center',gap:8,marginBottom:6,flexWrap:'wrap'}}>
-                              <span style={{fontSize:11,fontWeight:700,color:status.color,background:status.bg,border:`1px solid ${status.border}`,padding:'2px 10px',borderRadius:10}}>{status.label}</span>
-                              {c.deadline && <span style={{fontSize:11,color:'#94a3b8'}}>締切：{new Date(c.deadline).toLocaleDateString('ja-JP')}</span>}
-                              <span style={{fontSize:11,color:'var(--color-text-muted)'}}>応募数：{entryCount}作品</span>
-                            </div>
-                            <h3 style={{fontSize:15,fontWeight:700,color:'var(--color-text)',marginBottom:6,lineHeight:1.4,fontFamily:"'Noto Serif JP',serif"}}>{c.title}</h3>
-                            {c.description && <p style={{fontSize:12,color:'var(--color-text-muted)',lineHeight:1.8,overflow:'hidden',display:'-webkit-box',WebkitLineClamp:2,WebkitBoxOrient:'vertical' as any,margin:0}}>{c.description}</p>}
-                            {status.label === '募集中' && <div style={{marginTop:10}}><span style={{display:'inline-block',padding:'6px 16px',background:'var(--color-brand)',color:'var(--color-bg-card)',fontWeight:700,fontSize:12,borderRadius:6}}>応募受付中 →</span></div>}
+                          {c.image_url && <img src={c.image_url} alt={c.title} style={{width:'100%',aspectRatio:'9/16',objectFit:'cover',display:'block'}}/>}
+                          <div style={{padding:'10px 14px',display:'flex',alignItems:'center',gap:10,flexWrap:'wrap'}}>
+                            <span style={{fontSize:11,fontWeight:700,color:status.color,background:status.bg,border:`1px solid ${status.border}`,padding:'2px 10px',borderRadius:10}}>{status.label}</span>
+                            <Link href={`/contests/${c.id}`}
+                              style={{display:'inline-block',padding:'6px 18px',background:'var(--color-brand)',color:'var(--color-bg-card)',fontWeight:700,fontSize:12,borderRadius:6,textDecoration:'none'}}>
+                              {status.label==='募集中'?'応募受付中 →':'詳細を見る →'}
+                            </Link>
                           </div>
                         </div>
                       </div>
@@ -115,36 +104,31 @@ export default async function ContestsPage() {
                 {externalContests.map((c:any) => {
                   const status = getStatusLabel(c.deadline, c.judging_end)
                   return (
-                    <a key={c.id} href={c.apply_url||'#'} target="_blank" rel="noopener noreferrer" style={{textDecoration:'none'}}>
-                      <div style={{background:'var(--color-bg-card)',border:'1px solid var(--color-brand-border)',borderRadius:12,overflow:'hidden'}}>
-                        <div className="desktop-only" style={{display:'flex',gap:0}}>
-                          {c.image_url && <div style={{width:200,flexShrink:0,overflow:'hidden',background:'var(--color-bg)'}}><img src={c.image_url} alt={c.title} style={{width:'100%',height:'100%',objectFit:'cover',display:'block'}}/></div>}
-                          <div style={{padding:'20px 24px',flex:1,minWidth:0}}>
-                            <div style={{display:'flex',alignItems:'center',gap:8,marginBottom:8,flexWrap:'wrap'}}>
-                              <span style={{fontSize:11,fontWeight:700,color:status.color,background:status.bg,border:`1px solid ${status.border}`,padding:'2px 10px',borderRadius:10}}>{status.label}</span>
-                              {c.deadline && <span style={{fontSize:11,color:'#94a3b8'}}>締切：{new Date(c.deadline).toLocaleDateString('ja-JP')}</span>}
-                              <span style={{fontSize:11,color:'#3b82f6',marginLeft:'auto',fontWeight:600}}>外部サイト ↗</span>
-                            </div>
-                            <h3 style={{fontSize:17,fontWeight:700,color:'var(--color-text)',marginBottom:8,lineHeight:1.4,fontFamily:"'Noto Serif JP',serif"}}>{c.title}</h3>
-                            {c.description && <p style={{fontSize:12,color:'var(--color-text-muted)',lineHeight:1.8,overflow:'hidden',display:'-webkit-box',WebkitLineClamp:2,WebkitBoxOrient:'vertical' as any}}>{c.description}</p>}
-                            {status.label === '募集中' && <div style={{marginTop:10}}><span style={{display:'inline-block',padding:'6px 16px',background:'#3b82f6',color:'#fff',fontWeight:700,fontSize:12,borderRadius:6}}>外部サイトで応募する ↗</span></div>}
+                    <div key={c.id} style={{background:'var(--color-bg-card)',border:'1px solid var(--color-brand-border)',borderRadius:12,overflow:'hidden'}}>
+                        <div className="desktop-only">
+                          {c.image_url && (
+                            <img src={c.image_url} alt={c.title}
+                              style={{width:'100%',aspectRatio:'9/16',objectFit:'cover',display:'block',maxHeight:480}}/>
+                          )}
+                          <div style={{padding:'10px 14px',display:'flex',alignItems:'center',gap:10,flexWrap:'wrap'}}>
+                            <span style={{fontSize:11,fontWeight:700,color:status.color,background:status.bg,border:`1px solid ${status.border}`,padding:'2px 10px',borderRadius:10}}>{status.label}</span>
+                            <a href={c.apply_url||'#'} target="_blank" rel="noopener noreferrer"
+                              style={{display:'inline-block',padding:'6px 18px',background:'#3b82f6',color:'#fff',fontWeight:700,fontSize:12,borderRadius:6,textDecoration:'none'}}>
+                              外部サイトで応募する ↗
+                            </a>
                           </div>
                         </div>
                         <div className="mobile-only">
-                          {c.image_url && <img src={c.image_url} alt={c.title} style={{width:'100%',height:120,objectFit:'cover',display:'block'}}/>}
-                          <div style={{padding:'14px 16px'}}>
-                            <div style={{display:'flex',alignItems:'center',gap:8,marginBottom:6,flexWrap:'wrap'}}>
-                              <span style={{fontSize:11,fontWeight:700,color:status.color,background:status.bg,border:`1px solid ${status.border}`,padding:'2px 10px',borderRadius:10}}>{status.label}</span>
-                              {c.deadline && <span style={{fontSize:11,color:'#94a3b8'}}>締切：{new Date(c.deadline).toLocaleDateString('ja-JP')}</span>}
-                              <span style={{fontSize:11,color:'#3b82f6',fontWeight:600}}>外部サイト ↗</span>
-                            </div>
-                            <h3 style={{fontSize:15,fontWeight:700,color:'var(--color-text)',marginBottom:4,lineHeight:1.4,fontFamily:"'Noto Serif JP',serif"}}>{c.title}</h3>
-                            {c.description && <p style={{fontSize:12,color:'var(--color-text-muted)',lineHeight:1.8,overflow:'hidden',display:'-webkit-box',WebkitLineClamp:2,WebkitBoxOrient:'vertical' as any,margin:0}}>{c.description}</p>}
-                            {status.label === '募集中' && <div style={{marginTop:10}}><span style={{display:'inline-block',padding:'6px 16px',background:'#3b82f6',color:'#fff',fontWeight:700,fontSize:12,borderRadius:6}}>外部サイトで応募する ↗</span></div>}
+                          {c.image_url && <img src={c.image_url} alt={c.title} style={{width:'100%',aspectRatio:'9/16',objectFit:'cover',display:'block'}}/>}
+                          <div style={{padding:'10px 14px',display:'flex',alignItems:'center',gap:10,flexWrap:'wrap'}}>
+                            <span style={{fontSize:11,fontWeight:700,color:status.color,background:status.bg,border:`1px solid ${status.border}`,padding:'2px 10px',borderRadius:10}}>{status.label}</span>
+                            <a href={c.apply_url||'#'} target="_blank" rel="noopener noreferrer"
+                              style={{display:'inline-block',padding:'6px 18px',background:'#3b82f6',color:'#fff',fontWeight:700,fontSize:12,borderRadius:6,textDecoration:'none'}}>
+                              外部サイトで応募する ↗
+                            </a>
                           </div>
                         </div>
-                      </div>
-                    </a>
+                    </div>
                   )
                 })}
               </div>
