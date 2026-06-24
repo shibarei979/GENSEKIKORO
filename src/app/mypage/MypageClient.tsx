@@ -20,7 +20,7 @@ interface MissionStats {
 }
 
 interface Props {
-  profile: Profile & { birthdate?: string | null }
+  profile: Profile & { birthdate?: string | null; notify_like?: boolean; notify_comment?: boolean; notify_follow?: boolean; notify_new_episode?: boolean; notify_new_work?: boolean }
   novels: Novel[]
   bookmarkedNovels: any[]
   followingAuthors?: any[]
@@ -139,6 +139,12 @@ export default function MypageClient({
   const [epList,         setEpList]         = useState<any[]>([])
   const [epToggling,     setEpToggling]     = useState('')
   const [expandedNovels, setExpandedNovels] = useState<Set<string>>(new Set())
+  const [notifyLike,       setNotifyLike]       = useState(profile.notify_like       !== false)
+  const [notifyComment,    setNotifyComment]    = useState(profile.notify_comment    !== false)
+  const [notifyFollow,     setNotifyFollow]     = useState(profile.notify_follow     !== false)
+  const [notifyNewEpisode, setNotifyNewEpisode] = useState(profile.notify_new_episode !== false)
+  const [notifyNewWork,    setNotifyNewWork]    = useState(profile.notify_new_work   !== false)
+  const [notifySaving,     setNotifySaving]     = useState(false)
 
   useEffect(() => {
     const check = () => setIsMobile(window.innerWidth <= 768)
@@ -163,6 +169,12 @@ export default function MypageClient({
   }
   function fmtNum(n:number) { return n>=10000?`${(n/10000).toFixed(1)}万`:n.toString() }
   function fmtChars(n:number) { return n>=10000?`${(n/10000).toFixed(1)}万文字`:`${n.toLocaleString()}文字` }
+
+  async function handleSaveNotify(key: string, value: boolean) {
+    setNotifySaving(true)
+    await supabase.from('profiles').update({ [key]: value }).eq('user_id', profile.user_id)
+    setNotifySaving(false)
+  }
 
   async function handleSaveBio() {
     setBioSaving(true)
@@ -508,6 +520,42 @@ export default function MypageClient({
   const SettingsTab = () => (
     <div>
       <div style={{fontSize:15,fontWeight:700,color:'var(--color-text)',marginBottom:20}}>設定</div>
+
+      {/* 通知設定 */}
+      <div style={{marginBottom:24}}>
+        <div style={{fontSize:12,fontWeight:700,color:'var(--color-text-muted)',letterSpacing:'.05em',marginBottom:10}}>通知設定</div>
+        {[
+          {label:'いいねされたとき',             key:'notify_like',        val:notifyLike,       set:setNotifyLike},
+          {label:'コメントされたとき',            key:'notify_comment',     val:notifyComment,    set:setNotifyComment},
+          {label:'フォローされたとき',            key:'notify_follow',      val:notifyFollow,     set:setNotifyFollow},
+          {label:'フォロー中の作者が話を更新',     key:'notify_new_episode', val:notifyNewEpisode, set:setNotifyNewEpisode},
+          {label:'フォロー中の作者が新作を公開',   key:'notify_new_work',    val:notifyNewWork,    set:setNotifyNewWork},
+        ].map((item, i, arr) => (
+          <div key={item.key} style={{display:'flex',alignItems:'center',justifyContent:'space-between',padding:'13px 0',borderBottom:i<arr.length-1?'1px solid var(--color-brand-border)':'none'}}>
+            <div style={{fontSize:13,color:'var(--color-text)'}}>{item.label}</div>
+            <button
+              onClick={async()=>{
+                const next = !item.val
+                item.set(next)
+                await handleSaveNotify(item.key, next)
+              }}
+              style={{
+                width:44, height:24, borderRadius:12, border:'none', cursor:'pointer',
+                background: item.val ? 'var(--color-brand)' : '#d1d5db',
+                position:'relative', transition:'background .2s', flexShrink:0,
+                opacity: notifySaving ? 0.6 : 1,
+              }}>
+              <div style={{
+                position:'absolute', top:3, left: item.val ? 23 : 3,
+                width:18, height:18, borderRadius:'50%', background:'#fff',
+                transition:'left .2s', boxShadow:'0 1px 3px rgba(0,0,0,0.2)',
+              }}/>
+            </button>
+          </div>
+        ))}
+      </div>
+
+      <div style={{fontSize:12,fontWeight:700,color:'var(--color-text-muted)',letterSpacing:'.05em',marginBottom:10}}>アカウント設定</div>
       <div style={{display:'flex',flexDirection:'column'}}>
         {[
           ...(profile.login_provider!=='google' ? [
