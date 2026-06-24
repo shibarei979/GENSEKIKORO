@@ -137,7 +137,7 @@ export default async function HistoryPage() {
                 まだ閲覧履歴がありません
               </div>
             ) : historyItems.map((item) => (
-              <Link key={item.novelId} href={`/novel/${item.novelId}`} style={{display:'block',padding:'16px 20px',borderBottom:'1px solid var(--color-brand-light)',background:'var(--color-bg-card)',textDecoration:'none',color:'inherit'}}>
+              <Link key={item.novelId} href={`/novel/${item.novelId}`} className="history-novel-card" style={{display:'block',padding:'16px 20px',borderBottom:'1px solid var(--color-brand-light)',background:'var(--color-bg-card)',textDecoration:'none',color:'inherit'}}>
                 {/* バッジ行 */}
                 <div style={{display:'flex',gap:5,marginBottom:6,flexWrap:'wrap',alignItems:'center'}}>
                   <span style={{fontSize:10,background:'var(--color-brand-light)',color:'var(--color-brand)',border:'1px solid var(--color-tag-border)',padding:'1px 6px',borderRadius:3}}>{item.genre}</span>
@@ -192,6 +192,11 @@ export default async function HistoryPage() {
         <div className="desktop-only"><Sidebar /></div>
       </div>
 
+      <style>{`
+        .history-novel-card { color: inherit !important; }
+        .history-novel-card:hover { color: inherit !important; opacity: 0.92; }
+        .history-novel-card:hover div { color: inherit !important; }
+      `}</style>
       <AdBanner />
       <Footer user={user} />
     </div>
