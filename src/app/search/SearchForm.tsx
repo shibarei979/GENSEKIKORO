@@ -313,7 +313,7 @@ export default function SearchForm({
             padding:'5px 12px',
             border:`1.5px solid ${activeMood?'var(--color-brand)':'var(--color-brand-border)'}`,
             borderRadius:16,
-            background:activeMood?'var(--color-brand)':'var(--color-bg-card)',
+            background:activeMood?'var(--color-brand)':'var(--color-bg)',
             color:activeMood?'var(--color-bg-card)':'var(--color-text-muted)',
             fontSize:12,fontWeight:600,cursor:'pointer',whiteSpace:'nowrap' as const,
           }}>
@@ -326,7 +326,7 @@ export default function SearchForm({
             padding:'5px 12px',
             border:`1.5px solid ${(genre||type||serial||tags.length>0||author)?'var(--color-brand)':'var(--color-brand-border)'}`,
             borderRadius:16,
-            background:(genre||type||serial||tags.length>0||author)?'var(--color-brand)':'var(--color-bg-card)',
+            background:(genre||type||serial||tags.length>0||author)?'var(--color-brand)':'var(--color-bg)',
             color:(genre||type||serial||tags.length>0||author)?'var(--color-bg-card)':'var(--color-text-muted)',
             fontSize:12,fontWeight:600,cursor:'pointer',whiteSpace:'nowrap' as const,
           }}>
