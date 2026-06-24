@@ -13,13 +13,19 @@ const FONT_SIZES = [{label:'小',size:13},{label:'標準',size:15},{label:'大',
 
 // （S2用定数は削除：ヒントはインラインで表示）
 
-// S3: タグの例
-const TAG_EXAMPLES: Record<string, string[]> = {
-  '設定・世界観': ['異世界転生','現代ファンタジー','魔法','ドラゴン','剣と魔法','近未来','宇宙','学園','王宮','戦国時代'],
-  'キャラクター': ['最強主人公','無自覚チート','悪役令嬢','聖女','騎士','魔王','勇者','転生者','無能から覚醒'],
-  'テーマ・展開': ['スローライフ','復讐','溺愛','ざまぁ','ハーレム','純愛','友情','成長','逆転','バディもの'],
-  'ジャンル補足': ['ほのぼの','シリアス','コメディ','ダーク','謎解き','バトル','恋愛メイン','群像劇'],
-}
+// S3: タグの例（100個・カテゴリなし）
+const TAG_EXAMPLES: string[] = [
+  '異世界転生','現代ファンタジー','魔法','ドラゴン','剣と魔法','近未来','宇宙','学園','王宮','戦国時代',
+  '最強主人公','無自覚チート','悪役令嬢','聖女','騎士','魔王','勇者','転生者','無能から覚醒','英雄',
+  'スローライフ','復讐','溺愛','ざまぁ','ハーレム','純愛','友情','成長','逆転','バディもの',
+  'ほのぼの','シリアス','コメディ','ダーク','謎解き','バトル','恋愛メイン','群像劇','日常系','感動',
+  'TS転生','悪役令息','転生令嬢','乙女ゲーム','悪役','ヒロイン','双子','幼馴染','師弟','運命の出会い',
+  '魔法少女','獣人','エルフ','ドワーフ','神様','天使','悪魔','妖怪','吸血鬼','獣耳',
+  'ギルド','冒険者','魔法学校','後宮','騎士団','傭兵','商人','錬金術師','料理人','剣士',
+  'チートスキル','隠れ最強','覚醒','スキル無し','追放','ざまあ','婚約破棄','冤罪','復讐劇','下剋上',
+  'BL','GL','百合','兄妹','姉弟','師匠と弟子','年上ヒロイン','年下ヒロイン','メンヘラ','ヤンデレ',
+  'ループ','タイムリープ','記憶喪失','夢オチなし','どんでん返し','伏線回収','ハッピーエンド','鬱展開','残酷描写','泣ける',
+]
 
 // 縦書き変換（NovelPreviewPopupと同じロジック）
 function toVerticalText(text: string): string {
@@ -691,38 +697,33 @@ export default function PostClient({ profile, userId }: Props) {
                     <div style={{fontSize:11,fontWeight:700,color:'var(--color-brand)',marginBottom:10}}>
                       💡 タグの例（クリックで追加）
                     </div>
-                    {Object.entries(TAG_EXAMPLES).map(([category, examples]) => (
-                      <div key={category} style={{marginBottom:10}}>
-                        <div style={{fontSize:10,color:'var(--color-text-muted)',fontWeight:600,marginBottom:5}}>{category}</div>
-                        <div style={{display:'flex',flexWrap:'wrap',gap:5}}>
-                          {examples.map(ex => {
-                            const alreadyAdded = tags.includes(ex)
-                            return (
-                              <button key={ex} type="button"
-                                onClick={()=>{
-                                  if (!alreadyAdded && tags.length < 10) {
-                                    setTags([...tags, ex])
-                                  }
-                                }}
-                                disabled={alreadyAdded || tags.length >= 10}
-                                style={{
-                                  padding:'3px 10px',
-                                  fontSize:11,
-                                  border:'1.5px solid',
-                                  borderRadius:12,
-                                  cursor: alreadyAdded || tags.length >= 10 ? 'default' : 'pointer',
-                                  borderColor: alreadyAdded ? 'var(--color-success)' : 'var(--color-brand-border)',
-                                  background: alreadyAdded ? '#f0fdf4' : 'var(--color-bg-card)',
-                                  color: alreadyAdded ? 'var(--color-success)' : 'var(--color-text-muted)',
-                                  opacity: tags.length >= 10 && !alreadyAdded ? 0.4 : 1,
-                                }}>
-                                {alreadyAdded ? '✓ ' : ''}{ex}
-                              </button>
-                            )
-                          })}
-                        </div>
-                      </div>
-                    ))}
+                    <div style={{display:'flex',flexWrap:'wrap',gap:5}}>
+                      {TAG_EXAMPLES.map(ex => {
+                        const alreadyAdded = tags.includes(ex)
+                        return (
+                          <button key={ex} type="button"
+                            onClick={()=>{
+                              if (!alreadyAdded && tags.length < 10) {
+                                setTags([...tags, ex])
+                              }
+                            }}
+                            disabled={alreadyAdded || tags.length >= 10}
+                            style={{
+                              padding:'3px 10px',
+                              fontSize:11,
+                              border:'1.5px solid',
+                              borderRadius:12,
+                              cursor: alreadyAdded || tags.length >= 10 ? 'default' : 'pointer',
+                              borderColor: alreadyAdded ? 'var(--color-success)' : 'var(--color-brand-border)',
+                              background: alreadyAdded ? '#f0fdf4' : 'var(--color-bg-card)',
+                              color: alreadyAdded ? 'var(--color-success)' : 'var(--color-text-muted)',
+                              opacity: tags.length >= 10 && !alreadyAdded ? 0.4 : 1,
+                            }}>
+                            {alreadyAdded ? '✓ ' : ''}{ex}
+                          </button>
+                        )
+                      })}
+                    </div>
                     <div style={{fontSize:10,color:'var(--color-text-faint)',marginTop:4}}>
                       ※ 例はあくまでヒントです。自由に入力もできます。
                     </div>
