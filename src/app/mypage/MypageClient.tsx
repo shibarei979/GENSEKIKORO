@@ -321,7 +321,7 @@ export default function MypageClient({
 
   // ===== プロフィールヘッダー（全タブ共通） =====
   const ProfileHeader = () => (
-    <div style={{background:'var(--color-bg-card)',border:'1px solid var(--color-brand-border)',borderRadius:16,padding: isMobile ? '16px' : '24px 32px',marginBottom:0}}>
+    <div style={{background:'var(--color-bg-card)',borderBottom:'1px solid var(--color-brand-border)',padding: isMobile ? '16px' : '24px 40px',marginBottom:0}}>
       <div style={{display:'flex',alignItems:'center',gap: isMobile ? 12 : 16}}>
         <div style={{position:'relative',flexShrink:0,cursor:'pointer'}} onClick={()=>iconInputRef.current?.click()}>
           <input ref={iconInputRef} type="file" accept="image/*" style={{display:'none'}}
@@ -678,7 +678,7 @@ export default function MypageClient({
     <div style={{minHeight:'100vh',background:'var(--color-bg)'}}>
       <Header profile={profile} user={true} />
 
-      <div style={{maxWidth:1100,margin:'0 auto',padding: isMobile ? '0' : '24px 24px 0'}}>
+      <div style={{width:'100%',padding:'0'}}>
         <ProfileHeader/>
 
         {isMobile ? (
@@ -713,11 +713,11 @@ export default function MypageClient({
           </>
         ) : (
           // デスクトップ：左サイドナビ＋右コンテンツ
-          <div style={{display:'flex',gap:24,marginTop:20,alignItems:'flex-start'}}>
+          <div style={{display:'flex',gap:32,marginTop:0,alignItems:'flex-start',padding:'24px 40px 40px'}}>
             {/* 左サイドナビ */}
             <div style={{
               width:160, flexShrink:0,
-              position:'sticky', top:80,
+              position:'sticky', top:90,
             }}>
               {TABS.map((tab) => (
                 <button key={tab.id} onClick={()=>setActiveTab(tab.id)}
