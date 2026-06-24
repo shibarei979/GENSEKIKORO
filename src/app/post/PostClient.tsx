@@ -50,8 +50,10 @@ export default function PostClient({ profile, userId }: Props) {
   const [isMobile, setIsMobile] = useState(false)
   // S2: キャッチコピーのヒント表示
   const [showCatchcopyHint, setShowCatchcopyHint] = useState(false)
+  const [mounted, setMounted] = useState(false)
 
   useEffect(() => {
+    setMounted(true)
     const check = () => setIsMobile(window.innerWidth <= 768)
     check()
     window.addEventListener('resize', check)
