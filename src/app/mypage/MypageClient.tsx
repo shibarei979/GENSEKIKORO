@@ -335,13 +335,47 @@ export default function MypageClient({
             {iconUploading ? '⟳' : '📷'}
           </div>
         </div>
-        {/* 名前・番号のみ（統計はマイページタブに） */}
+        {/* 名前・番号・統計・メール・ボタン */}
         <div style={{flex:1,minWidth:0}}>
           <div style={{display:'flex',alignItems:'center',gap:8,marginBottom:2}}>
             <div style={{fontSize: isMobile ? 16 : 18,fontWeight:700,color:'var(--color-text)'}}>{nameInput}</div>
             {nameSaved && <span style={{fontSize:11,color:'var(--color-success)'}}>✓</span>}
           </div>
-          {userNumber && <div style={{fontSize:11,color:'var(--color-text-faint)',letterSpacing:'.05em'}}>{userNumber}</div>}
+          {userNumber && <div style={{fontSize:11,color:'var(--color-text-faint)',letterSpacing:'.05em',marginBottom:6}}>{userNumber}</div>}
+          {!isMobile && (
+            <>
+              <div style={{display:'flex',gap:16,flexWrap:'wrap',marginBottom:6}}>
+                <span style={{fontSize:12,color:'var(--color-text-muted)'}}><strong style={{color:'var(--color-text)'}}>{followerCount}</strong> フォロワー</span>
+                <span style={{fontSize:12,color:'var(--color-text-muted)'}}><strong style={{color:'var(--color-text)'}}>{followingCount}</strong> フォロー中</span>
+                <span style={{fontSize:12,color:'var(--color-brand)'}}><strong>{published.length}</strong> 公開作品</span>
+              </div>
+              <div style={{fontSize:12,color:'var(--color-text-muted)',marginBottom:8}}>{profile.email}</div>
+              <div style={{display:'flex',gap:8,flexWrap:'wrap'}}>
+                <button onClick={()=>setEditingName(true)}
+                  style={{fontSize:12,border:'1px solid var(--color-brand-border)',padding:'5px 12px',borderRadius:8,background:'var(--color-bg-card)',color:'var(--color-text-muted)',cursor:'pointer'}}>
+                  名前を変更
+                </button>
+                <button onClick={()=>setShowBioModal(true)}
+                  style={{fontSize:12,border:'1px solid var(--color-brand-border)',padding:'5px 12px',borderRadius:8,background:'var(--color-bg-card)',color:'var(--color-text-muted)',cursor:'pointer'}}>
+                  自己紹介を編集
+                </button>
+              </div>
+              {editingName && (
+                <div style={{marginTop:10,display:'flex',alignItems:'center',gap:8,flexWrap:'wrap'}}>
+                  <input value={nameInput} onChange={e=>setNameInput(e.target.value)}
+                    onKeyDown={e=>{if(e.key==='Enter')handleSaveName();if(e.key==='Escape')setEditingName(false)}}
+                    style={{fontSize:14,fontWeight:700,border:'1.5px solid var(--color-brand)',borderRadius:6,padding:'4px 10px',outline:'none',width:160}} autoFocus/>
+                  <button onClick={handleSaveName} disabled={nameSaving}
+                    style={{fontSize:12,background:'var(--color-brand)',color:'var(--color-bg-card)',border:'none',borderRadius:6,padding:'5px 12px',cursor:'pointer'}}>
+                    {nameSaving ? '保存中' : '保存'}
+                  </button>
+                  <button onClick={()=>{setEditingName(false);setNameInput(profile.display_name);setNameError('')}}
+                    style={{fontSize:12,background:'none',color:'var(--color-text-muted)',border:'1px solid var(--color-brand-border)',borderRadius:6,padding:'5px 10px',cursor:'pointer'}}>×</button>
+                  {nameError && <span style={{fontSize:11,color:'var(--color-danger)'}}>{nameError}</span>}
+                </div>
+              )}
+            </>
+          )}
         </div>
         {/* ボード・バッジ図鑑ボタン */}
         <div style={{display:'flex',gap:8,flexShrink:0}}>
@@ -401,50 +435,24 @@ export default function MypageClient({
           </button>
         </div>
       )}
-      <div style={{background:'var(--color-bg-card)',border:'1px solid var(--color-brand-border)',borderRadius:12,padding:'20px 24px'}}>
-        {/* 名前・統計 */}
-        <div style={{marginBottom:16}}>
-          <div style={{fontSize:18,fontWeight:700,color:'var(--color-text)',marginBottom:4}}>{nameInput}</div>
-          {userNumber && <div style={{fontSize:11,color:'var(--color-text-faint)',marginBottom:10}}>{userNumber}</div>}
-          <div style={{display:'flex',gap:20,flexWrap:'wrap'}}>
-            <span style={{fontSize:13,color:'var(--color-text-muted)'}}><strong style={{color:'var(--color-text)'}}>{followerCount}</strong> フォロワー</span>
-            <span style={{fontSize:13,color:'var(--color-text-muted)'}}><strong style={{color:'var(--color-text)'}}>{followingCount}</strong> フォロー中</span>
-            <span style={{fontSize:13,color:'var(--color-brand)'}}><strong>{published.length}</strong> 公開作品</span>
+      {/* モバイルのみプロフィールカードを表示（デスクトップはヘッダーに表示済み） */}
+      {isMobile && (
+        <div style={{background:'var(--color-bg-card)',border:'1px solid var(--color-brand-border)',borderRadius:12,padding:'16px'}}>
+          <div style={{fontSize:15,fontWeight:700,color:'var(--color-text)',marginBottom:2}}>{nameInput}</div>
+          {userNumber && <div style={{fontSize:11,color:'var(--color-text-faint)',marginBottom:8}}>{userNumber}</div>}
+          <div style={{display:'flex',gap:14,flexWrap:'wrap',marginBottom:8}}>
+            <span style={{fontSize:12,color:'var(--color-text-muted)'}}><strong style={{color:'var(--color-text)'}}>{followerCount}</strong> フォロワー</span>
+            <span style={{fontSize:12,color:'var(--color-text-muted)'}}><strong style={{color:'var(--color-text)'}}>{followingCount}</strong> フォロー中</span>
+            <span style={{fontSize:12,color:'var(--color-brand)'}}><strong>{published.length}</strong> 公開作品</span>
+          </div>
+          <div style={{fontSize:12,color:'var(--color-text-muted)',marginBottom:8}}>{profile.email}</div>
+          {profile.bio && <div style={{fontSize:12,color:'var(--color-text)',lineHeight:1.7,marginBottom:8}}>{profile.bio}</div>}
+          <div style={{display:'flex',gap:8}}>
+            <button onClick={()=>setEditingName(true)} style={{fontSize:12,border:'1px solid var(--color-brand-border)',padding:'5px 12px',borderRadius:8,background:'var(--color-bg-card)',color:'var(--color-text-muted)',cursor:'pointer'}}>名前を変更</button>
+            <button onClick={()=>setShowBioModal(true)} style={{fontSize:12,border:'1px solid var(--color-brand-border)',padding:'5px 12px',borderRadius:8,background:'var(--color-bg-card)',color:'var(--color-text-muted)',cursor:'pointer'}}>自己紹介を編集</button>
           </div>
         </div>
-        {/* 区切り線 */}
-        <div style={{height:1,background:'var(--color-brand-border)',margin:'0 0 16px'}}/>
-        {/* プロフィール情報 */}
-        <div style={{fontSize:13,color:'var(--color-text-muted)',marginBottom:4}}>{profile.email}</div>
-        {profile.bio && <div style={{fontSize:13,color:'var(--color-text)',lineHeight:1.7,marginTop:8,marginBottom:4}}>{profile.bio}</div>}
-        {/* 区切り線 */}
-        <div style={{height:1,background:'var(--color-brand-border)',margin:'16px 0'}}/>
-        {/* 操作ボタン */}
-        <div style={{display:'flex',gap:8,flexWrap:'wrap'}}>
-          <button onClick={()=>setEditingName(true)}
-            style={{fontSize:12,border:'1px solid var(--color-brand-border)',padding:'6px 14px',borderRadius:8,background:'var(--color-bg-card)',color:'var(--color-text-muted)',cursor:'pointer'}}>
-            名前を変更
-          </button>
-          <button onClick={()=>setShowBioModal(true)}
-            style={{fontSize:12,border:'1px solid var(--color-brand-border)',padding:'6px 14px',borderRadius:8,background:'var(--color-bg-card)',color:'var(--color-text-muted)',cursor:'pointer'}}>
-            自己紹介を編集
-          </button>
-        </div>
-        {editingName && (
-          <div style={{marginTop:12,display:'flex',alignItems:'center',gap:8,flexWrap:'wrap'}}>
-            <input value={nameInput} onChange={e=>setNameInput(e.target.value)}
-              onKeyDown={e=>{if(e.key==='Enter')handleSaveName();if(e.key==='Escape')setEditingName(false)}}
-              style={{fontSize:14,fontWeight:700,border:'1.5px solid var(--color-brand)',borderRadius:6,padding:'4px 10px',outline:'none',width:160}} autoFocus/>
-            <button onClick={handleSaveName} disabled={nameSaving}
-              style={{fontSize:12,background:'var(--color-brand)',color:'var(--color-bg-card)',border:'none',borderRadius:6,padding:'5px 12px',cursor:'pointer'}}>
-              {nameSaving ? '保存中' : '保存'}
-            </button>
-            <button onClick={()=>{setEditingName(false);setNameInput(profile.display_name);setNameError('')}}
-              style={{fontSize:12,background:'none',color:'var(--color-text-muted)',border:'1px solid var(--color-brand-border)',borderRadius:6,padding:'5px 10px',cursor:'pointer'}}>×</button>
-            {nameError && <span style={{fontSize:11,color:'var(--color-danger)'}}>{nameError}</span>}
-          </div>
-        )}
-      </div>
+      )}
       {followingAuthors.length > 0 && (
         <div style={{background:'var(--color-bg-card)',border:'1px solid var(--color-brand-border)',borderRadius:12,overflow:'hidden'}}>
           <div style={{padding:'12px 16px',borderBottom:'1px solid var(--color-brand-border)',background:'var(--color-bg)'}}>
