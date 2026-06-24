@@ -18,6 +18,7 @@ export default function Header({ profile, user, activeGenre }: Props) {
   const [q, setQ] = useState('')
   const [notifications, setNotifications] = useState<any[]>([])
   const [showNotif, setShowNotif] = useState(false)
+  const [showAllNotif, setShowAllNotif] = useState(false)
   const [unreadCount, setUnreadCount] = useState(0)
   const [showUserMenu, setShowUserMenu] = useState(false)
   const [showSettings, setShowSettings] = useState(false)
@@ -208,25 +209,19 @@ export default function Header({ profile, user, activeGenre }: Props) {
                     <div style={{position:'absolute',right:0,top:'calc(100% + 8px)',width:320,background:'var(--color-bg-card)',border:'1px solid var(--color-brand-border)',borderRadius:12,boxShadow:'0 8px 32px rgba(0,0,0,0.12)',zIndex:200,overflow:'hidden',display:'flex',flexDirection:'column'}}>
                       <div style={{padding:'10px 14px',borderBottom:'1px solid var(--color-brand-border)',display:'flex',alignItems:'center',justifyContent:'space-between'}}>
                         <span style={{fontSize:13,fontWeight:700,color:'var(--color-text)'}}>通知</span>
-                        {/* S1: 「もっと見る」→お知らせページへ遷移 */}
-                        <button onClick={()=>{setShowNotif(false);router.push('/announcements')}}
+                        <button onClick={()=>setShowAllNotif(!showAllNotif)}
                           style={{fontSize:11,color:'var(--color-brand)',background:'none',border:'none',cursor:'pointer',fontWeight:600,padding:0}}>
-                          もっと見る ›
+                          {showAllNotif ? '閉じる ›' : 'もっと見る ›'}
                         </button>
                       </div>
                       {notifications.length === 0
                         ? <div style={{padding:'24px',textAlign:'center',fontSize:12,color:'var(--color-text-faint)'}}>通知はありません</div>
-                        : <div style={{overflowY:'auto',flex:1,maxHeight:320}}>{notifications.slice(0,5).map(n=>(
+                        : <div style={{overflowY:'auto',flex:1,maxHeight:showAllNotif?'60vh':280}}>{(showAllNotif?notifications:notifications.slice(0,5)).map(n=>(
                           <a key={n.id} href={n.link||'#'} onClick={()=>setShowNotif(false)} style={{display:'block',padding:'10px 14px',borderBottom:'1px solid var(--color-brand-light)',textDecoration:'none',background:n.is_read?'var(--color-bg-card)':'var(--color-bg)'}}>
                             <div style={{fontSize:12,color:'var(--color-text)',lineHeight:1.6,marginBottom:2}}>{n.message}</div>
                             <div style={{fontSize:10,color:'var(--color-text-faint)'}}>{fmtDate(n.created_at)}</div>
                           </a>
                         ))}</div>}
-                      {/* 下部にもお知らせページへのリンク */}
-                      <button onClick={()=>{setShowNotif(false);router.push('/announcements')}}
-                        style={{display:'block',width:'100%',padding:'9px 14px',textAlign:'center',fontSize:11,color:'var(--color-brand)',background:'var(--color-bg)',border:'none',borderTop:'1px solid var(--color-brand-border)',cursor:'pointer',fontWeight:600}}>
-                        お知らせ一覧を見る →
-                      </button>
                     </div>
                   )}
                 </div>
@@ -303,11 +298,7 @@ export default function Header({ profile, user, activeGenre }: Props) {
                             <div style={{fontSize:10,color:'var(--color-text-faint)'}}>{fmtDate(n.created_at)}</div>
                           </a>
                         ))}</div>}
-                      {/* S1: モバイル版もお知らせページへ */}
-                      <button onClick={()=>{setShowNotif(false);router.push('/announcements')}}
-                        style={{display:'block',width:'100%',padding:'10px 14px',textAlign:'center',fontSize:12,color:'var(--color-brand)',background:'var(--color-bg)',border:'none',borderTop:'1px solid var(--color-brand-border)',cursor:'pointer',fontWeight:600}}>
-                        お知らせ一覧を見る →
-                      </button>
+
                     </div>
                   )}
                 </div>
