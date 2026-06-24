@@ -137,7 +137,7 @@ export default async function HistoryPage() {
                 まだ閲覧履歴がありません
               </div>
             ) : historyItems.map((item) => (
-              <div key={item.novelId} style={{padding:'16px 20px',borderBottom:'1px solid var(--color-brand-light)',background:'var(--color-bg-card)'}}>
+              <Link key={item.novelId} href={`/novel/${item.novelId}`} style={{display:'block',padding:'16px 20px',borderBottom:'1px solid var(--color-brand-light)',background:'var(--color-bg-card)',textDecoration:'none',color:'inherit'}}>
                 {/* バッジ行 */}
                 <div style={{display:'flex',gap:5,marginBottom:6,flexWrap:'wrap',alignItems:'center'}}>
                   <span style={{fontSize:10,background:'var(--color-brand-light)',color:'var(--color-brand)',border:'1px solid var(--color-tag-border)',padding:'1px 6px',borderRadius:3}}>{item.genre}</span>
@@ -148,9 +148,7 @@ export default async function HistoryPage() {
                     : <span style={{fontSize:10,background:'#f5f5f5',color:'#757575',border:'1px solid #e0e0e0',padding:'1px 6px',borderRadius:3}}>完結</span>}
                 </div>
                 {/* タイトル・作者 */}
-                <Link href={`/novel/${item.novelId}`} style={{textDecoration:'none',color:'inherit',display:'block',marginBottom:3}}>
-                  <div style={{fontSize:17,fontWeight:700,color:'var(--color-text)',lineHeight:1.4}}>{item.novelTitle}</div>
-                </Link>
+                <div style={{fontSize:17,fontWeight:700,color:'var(--color-text)',lineHeight:1.4,marginBottom:3}}>{item.novelTitle}</div>
                 <div style={{fontSize:12,color:'var(--color-text-muted)',marginBottom:6}}>作者：{item.displayName}</div>
                 {/* あらすじ */}
                 {item.summary && (
@@ -187,7 +185,7 @@ export default async function HistoryPage() {
                     </Link>
                   </div>
                 </div>
-              </div>
+              </Link>
             ))}
           </div>
         </div>
