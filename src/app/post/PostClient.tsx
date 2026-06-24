@@ -553,6 +553,9 @@ export default function PostClient({ profile, userId }: Props) {
                       {/* 本文エリア */}
                       <div style={{flex:1,overflowY:'auto',minHeight:0,padding:'12px 0',background:'var(--color-bg-card)'}}>
 
+                        <div style={{fontSize:11,fontWeight:700,color:'var(--color-brand)',textAlign:'center',marginBottom:6}}>
+                          キャッチコピーはここに縦書きで表示されます
+                        </div>
                         <div style={{fontSize:10,color:'#999',marginBottom:6,textAlign:'center',letterSpacing:'0.1em'}}>
                           {catchcopy ? '― キャッチコピー ―' : '― あらすじ ―'}
                         </div>
