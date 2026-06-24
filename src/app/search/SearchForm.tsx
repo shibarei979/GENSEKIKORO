@@ -305,47 +305,55 @@ export default function SearchForm({
         </div>
       </div>
 
-      <div style={{marginBottom:12}}>
+      {/* S5: コンパクトなトグルボタン横並び */}
+      <div style={{display:'flex',gap:8,marginBottom:12,flexWrap:'wrap'}}>
         <button type="button" onClick={()=>setShowMoods(!showMoods)}
-          style={{display:'flex',alignItems:'center',gap:6,width:'100%',padding:'7px 14px',border:'1.5px solid var(--color-brand-border)',
-            borderRadius:8,background:'var(--color-bg)',color:'var(--color-text-muted)',fontSize:12,fontWeight:600,cursor:'pointer',justifyContent:'space-between'}}>
-          <span>気分で探す{activeMood ? ` ● ${activeMood}` : ''}</span>
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"
-            style={{transition:'transform .2s',transform:showMoods?'rotate(180deg)':'rotate(0deg)'}}>
-            <polyline points="6 9 12 15 18 9"/>
-          </svg>
+          style={{
+            display:'flex',alignItems:'center',gap:5,
+            padding:'5px 12px',
+            border:`1.5px solid ${showMoods||activeMood?'var(--color-brand)':'var(--color-brand-border)'}`,
+            borderRadius:16,
+            background:showMoods||activeMood?'var(--color-brand)':'var(--color-bg-card)',
+            color:showMoods||activeMood?'var(--color-bg-card)':'var(--color-text-muted)',
+            fontSize:12,fontWeight:600,cursor:'pointer',whiteSpace:'nowrap' as const,
+          }}>
+          {activeMood ? `✦ ${activeMood}` : '気分で探す'}
+          <span style={{fontSize:14,lineHeight:1}}>{showMoods?'−':'＋'}</span>
         </button>
-        {showMoods && (
-          <div style={{marginTop:8,display:'flex',flexWrap:'wrap',gap:6}}>
-            {MOODS.map(mood => (
-              <button key={mood.label} type="button" onClick={()=>handleMoodSelect(mood)}
-                style={{padding:'6px 14px',borderRadius:16,fontSize:12,cursor:'pointer',
-                  whiteSpace:'nowrap' as const,
-                  border:`1.5px solid ${activeMood===mood.label?'var(--color-brand)':'var(--color-brand-border)'}`,
-                  background:activeMood===mood.label?'var(--color-brand)':'var(--color-bg-card)',
-                  color:activeMood===mood.label?'var(--color-bg-card)':'var(--color-text)',
-                  fontWeight:activeMood===mood.label?700:400,
-                  transition:'all .15s'}}>
-                {mood.label}
-              </button>
-            ))}
-          </div>
-        )}
+        <button type="button" onClick={()=>setShowDetail(!showDetail)}
+          style={{
+            display:'flex',alignItems:'center',gap:5,
+            padding:'5px 12px',
+            border:`1.5px solid ${showDetail||(genre||type||serial||tags.length>0||author)?'var(--color-brand)':'var(--color-brand-border)'}`,
+            borderRadius:16,
+            background:showDetail||(genre||type||serial||tags.length>0||author)?'var(--color-brand)':'var(--color-bg-card)',
+            color:showDetail||(genre||type||serial||tags.length>0||author)?'var(--color-bg-card)':'var(--color-text-muted)',
+            fontSize:12,fontWeight:600,cursor:'pointer',whiteSpace:'nowrap' as const,
+          }}>
+          {(genre||type||serial||tags.length>0||author) ? '✦ 詳細条件あり' : '詳細条件'}
+          <span style={{fontSize:14,lineHeight:1}}>{showDetail?'−':'＋'}</span>
+        </button>
       </div>
 
-      <button onClick={()=>setShowDetail(!showDetail)}
-        style={{display:'flex',alignItems:'center',gap:6,padding:'7px 14px',border:'1.5px solid var(--color-brand-border)',
-          borderRadius:8,background:'var(--color-bg)',color:'var(--color-text-muted)',fontSize:12,fontWeight:600,cursor:'pointer',
-          marginBottom:showDetail?12:0,width:'100%',justifyContent:'space-between'}}>
-        <span>詳細条件設定{(genre||type||serial||tags.length>0||author) ? ' ●' : ''}</span>
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"
-          style={{transition:'transform .2s',transform:showDetail?'rotate(180deg)':'rotate(0deg)'}}>
-          <polyline points="6 9 12 15 18 9"/>
-        </svg>
-      </button>
+      {showMoods && (
+        <div style={{marginBottom:12,display:'flex',flexWrap:'wrap',gap:6}}>
+          {MOODS.map(mood => (
+            <button key={mood.label} type="button" onClick={()=>handleMoodSelect(mood)}
+              style={{padding:'5px 12px',borderRadius:16,fontSize:12,cursor:'pointer',
+                whiteSpace:'nowrap' as const,
+                border:`1.5px solid ${activeMood===mood.label?'var(--color-brand)':'var(--color-brand-border)'}`,
+                background:activeMood===mood.label?'var(--color-brand)':'var(--color-bg-card)',
+                color:activeMood===mood.label?'var(--color-bg-card)':'var(--color-text)',
+                fontWeight:activeMood===mood.label?700:400,
+                transition:'all .15s'}}>
+              {mood.label}
+            </button>
+          ))}
+        </div>
+      )}
 
       {showDetail && (
-        <div style={{border:'1px solid var(--color-brand-border)',borderRadius:8,padding:'14px',marginBottom:12,background:'var(--color-bg)'}}>
+        <div style={{border:'1px solid var(--color-brand-border)',borderRadius:8,padding:'14px',marginBottom:12,marginTop:-4,background:'var(--color-bg)'}}>
           <div style={{marginBottom:12}}>
             <div style={{fontSize:11,color:'var(--color-text-muted)',fontWeight:600,marginBottom:6}}>ジャンル</div>
             <div style={{display:'flex',gap:6,flexWrap:'wrap'}}>
