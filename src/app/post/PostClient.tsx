@@ -13,6 +13,24 @@ const FONT_SIZES = [{label:'小',size:13},{label:'標準',size:15},{label:'大',
 
 // （S2用定数は削除：ヒントはインラインで表示）
 
+// 縦書き変換（NovelPreviewPopupと同じロジック）
+function toVerticalText(text: string): string {
+  return text
+    .replace(/0/g,'０').replace(/1/g,'１').replace(/2/g,'２')
+    .replace(/3/g,'３').replace(/4/g,'４').replace(/5/g,'５')
+    .replace(/6/g,'６').replace(/7/g,'７').replace(/8/g,'８')
+    .replace(/9/g,'９')
+    .replace(/ー/g,'｜').replace(/－/g,'｜').replace(/—/g,'｜')
+    .replace(/（/g,'︵').replace(/）/g,'︶')
+    .replace(/\(/g,'︵').replace(/\)/g,'︶')
+    .replace(/「/g,'﹁').replace(/」/g,'﹂')
+    .replace(/『/g,'﹃').replace(/』/g,'﹄')
+}
+
+function isHorizontalCharPC(ch: string): boolean {
+  return ['〜','…','‥','─'].includes(ch)
+}
+
 interface Props { profile: any; userId: string }
 
 function detectAiMarkers(text: string): string[] {
@@ -556,16 +574,20 @@ export default function PostClient({ profile, userId }: Props) {
                               ))}
                             </div>
                             {Array.from({length:5},(_,col)=>{
-                              const text = catchcopy||summary||'（キャッチコピーまたはあらすじがここに縦書きで表示されます）'
-                              const chars = text.split('')
+                              const rawT = catchcopy||summary||'（キャッチコピーまたはあらすじがここに縦書きで表示されます）'
+                              const converted = toVerticalText(rawT)
+                              const chars = converted.split('')
                               const actualCol = 4-col
                               return (
                                 <div key={col} style={{display:'flex',flexDirection:'column',borderRight:'1px solid #ddd'}}>
                                   {Array.from({length:20},(_,row)=>{
                                     const ch = chars[actualCol*20+row]||null
+                                    const isHoriz = ch ? isHorizontalCharPC(ch) : false
                                     return (
                                       <div key={row} style={{width:27,height:27,borderBottom:row<19?'1px solid #eee':'none',display:'flex',alignItems:'center',justifyContent:'center',fontSize:15,color:ch?'#111':'transparent',fontFamily:"'Noto Serif JP',serif",lineHeight:1,flexShrink:0}}>
-                                        {ch||'　'}
+                                        <span style={{display:'inline-block',transform:isHoriz?'rotate(90deg)':'none',lineHeight:1}}>
+                                          {ch||'　'}
+                                        </span>
                                       </div>
                                     )
                                   })}
