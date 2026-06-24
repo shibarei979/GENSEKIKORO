@@ -79,7 +79,7 @@ export default function SearchForm({
   const [exHistory,          setExHistory]          = useState<string[]>([])
   const [showExHistory,      setShowExHistory]      = useState(false)
   const [showMoods,          setShowMoods]          = useState(false)
-  const [activeMood,         setActiveMood]         = useState<string|null>(null)
+  const [activeMoods,        setActiveMoods]        = useState<string[]>([])
   const [isMobile,           setIsMobile]           = useState(false)
   const MAX_HISTORY = 10
 
@@ -100,12 +100,12 @@ export default function SearchForm({
   }, [])
 
   function handleMoodSelect(mood: typeof MOODS[0]) {
-    if (activeMood === mood.label) {
-      setActiveMood(null)
+    if (activeMoods.includes(mood.label)) {
+      setActiveMoods(activeMoods.filter(m => m !== mood.label))
       setTags(tags.filter(t => !mood.tags.includes(t)))
     } else {
-      setActiveMood(mood.label)
-      const newTags = Array.from(new Set([...tags.filter(t => !MOODS.some(m => m.tags.includes(t))), ...mood.tags.slice(0,3)]))
+      setActiveMoods([...activeMoods, mood.label])
+      const newTags = Array.from(new Set([...tags, ...mood.tags.slice(0,3)]))
       setTags(newTags)
     }
   }
@@ -311,26 +311,26 @@ export default function SearchForm({
           style={{
             display:'flex',alignItems:'center',gap:5,
             padding:'5px 12px',
-            border:`1.5px solid ${activeMood?'var(--color-brand)':'var(--color-brand-border)'}`,
+            border:'1.5px solid var(--color-brand-border)',
             borderRadius:16,
-            background:activeMood?'var(--color-brand)':'var(--color-bg)',
-            color:activeMood?'var(--color-bg-card)':'var(--color-text-muted)',
+            background:'var(--color-bg)',
+            color:'var(--color-text-muted)',
             fontSize:12,fontWeight:600,cursor:'pointer',whiteSpace:'nowrap' as const,
           }}>
-          {activeMood ? `✦ ${activeMood}` : '気分で探す'}
+          気分で探す
           <span style={{fontSize:14,lineHeight:1}}>{showMoods?'−':'＋'}</span>
         </button>
         <button type="button" onClick={()=>setShowDetail(!showDetail)}
           style={{
             display:'flex',alignItems:'center',gap:5,
             padding:'5px 12px',
-            border:`1.5px solid ${(genre||type||serial||tags.length>0||author)?'var(--color-brand)':'var(--color-brand-border)'}`,
+            border:'1.5px solid var(--color-brand-border)',
             borderRadius:16,
-            background:(genre||type||serial||tags.length>0||author)?'var(--color-brand)':'var(--color-bg)',
-            color:(genre||type||serial||tags.length>0||author)?'var(--color-bg-card)':'var(--color-text-muted)',
+            background:'var(--color-bg)',
+            color:'var(--color-text-muted)',
             fontSize:12,fontWeight:600,cursor:'pointer',whiteSpace:'nowrap' as const,
           }}>
-          {(genre||type||serial||tags.length>0||author) ? '✦ 詳細条件あり' : '詳細条件'}
+          詳細条件
           <span style={{fontSize:14,lineHeight:1}}>{showDetail?'−':'＋'}</span>
         </button>
       </div>
@@ -341,10 +341,10 @@ export default function SearchForm({
             <button key={mood.label} type="button" onClick={()=>handleMoodSelect(mood)}
               style={{padding:'5px 12px',borderRadius:16,fontSize:12,cursor:'pointer',
                 whiteSpace:'nowrap' as const,
-                border:`1.5px solid ${activeMood===mood.label?'var(--color-brand)':'var(--color-brand-border)'}`,
-                background:activeMood===mood.label?'var(--color-brand)':'var(--color-bg-card)',
-                color:activeMood===mood.label?'var(--color-bg-card)':'var(--color-text)',
-                fontWeight:activeMood===mood.label?700:400,
+                border:`1.5px solid ${activeMoods.includes(mood.label)?'var(--color-brand)':'var(--color-brand-border)'}`,
+                background:activeMoods.includes(mood.label)?'var(--color-brand)':'var(--color-bg-card)',
+                color:activeMoods.includes(mood.label)?'var(--color-bg-card)':'var(--color-text)',
+                fontWeight:activeMoods.includes(mood.label)?700:400,
                 transition:'all .15s'}}>
               {mood.label}
             </button>
