@@ -30,16 +30,21 @@ const KEYWORD_CATEGORIES = [
   { label: '要素', items: ['魔王討伐','内政','転生','転移','タイムトラベル','ゲーム世界','タイムリープ','獣耳','魔法少女','精霊','神様','鑑定スキル','無双','ざまぁ','婚約破棄'] },
 ]
 
-// S4: 並び順の選択肢
+// S4: 並び順の選択肢（セレクトボックス用）
 const SORT_OPTIONS = [
-  { v: 'new',      l: '新着順' },
-  { v: 'old',      l: '古い順' },
-  { v: 'like',     l: 'いいね順' },
-  { v: 'bookmark', l: 'ブックマーク順' },
-  { v: 'view',     l: '閲覧数順' },
-  { v: 'comment',  l: 'コメント順' },
-  { v: 'rising',   l: '急上昇順' },
-  { v: 'ep_count', l: '話数順' },
+  { v: 'new',          l: '新着順' },
+  { v: 'old',          l: '古い順' },
+  { v: 'like',         l: 'いいね順（総合）' },
+  { v: 'like_daily',   l: 'いいね順（日間）' },
+  { v: 'like_weekly',  l: 'いいね順（週間）' },
+  { v: 'like_monthly', l: 'いいね順（月間）' },
+  { v: 'bookmark',     l: 'ブックマーク順' },
+  { v: 'view',         l: '閲覧数順' },
+  { v: 'comment',      l: 'コメント順' },
+  { v: 'rising',       l: '急上昇順' },
+  { v: 'ep_count',     l: '話数順' },
+  { v: 'char_count',   l: '文字数順' },
+  { v: 'award',        l: '受賞作品順' },
 ]
 
 interface Props {
@@ -421,14 +426,28 @@ export default function SearchForm({
         justifyContent: isMobile ? 'flex-start' : 'space-between',
         marginTop:12,
       }}>
-        <div style={{display:'flex',alignItems:'center',gap:6,flexWrap:'wrap'}}>
+        <div style={{display:'flex',alignItems:'center',gap:8,flexWrap:'wrap'}}>
           <span style={{fontSize:11,color:'var(--color-text-muted)',fontWeight:600,whiteSpace:'nowrap'}}>並び順</span>
-          {SORT_OPTIONS.map(({v,l})=>(
-            <button key={v} onClick={()=>{setSort(v);setDiscoverMode(false)}}
-              style={pill(sort===v&&!discoverMode)}>
-              {l}
-            </button>
-          ))}
+          <select
+            value={discoverMode ? 'discover' : sort}
+            onChange={e=>{
+              if(e.target.value==='discover'){setDiscoverMode(true);setSort('new')}
+              else{setDiscoverMode(false);setSort(e.target.value)}
+            }}
+            style={{
+              padding:'6px 32px 6px 12px',
+              border:'1.5px solid var(--color-brand-border)',
+              borderRadius:8, fontSize:13,
+              color:'var(--color-text)',
+              background:'var(--color-bg-card)',
+              cursor:'pointer', outline:'none',
+              fontWeight:500,
+              appearance:'auto',
+            }}>
+            {SORT_OPTIONS.map(({v,l})=>(
+              <option key={v} value={v}>{l}</option>
+            ))}
+          </select>
         </div>
         <div style={{display:'flex',gap:8,alignItems:'center',justifyContent: isMobile ? 'space-between' : 'flex-end'}}>
           {(q||exclude||genre||type||serial||tags.length>0||author) && (

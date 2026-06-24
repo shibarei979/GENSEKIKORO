@@ -45,9 +45,16 @@ export default async function SearchPage({ searchParams }: Props) {
   let results: any[] = []
   let count = 0
 
+  // 日間・週間・月間いいね用の期間
+  const now = Date.now()
+  const oneDayAgo   = new Date(now - 1  * 24 * 60 * 60 * 1000).toISOString()
+  const oneWeekAgo  = new Date(now - 7  * 24 * 60 * 60 * 1000).toISOString()
+  const oneMonthAgo = new Date(now - 30 * 24 * 60 * 60 * 1000).toISOString()
+
+  // いいね数・ブックマーク数・閲覧数・コメント数を後で集計するためnovel_idsを先に取得
   if (!hasSearch) {
     let q2 = supabase.from('novels')
-      .select('id, title, summary, genre, tags, novel_type, is_serial, author_id, created_at, updated_at, is_r18', { count: 'exact' })
+      .select('id, title, summary, catchcopy, genre, tags, novel_type, is_serial, author_id, created_at, updated_at, is_r18', { count: 'exact' })
       .eq('published', true)
       .order('created_at', { ascending: false })
       .limit(200)
@@ -60,19 +67,17 @@ export default async function SearchPage({ searchParams }: Props) {
     count = allCount || 0
   } else {
     let query = supabase.from('novels')
-      .select('id, title, summary, genre, tags, novel_type, is_serial, author_id, created_at, updated_at, is_r18', { count: 'exact' })
+      .select('id, title, summary, catchcopy, genre, tags, novel_type, is_serial, author_id, created_at, updated_at, is_r18', { count: 'exact' })
       .eq('published', true)
 
     if (!user || !isAgeVerified) {
       query = (query as any).eq('is_r18', false).neq('genre', '官能')
     }
     if (q) {
-      // タイトル・あらすじ・キャッチコピーを検索対象に
       query = (query as any).or(`title.ilike.%${q}%,summary.ilike.%${q}%,catchcopy.ilike.%${q}%`)
     }
     if (exclude) query = (query as any).not('title', 'ilike', `%${exclude}%`)
     if (authorQ) {
-      // 作者名で検索
       const { data: matchedAuthors } = await supabase
         .from('profiles').select('user_id').ilike('display_name', `%${authorQ}%`)
       const authorIds2 = (matchedAuthors||[]).map((a:any) => a.user_id)
@@ -86,60 +91,158 @@ export default async function SearchPage({ searchParams }: Props) {
     if (type)   query = (query as any).eq('novel_type', type)
     if (serial === 'serial')   query = (query as any).eq('is_serial', true)
     if (serial === 'complete') query = (query as any).eq('is_serial', false)
-    if (serial === 'new')      query = (query as any).gte('created_at', new Date(Date.now()-30*24*60*60*1000).toISOString())
     if (tags.length > 0) {
       for (const tag of tags) {
         query = (query as any).contains('tags', [tag])
       }
     }
-    query = (query as any).order('created_at', { ascending: false })
 
-    const { data, count: c2 } = await (query as any).range(offset, offset + PAGE_SIZE - 1)
+    // 基本ソート（後で並び替えが必要なものはcreated_at降順で全件取得）
+    const needsPostSort = ['like','like_daily','like_weekly','like_monthly','bookmark','view','comment','rising','ep_count','char_count','award'].includes(sort)
+    if (needsPostSort) {
+      query = (query as any).order('created_at', { ascending: false }).limit(500)
+    } else if (sort === 'old') {
+      query = (query as any).order('created_at', { ascending: true }).range(offset, offset + PAGE_SIZE - 1)
+    } else {
+      query = (query as any).order('created_at', { ascending: false }).range(offset, offset + PAGE_SIZE - 1)
+    }
+
+    const { data, count: c2 } = await (query as any)
     results = data || []
     count = c2 || 0
   }
 
+  const novelIds = results.map((n: any) => n.id)
+
+  // 文字数
   const charCountMap: Record<string, number> = {}
-  if (results.length > 0) {
-    const rIds = results.map((n: any) => n.id)
-    const { data: epData } = await supabase.from('episodes').select('novel_id, body').in('novel_id', rIds)
+  if (novelIds.length > 0) {
+    const { data: epData } = await supabase.from('episodes').select('novel_id, body').in('novel_id', novelIds)
     epData?.forEach((ep: any) => {
       charCountMap[ep.novel_id] = (charCountMap[ep.novel_id] || 0) + (ep.body?.length || 0)
     })
   }
 
-  const authorIds = Array.from(new Set((results).map((n: any) => n.author_id)))
-  const authorMap: Record<string, string> = {}
-  if (authorIds.length > 0) {
-    const { data: authors } = await supabase.from('profiles').select('user_id, display_name').in('user_id', authorIds as string[])
-    authors?.forEach((a: any) => { authorMap[a.user_id] = a.display_name })
-  }
-
-  const novelIds = (results).map((n: any) => n.id)
+  // いいね（総合）
   const likeMap: Record<string, number> = {}
   if (novelIds.length > 0) {
     const { data: likes } = await supabase.from('likes').select('novel_id').in('novel_id', novelIds)
     likes?.forEach((l: any) => { likeMap[l.novel_id] = (likeMap[l.novel_id] || 0) + 1 })
   }
 
-  // 新人バッジ用：作者ごとの投稿数を取得
-  const allAuthorIds = Array.from(new Set(results.map((n: any) => n.author_id)))
+  // 日間・週間・月間いいね
+  const likeDailyMap:   Record<string, number> = {}
+  const likeWeeklyMap:  Record<string, number> = {}
+  const likeMonthlyMap: Record<string, number> = {}
+  if (novelIds.length > 0 && ['like_daily','like_weekly','like_monthly'].includes(sort)) {
+    const since = sort === 'like_daily' ? oneDayAgo : sort === 'like_weekly' ? oneWeekAgo : oneMonthAgo
+    const targetMap = sort === 'like_daily' ? likeDailyMap : sort === 'like_weekly' ? likeWeeklyMap : likeMonthlyMap
+    const { data: periodLikes } = await supabase
+      .from('likes').select('novel_id').in('novel_id', novelIds).gte('created_at', since)
+    periodLikes?.forEach((l: any) => { targetMap[l.novel_id] = (targetMap[l.novel_id] || 0) + 1 })
+  }
+
+  // ブックマーク
+  const bookmarkMap: Record<string, number> = {}
+  if (novelIds.length > 0 && sort === 'bookmark') {
+    const { data: bookmarks } = await supabase.from('bookmarks').select('novel_id').in('novel_id', novelIds)
+    bookmarks?.forEach((b: any) => { bookmarkMap[b.novel_id] = (bookmarkMap[b.novel_id] || 0) + 1 })
+  }
+
+  // コメント
+  const commentMap: Record<string, number> = {}
+  if (novelIds.length > 0 && sort === 'comment') {
+    const { data: comments } = await supabase.from('comments').select('novel_id').in('novel_id', novelIds)
+    comments?.forEach((c: any) => { commentMap[c.novel_id] = (commentMap[c.novel_id] || 0) + 1 })
+  }
+
+  // 閲覧数（page_views）
+  const viewMap: Record<string, number> = {}
+  if (novelIds.length > 0 && sort === 'view') {
+    const { data: views } = await supabase.from('page_views').select('novel_id').in('novel_id', novelIds)
+    views?.forEach((v: any) => { viewMap[v.novel_id] = (viewMap[v.novel_id] || 0) + 1 })
+  }
+
+  // 話数
+  const epCountMap: Record<string, number> = {}
+  if (novelIds.length > 0 && sort === 'ep_count') {
+    const { data: eps } = await supabase.from('episodes').select('novel_id').in('novel_id', novelIds).eq('published', true)
+    eps?.forEach((e: any) => { epCountMap[e.novel_id] = (epCountMap[e.novel_id] || 0) + 1 })
+  }
+
+  // 受賞（is_award や award_tag フィールドがある想定、なければlikeで代替）
+  const awardMap: Record<string, number> = {}
+  if (novelIds.length > 0 && sort === 'award') {
+    // award_rankカラムがあれば使う、なければlikeで代替
+    results.forEach((n: any) => {
+      awardMap[n.id] = n.award_rank || likeMap[n.id] || 0
+    })
+  }
+
+  // 作者情報
+  const authorIds = Array.from(new Set(results.map((n: any) => n.author_id)))
+  const authorMap: Record<string, string> = {}
+  if (authorIds.length > 0) {
+    const { data: authors } = await supabase.from('profiles').select('user_id, display_name').in('user_id', authorIds as string[])
+    authors?.forEach((a: any) => { authorMap[a.user_id] = a.display_name })
+  }
+
+  // 新人バッジ
   const newbieSet = new Set<string>()
-  if (allAuthorIds.length > 0) {
+  if (authorIds.length > 0) {
     const { data: authorNovels } = await supabase
-      .from('novels').select('author_id').eq('published', true).in('author_id', allAuthorIds as string[])
+      .from('novels').select('author_id').eq('published', true).in('author_id', authorIds as string[])
     const authorCount: Record<string,number> = {}
     authorNovels?.forEach((n: any) => { authorCount[n.author_id] = (authorCount[n.author_id]||0)+1 })
     Object.entries(authorCount).forEach(([id, cnt]) => { if (cnt <= 3) newbieSet.add(id) })
   }
 
-  const novels = results.map((n: any) => ({
+  let novels = results.map((n: any) => ({
     ...n,
     display_name: authorMap[n.author_id] || '',
     is_newbie: newbieSet.has(n.author_id),
     likeCount: likeMap[n.id] || 0,
     charCount: charCountMap[n.id] || 0,
   }))
+
+  // ポストソート（いいね・ブックマーク・閲覧数・コメント・話数・文字数・受賞）
+  if (hasSearch) {
+    if (sort === 'like') {
+      novels.sort((a, b) => (likeMap[b.id]||0) - (likeMap[a.id]||0))
+    } else if (sort === 'like_daily') {
+      novels.sort((a, b) => (likeDailyMap[b.id]||0) - (likeDailyMap[a.id]||0))
+    } else if (sort === 'like_weekly') {
+      novels.sort((a, b) => (likeWeeklyMap[b.id]||0) - (likeWeeklyMap[a.id]||0))
+    } else if (sort === 'like_monthly') {
+      novels.sort((a, b) => (likeMonthlyMap[b.id]||0) - (likeMonthlyMap[a.id]||0))
+    } else if (sort === 'bookmark') {
+      novels.sort((a, b) => (bookmarkMap[b.id]||0) - (bookmarkMap[a.id]||0))
+    } else if (sort === 'view') {
+      novels.sort((a, b) => (viewMap[b.id]||0) - (viewMap[a.id]||0))
+    } else if (sort === 'comment') {
+      novels.sort((a, b) => (commentMap[b.id]||0) - (commentMap[a.id]||0))
+    } else if (sort === 'ep_count') {
+      novels.sort((a, b) => (epCountMap[b.id]||0) - (epCountMap[a.id]||0))
+    } else if (sort === 'char_count') {
+      novels.sort((a, b) => (charCountMap[b.id]||0) - (charCountMap[a.id]||0))
+    } else if (sort === 'award') {
+      novels.sort((a, b) => (awardMap[b.id]||0) - (awardMap[a.id]||0))
+    } else if (sort === 'rising') {
+      // 急上昇：週間いいねで代替
+      const { data: risingLikes } = await supabase
+        .from('likes').select('novel_id').in('novel_id', novelIds).gte('created_at', oneWeekAgo)
+      const risingMap: Record<string, number> = {}
+      risingLikes?.forEach((l: any) => { risingMap[l.novel_id] = (risingMap[l.novel_id] || 0) + 1 })
+      novels.sort((a, b) => (risingMap[b.id]||0) - (risingMap[a.id]||0))
+    }
+
+    // ポストソート後にページネーション
+    const needsPostSort = ['like','like_daily','like_weekly','like_monthly','bookmark','view','comment','rising','ep_count','char_count','award'].includes(sort)
+    if (needsPostSort) {
+      count = novels.length
+      novels = novels.slice(offset, offset + PAGE_SIZE)
+    }
+  }
 
   function fmtNum(n: number | undefined | null): string {
     if (!n) return '0'
@@ -191,7 +294,7 @@ export default async function SearchPage({ searchParams }: Props) {
                 <div style={{fontSize:12}}>検索条件を変えてお試しください</div>
               </div>
             ) : novels.map((n: any, idx: number) => (
-              <NovelPreviewPopup key={n.id} novel={{...n, like_count: n.like_count||0}}>
+              <NovelPreviewPopup key={n.id} novel={{...n, like_count: n.likeCount||0}}>
               <div style={{cursor:'pointer',padding:'16px 20px',borderBottom:idx<novels.length-1?'1px solid var(--color-brand-light)':'none'}}>
                 <span style={{display:'flex',gap:5,marginBottom:6,flexWrap:'wrap',alignItems:'center'}}>
                   <span style={{fontSize:10,background:'var(--color-brand-light)',color:'var(--color-brand)',border:'1px solid var(--color-tag-border)',padding:'1px 6px',borderRadius:3}}>{n.genre}</span>
