@@ -493,37 +493,66 @@ export default function PostClient({ profile, userId }: Props) {
                   </button>
                 </div>
 
-                {/* S2: キャッチコピー プレビュー説明パネル */}
+                {/* S2: キャッチコピー ミニポップアッププレビュー */}
                 {showCatchcopyHint && (
                   <div style={{
-                    background:'var(--color-brand-light)',
+                    background:'var(--color-bg)',
                     border:'1px solid var(--color-brand-border)',
                     borderRadius:8, padding:'12px 14px', marginBottom:8,
                   }}>
-                    <div style={{fontSize:11,fontWeight:700,color:'var(--color-brand)',marginBottom:8}}>
-                      💡 キャッチコピーはここに表示されます
+                    <div style={{fontSize:11,fontWeight:700,color:'var(--color-brand)',marginBottom:10}}>
+                      💡 作品カードのプレビューポップアップではこう見えます
                     </div>
-                    {/* 作品カードのプレビューイメージ */}
+                    {/* ポップアップのミニ版 */}
                     <div style={{
+                      border:'2px solid var(--color-brand)',
+                      borderRadius:10, overflow:'hidden',
+                      maxWidth:240, fontSize:'0.85em',
+                      boxShadow:'0 4px 16px rgba(0,0,0,0.12)',
                       background:'var(--color-bg-card)',
-                      border:'1px solid var(--color-brand-border)',
-                      borderRadius:8, padding:'10px 12px',
-                      maxWidth:260,
                     }}>
-                      <div style={{fontSize:10,color:'var(--color-text-faint)',marginBottom:4}}>作品カードのイメージ</div>
-                      <div style={{fontSize:13,fontWeight:700,color:'var(--color-text)',marginBottom:4}}>作品タイトル</div>
-                      <div style={{
-                        fontSize:11, color:'var(--color-brand)',
-                        fontStyle:'italic', lineHeight:1.5,
-                        borderLeft:'2px solid var(--color-brand)',
-                        paddingLeft:8, marginBottom:4,
-                      }}>
-                        {catchcopy || '「ここにキャッチコピーが表示されます」'}
+                      {/* ポップアップ上部 */}
+                      <div style={{padding:'8px 10px', background:'var(--color-brand-light)', borderBottom:'1px solid var(--color-brand-border)'}}>
+                        <div style={{display:'flex',gap:4,marginBottom:4,flexWrap:'wrap'}}>
+                          <span style={{fontSize:9,background:'var(--color-brand-light)',border:'1px solid var(--color-brand-border)',color:'var(--color-brand)',padding:'1px 5px',borderRadius:4}}>{genre||'ジャンル'}</span>
+                          <span style={{fontSize:9,background:'var(--color-brand-light)',border:'1px solid var(--color-brand-border)',color:'var(--color-text-muted)',padding:'1px 5px',borderRadius:4}}>長編</span>
+                        </div>
+                        <div style={{fontSize:12,fontWeight:700,color:'var(--color-text)',marginBottom:2}}>{title||'作品タイトル'}</div>
+                        <div style={{fontSize:10,color:'var(--color-text-muted)'}}>作者：{profile?.display_name||'作者名'}</div>
                       </div>
-                      <div style={{fontSize:10,color:'var(--color-text-faint)'}}>作者名 / ジャンル</div>
+                      {/* キャッチコピー欄（ハイライト） */}
+                      <div style={{
+                        padding:'8px 10px',
+                        background:'#fffbe6',
+                        borderBottom:'1px solid var(--color-brand-border)',
+                        borderLeft:'3px solid var(--color-brand)',
+                        position:'relative',
+                      }}>
+                        <div style={{
+                          position:'absolute', top:-8, right:6,
+                          background:'var(--color-brand)', color:'#fff',
+                          fontSize:8, fontWeight:700,
+                          padding:'1px 5px', borderRadius:4,
+                        }}>ここ！</div>
+                        <div style={{fontSize:11,color:'var(--color-text)',fontStyle:'italic',lineHeight:1.5}}>
+                          {catchcopy || '（キャッチコピーがここに表示されます）'}
+                        </div>
+                      </div>
+                      {/* あらすじ欄 */}
+                      <div style={{padding:'8px 10px'}}>
+                        <div style={{fontSize:9,color:'var(--color-text-faint)',marginBottom:4}}>― あらすじ ―</div>
+                        <div style={{fontSize:10,color:'var(--color-text-muted)',lineHeight:1.5}}>
+                          {summary ? summary.slice(0,40)+'…' : 'あらすじがここに入ります…'}
+                        </div>
+                      </div>
+                      {/* ボタン */}
+                      <div style={{display:'flex',gap:6,padding:'8px 10px',borderTop:'1px solid var(--color-brand-border)'}}>
+                        <div style={{flex:1,padding:'5px',border:'1px solid var(--color-brand-border)',borderRadius:6,textAlign:'center',fontSize:9,color:'var(--color-text-muted)'}}>閉じる</div>
+                        <div style={{flex:2,padding:'5px',background:'var(--color-brand)',borderRadius:6,textAlign:'center',fontSize:9,color:'#fff',fontWeight:700}}>作品を読む →</div>
+                      </div>
                     </div>
                     <div style={{fontSize:10,color:'var(--color-text-muted)',marginTop:8,lineHeight:1.6}}>
-                      読者が最初に目にする一文です。作品の雰囲気や魅力が伝わる言葉を入れましょう。
+                      読者が作品カードをホバーしたときに表示されるポップアップです。<br/>キャッチコピーはあらすじの上に目立つ形で表示されます。
                     </div>
                   </div>
                 )}
