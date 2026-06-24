@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useRef, useEffect } from 'react'
+import { createPortal } from 'react-dom'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import Link from 'next/link'
@@ -493,68 +494,104 @@ export default function PostClient({ profile, userId }: Props) {
                   </button>
                 </div>
 
-                {/* S2: キャッチコピー ミニポップアッププレビュー */}
-                {showCatchcopyHint && (
-                  <div style={{
-                    background:'var(--color-bg)',
-                    border:'1px solid var(--color-brand-border)',
-                    borderRadius:8, padding:'12px 14px', marginBottom:8,
-                  }}>
-                    <div style={{fontSize:11,fontWeight:700,color:'var(--color-brand)',marginBottom:10}}>
-                      💡 作品カードのプレビューポップアップではこう見えます
-                    </div>
-                    {/* ポップアップのミニ版 */}
-                    <div style={{
-                      border:'2px solid var(--color-brand)',
-                      borderRadius:10, overflow:'hidden',
-                      maxWidth:240, fontSize:'0.85em',
-                      boxShadow:'0 4px 16px rgba(0,0,0,0.12)',
+                {/* S2: キャッチコピー位置確認モーダル（実際のポップアップと同じ表示） */}
+                {showCatchcopyHint && mounted && createPortal(
+                  <div style={{position:'fixed',inset:0,background:'rgba(0,0,0,0.5)',zIndex:9999,display:'flex',alignItems:'center',justifyContent:'center',padding:isMobile?'16px':20}}
+                    onClick={()=>setShowCatchcopyHint(false)}>
+                    <div onClick={e=>e.stopPropagation()} style={{
                       background:'var(--color-bg-card)',
+                      border:'2px solid var(--color-brand)',
+                      borderRadius:16,
+                      boxShadow:'0 8px 24px rgba(0,0,0,0.15)',
+                      overflow:'hidden',
+                      width: isMobile ? 320 : 500,
+                      maxWidth:'95vw',
+                      maxHeight: isMobile ? '85vh' : '90vh',
+                      display:'flex', flexDirection:'column',
+                      animation:'modalIn .2s ease',
                     }}>
-                      {/* ポップアップ上部 */}
-                      <div style={{padding:'8px 10px', background:'var(--color-brand-light)', borderBottom:'1px solid var(--color-brand-border)'}}>
-                        <div style={{display:'flex',gap:4,marginBottom:4,flexWrap:'wrap'}}>
-                          <span style={{fontSize:9,background:'var(--color-brand-light)',border:'1px solid var(--color-brand-border)',color:'var(--color-brand)',padding:'1px 5px',borderRadius:4}}>{genre||'ジャンル'}</span>
-                          <span style={{fontSize:9,background:'var(--color-brand-light)',border:'1px solid var(--color-brand-border)',color:'var(--color-text-muted)',padding:'1px 5px',borderRadius:4}}>長編</span>
+                      {/* ヘッダー */}
+                      <div style={{background:'var(--color-brand-light)',padding:'10px 14px',borderBottom:'1px solid var(--color-brand-border)',position:'relative',flexShrink:0}}>
+                        <button onClick={()=>setShowCatchcopyHint(false)}
+                          style={{position:'absolute',top:8,right:10,background:'none',border:'none',fontSize:18,color:'var(--color-text-faint)',cursor:'pointer'}}>×</button>
+                        <div style={{display:'flex',gap:5,marginBottom:3,flexWrap:'wrap'}}>
+                          <span style={{fontSize:10,background:'var(--color-brand-light)',color:'var(--color-brand)',border:'1px solid var(--color-tag-border)',padding:'1px 6px',borderRadius:3}}>{genre||'ジャンル'}</span>
+                          <span style={{fontSize:10,background:'var(--color-info-bg)',color:'var(--color-info)',border:'1px solid var(--color-info-border)',padding:'1px 6px',borderRadius:3}}>{novelType}</span>
                         </div>
-                        <div style={{fontSize:12,fontWeight:700,color:'var(--color-text)',marginBottom:2}}>{title||'作品タイトル'}</div>
-                        <div style={{fontSize:10,color:'var(--color-text-muted)'}}>作者：{profile?.display_name||'作者名'}</div>
+                        <div style={{fontSize:isMobile?13:15,fontWeight:700,color:'var(--color-text)',lineHeight:1.4,fontFamily:"'Noto Serif JP',serif",paddingRight:20}}>{title||'作品タイトル'}</div>
+                        <div style={{display:'flex',alignItems:'center',gap:8,marginTop:3}}>
+                          <span style={{fontSize:11,color:'var(--color-text-muted)'}}>作者：{profile?.display_name||'作者名'}</span>
+                        </div>
+                        {tags.length > 0 && (
+                          <div style={{display:'flex',gap:4,flexWrap:'wrap',marginTop:4}}>
+                            {tags.slice(0,5).map((t:string)=>(
+                              <span key={t} style={{fontSize:9,background:'var(--color-bg)',color:'var(--color-text-muted)',border:'1px solid var(--color-brand-border)',padding:'1px 5px',borderRadius:3}}>#{t}</span>
+                            ))}
+                          </div>
+                        )}
                       </div>
-                      {/* キャッチコピー欄（ハイライト） */}
-                      <div style={{
-                        padding:'8px 10px',
-                        background:'#fffbe6',
-                        borderBottom:'1px solid var(--color-brand-border)',
-                        borderLeft:'3px solid var(--color-brand)',
-                        position:'relative',
-                      }}>
+                      {/* 本文エリア */}
+                      <div style={{flex:1,overflowY:'auto',minHeight:0,padding:'12px 0',background:'var(--color-bg-card)'}}>
+                        {/* キャッチコピー表示位置を示すラベル */}
                         <div style={{
-                          position:'absolute', top:-8, right:6,
-                          background:'var(--color-brand)', color:'#fff',
-                          fontSize:8, fontWeight:700,
-                          padding:'1px 5px', borderRadius:4,
-                        }}>ここ！</div>
-                        <div style={{fontSize:11,color:'var(--color-text)',fontStyle:'italic',lineHeight:1.5}}>
-                          {catchcopy || '（キャッチコピーがここに表示されます）'}
+                          margin:'0 14px 10px',
+                          background:'var(--color-brand)',
+                          color:'#fff', fontSize:10, fontWeight:700,
+                          padding:'4px 10px', borderRadius:6,
+                          textAlign:'center',
+                        }}>
+                          👆 キャッチコピーはここに縦書きで表示されます
                         </div>
-                      </div>
-                      {/* あらすじ欄 */}
-                      <div style={{padding:'8px 10px'}}>
-                        <div style={{fontSize:9,color:'var(--color-text-faint)',marginBottom:4}}>― あらすじ ―</div>
-                        <div style={{fontSize:10,color:'var(--color-text-muted)',lineHeight:1.5}}>
-                          {summary ? summary.slice(0,40)+'…' : 'あらすじがここに入ります…'}
+                        <div style={{fontSize:10,color:'#999',marginBottom:6,textAlign:'center',letterSpacing:'0.1em'}}>
+                          {catchcopy ? '― キャッチコピー ―' : '― あらすじ ―'}
+                        </div>
+                        {/* 縦書きテキスト（本物と同じロジック） */}
+                        <div style={{margin:isMobile?'0 8px':'0 28px'}}>
+                          <div style={{display:'flex',flexDirection:'row',border:'1px solid #ccc',borderRadius:3,overflow:'hidden',padding:'8px 0'}}>
+                            <div style={{flex:1,display:'flex',flexDirection:'column'}}>
+                              {Array.from({length:20},(_,row)=>(
+                                <div key={row} style={{flex:1,height:27,borderBottom:row<19?'1px solid #eee':'none',borderRight:'1px solid #ddd'}}/>
+                              ))}
+                            </div>
+                            {Array.from({length:5},(_,col)=>{
+                              const text = catchcopy||summary||'（キャッチコピーまたはあらすじがここに縦書きで表示されます）'
+                              const chars = text.split('')
+                              const actualCol = 4-col
+                              return (
+                                <div key={col} style={{display:'flex',flexDirection:'column',borderRight:'1px solid #ddd'}}>
+                                  {Array.from({length:20},(_,row)=>{
+                                    const ch = chars[actualCol*20+row]||null
+                                    return (
+                                      <div key={row} style={{width:27,height:27,borderBottom:row<19?'1px solid #eee':'none',display:'flex',alignItems:'center',justifyContent:'center',fontSize:15,color:ch?'#111':'transparent',fontFamily:"'Noto Serif JP',serif",lineHeight:1,flexShrink:0}}>
+                                        {ch||'　'}
+                                      </div>
+                                    )
+                                  })}
+                                </div>
+                              )
+                            })}
+                            <div style={{flex:1,display:'flex',flexDirection:'column'}}>
+                              {Array.from({length:20},(_,row)=>(
+                                <div key={row} style={{flex:1,height:27,borderBottom:row<19?'1px solid #eee':'none'}}/>
+                              ))}
+                            </div>
+                          </div>
                         </div>
                       </div>
                       {/* ボタン */}
-                      <div style={{display:'flex',gap:6,padding:'8px 10px',borderTop:'1px solid var(--color-brand-border)'}}>
-                        <div style={{flex:1,padding:'5px',border:'1px solid var(--color-brand-border)',borderRadius:6,textAlign:'center',fontSize:9,color:'var(--color-text-muted)'}}>閉じる</div>
-                        <div style={{flex:2,padding:'5px',background:'var(--color-brand)',borderRadius:6,textAlign:'center',fontSize:9,color:'#fff',fontWeight:700}}>作品を読む →</div>
+                      <div style={{padding:'10px 14px',borderTop:'1px solid var(--color-brand-border)',background:'var(--color-bg)',display:'flex',gap:8,flexShrink:0}}>
+                        <button onClick={()=>setShowCatchcopyHint(false)}
+                          style={{flex:1,padding:'9px',border:'1px solid var(--color-brand-border)',borderRadius:8,background:'var(--color-bg-card)',color:'var(--color-text-muted)',fontSize:13,cursor:'pointer'}}>
+                          閉じる
+                        </button>
+                        <div style={{flex:2,padding:'9px 0',background:'var(--color-brand)',color:'#fff',fontWeight:700,fontSize:14,borderRadius:8,textAlign:'center'}}>
+                          作品を読む →
+                        </div>
                       </div>
                     </div>
-                    <div style={{fontSize:10,color:'var(--color-text-muted)',marginTop:8,lineHeight:1.6}}>
-                      読者が作品カードをホバーしたときに表示されるポップアップです。<br/>キャッチコピーはあらすじの上に目立つ形で表示されます。
-                    </div>
-                  </div>
+                    <style>{`@keyframes modalIn{from{opacity:0;transform:scale(.95)}to{opacity:1;transform:scale(1)}}`}</style>
+                  </div>,
+                  document.body
                 )}
 
                 <textarea style={{...inp,resize:'vertical',minHeight:60}} value={catchcopy}
