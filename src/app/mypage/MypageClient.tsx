@@ -181,6 +181,7 @@ export default function MypageClient({
   const [folderInput,      setFolderInput]      = useState('')
   const [folderSaving,     setFolderSaving]     = useState(false)
   const [movingBookmark,   setMovingBookmark]   = useState<string|null>(null)
+  const [myBookmarks,      setMyBookmarks]      = useState<any[]>(bookmarkedNovels)
   const [foldersLoaded,    setFoldersLoaded]    = useState(false)
   const [muteList,         setMuteList]         = useState<any[]>([])
   const [blockMuteLoaded,  setBlockMuteLoaded]  = useState(false)
@@ -518,6 +519,7 @@ export default function MypageClient({
 
   async function handleMoveBookmark(novelId: string, folderId: string | null) {
     await supabase.from('bookmarks').update({ folder_id: folderId }).eq('novel_id', novelId).eq('user_id', profile.user_id)
+    setMyBookmarks(prev => prev.map((bm:any) => bm.novel_id === novelId ? {...bm, folder_id: folderId} : bm))
     setMovingBookmark(null)
   }
 
@@ -609,7 +611,7 @@ export default function MypageClient({
     return (
       <div>
         <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',marginBottom:12}}>
-          <div style={{fontSize:15,fontWeight:700,color:'var(--color-text)'}}>保存済み作品（{bookmarkedNovels.length}）</div>
+          <div style={{fontSize:15,fontWeight:700,color:'var(--color-text)'}}>保存済み作品（{myBookmarks.length}）</div>
           <button onClick={()=>setShowFolderModal(true)}
             style={{fontSize:12,padding:'5px 12px',border:'1px solid var(--color-brand)',borderRadius:8,background:'none',color:'var(--color-brand)',cursor:'pointer'}}>
             ＋ リスト作成
@@ -617,10 +619,10 @@ export default function MypageClient({
         </div>
         {folders.map((f:any) => (
           <Section key={f.id} id={f.id} title={f.name}
-            items={bookmarkedNovels.filter((bm:any) => bm.folder_id === f.id)}
+            items={myBookmarks.filter((bm:any) => bm.folder_id === f.id)}
             onDelete={()=>handleDeleteFolder(f.id)}/>
         ))}
-        <Section id="unclassified" title="未分類" items={bookmarkedNovels.filter((bm:any) => !bm.folder_id)}/>
+        <Section id="unclassified" title="未分類" items={myBookmarks.filter((bm:any) => !bm.folder_id)}/>
         {showFolderModal && (
           <FolderCreateModal
             onClose={()=>setShowFolderModal(false)}
