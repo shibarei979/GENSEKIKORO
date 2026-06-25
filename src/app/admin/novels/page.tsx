@@ -44,7 +44,7 @@ export default async function AdminNovelsPage({ searchParams }: { searchParams: 
             style={{marginLeft:'auto',padding:'6px 14px',borderRadius:8,fontSize:12,fontWeight:600,textDecoration:'none',
               background:publishingOnly?'#eab308':'#fff',color:publishingOnly?'#fff':'#64748b',
               border:`1px solid ${publishingOnly?'#eab308':'#e2e8f0'}`}}>
-            📚 書籍化希望{publishingOnly?' ✓':''}
+            書籍化希望{publishingOnly?' ✓':''}
           </a>
         </div>
         <NovelManager initialNovels={novelsWithAuthor} total={count||0} currentPage={page} q={q} publishingOnly={publishingOnly}/>

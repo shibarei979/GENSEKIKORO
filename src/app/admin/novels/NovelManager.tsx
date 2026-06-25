@@ -53,7 +53,7 @@ export default function NovelManager({ initialNovels, total, currentPage, q, pub
                 <span style={{fontSize:10,background:'#FFF1E6',color:'#F26A21',border:'1px solid #f5b080',padding:'1px 5px',borderRadius:3}}>{n.genre}</span>
                 {n.is_r18 && <span style={{fontSize:10,background:'#fef2f2',color:'#dc2626',border:'1px solid #fca5a5',padding:'1px 5px',borderRadius:3}}>R18</span>}
                 {!n.published && <span style={{fontSize:10,background:'#f1f5f9',color:'#94a3b8',padding:'1px 5px',borderRadius:3}}>非公開</span>}
-                {n.aims_publishing && <span style={{fontSize:10,background:'#fefce8',color:'#854d0e',border:'1px solid #fde047',padding:'1px 5px',borderRadius:3,fontWeight:700}}>📚 書籍化希望</span>}
+                {n.aims_publishing && <span style={{fontSize:10,background:'#fefce8',color:'#854d0e',border:'1px solid #fde047',padding:'1px 5px',borderRadius:3,fontWeight:700}}>書籍化希望</span>}
               </div>
               <Link href={`/novel/${n.id}`} target="_blank" style={{fontSize:13,fontWeight:600,color:'#1e293b',textDecoration:'none'}}>{n.title}</Link>
               <div style={{fontSize:11,color:'#94a3b8',marginTop:1}}>作者：{n.display_name} · {new Date(n.created_at).toLocaleDateString('ja-JP')}</div>
