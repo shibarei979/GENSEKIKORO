@@ -60,7 +60,7 @@ export default async function MypagePage() {
 
   const { data: bookmarkedNovels } = await supabase
     .from('bookmarks')
-    .select('novel_id, created_at, novels(id, title, genre, is_serial, novel_type, summary, tags, author_id)')
+    .select('novel_id, created_at, folder_id, novels(id, title, genre, is_serial, novel_type, summary, tags, author_id)')
     .eq('user_id', user.id)
     .order('created_at', { ascending: false })
     .limit(50)
