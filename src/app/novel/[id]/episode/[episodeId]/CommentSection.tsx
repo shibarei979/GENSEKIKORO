@@ -59,7 +59,7 @@ export default function CommentSection({ novelId, episodeId, userId, userName, u
 
   useEffect(() => {
     supabase.from('comments')
-      .select('id,body,created_at,user_id,is_pinned,parent_id,quoted_text')
+      .select('id,body,created_at,user_id,is_pinned,parent_id,quoted_text,is_muted')
       .eq('episode_id', episodeId)
       .order('created_at', { ascending: true })
       .limit(200)
@@ -77,8 +77,14 @@ export default function CommentSection({ novelId, episodeId, userId, userName, u
           quoted_text: d.quoted_text || null,
           display_name: profileMap[d.user_id]?.display_name||'不明',
           icon_url: profileMap[d.user_id]?.icon_url||'',
+          is_muted: d.is_muted || false,
         }))
-        const roots = flat.filter(c => !c.parent_id)
+        // ミュートされたコメントは当人以外（作者）には非表示
+        const filteredFlat = flat.filter((c: any) => {
+          if (c.is_muted && c.user_id !== userId) return false
+          return true
+        })
+        const roots = filteredFlat.filter(c => !c.parent_id)
         roots.forEach(r => { r.replies = flat.filter(c => c.parent_id === r.id) })
         roots.sort((a,b) => (b.is_pinned?1:0)-(a.is_pinned?1:0) || (b.like_count||0)-(a.like_count||0))
         setComments(roots)
@@ -99,10 +105,23 @@ export default function CommentSection({ novelId, episodeId, userId, userName, u
       alert('この作品はコメントを受け付けていません')
       return
     }
+    // ブロックチェック（作者がこのユーザーをブロックしているか）
+    const { data: blockData } = await supabase
+      .from('user_blocks').select('id')
+      .eq('blocker_id', authorId).eq('blocked_id', userId).maybeSingle()
+    if (blockData) {
+      alert('この作者にブロックされているため、コメントできません')
+      return
+    }
+    // ミュートチェック（作者がミュートしているか）
+    const { data: muteData } = await supabase
+      .from('user_mutes').select('id')
+      .eq('muter_id', authorId).eq('muted_id', userId).maybeSingle()
+    const isMuted = !!muteData
     setLoading(true)
     const { data, error } = await supabase.from('comments')
-      .insert({ novel_id: novelId, episode_id: episodeId, user_id: userId, body: body.trim(), parent_id: null, quoted_text: quotedText || null })
-      .select('id,body,created_at,user_id,quoted_text').single()
+      .insert({ novel_id: novelId, episode_id: episodeId, user_id: userId, body: body.trim(), parent_id: null, quoted_text: quotedText || null, is_muted: isMuted })
+      .select('id,body,created_at,user_id,quoted_text,is_muted').single()
     setLoading(false)
     if (error || !data) return
     const newComment = { ...data, display_name: userName||'', icon_url: userIconUrl||'', like_count:0, replies:[] }

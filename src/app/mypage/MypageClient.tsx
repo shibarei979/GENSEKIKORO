@@ -68,7 +68,7 @@ const ALL_BADGES = [
   { id:'_slot2',      name:'？？？',                  color:'#94a3b8' },
 ]
 
-type Tab = 'mypage' | 'works' | 'bookmarks' | 'history' | 'tweet' | 'mission' | 'contest' | 'settings'
+type Tab = 'mypage' | 'works' | 'bookmarks' | 'history' | 'tweet' | 'mission' | 'contest' | 'settings' | 'blockmute'
 const TABS: { id: Tab; label: string }[] = [
   { id:'mypage',    label:'マイページ' },
   { id:'works',     label:'作品管理' },
@@ -78,6 +78,7 @@ const TABS: { id: Tab; label: string }[] = [
   { id:'mission',   label:'ミッション' },
   { id:'contest',   label:'コンテスト' },
   { id:'settings',  label:'設定' },
+  { id:'blockmute', label:'ブロック・ミュート' },
 ]
 
 export default function MypageClient({
@@ -145,6 +146,9 @@ export default function MypageClient({
   const [notifyNewEpisode, setNotifyNewEpisode] = useState(profile.notify_new_episode !== false)
   const [notifyNewWork,    setNotifyNewWork]    = useState(profile.notify_new_work   !== false)
   const [notifySaving,     setNotifySaving]     = useState(false)
+  const [blockList,        setBlockList]        = useState<any[]>([])
+  const [muteList,         setMuteList]         = useState<any[]>([])
+  const [blockMuteLoaded,  setBlockMuteLoaded]  = useState(false)
   const [gender,           setGender]           = useState<string>((profile as any).gender || '')
   const [xAccount,         setXAccount]         = useState<string>((profile as any).x_account || '')
   const [xSaving,          setXSaving]          = useState(false)
@@ -551,6 +555,65 @@ export default function MypageClient({
       <ContestEntry novels={myNovels} contests={contests} initialEntries={initialEntries} userId={profile.user_id}/>
     </div>
   )
+
+  // ===== ブロック・ミュートタブ =====
+  const BlockMuteTab = () => {
+    useEffect(() => {
+      if (blockMuteLoaded) return
+      Promise.all([
+        supabase.from('user_blocks').select('blocked_id, profiles!user_blocks_blocked_id_fkey(display_name, icon_url)').eq('blocker_id', profile.user_id),
+        supabase.from('user_mutes').select('muted_id, profiles!user_mutes_muted_id_fkey(display_name, icon_url)').eq('muter_id', profile.user_id),
+      ]).then(([blocks, mutes]) => {
+        setBlockList((blocks.data||[]).map((b:any) => ({ id: b.blocked_id, ...b.profiles })))
+        setMuteList((mutes.data||[]).map((m:any) => ({ id: m.muted_id, ...m.profiles })))
+        setBlockMuteLoaded(true)
+      })
+    }, [])
+
+    async function handleUnblock(targetId: string) {
+      await supabase.from('user_blocks').delete().eq('blocker_id', profile.user_id).eq('blocked_id', targetId)
+      setBlockList(prev => prev.filter(u => u.id !== targetId))
+    }
+    async function handleUnmute(targetId: string) {
+      await supabase.from('user_mutes').delete().eq('muter_id', profile.user_id).eq('muted_id', targetId)
+      setMuteList(prev => prev.filter(u => u.id !== targetId))
+    }
+
+    const UserRow = ({ u, onRemove, label }: { u:any; onRemove:()=>void; label:string }) => (
+      <div style={{display:'flex',alignItems:'center',gap:10,padding:'10px 0',borderBottom:'1px solid var(--color-brand-border)'}}>
+        {u.icon_url
+          ? <img src={u.icon_url} style={{width:36,height:36,borderRadius:'50%',objectFit:'cover',flexShrink:0}} alt=""/>
+          : <div style={{width:36,height:36,borderRadius:'50%',background:'var(--color-brand-border)',display:'flex',alignItems:'center',justifyContent:'center',fontSize:14,color:'var(--color-brand)',fontWeight:700,flexShrink:0}}>{u.display_name?.[0]||'?'}</div>
+        }
+        <a href={`/author/${u.id}`} style={{flex:1,fontSize:13,color:'var(--color-text)',textDecoration:'none',fontWeight:600}}>{u.display_name}</a>
+        <button onClick={onRemove}
+          style={{fontSize:12,padding:'4px 12px',border:'1px solid var(--color-danger)',borderRadius:8,background:'none',color:'var(--color-danger)',cursor:'pointer'}}>
+          {label}解除
+        </button>
+      </div>
+    )
+
+    return (
+      <div>
+        <div style={{marginBottom:24}}>
+          <div style={{fontSize:13,fontWeight:700,color:'var(--color-text)',marginBottom:8}}>ブロック中（{blockList.length}人）</div>
+          <div style={{fontSize:11,color:'var(--color-text-muted)',marginBottom:10}}>ブロックしたユーザーはあなたの作品にコメントできません。</div>
+          {blockList.length === 0
+            ? <div style={{fontSize:12,color:'var(--color-text-faint)'}}>ブロック中のユーザーはいません</div>
+            : blockList.map(u => <UserRow key={u.id} u={u} onRemove={()=>handleUnblock(u.id)} label="ブロック"/>)
+          }
+        </div>
+        <div>
+          <div style={{fontSize:13,fontWeight:700,color:'var(--color-text)',marginBottom:8}}>ミュート中（{muteList.length}人）</div>
+          <div style={{fontSize:11,color:'var(--color-text-muted)',marginBottom:10}}>ミュートしたユーザーのコメントはあなたには表示されません。</div>
+          {muteList.length === 0
+            ? <div style={{fontSize:12,color:'var(--color-text-faint)'}}>ミュート中のユーザーはいません</div>
+            : muteList.map(u => <UserRow key={u.id} u={u} onRemove={()=>handleUnmute(u.id)} label="ミュート"/>)
+          }
+        </div>
+      </div>
+    )
+  }
 
   // ===== 設定タブ =====
   const SettingsTab = () => (

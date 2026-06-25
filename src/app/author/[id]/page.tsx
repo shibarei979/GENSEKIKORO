@@ -52,13 +52,16 @@ export default async function AuthorPage({ params }: Props) {
 
   let isFollowing = false
   let isBlocked = false
+  let isMuted = false
   if (user && user.id !== params.id) {
-    const [followRes, blockRes] = await Promise.all([
+    const [followRes, blockRes, muteRes] = await Promise.all([
       supabase.from('follows').select('id').eq('follower_id', user.id).eq('following_id', params.id).maybeSingle(),
       supabase.from('user_blocks').select('id').eq('blocker_id', user.id).eq('blocked_id', params.id).maybeSingle(),
+      supabase.from('user_mutes').select('id').eq('muter_id', user.id).eq('muted_id', params.id).maybeSingle(),
     ])
     isFollowing = !!followRes.data
     isBlocked   = !!blockRes.data
+    isMuted     = !!muteRes.data
   }
 
   const isMe = user?.id === params.id
@@ -119,7 +122,7 @@ export default async function AuthorPage({ params }: Props) {
                   {!isMe && user && (
                     <>
                       <FollowButton authorId={params.id} userId={user.id} initialFollowing={isFollowing} followerCount={followerCount || 0}/>
-                      <BlockButton targetId={params.id} userId={user.id} initialBlocked={isBlocked}/>
+                      <BlockButton targetId={params.id} userId={user.id} initialBlocked={isBlocked} initialMuted={isMuted}/>
                     </>
                   )}
                 </div>
@@ -161,7 +164,7 @@ export default async function AuthorPage({ params }: Props) {
             {!isMe && user && (
               <div style={{flexShrink:0,display:'flex',gap:6}}>
                 <FollowButton authorId={params.id} userId={user.id} initialFollowing={isFollowing} followerCount={followerCount || 0}/>
-                <BlockButton targetId={params.id} userId={user.id} initialBlocked={isBlocked}/>
+                <BlockButton targetId={params.id} userId={user.id} initialBlocked={isBlocked} initialMuted={isMuted}/>
               </div>
             )}
           </div>
