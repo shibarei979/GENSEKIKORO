@@ -279,7 +279,7 @@ export default async function HomePage() {
       </div>
 
       {/* ===== ユーザーの推し ===== */}
-      <div className="gem-section-wrap" style={{background:'var(--color-bg-card)',padding:'16px 0',overflow:'hidden'}}>
+      <div className="gem-section-wrap" style={{background:'var(--color-bg)',padding:'16px 0',overflow:'hidden'}}>
         <div style={{width:'100%'}}>
           <GemSection novels={gemNovels} discoverCommentMap={discoverCommentMap} />
         </div>
