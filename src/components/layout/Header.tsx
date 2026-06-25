@@ -246,11 +246,26 @@ export default function Header({ profile, user, activeGenre }: Props) {
                     </div>
                   )}
                 </div>
-                {/* ダークモードトグル */}
-                <button onClick={toggleDarkMode}
-                  title={darkMode?'ライトモード':'ダークモード'}
-                  style={{width:34,height:34,borderRadius:'50%',border:'1px solid var(--color-brand-border)',background:'var(--color-bg)',display:'flex',alignItems:'center',justifyContent:'center',fontSize:16,cursor:'pointer',flexShrink:0}}>
-                  {darkMode ? '☀️' : '🌙'}
+                {/* ダークモード スライドトグル */}
+                <button onClick={toggleDarkMode} title={darkMode?'ライトモードに切替':'ダークモードに切替'}
+                  style={{display:'flex',alignItems:'center',gap:5,background:'none',border:'none',cursor:'pointer',padding:0,flexShrink:0}}>
+                  <span style={{fontSize:11,color:'var(--color-text-faint)',lineHeight:1}}>{darkMode?'🌙':' ☀'}</span>
+                  <div style={{
+                    width:36,height:20,borderRadius:10,
+                    background:darkMode?'#4a3828':'#e0d0c0',
+                    position:'relative',transition:'background .25s',
+                    border:'1px solid var(--color-brand-border)',
+                    flexShrink:0,
+                  }}>
+                    <div style={{
+                      position:'absolute',top:2,
+                      left:darkMode?16:2,
+                      width:14,height:14,borderRadius:'50%',
+                      background:darkMode?'#F26A21':'#fff',
+                      transition:'left .25s',
+                      boxShadow:'0 1px 3px rgba(0,0,0,0.25)',
+                    }}/>
+                  </div>
                 </button>
 
                 <Link href="/mypage" style={{display:'flex',alignItems:'center',justifyContent:'center',width:38,height:38,borderRadius:'50%',background:'var(--color-bg)',border: profile?.icon_url ? '1.5px solid var(--color-brand-border)' : 'none',cursor:'pointer',padding:0,overflow:'hidden',textDecoration:'none'}}>
