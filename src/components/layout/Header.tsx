@@ -24,6 +24,7 @@ export default function Header({ profile, user, activeGenre }: Props) {
   const [showSettings, setShowSettings] = useState(false)
   const [showSettingsModal, setShowSettingsModal] = useState(false)
   const [showMobileMenu, setShowMobileMenu] = useState(false)
+  const [darkMode, setDarkMode] = useState(false)
   const [scrolled, setScrolled] = useState(false)
   const notifRef = useRef<HTMLDivElement>(null)
   const userMenuRef = useRef<HTMLDivElement>(null)
@@ -51,6 +52,26 @@ export default function Header({ profile, user, activeGenre }: Props) {
     document.addEventListener('mousedown', handleClick)
     return () => document.removeEventListener('mousedown', handleClick)
   }, [])
+
+  useEffect(() => {
+    const saved = localStorage.getItem('theme')
+    if (saved === 'dark') {
+      setDarkMode(true)
+      document.documentElement.setAttribute('data-theme', 'dark')
+    }
+  }, [])
+
+  function toggleDarkMode() {
+    const next = !darkMode
+    setDarkMode(next)
+    if (next) {
+      document.documentElement.setAttribute('data-theme', 'dark')
+      localStorage.setItem('theme', 'dark')
+    } else {
+      document.documentElement.removeAttribute('data-theme')
+      localStorage.setItem('theme', 'light')
+    }
+  }
 
   useEffect(() => {
     if (showMobileMenu) {
@@ -225,6 +246,13 @@ export default function Header({ profile, user, activeGenre }: Props) {
                     </div>
                   )}
                 </div>
+                {/* ダークモードトグル */}
+                <button onClick={toggleDarkMode}
+                  title={darkMode?'ライトモード':'ダークモード'}
+                  style={{width:34,height:34,borderRadius:'50%',border:'1px solid var(--color-brand-border)',background:'var(--color-bg)',display:'flex',alignItems:'center',justifyContent:'center',fontSize:16,cursor:'pointer',flexShrink:0}}>
+                  {darkMode ? '☀️' : '🌙'}
+                </button>
+
                 <Link href="/mypage" style={{display:'flex',alignItems:'center',justifyContent:'center',width:38,height:38,borderRadius:'50%',background:'var(--color-bg)',border: profile?.icon_url ? '1.5px solid var(--color-brand-border)' : 'none',cursor:'pointer',padding:0,overflow:'hidden',textDecoration:'none'}}>
                   {profile?.icon_url ? (
                     <img src={profile.icon_url} alt="" style={{width:'100%',height:'100%',objectFit:'cover'}}/>

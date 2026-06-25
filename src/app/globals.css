@@ -68,15 +68,47 @@
   --admin-stat-red:     #ef4444;
 }
 
-/* 将来のダークモード対応用（A5実装時にここを拡張する） */
-/*
+/* ===== ダークモード ===== */
 [data-theme="dark"] {
-  --color-bg: #1c1610;
-  --color-bg-card: #2a2018;
-  --color-text: #f0e8de;
-  ...
+  --color-brand:        #F26A21;
+  --color-brand-dark:   #d95a18;
+  --color-brand-light:  #2a1a0e;
+  --color-brand-border: #3a2416;
+
+  --color-bg:           #1a1310;
+  --color-bg-card:      #221a14;
+  --color-bg-subtle:    #1a1310;
+
+  --color-text:         #f0e8de;
+  --color-text-muted:   #a89880;
+  --color-text-faint:   #6a5a50;
+
+  --color-success:      #22c55e;
+  --color-danger:       #f87171;
+  --color-info:         #60a5fa;
+  --color-warning:      #fbbf24;
+
+  --color-dark-bg:       #111;
+  --color-dark-bg-light: #222;
+  --color-dark-text:     #ffffff;
+
+  --color-tag-border:   #5a3a1e;
+  --color-info-bg:      #1e2a3a;
+  --color-info-border:  #2a3f5a;
+
+  --color-rank-gold:    #F26A21;
+  --color-rank-silver:  #6b7280;
+  --color-rank-bronze:  #92512a;
+  --color-rank-muted:   #3a2816;
+
+  --admin-bg:           #1a1a1a;
+  --admin-bg-card:      #222222;
+  --admin-border:       #333333;
+  --admin-text:         #f1f5f9;
+  --admin-text-muted:   #94a3b8;
+  --admin-text-faint:   #64748b;
+  --admin-row-border:   #2a2a2a;
 }
-*/
 
 * { box-sizing: border-box; }
 
