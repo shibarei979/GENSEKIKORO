@@ -175,6 +175,7 @@ export default async function RankingPage({ searchParams }: Props) {
     color: active ? 'var(--color-bg-card)' : 'var(--color-brand)',
     border: `1px solid ${active ? 'var(--color-brand)' : 'var(--color-tag-border)'}`,
   })
+  const pillClass = (active: boolean) => active ? 'ranking-pill ranking-pill-active' : 'ranking-pill ranking-pill-inactive'
 
   return (
     <div style={{minHeight:'100vh',background:'var(--color-bg-card)',fontFamily:"'Noto Sans JP',sans-serif"}}>
@@ -192,7 +193,7 @@ export default async function RankingPage({ searchParams }: Props) {
               <div style={{overflowX:'auto',msOverflowStyle:'none',scrollbarWidth:'none'} as any}>
                 <div style={{display:'flex',gap:6,flexWrap:'nowrap'}}>
                   {periodOptions.map(o => (
-                    <Link key={o.value} href={buildUrl(o.value,novelType,serial)} style={pill(period===o.value)}>
+                    <Link key={o.value} href={buildUrl(o.value,novelType,serial)} className={pillClass(period===o.value)} style={pill(period===o.value)}>
                       {o.label}
                     </Link>
                   ))}
@@ -204,7 +205,7 @@ export default async function RankingPage({ searchParams }: Props) {
               <div style={{overflowX:'auto',msOverflowStyle:'none',scrollbarWidth:'none'} as any}>
                 <div style={{display:'flex',gap:6,flexWrap:'nowrap'}}>
                   {typeOptions.map(o => (
-                    <Link key={o.value} href={buildUrl(period,o.value,serial)} style={pill(novelType===o.value)}>
+                    <Link key={o.value} href={buildUrl(period,o.value,serial)} className={pillClass(novelType===o.value)} style={pill(novelType===o.value)}>
                       {o.label}
                     </Link>
                   ))}
@@ -217,7 +218,7 @@ export default async function RankingPage({ searchParams }: Props) {
                 <div style={{display:'flex',gap:5,flexWrap:'nowrap'}}>
                   {genres.map(g => (
                     <Link key={g} href={`/ranking?period=${period}&type=${encodeURIComponent(novelType)}&serial=${serial}&genre=${encodeURIComponent(g)}&page=1`}
-                      style={pill(genre===g, true)}>
+                      className={pillClass(genre===g)} style={pill(genre===g, true)}>
                       {g}
                     </Link>
                   ))}
@@ -229,7 +230,7 @@ export default async function RankingPage({ searchParams }: Props) {
               <div style={{overflowX:'auto',msOverflowStyle:'none',scrollbarWidth:'none'} as any}>
                 <div style={{display:'flex',gap:6,flexWrap:'nowrap'}}>
                   {serialOptions.map(o => (
-                    <Link key={o.value} href={buildUrl(period,novelType,o.value)} style={pill(serial===o.value)}>
+                    <Link key={o.value} href={buildUrl(period,novelType,o.value)} className={pillClass(serial===o.value)} style={pill(serial===o.value)}>
                       {o.label}
                     </Link>
                   ))}

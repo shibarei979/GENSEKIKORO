@@ -139,21 +139,13 @@
   color: var(--color-brand) !important;
 }
 
-/* ダークモード：ピルボタン 非アクティブ（肌色背景・濃い文字） */
-[data-theme="dark"] .ranking-filter a {
+/* ダークモード：ランキングピルボタン（クラスベース） */
+[data-theme="dark"] .ranking-pill-inactive {
   background: #c8a882 !important;
   color: #2a1a0e !important;
   border-color: #a8886a !important;
 }
-
-/* ダークモード：ピルボタン アクティブ（オレンジ背景・白文字） */
-[data-theme="dark"] .ranking-filter a[style*="background:var(--color-brand)"],
-[data-theme="dark"] .ranking-filter a[style*="background:'var(--color-brand)'"],
-[data-theme="dark"] .ranking-filter a[style*='background:"var(--color-brand)"'],
-[data-theme="dark"] .ranking-filter a[style*="background: rgb(242, 106, 33)"],
-[data-theme="dark"] .ranking-filter a[style*="background:#F26A21"],
-[data-theme="dark"] .ranking-filter a[style*="background:'#F26A21'"],
-[data-theme="dark"] .ranking-filter a[style*='background:"#F26A21"'] {
+[data-theme="dark"] .ranking-pill-active {
   background: #F26A21 !important;
   color: #fff !important;
   border-color: #F26A21 !important;
