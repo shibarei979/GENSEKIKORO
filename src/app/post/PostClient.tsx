@@ -128,6 +128,7 @@ export default function PostClient({ profile, userId }: Props) {
   const [savedNovelId,  setSavedNovelId]  = useState<string>('')
   const [isR18,         setIsR18]         = useState(false)
   const [isR15,         setIsR15]         = useState(false)
+  const [allowComments, setAllowComments] = useState(true)
   const [editMode,      setEditMode]      = useState(false)
   const [contests,      setContests]      = useState<any[]>([])
   const [selectedContestIds, setSelectedContestIds] = useState<string[]>([])
@@ -168,6 +169,7 @@ export default function PostClient({ profile, userId }: Props) {
         setNovelType(novel.novel_type || '長編')
         setIsR18(novel.is_r18 || false)
         setIsR15(novel.is_r15 || false)
+        setAllowComments(novel.allow_comments !== false)
         setSavedNovelId(novel.id)
       })
     supabase.from('episodes').select('id,title,ep_number,body,preface,afterword,illust_url,scheduled_at,published')
@@ -324,6 +326,7 @@ export default function PostClient({ profile, userId }: Props) {
           novel_type: novelType,
           is_r18: isR18, is_r15: isR15,
           catchcopy: catchcopy.trim() || null,
+          allow_comments: allowComments,
         }).select().single()
         if (nErr) throw nErr
         novelId = novel.id
@@ -348,6 +351,7 @@ export default function PostClient({ profile, userId }: Props) {
           is_r18: isR18, is_r15: isR15,
           catchcopy: catchcopy.trim() || null,
           novel_type: novelType,
+          allow_comments: allowComments,
         }).eq('id', savedNovelId)
         const res = await supabase.from('episodes')
           .update({

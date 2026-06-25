@@ -436,6 +436,13 @@ export default function MypageClient({
             <button onClick={()=>handleOpenEpManage(novel)} style={{fontSize:12,border:'1px solid #d1fae5',padding:'5px 10px',borderRadius:8,color:'#059669',background:'#ecfdf5',cursor:'pointer'}}>話の公開管理</button>
             <button onClick={()=>handleTogglePublish(novel.id,novel.published)} style={{fontSize:12,border:`1px solid ${novel.published?'var(--color-brand-border)':'#86efac'}`,padding:'5px 10px',borderRadius:8,color:novel.published?'var(--color-text-muted)':'#15803d',background:'none',cursor:'pointer'}}>{novel.published?'非公開にする':'公開する'}</button>
             <button onClick={async()=>{
+                const next = !(novel.allow_comments !== false)
+                await supabase.from('novels').update({allow_comments:next}).eq('id',novel.id)
+                setMyNovels((prev:any[])=>prev.map((n:any)=>n.id===novel.id?{...n,allow_comments:next}:n))
+              }} style={{fontSize:12,border:`1px solid ${novel.allow_comments===false?'#fca5a5':'var(--color-brand-border)'}`,padding:'5px 10px',borderRadius:8,color:novel.allow_comments===false?'var(--color-danger)':'var(--color-text-muted)',background:'none',cursor:'pointer'}}>
+              {novel.allow_comments===false?'コメント不可':'コメント許可中'}
+            </button>
+            <button onClick={async()=>{
                 const{data:eps}=await supabase.from('episodes').select('id,title,ep_number').eq('novel_id',novel.id).order('ep_number',{ascending:true})
                 setDeleteTarget({id:novel.id,title:novel.title,episodes:eps||[]});setDeleteMode(null);setDeleteEpId('')
               }} style={{fontSize:12,border:'1px solid #fca5a5',padding:'5px 10px',borderRadius:8,color:'var(--color-danger)',background:'none',cursor:'pointer'}}>削除</button>
