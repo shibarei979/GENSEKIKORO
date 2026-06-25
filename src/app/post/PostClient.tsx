@@ -1133,7 +1133,7 @@ export default function PostClient({ profile, userId }: Props) {
                 </div>
               )}
               {/* 本文 */}
-              <div style={{fontSize:15,lineHeight:2,color:'var(--color-text)',fontFamily:"'Noto Serif JP',serif",whiteSpace:'pre-wrap',wordBreak:'break-all'}}
+              <div style={{fontSize:17,lineHeight:2,color:'var(--color-text)',fontFamily:"'Noto Serif JP',serif",whiteSpace:'pre-wrap',wordBreak:'break-all'}}
                 dangerouslySetInnerHTML={{__html:
                   (body||'（本文未入力）')
                     // ルビ ｜テキスト《ルビ》
