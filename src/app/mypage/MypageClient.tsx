@@ -595,6 +595,13 @@ export default function MypageClient({
 
     return (
       <div>
+        <div style={{marginBottom:20}}>
+          <div style={{fontSize:15,fontWeight:700,color:'var(--color-text)',marginBottom:6}}>ブロック・ミュート管理</div>
+          <div style={{fontSize:12,color:'var(--color-text-muted)',lineHeight:1.7,padding:'10px 12px',background:'var(--color-bg)',borderRadius:8,border:'1px solid var(--color-brand-border)'}}>
+            <div style={{marginBottom:4}}>🚫 <strong>ブロック</strong>：相手はあなたの作品にコメントできなくなります。</div>
+            <div>🔇 <strong>ミュート</strong>：相手のコメントがあなたには表示されなくなります。相手には通知されません。</div>
+          </div>
+        </div>
         <div style={{marginBottom:24}}>
           <div style={{fontSize:13,fontWeight:700,color:'var(--color-text)',marginBottom:8}}>ブロック中（{blockList.length}人）</div>
           <div style={{fontSize:11,color:'var(--color-text-muted)',marginBottom:10}}>ブロックしたユーザーはあなたの作品にコメントできません。</div>
