@@ -124,7 +124,7 @@ export default async function NovelPage({ params }: { params: { id: string } }) 
     bookmarked = !!b.data
   }
 
-  const author   = authorProfile as any
+  const author = authorProfile as any
 
   let isFollowing = false
   let followerCount = 0
@@ -159,6 +159,25 @@ export default async function NovelPage({ params }: { params: { id: string } }) 
     like_count: novelCommentLikes[c.id] || 0,
     is_pinned: c.is_pinned || false,
   }))
+
+  // ===== おすすめ作品（同ジャンル3件＋別ジャンル3件） =====
+  const [sameGenreRes, otherGenreRes] = await Promise.all([
+    supabase.from('novels')
+      .select('id, title, genre, novel_type, is_serial, author_id, summary')
+      .eq('published', true).eq('genre', novel.genre).neq('id', params.id)
+      .limit(3),
+    supabase.from('novels')
+      .select('id, title, genre, novel_type, is_serial, author_id, summary')
+      .eq('published', true).neq('genre', novel.genre).neq('id', params.id)
+      .limit(3),
+  ])
+  const recommendedNovels = [...(sameGenreRes.data||[]), ...(otherGenreRes.data||[])]
+  const recAuthorIds = Array.from(new Set(recommendedNovels.map((n: any) => n.author_id)))
+  const recAuthorMap: Record<string,string> = {}
+  if (recAuthorIds.length > 0) {
+    const { data: recAuthors } = await supabase.from('profiles').select('user_id, display_name').in('user_id', recAuthorIds as string[])
+    recAuthors?.forEach((a: any) => { recAuthorMap[a.user_id] = a.display_name })
+  }
 
   function fmtNum(n: number): string {
     if (n >= 10000) return (Math.floor(n / 1000) / 10) + '万'
@@ -240,13 +259,8 @@ export default async function NovelPage({ params }: { params: { id: string } }) 
             </div>
             <h1 style={{fontSize:20,fontWeight:700,color:'var(--color-text)',lineHeight:1.4,marginBottom:8,fontFamily:"'Noto Serif JP',serif"}}>{novel.title}</h1>
             {upcomingEpisode && (
-              <div style={{
-                display:'flex', alignItems:'center', gap:8,
-                background:'var(--color-info-bg)', border:'1.5px solid #93c5fd', borderRadius:8,
-                padding:'8px 14px', marginBottom:10, fontSize:12, color:'#1d4ed8', fontWeight:600,
-              }}>
-                次回更新予告：
-                {new Date(upcomingEpisode.scheduled_at!).toLocaleString('ja-JP',{month:'numeric',day:'numeric',hour:'2-digit',minute:'2-digit'})} 頃
+              <div style={{display:'flex',alignItems:'center',gap:8,background:'var(--color-info-bg)',border:'1.5px solid #93c5fd',borderRadius:8,padding:'8px 14px',marginBottom:10,fontSize:12,color:'#1d4ed8',fontWeight:600}}>
+                次回更新予告：{new Date(upcomingEpisode.scheduled_at!).toLocaleString('ja-JP',{month:'numeric',day:'numeric',hour:'2-digit',minute:'2-digit'})} 頃
               </div>
             )}
             <div style={{fontSize:13,color:'var(--color-text-muted)',marginBottom:12,display:'flex',alignItems:'center',gap:6,flexWrap:'wrap'}}>
@@ -260,7 +274,7 @@ export default async function NovelPage({ params }: { params: { id: string } }) 
               )}
             </div>
             {novel.summary && (
-              <div style={{fontSize:13,color:'#5a3a20',lineHeight:1.85,padding:'10px 12px',background:'var(--color-bg)',borderRadius:8,borderLeft:'3px solid #f5a060',marginBottom:14,whiteSpace:'pre-wrap'}}>
+              <div style={{fontSize:13,color:'var(--color-text)',lineHeight:1.85,padding:'10px 12px',background:'var(--color-bg)',borderRadius:8,borderLeft:'3px solid #f5a060',marginBottom:14,whiteSpace:'pre-wrap'}}>
                 {novel.summary}
               </div>
             )}
@@ -299,9 +313,7 @@ export default async function NovelPage({ params }: { params: { id: string } }) 
                   {user && totalCount > 0 && (
                     <span style={{fontSize:11,color:'var(--color-success)',fontWeight:600}}>✓ {fmtNum(readCount)}/{fmtNum(totalCount)}話 既読</span>
                   )}
-                  <span style={{fontSize:11,color:'var(--color-text-muted)'}}>
-                    最終更新：{episodes?.length ? fmtDate(episodes[episodes.length-1].created_at) : '—'}
-                  </span>
+                  <span style={{fontSize:11,color:'var(--color-text-muted)'}}>最終更新：{episodes?.length ? fmtDate(episodes[episodes.length-1].created_at) : '—'}</span>
                 </div>
               </div>
             </div>
@@ -341,6 +353,38 @@ export default async function NovelPage({ params }: { params: { id: string } }) 
               comments={novelComments}
             />
           </div>
+
+          {/* ===== おすすめ作品 ===== */}
+          {recommendedNovels.length > 0 && (
+            <div style={{marginTop:20,background:'var(--color-bg-card)',border:'1px solid var(--color-brand-border)',borderRadius:12,overflow:'hidden'}}>
+              <div style={{padding:'10px 14px',borderBottom:'1px solid var(--color-brand-border)',background:'var(--color-bg)',display:'flex',alignItems:'center',gap:8}}>
+                <span style={{width:4,height:16,background:'var(--color-brand)',borderRadius:2,display:'inline-block'}}/>
+                <span style={{fontSize:14,fontWeight:700,color:'var(--color-text)'}}>おすすめ作品</span>
+              </div>
+              <div style={{display:'flex',flexDirection:'column'}}>
+                {recommendedNovels.map((n: any, i: number) => (
+                  <Link key={n.id} href={`/novel/${n.id}`} style={{textDecoration:'none',display:'block',borderBottom:i<recommendedNovels.length-1?'1px solid var(--color-brand-light)':'none'}}>
+                    <div style={{padding:'12px 14px',display:'flex',gap:10,alignItems:'flex-start'}}>
+                      <div style={{flex:1,minWidth:0}}>
+                        <div style={{display:'flex',gap:4,marginBottom:4,flexWrap:'wrap'}}>
+                          <span style={{fontSize:10,background:'var(--color-brand-light)',color:'var(--color-brand)',border:'1px solid var(--color-tag-border)',padding:'1px 6px',borderRadius:3}}>{n.genre}</span>
+                          {n.novel_type && <span style={{fontSize:10,background:'var(--color-info-bg)',color:'var(--color-info)',border:'1px solid var(--color-info-border)',padding:'1px 6px',borderRadius:3}}>{n.novel_type}</span>}
+                          {n.is_serial && <span style={{fontSize:10,background:'#f0fdf4',color:'#15803d',border:'1px solid #86efac',padding:'1px 6px',borderRadius:3}}>連載中</span>}
+                        </div>
+                        <div style={{fontSize:13,fontWeight:700,color:'var(--color-text)',marginBottom:2,lineHeight:1.4}}>{n.title}</div>
+                        <div style={{fontSize:11,color:'var(--color-text-muted)'}}>作者：{recAuthorMap[n.author_id]||''}</div>
+                        {n.summary && (
+                          <div style={{fontSize:11,color:'var(--color-text-muted)',marginTop:3,lineHeight:1.6,overflow:'hidden',display:'-webkit-box',WebkitLineClamp:2,WebkitBoxOrient:'vertical' as any}}>
+                            {n.summary}
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  </Link>
+                ))}
+              </div>
+            </div>
+          )}
 
           <div className="mobile-only" style={{height:80}}/>
         </div>
