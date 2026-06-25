@@ -35,6 +35,7 @@ interface Props {
   likeMap?: Record<string,number>
   missionStats?: MissionStats
   novelLikeMap?: Record<string,number>
+  postDates?: string[]
   novelCommentMap?: Record<string,number>
   novelViewMap?: Record<string,number>
   novelEpCountMap?: Record<string,number>
@@ -116,6 +117,7 @@ export default function MypageClient({
   historyItems=[], firstEpMap={}, charCountMap={}, likeMap={},
   missionStats={ likeCount:0, discoverCount:0, commentCount:0, bookmarkCount:0, novelCount:0, episodeCount:0, followCount:0 },
   novelLikeMap={}, novelCommentMap={}, novelViewMap={}, novelEpCountMap={}, bmAuthorMap={},
+  postDates=[],
 }: Props) {
   const router   = useRouter()
   const supabase = createClient()
@@ -521,6 +523,72 @@ export default function MypageClient({
     await supabase.from('bookmarks').update({ folder_id: folderId }).eq('novel_id', novelId).eq('user_id', profile.user_id)
     setMyBookmarks(prev => prev.map((bm:any) => bm.novel_id === novelId ? {...bm, folder_id: folderId} : bm))
     setMovingBookmark(null)
+  }
+
+  // ===== 投稿カレンダー =====
+  const PostCalendar = () => {
+    const dateSet = new Set(postDates)
+    const today = new Date()
+    const weeks: Date[][] = []
+    // 過去53週分
+    const start = new Date(today)
+    start.setDate(start.getDate() - 7 * 52 - start.getDay())
+    let cur = new Date(start)
+    while (cur <= today) {
+      const week: Date[] = []
+      for (let d = 0; d < 7; d++) {
+        week.push(new Date(cur))
+        cur.setDate(cur.getDate() + 1)
+      }
+      weeks.push(week)
+    }
+    const months: {label:string; col:number}[] = []
+    weeks.forEach((week, i) => {
+      const firstDay = week[0]
+      if (firstDay.getDate() <= 7) {
+        months.push({ label: `${firstDay.getMonth()+1}月`, col: i })
+      }
+    })
+    return (
+      <div style={{marginTop:20}}>
+        <div style={{fontSize:13,fontWeight:700,color:'var(--color-text)',marginBottom:10}}>投稿カレンダー（過去1年）</div>
+        <div style={{overflowX:'auto',paddingBottom:4}}>
+          <div style={{position:'relative',paddingTop:18,minWidth:'max-content'}}>
+            {/* 月ラベル */}
+            <div style={{display:'flex',position:'absolute',top:0,left:0}}>
+              {months.map((m,i) => (
+                <div key={i} style={{position:'absolute',left:m.col*12,fontSize:9,color:'var(--color-text-muted)',whiteSpace:'nowrap'}}>{m.label}</div>
+              ))}
+            </div>
+            {/* グリッド */}
+            <div style={{display:'flex',gap:2}}>
+              {weeks.map((week, wi) => (
+                <div key={wi} style={{display:'flex',flexDirection:'column',gap:2}}>
+                  {week.map((day, di) => {
+                    const key = `${day.getFullYear()}-${String(day.getMonth()+1).padStart(2,'0')}-${String(day.getDate()).padStart(2,'0')}`
+                    const hasPost = dateSet.has(key)
+                    const isFuture = day > today
+                    return (
+                      <div key={di} title={hasPost?`${key} 投稿あり`:key}
+                        style={{
+                          width:10,height:10,borderRadius:2,
+                          background: isFuture ? 'transparent' : hasPost ? 'var(--color-brand)' : 'var(--color-brand-border)',
+                          opacity: isFuture ? 0 : 1,
+                        }}/>
+                    )
+                  })}
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+        <div style={{display:'flex',alignItems:'center',gap:6,marginTop:8,fontSize:10,color:'var(--color-text-muted)'}}>
+          <div style={{width:10,height:10,borderRadius:2,background:'var(--color-brand-border)'}}/>少ない
+          <div style={{width:10,height:10,borderRadius:2,background:'var(--color-brand)'}}/>多い
+          <span style={{marginLeft:8}}>投稿数：{postDates.length}話（過去1年）</span>
+        </div>
+      </div>
+    )
   }
 
   // ===== 保存済みタブ =====
