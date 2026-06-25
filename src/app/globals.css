@@ -72,8 +72,8 @@
 [data-theme="dark"] {
   --color-brand:        #F26A21;
   --color-brand-dark:   #d95a18;
-  --color-brand-light:  #332418;
-  --color-brand-border: #4a3322;
+  --color-brand-light:  #3a2818;  /* ダークモードのピル非アクティブ背景 */
+  --color-brand-border: #5a3a22;  /* ダークモードの枠線・ピルボーダー */
 
   /* 背景：真っ黒ではなくグレーがかった暗色 */
   --color-bg:           #2a2520;
@@ -94,7 +94,7 @@
   --color-dark-bg-light: #332d28;
   --color-dark-text:     #f2ede8;
 
-  --color-tag-border:   #6a4428;
+  --color-tag-border:   #7a5030;
   --color-info-bg:      #1e2b3e;
   --color-info-border:  #2e4460;
 
@@ -137,6 +137,42 @@
 }
 [data-theme="dark"] header nav a:hover {
   color: var(--color-brand) !important;
+}
+
+/* ダークモード：ピルボタン（ランキング・検索フィルター）*/
+[data-theme="dark"] a[style*="background: rgb(255, 241, 230)"],
+[data-theme="dark"] a[style*="background:'var(--color-brand-light)'"],
+[data-theme="dark"] a[style*='background:"var(--color-brand-light)"'] {
+  background: #3a2818 !important;
+  color: #d4a880 !important;
+  border-color: #5a3a22 !important;
+}
+[data-theme="dark"] a[style*="background: rgb(242, 106, 33)"],
+[data-theme="dark"] a[style*="background:'var(--color-brand)'"],
+[data-theme="dark"] a[style*='background:"var(--color-brand)"'] {
+  background: #c45a18 !important;
+  color: #fff0e6 !important;
+  border-color: #c45a18 !important;
+}
+
+/* ダークモード：非アクティブピルボタン全般 */
+[data-theme="dark"] .ranking-filter a,
+[data-theme="dark"] .ranking-filter a:visited {
+  background: #3a2818 !important;
+  color: #d4a880 !important;
+  border-color: #5a3a22 !important;
+}
+[data-theme="dark"] .ranking-filter a[style*="background: rgb(242"],
+[data-theme="dark"] .ranking-filter a[style*="color: rgb(255"] {
+  background: #c45a18 !important;
+  color: #fff0e6 !important;
+  border-color: #c45a18 !important;
+}
+
+/* ダークモード：検索・ランキングのカード背景 */
+[data-theme="dark"] .search-result-row:hover,
+[data-theme="dark"] .list-row:hover {
+  background: #3a3028 !important;
 }
 
 * { box-sizing: border-box; }
