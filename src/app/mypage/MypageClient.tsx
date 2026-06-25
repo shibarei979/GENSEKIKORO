@@ -588,7 +588,7 @@ export default function MypageClient({
               <div style={{fontSize:15,fontWeight:700,color:'var(--color-text)',marginBottom:12}}>フォルダを作成</div>
               <input value={folderInput} onChange={e=>setFolderInput(e.target.value)}
                 placeholder="フォルダ名" autoFocus
-                onKeyDown={e=>e.key==='Enter'&&handleCreateFolder()}
+                onKeyDown={e=>{if(e.key==='Enter' && !e.nativeEvent.isComposing) handleCreateFolder()}}
                 style={{width:'100%',padding:'9px 12px',border:'1.5px solid var(--color-brand-border)',borderRadius:8,fontSize:16,outline:'none',marginBottom:12,boxSizing:'border-box' as const}}/>
               <div style={{display:'flex',gap:8}}>
                 <button onClick={()=>{setShowFolderModal(false);setFolderInput('')}}
