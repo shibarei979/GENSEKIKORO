@@ -72,42 +72,56 @@
 [data-theme="dark"] {
   --color-brand:        #F26A21;
   --color-brand-dark:   #d95a18;
-  --color-brand-light:  #2c1f14;
-  --color-brand-border: #3d2a1a;
+  --color-brand-light:  #332418;
+  --color-brand-border: #4a3322;
 
-  --color-bg:           #1e1a17;
-  --color-bg-card:      #272320;
-  --color-bg-subtle:    #1e1a17;
+  /* 背景：真っ黒ではなくグレーがかった暗色 */
+  --color-bg:           #2a2520;
+  --color-bg-card:      #332d28;
+  --color-bg-subtle:    #2a2520;
 
-  --color-text:         #ede8e3;
-  --color-text-muted:   #9e9289;
-  --color-text-faint:   #6b6058;
+  /* テキスト：純白でなくウォームホワイト */
+  --color-text:         #f2ede8;
+  --color-text-muted:   #b0a89e;
+  --color-text-faint:   #7a7068;
 
   --color-success:      #4ade80;
   --color-danger:       #f87171;
   --color-info:         #60a5fa;
   --color-warning:      #fbbf24;
 
-  --color-dark-bg:       #141210;
-  --color-dark-bg-light: #2a2520;
-  --color-dark-text:     #ffffff;
+  --color-dark-bg:       #1e1a16;
+  --color-dark-bg-light: #332d28;
+  --color-dark-text:     #f2ede8;
 
-  --color-tag-border:   #5a3a1e;
-  --color-info-bg:      #1a2535;
-  --color-info-border:  #2a3f5a;
+  --color-tag-border:   #6a4428;
+  --color-info-bg:      #1e2b3e;
+  --color-info-border:  #2e4460;
 
   --color-rank-gold:    #F26A21;
-  --color-rank-silver:  #7a8090;
-  --color-rank-bronze:  #a06030;
-  --color-rank-muted:   #3a2816;
+  --color-rank-silver:  #8a9098;
+  --color-rank-bronze:  #b07040;
+  --color-rank-muted:   #4a3420;
 
-  --admin-bg:           #1e1a17;
-  --admin-bg-card:      #272320;
-  --admin-border:       #3d2a1a;
-  --admin-text:         #ede8e3;
-  --admin-text-muted:   #9e9289;
-  --admin-text-faint:   #6b6058;
-  --admin-row-border:   #2e2520;
+  --admin-bg:           #2a2520;
+  --admin-bg-card:      #332d28;
+  --admin-border:       #4a3322;
+  --admin-text:         #f2ede8;
+  --admin-text-muted:   #b0a89e;
+  --admin-text-faint:   #7a7068;
+  --admin-row-border:   #3a3028;
+}
+
+/* ダークモード：フッターのテキスト強制表示 */
+[data-theme="dark"] footer,
+[data-theme="dark"] footer * {
+  color: var(--color-text) !important;
+}
+[data-theme="dark"] footer a {
+  color: var(--color-text-muted) !important;
+}
+[data-theme="dark"] footer a:hover {
+  color: var(--color-brand) !important;
 }
 
 * { box-sizing: border-box; }
