@@ -160,18 +160,107 @@ export default async function NovelPage({ params }: { params: { id: string } }) 
     is_pinned: c.is_pinned || false,
   }))
 
-  // ===== おすすめ作品（同ジャンル3件＋別ジャンル3件） =====
-  const [sameGenreRes, otherGenreRes] = await Promise.all([
-    supabase.from('novels')
+  // ===== おすすめ作品（パーソナライズ） =====
+  let readNovelIds = new Set<string>([params.id])
+  let historyGenres: string[] = []
+  let historyTags: string[] = []
+  let historyAuthorIds: string[] = []
+
+  if (user) {
+    // 閲覧履歴から好みを抽出
+    const { data: historyData } = await supabase
+      .from('page_views')
+      .select('novel_id, novels(genre, tags, author_id)')
+      .eq('user_id', user.id)
+      .order('created_at', { ascending: false })
+      .limit(30)
+
+    for (const h of (historyData || [])) {
+      const n = (h as any).novels
+      if (!n) continue
+      readNovelIds.add(h.novel_id)
+      if (n.genre) historyGenres.push(n.genre)
+      if (n.tags) historyTags.push(...n.tags)
+      if (n.author_id) historyAuthorIds.push(n.author_id)
+    }
+  }
+
+  // 未ログイン：前半・後半ともランダムジャンルで表示
+  const allGenresList = ['異世界','ファンタジー','SF','恋愛','学園','ミステリー','ホラー','歴史・時代','日常','アクション','コメディ','その他']
+  const isLoggedIn = !!user
+
+  // 頻出ジャンル・タグ・作者を集計
+  const genreFreq: Record<string,number> = {}
+  historyGenres.forEach(g => { genreFreq[g] = (genreFreq[g]||0)+1 })
+  const tagFreq: Record<string,number> = {}
+  historyTags.forEach(t => { tagFreq[t] = (tagFreq[t]||0)+1 })
+  const topGenres = Object.entries(genreFreq).sort((a,b)=>b[1]-a[1]).map(([g])=>g)
+  const topTags   = Object.entries(tagFreq).sort((a,b)=>b[1]-a[1]).slice(0,5).map(([t])=>t)
+  const topAuthors = [...new Set(historyAuthorIds)].slice(0,3)
+
+  // 前半：パーソナライズ or ランダム
+  let scored: any[] = []
+  if (isLoggedIn && topGenres.length > 0) {
+    const preferGenre = topGenres[0]
+    const { data: personalizedRaw } = await supabase
+      .from('novels')
+      .select('id, title, genre, novel_type, is_serial, author_id, summary, tags')
+      .eq('published', true)
+      .eq('genre', preferGenre)
+      .order('created_at', { ascending: false })
+      .limit(20)
+    scored = (personalizedRaw || [])
+      .filter((n: any) => !readNovelIds.has(n.id))
+      .map((n: any) => {
+        let score = 0
+        if (topAuthors.includes(n.author_id)) score += 3
+        const matchTags = (n.tags || []).filter((t: string) => topTags.includes(t)).length
+        score += matchTags * 2
+        return { ...n, score }
+      })
+      .sort((a: any, b: any) => b.score - a.score)
+      .slice(0, 3)
+  } else {
+    // 未ログイン：ランダムジャンルから3件
+    const rg1 = allGenresList[Math.floor(Math.random() * allGenresList.length)]
+    const { data: randomRaw1 } = await supabase
+      .from('novels')
       .select('id, title, genre, novel_type, is_serial, author_id, summary')
-      .eq('published', true).eq('genre', novel.genre).neq('id', params.id)
-      .limit(3),
-    supabase.from('novels')
+      .eq('published', true).eq('genre', rg1).neq('id', params.id)
+      .limit(10)
+    scored = (randomRaw1 || [])
+      .sort(() => Math.random() - 0.5)
+      .slice(0, 3)
+  }
+
+  // 後半：ディスカバリー or ランダム
+  let discovery: any[] = []
+  if (isLoggedIn) {
+    const unusedGenres = allGenresList.filter(g => !topGenres.slice(0,3).includes(g) && g !== novel.genre)
+    const discoveryGenre = unusedGenres[Math.floor(Math.random() * Math.max(1, unusedGenres.length))] || allGenresList[0]
+    const { data: discoveryRaw } = await supabase
+      .from('novels')
       .select('id, title, genre, novel_type, is_serial, author_id, summary')
-      .eq('published', true).neq('genre', novel.genre).neq('id', params.id)
-      .limit(3),
-  ])
-  const recommendedNovels = [...(sameGenreRes.data||[]), ...(otherGenreRes.data||[])]
+      .eq('published', true).eq('genre', discoveryGenre)
+      .order('created_at', { ascending: false })
+      .limit(10)
+    discovery = (discoveryRaw || [])
+      .filter((n: any) => !readNovelIds.has(n.id))
+      .slice(0, 3)
+  } else {
+    // 未ログイン：別のランダムジャンルから3件
+    const rg2 = allGenresList[Math.floor(Math.random() * allGenresList.length)]
+    const { data: randomRaw2 } = await supabase
+      .from('novels')
+      .select('id, title, genre, novel_type, is_serial, author_id, summary')
+      .eq('published', true).eq('genre', rg2).neq('id', params.id)
+      .limit(10)
+    discovery = (randomRaw2 || [])
+      .sort(() => Math.random() - 0.5)
+      .slice(0, 3)
+  }
+
+  const recommendedNovels = [...scored, ...discovery]
   const recAuthorIds = Array.from(new Set(recommendedNovels.map((n: any) => n.author_id)))
   const recAuthorMap: Record<string,string> = {}
   if (recAuthorIds.length > 0) {
