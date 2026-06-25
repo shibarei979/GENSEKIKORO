@@ -68,67 +68,69 @@ export default async function Sidebar() {
 
   return (
     <SidebarDrawer>
-      <div style={{width:240,flexShrink:0,display:'flex',flexDirection:'column',gap:12,paddingLeft:8}}>
+      <div style={{padding:'0 16px',display:'flex',flexDirection:'column',gap:24}}>
 
         {/* お知らせ */}
-        <div style={{background:'var(--color-bg-card)',border:'1px solid var(--color-brand-border)',borderRadius:10,overflow:'hidden'}}>
-          <div style={{padding:'8px 12px',fontSize:12,fontWeight:700,color:'var(--color-text)',borderBottom:'1px solid var(--color-brand-border)',background:'var(--color-bg)',display:'flex',justifyContent:'space-between',alignItems:'center'}}>
-            お知らせ
-            <Link href="/announcements" style={{fontSize:10,color:'var(--color-brand)',textDecoration:'none'}}>もっと見る ›</Link>
+        <div>
+          <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:10}}>
+            <span style={{fontSize:13,fontWeight:700,color:'var(--color-text)'}}>お知らせ</span>
+            <Link href="/announcements" style={{fontSize:11,color:'var(--color-brand)',textDecoration:'none'}}>もっと見る ›</Link>
           </div>
-          {(notices||[]).length > 0 ? (notices||[]).map((n: any) => {
-            const tag = noticeTypeLabel(n.type)
-            return (
-              <Link key={n.id} href={`/announcements/${n.id}`} style={{display:'block',padding:'9px 12px',borderBottom:'1px solid var(--color-brand-light)',textDecoration:'none'}}>
-                <div style={{display:'flex',alignItems:'center',gap:5,marginBottom:3}}>
-                  <span style={{fontSize:9,fontWeight:700,color:tag.color,background:tag.bg,border:`1px solid ${tag.border}`,padding:'1px 5px',borderRadius:3,flexShrink:0}}>{tag.label}</span>
-                  <span style={{fontSize:9,color:'var(--color-text-faint)'}}>{new Date(n.created_at).toLocaleDateString('ja-JP')}</span>
-                </div>
-                <div style={{fontSize:11,color:'var(--color-text)',lineHeight:1.5}}>{n.title}</div>
-              </Link>
-            )
-          }) : (
-            <div style={{padding:'12px',fontSize:11,color:'var(--color-text-faint)',textAlign:'center'}}>お知らせはまだありません</div>
-          )}
+          <div style={{display:'flex',flexDirection:'column',gap:10}}>
+            {(notices||[]).length > 0 ? (notices||[]).map((n: any) => {
+              const tag = noticeTypeLabel(n.type)
+              return (
+                <Link key={n.id} href={`/announcements/${n.id}`} style={{textDecoration:'none'}}>
+                  <div style={{display:'flex',alignItems:'center',gap:5,marginBottom:2}}>
+                    <span style={{fontSize:9,fontWeight:700,color:tag.color,background:tag.bg,border:`1px solid ${tag.border}`,padding:'1px 5px',borderRadius:3,flexShrink:0}}>{tag.label}</span>
+                    <span style={{fontSize:9,color:'var(--color-text-faint)'}}>{new Date(n.created_at).toLocaleDateString('ja-JP')}</span>
+                  </div>
+                  <div style={{fontSize:12,color:'var(--color-text)',lineHeight:1.5}}>{n.title}</div>
+                </Link>
+              )
+            }) : (
+              <div style={{fontSize:11,color:'var(--color-text-faint)'}}>お知らせはまだありません</div>
+            )}
+          </div>
         </div>
 
         {/* 週間ランキング */}
-        <div style={{background:'var(--color-bg-card)',border:'1px solid var(--color-brand-border)',borderRadius:10,overflow:'hidden'}}>
-          <div style={{padding:'8px 12px',fontSize:12,fontWeight:700,color:'var(--color-text)',borderBottom:'1px solid var(--color-brand-border)',background:'var(--color-bg)',display:'flex',justifyContent:'space-between',alignItems:'center'}}>
-            週間ランキング
-            <a href='/ranking' style={{fontSize:10,color:'var(--color-brand)',textDecoration:'none'}}>もっと見る ›</a>
+        <div>
+          <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:10}}>
+            <span style={{fontSize:13,fontWeight:700,color:'var(--color-text)'}}>週間ランキング</span>
+            <a href='/ranking' style={{fontSize:11,color:'var(--color-brand)',textDecoration:'none'}}>もっと見る ›</a>
           </div>
-          {Array.from({length:5},(_,i) => {
-            const n = weeklyNovels[i]
-            return (
-              <div key={i} style={{display:'flex',gap:7,padding:'8px 12px',borderBottom:'1px solid var(--color-brand-light)',alignItems:'flex-start'}}>
-                <span style={{fontSize:i<3?15:13,fontWeight:800,color:rankColor(i),minWidth:16,flexShrink:0,fontFamily:"'Noto Serif JP',serif"}}>{i+1}</span>
-                {n ? (
-                  <Link href={`/novel/${n.id}`} style={{textDecoration:'none',flex:1,minWidth:0}}>
-                    <div style={{fontSize:11,fontWeight:600,color:'var(--color-text)',lineHeight:1.4,marginBottom:1}}>{n.title}</div>
-                    <div style={{fontSize:10,color:'var(--color-text-muted)'}}>{n.display_name} · ♡{n.likeCount}</div>
-                  </Link>
-                ) : (
-                  <div style={{flex:1}}>
-                    <div style={{fontSize:10,color:'var(--color-brand)',marginBottom:1}}>ジャンル</div>
-                    <div style={{fontSize:11,fontWeight:600,color:'var(--color-text)'}}>作品タイトル（準備中）</div>
-                  </div>
-                )}
-              </div>
-            )
-          })}
+          <div style={{display:'flex',flexDirection:'column',gap:10}}>
+            {Array.from({length:5},(_,i) => {
+              const n = weeklyNovels[i]
+              return (
+                <div key={i} style={{display:'flex',gap:8,alignItems:'flex-start'}}>
+                  <span style={{fontSize:i<3?15:13,fontWeight:800,color:rankColor(i),minWidth:18,flexShrink:0,fontFamily:"'Noto Serif JP',serif"}}>{i+1}</span>
+                  {n ? (
+                    <Link href={`/novel/${n.id}`} style={{textDecoration:'none',flex:1,minWidth:0}}>
+                      <div style={{fontSize:12,fontWeight:600,color:'var(--color-text)',lineHeight:1.4,marginBottom:1}}>{n.title}</div>
+                      <div style={{fontSize:10,color:'var(--color-text-muted)'}}>{n.display_name} · ♡{n.likeCount}</div>
+                    </Link>
+                  ) : (
+                    <div style={{flex:1}}>
+                      <div style={{fontSize:10,color:'var(--color-brand)',marginBottom:1}}>ジャンル</div>
+                      <div style={{fontSize:12,fontWeight:600,color:'var(--color-text)'}}>作品タイトル（準備中）</div>
+                    </div>
+                  )}
+                </div>
+              )
+            })}
+          </div>
         </div>
 
         {/* ジャンルから探す */}
-        <div style={{background:'var(--color-bg-card)',border:'1px solid var(--color-brand-border)',borderRadius:10,overflow:'hidden'}}>
-          <div style={{padding:'8px 12px',fontSize:12,fontWeight:700,color:'var(--color-text)',borderBottom:'1px solid var(--color-brand-border)',background:'var(--color-bg)'}}>
-            ジャンルから探す
-          </div>
-          <div style={{padding:'10px 12px',display:'flex',flexWrap:'wrap',gap:6}}>
+        <div>
+          <div style={{fontSize:13,fontWeight:700,color:'var(--color-text)',marginBottom:10}}>ジャンルから探す</div>
+          <div style={{display:'flex',flexWrap:'wrap',gap:6}}>
             {GENRES.map(g => (
               <Link key={g} href={`/search?genre=${encodeURIComponent(g)}`}
-                style={{fontSize:11,padding:'3px 10px',borderRadius:12,border:'1px solid var(--color-brand-border)',
-                  background:'var(--color-bg)',color:'var(--color-text-muted)',textDecoration:'none'}}>
+                style={{fontSize:11,padding:'4px 10px',borderRadius:12,border:'1px solid var(--color-brand-border)',
+                  background:'var(--color-bg-card)',color:'var(--color-text-muted)',textDecoration:'none'}}>
                 {g}
               </Link>
             ))}
