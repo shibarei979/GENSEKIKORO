@@ -4,13 +4,13 @@ import { createClient } from '@/lib/supabase/client'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 
-interface Novel { id: string; title: string; genre: string; display_name: string; published: boolean; is_r18: boolean; created_at: string }
+interface Novel { id: string; title: string; genre: string; display_name: string; published: boolean; is_r18: boolean; created_at: string; aims_publishing?: boolean }
 
 const btn = (color: string, bg: string, border: string) => ({
   padding:'5px 12px',borderRadius:6,fontSize:11,fontWeight:600,cursor:'pointer',color,background:bg,border:`1px solid ${border}`,
 })
 
-export default function NovelManager({ initialNovels, total, currentPage, q }: { initialNovels: Novel[]; total: number; currentPage: number; q: string }) {
+export default function NovelManager({ initialNovels, total, currentPage, q, publishingOnly }: { initialNovels: Novel[]; total: number; currentPage: number; q: string; publishingOnly?: boolean }) {
   const supabase = createClient()
   const router = useRouter()
   const [novels, setNovels] = useState(initialNovels)
@@ -29,7 +29,7 @@ export default function NovelManager({ initialNovels, total, currentPage, q }: {
 
   function handleSearch(e: React.FormEvent) {
     e.preventDefault()
-    router.push(`/admin/novels?q=${encodeURIComponent(search)}`)
+    router.push(`/admin/novels?q=${encodeURIComponent(search)}${publishingOnly?'&publishing=1':''}`)
   }
 
   const PAGE_SIZE = 20
@@ -49,10 +49,11 @@ export default function NovelManager({ initialNovels, total, currentPage, q }: {
         ) : novels.map((n, idx) => (
           <div key={n.id} style={{padding:'12px 16px',borderBottom:idx<novels.length-1?'1px solid #f1f5f9':'none',display:'flex',alignItems:'center',gap:12}}>
             <div style={{flex:1,minWidth:0}}>
-              <div style={{display:'flex',alignItems:'center',gap:6,marginBottom:2}}>
+              <div style={{display:'flex',alignItems:'center',gap:6,marginBottom:2,flexWrap:'wrap'}}>
                 <span style={{fontSize:10,background:'#FFF1E6',color:'#F26A21',border:'1px solid #f5b080',padding:'1px 5px',borderRadius:3}}>{n.genre}</span>
                 {n.is_r18 && <span style={{fontSize:10,background:'#fef2f2',color:'#dc2626',border:'1px solid #fca5a5',padding:'1px 5px',borderRadius:3}}>R18</span>}
                 {!n.published && <span style={{fontSize:10,background:'#f1f5f9',color:'#94a3b8',padding:'1px 5px',borderRadius:3}}>非公開</span>}
+                {n.aims_publishing && <span style={{fontSize:10,background:'#fefce8',color:'#854d0e',border:'1px solid #fde047',padding:'1px 5px',borderRadius:3,fontWeight:700}}>📚 書籍化希望</span>}
               </div>
               <Link href={`/novel/${n.id}`} target="_blank" style={{fontSize:13,fontWeight:600,color:'#1e293b',textDecoration:'none'}}>{n.title}</Link>
               <div style={{fontSize:11,color:'#94a3b8',marginTop:1}}>作者：{n.display_name} · {new Date(n.created_at).toLocaleDateString('ja-JP')}</div>
@@ -69,9 +70,9 @@ export default function NovelManager({ initialNovels, total, currentPage, q }: {
 
       {totalPages > 1 && (
         <div style={{display:'flex',justifyContent:'center',gap:8,marginTop:16}}>
-          {currentPage > 1 && <a href={`/admin/novels?q=${q}&page=${currentPage-1}`} style={{padding:'6px 16px',border:'1px solid #e2e8f0',borderRadius:8,fontSize:13,color:'#F26A21',textDecoration:'none',background:'#fff'}}>‹ 前へ</a>}
+          {currentPage > 1 && <a href={`/admin/novels?q=${q}&page=${currentPage-1}${publishingOnly?'&publishing=1':''}`} style={{padding:'6px 16px',border:'1px solid #e2e8f0',borderRadius:8,fontSize:13,color:'#F26A21',textDecoration:'none',background:'#fff'}}>‹ 前へ</a>}
           <span style={{padding:'6px 12px',fontSize:13,color:'#64748b'}}>{currentPage} / {totalPages}</span>
-          {currentPage < totalPages && <a href={`/admin/novels?q=${q}&page=${currentPage+1}`} style={{padding:'6px 16px',border:'1px solid #e2e8f0',borderRadius:8,fontSize:13,color:'#F26A21',textDecoration:'none',background:'#fff'}}>次へ ›</a>}
+          {currentPage < totalPages && <a href={`/admin/novels?q=${q}&page=${currentPage+1}${publishingOnly?'&publishing=1':''}`} style={{padding:'6px 16px',border:'1px solid #e2e8f0',borderRadius:8,fontSize:13,color:'#F26A21',textDecoration:'none',background:'#fff'}}>次へ ›</a>}
         </div>
       )}
     </div>

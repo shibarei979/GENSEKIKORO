@@ -6,7 +6,7 @@ import Header from '@/components/layout/Header'
 import Footer from '@/components/layout/Footer'
 import NovelManager from './NovelManager'
 
-export default async function AdminNovelsPage({ searchParams }: { searchParams: { q?: string; page?: string } }) {
+export default async function AdminNovelsPage({ searchParams }: { searchParams: { q?: string; page?: string; publishing?: string } }) {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/auth/login')
@@ -15,14 +15,16 @@ export default async function AdminNovelsPage({ searchParams }: { searchParams: 
 
   const q = searchParams.q || ''
   const page = Number(searchParams.page || 1)
+  const publishingOnly = searchParams.publishing === '1'
   const PAGE_SIZE = 20
   const offset = (page - 1) * PAGE_SIZE
 
-  let query = supabase.from('novels').select('id, title, genre, author_id, published, is_r18, created_at', { count: 'exact' })
+  let query = supabase.from('novels').select('id, title, genre, author_id, published, is_r18, created_at, aims_publishing', { count: 'exact' })
   if (q) query = (query as any).ilike('title', `%${q}%`)
+  if (publishingOnly) query = (query as any).eq('aims_publishing', true)
   const { data: novels, count } = await (query as any).order('created_at', { ascending: false }).range(offset, offset + PAGE_SIZE - 1)
 
-  const authorIds = Array.from(new Set((novels||[]).map((n: any) => n.author_id)))
+  const authorIds = (novels||[]).map((n: any) => n.author_id).filter((v:string,i:number,a:string[]) => a.indexOf(v)===i)
   const authorMap: Record<string, string> = {}
   if (authorIds.length > 0) {
     const { data: authors } = await supabase.from('profiles').select('user_id, display_name').in('user_id', authorIds as string[])
@@ -34,12 +36,18 @@ export default async function AdminNovelsPage({ searchParams }: { searchParams: 
     <div style={{minHeight:'100vh',background:'#f8fafc',fontFamily:"'Noto Sans JP',sans-serif"}}>
       <Header profile={profile} user={user} />
       <div style={{maxWidth:900,margin:'0 auto',padding:'32px'}}>
-        <div style={{display:'flex',alignItems:'center',gap:12,marginBottom:24}}>
+        <div style={{display:'flex',alignItems:'center',gap:12,marginBottom:24,flexWrap:'wrap'}}>
           <Link href="/admin" style={{fontSize:13,color:'#64748b',textDecoration:'none'}}>← 管理画面</Link>
           <span style={{fontSize:18,fontWeight:800,color:'#1e293b'}}>作品管理</span>
           <span style={{fontSize:13,color:'#64748b'}}>（{count?.toLocaleString()}作品）</span>
+          <a href={`/admin/novels?publishing=${publishingOnly?'0':'1'}`}
+            style={{marginLeft:'auto',padding:'6px 14px',borderRadius:8,fontSize:12,fontWeight:600,textDecoration:'none',
+              background:publishingOnly?'#eab308':'#fff',color:publishingOnly?'#fff':'#64748b',
+              border:`1px solid ${publishingOnly?'#eab308':'#e2e8f0'}`}}>
+            📚 書籍化希望{publishingOnly?' ✓':''}
+          </a>
         </div>
-        <NovelManager initialNovels={novelsWithAuthor} total={count||0} currentPage={page} q={q} />
+        <NovelManager initialNovels={novelsWithAuthor} total={count||0} currentPage={page} q={q} publishingOnly={publishingOnly}/>
       </div>
       <Footer user={user} />
     </div>
