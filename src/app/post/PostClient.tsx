@@ -130,6 +130,7 @@ export default function PostClient({ profile, userId }: Props) {
   const [isR18,         setIsR18]         = useState(false)
   const [isR15,         setIsR15]         = useState(false)
   const [allowComments, setAllowComments] = useState(true)
+  const [aimsPublishing, setAimsPublishing] = useState(false)
   const [editMode,      setEditMode]      = useState(false)
   const [contests,      setContests]      = useState<any[]>([])
   const [selectedContestIds, setSelectedContestIds] = useState<string[]>([])
@@ -171,6 +172,7 @@ export default function PostClient({ profile, userId }: Props) {
         setIsR18(novel.is_r18 || false)
         setIsR15(novel.is_r15 || false)
         setAllowComments(novel.allow_comments !== false)
+        setAimsPublishing(novel.aims_publishing || false)
         setSavedNovelId(novel.id)
       })
     supabase.from('episodes').select('id,title,ep_number,body,preface,afterword,illust_url,scheduled_at,published')
@@ -328,6 +330,7 @@ export default function PostClient({ profile, userId }: Props) {
           is_r18: isR18, is_r15: isR15,
           catchcopy: catchcopy.trim() || null,
           allow_comments: allowComments,
+          aims_publishing: aimsPublishing,
         }).select().single()
         if (nErr) throw nErr
         novelId = novel.id
@@ -353,6 +356,7 @@ export default function PostClient({ profile, userId }: Props) {
           catchcopy: catchcopy.trim() || null,
           novel_type: novelType,
           allow_comments: allowComments,
+          aims_publishing: aimsPublishing,
         }).eq('id', savedNovelId)
         const res = await supabase.from('episodes')
           .update({
@@ -884,6 +888,40 @@ export default function PostClient({ profile, userId }: Props) {
             {isR18 && <div style={{fontSize:11,color:'var(--color-danger)',marginTop:8}}>⚠ ログイン済み18歳以上のユーザーにのみ表示されます</div>}
           </div>
         </div>
+
+        {/* 書籍化設定 */}
+        {(mode === 'new' || editMode) && (
+          <div style={sec}>
+            <div style={sh}>書籍化について</div>
+            <div style={{padding:'14px 18px'}}>
+              <label style={{display:'flex',alignItems:'center',gap:10,cursor:'pointer'}}>
+                <input type="checkbox" checked={aimsPublishing} onChange={e=>setAimsPublishing(e.target.checked)}
+                  style={{width:18,height:18,accentColor:'var(--color-brand)',cursor:'pointer'}}/>
+                <div>
+                  <div style={{fontSize:13,fontWeight:600,color:'var(--color-text)'}}>この作品の書籍化を目指している</div>
+                  <div style={{fontSize:11,color:'var(--color-text-muted)',marginTop:2}}>チェックすると、運営からのサポート情報をお届けしやすくなります</div>
+                </div>
+              </label>
+            </div>
+          </div>
+        )}
+
+        {/* コメント設定 */}
+        {(mode === 'new' || editMode) && (
+          <div style={sec}>
+            <div style={sh}>コメント設定</div>
+            <div style={{padding:'14px 18px'}}>
+              <label style={{display:'flex',alignItems:'center',gap:10,cursor:'pointer'}}>
+                <input type="checkbox" checked={allowComments} onChange={e=>setAllowComments(e.target.checked)}
+                  style={{width:18,height:18,accentColor:'var(--color-brand)',cursor:'pointer'}}/>
+                <div>
+                  <div style={{fontSize:13,fontWeight:600,color:'var(--color-text)'}}>読者からのコメントを受け付ける</div>
+                  <div style={{fontSize:11,color:'var(--color-text-muted)',marginTop:2}}>OFFにすると、この作品へのコメントができなくなります</div>
+                </div>
+              </label>
+            </div>
+          </div>
+        )}
 
         {/* 話の内容 */}
         {(!editMode || editEpId) && (
