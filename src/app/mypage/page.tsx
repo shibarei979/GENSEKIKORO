@@ -39,13 +39,6 @@ export default async function MypagePage() {
   const { data: novels } = await supabase
     .from('novels').select('*').eq('author_id', user.id).order('created_at', { ascending: false })
 
-  // カレンダー用：過去1年のエピソード投稿日
-  const oneYearAgo = new Date(Date.now() - 365*24*60*60*1000).toISOString()
-  const { data: calendarEps } = await supabase
-    .from('episodes').select('created_at').in('novel_id', novelIds.length > 0 ? novelIds : [''])
-    .eq('published', true).gte('created_at', oneYearAgo)
-  const postDates = (calendarEps||[]).map((e:any) => e.created_at.slice(0,10))
-
   // 作品ごとのいいね・コメント・閲覧数
   const novelIds = (novels || []).map((n: any) => n.id)
   const novelLikeMap: Record<string,number> = {}
@@ -64,6 +57,13 @@ export default async function MypagePage() {
     viewsData.data?.forEach((v:any) => { novelViewMap[v.novel_id] = (novelViewMap[v.novel_id]||0)+1 })
     epsData.data?.forEach((e:any) => { novelEpCountMap[e.novel_id] = (novelEpCountMap[e.novel_id]||0)+1 })
   }
+
+  // カレンダー用：過去1年のエピソード投稿日
+  const oneYearAgo = new Date(Date.now() - 365*24*60*60*1000).toISOString()
+  const { data: calendarEps } = await supabase
+    .from('episodes').select('created_at').in('novel_id', novelIds.length > 0 ? novelIds : [''])
+    .eq('published', true).gte('created_at', oneYearAgo)
+  const postDates = (calendarEps||[]).map((e:any) => e.created_at.slice(0,10))
 
   const { data: bookmarkedNovels } = await supabase
     .from('bookmarks')
