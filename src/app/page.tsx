@@ -109,6 +109,44 @@ export default async function HomePage() {
     tags: (ep.novels as any)?.tags || [],
   }))
 
+  // ===== 短編棚 =====
+  const { data: tanpenEpRaw } = await supabase
+    .from('episodes')
+    .select('id, title, ep_number, created_at, novel_id, novels(id, title, genre, author_id, published, summary, catchcopy, tags, novel_type, is_r18)')
+    .order('created_at', { ascending: false })
+    .limit(100)
+  const seenTanpenIds = new Set<string>()
+  const tanpenEpFiltered = (tanpenEpRaw || [])
+    .filter((ep: any) => {
+      const n = ep.novels as any
+      if (!n?.published || n?.novel_type !== '短編' || n?.is_r18) return false
+      if (seenTanpenIds.has(n.id)) return false
+      seenTanpenIds.add(n.id)
+      return true
+    })
+    .slice(0, 10)
+  const tanpenAuthorIds = tanpenEpFiltered
+    .map((ep: any) => (ep.novels as any)?.author_id)
+    .filter(Boolean)
+    .filter((v: string, i: number, a: string[]) => a.indexOf(v) === i)
+  let tanpenAuthorMap: Record<string,string> = {}
+  if (tanpenAuthorIds.length > 0) {
+    const { data: ta } = await supabase.from('profiles').select('user_id, display_name').in('user_id', tanpenAuthorIds)
+    ta?.forEach((a: any) => { tanpenAuthorMap[a.user_id] = a.display_name })
+  }
+  const tanpenEpisodes = tanpenEpFiltered.map((ep: any) => ({
+    id: ep.id,
+    title: ep.title,
+    ep_number: ep.ep_number,
+    novel_id: (ep.novels as any)?.id,
+    novel_title: (ep.novels as any)?.title,
+    genre: (ep.novels as any)?.genre,
+    author_name: tanpenAuthorMap[(ep.novels as any)?.author_id] || '',
+    summary: (ep.novels as any)?.summary || null,
+    catchcopy: (ep.novels as any)?.catchcopy || null,
+    tags: (ep.novels as any)?.tags || [],
+  }))
+
   const oneMonthAgo = new Date(Date.now() - 30*24*60*60*1000).toISOString()
   const { data: allLatestRaw } = await supabase
     .from('novels')
