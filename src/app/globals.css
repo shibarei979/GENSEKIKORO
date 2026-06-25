@@ -80,10 +80,10 @@
   --color-bg-card:      #332d28;
   --color-bg-subtle:    #2a2520;
 
-  /* テキスト：純白でなくウォームホワイト */
-  --color-text:         #f2ede8;
-  --color-text-muted:   #b0a89e;
-  --color-text-faint:   #7a7068;
+  /* テキスト：明るく読みやすい */
+  --color-text:         #f5f0eb;
+  --color-text-muted:   #d4c8bc;
+  --color-text-faint:   #a09088;
 
   --color-success:      #4ade80;
   --color-danger:       #f87171;
