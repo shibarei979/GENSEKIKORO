@@ -113,6 +113,7 @@ export default function PostClient({ profile, userId }: Props) {
 
   const [fontSize,     setFontSize]     = useState(15)
   const [showReplace,  setShowReplace]  = useState(false)
+  const [showPreview,  setShowPreview]  = useState(false)
   const [replaceFrom,  setReplaceFrom]  = useState('')
   const [replaceTo,    setReplaceTo]    = useState('')
   const [replaceCount, setReplaceCount] = useState<number|null>(null)
@@ -966,6 +967,11 @@ export default function PostClient({ profile, userId }: Props) {
                     <button type="button" onClick={indentNonDialogue} style={toolBtn}>一文字下げ</button>
                     <button type="button" onClick={()=>insertText('\n\n')} style={toolBtn}>改行</button>
                     <div style={{width:1,background:'var(--color-brand-border)',margin:'0 2px'}}/>
+                    <button type="button" onClick={()=>setShowPreview(true)}
+                      style={{...toolBtn,background:'var(--color-brand)',color:'#fff',borderColor:'var(--color-brand)'}}>
+                      プレビュー
+                    </button>
+                    <div style={{width:1,background:'var(--color-brand-border)',margin:'0 2px'}}/>
                     <button type="button" onClick={()=>setShowReplace(!showReplace)}
                       style={{...toolBtn,background:showReplace?'var(--color-brand)':'var(--color-bg-card)',color:showReplace?'var(--color-bg-card)':'var(--color-text-muted)',borderColor:showReplace?'var(--color-brand)':'var(--color-brand-border)'}}>
                       一括置換
@@ -1097,6 +1103,58 @@ export default function PostClient({ profile, userId }: Props) {
       </div>
 
       <Footer user={true} />
+
+      {/* プレビューモーダル */}
+      {showPreview && mounted && createPortal(
+        <div style={{position:'fixed',inset:0,background:'rgba(0,0,0,0.7)',zIndex:9999,display:'flex',flexDirection:'column',overflow:'hidden'}}
+          onClick={()=>setShowPreview(false)}>
+          <div style={{background:'var(--color-bg)',borderBottom:'1px solid var(--color-brand-border)',padding:'10px 16px',display:'flex',alignItems:'center',justifyContent:'space-between',flexShrink:0}}
+            onClick={e=>e.stopPropagation()}>
+            <div style={{fontSize:14,fontWeight:700,color:'var(--color-text)'}}>プレビュー</div>
+            <button onClick={()=>setShowPreview(false)}
+              style={{padding:'5px 14px',background:'var(--color-brand)',color:'#fff',border:'none',borderRadius:8,fontSize:13,cursor:'pointer'}}>
+              閉じる
+            </button>
+          </div>
+          <div style={{flex:1,overflowY:'auto',background:'var(--color-bg-card)'}} onClick={e=>e.stopPropagation()}>
+            <div style={{maxWidth:700,margin:'0 auto',padding:'24px 20px'}}>
+              {/* タイトル */}
+              <h1 style={{fontSize:22,fontWeight:700,color:'var(--color-text)',lineHeight:1.4,marginBottom:16,fontFamily:"'Noto Serif JP',serif"}}>{epTitle||'（タイトル未入力）'}</h1>
+              {/* 前書き */}
+              {preface && (
+                <div style={{fontSize:13,color:'var(--color-text-muted)',lineHeight:1.8,marginBottom:20,padding:'10px 14px',background:'var(--color-bg)',borderRadius:8,borderLeft:'3px solid var(--color-brand-border)',whiteSpace:'pre-wrap'}}>
+                  {preface}
+                </div>
+              )}
+              {/* 挿絵 */}
+              {illustPreview && (
+                <div style={{textAlign:'center',marginBottom:20}}>
+                  <img src={illustPreview} alt="挿絵" style={{maxWidth:'100%',maxHeight:400,borderRadius:8,objectFit:'contain'}}/>
+                </div>
+              )}
+              {/* 本文 */}
+              <div style={{fontSize:15,lineHeight:2,color:'var(--color-text)',fontFamily:"'Noto Serif JP',serif",whiteSpace:'pre-wrap',wordBreak:'break-all'}}
+                dangerouslySetInnerHTML={{__html:
+                  (body||'（本文未入力）')
+                    // ルビ ｜テキスト《ルビ》
+                    .replace(/｜([^《]+)《([^》]+)》/g,'<ruby>$1<rt>$2</rt></ruby>')
+                    // 強調 《《テキスト》》
+                    .replace(/《《([^》]+)》》/g,'<em style="font-style:normal;font-weight:700;color:var(--color-brand)">$1</em>')
+                    // 区切り線
+                    .replace(/────────────/g,'<hr style="border:none;border-top:1px solid var(--color-brand-border);margin:20px 0"/>')
+                }}
+              />
+              {/* あとがき */}
+              {afterword && (
+                <div style={{fontSize:13,color:'var(--color-text-muted)',lineHeight:1.8,marginTop:24,padding:'10px 14px',background:'var(--color-bg)',borderRadius:8,borderLeft:'3px solid var(--color-brand-border)',whiteSpace:'pre-wrap'}}>
+                  {afterword}
+                </div>
+              )}
+            </div>
+          </div>
+        </div>,
+        document.body
+      )}
 
       {toast && (
         <div style={{position:'fixed',bottom: isMobile ? 80 : 24,right:24,background:'var(--color-brand)',color:'var(--color-bg-card)',padding:'12px 20px',borderRadius:12,fontSize:14,fontWeight:600,zIndex:9999,boxShadow:'0 4px 16px rgba(242,106,33,.35)'}}>
