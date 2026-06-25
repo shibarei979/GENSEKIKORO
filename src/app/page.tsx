@@ -341,7 +341,6 @@ export default async function HomePage() {
                 <div style={{display:'flex',alignItems:'center',gap:8}}>
                   <span style={{width:4,height:16,background:'var(--color-brand)',borderRadius:2,display:'inline-block'}}/>
                   <span style={{fontSize:14,fontWeight:700,color:'var(--color-text)'}}>短編棚</span>
-                  <span style={{fontSize:11,color:'var(--color-text-faint)'}}>1話で完結する作品</span>
                 </div>
                 <Link href="/search?type=短編" style={{fontSize:12,color:'var(--color-brand)',textDecoration:'none'}}>もっと見る ›</Link>
               </div>
@@ -351,11 +350,9 @@ export default async function HomePage() {
           <div style={{background:'var(--color-bg-card)',border:'1px solid var(--color-brand-border)',borderRadius:10,overflow:'hidden'}}>
             <div style={{padding:'10px 16px',borderBottom:'1px solid var(--color-brand-border)',display:'flex',alignItems:'center',justifyContent:'space-between',background:'var(--color-bg)'}}>
               <span style={{fontSize:14,fontWeight:700,color:'var(--color-text)'}}>最新話更新</span>
+              <Link href='/ranking' className='more-link' style={{fontSize:12,color:'var(--color-brand)',textDecoration:'none'}}>もっと見る ›</Link>
             </div>
             <LatestEpisodesSection episodes={latestEpisodes} />
-            <div style={{padding:'9px 16px',textAlign:'center',borderTop:'1px solid var(--color-brand-border)'}}>
-              <Link href='/ranking' className='more-link' style={{fontSize:12,color:'var(--color-brand)',textDecoration:'none',display:'inline-block'}}>もっと見る ›</Link>
-            </div>
           </div>
           <div id="novels" style={{background:'var(--color-bg-card)',border:'1px solid var(--color-brand-border)',borderRadius:10,overflow:'hidden'}}>
             <div style={{padding:'10px 16px',borderBottom:'1px solid var(--color-brand-border)',background:'var(--color-bg)'}}>
