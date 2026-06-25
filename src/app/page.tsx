@@ -121,6 +121,28 @@ export default async function HomePage() {
     .limit(50)
   const shuffledLatest = [...(allLatestRaw||[])].sort(()=>Math.random()-0.5).slice(0,8)
 
+  // ===== 短編棚 =====
+  const { data: tanpenRaw } = await supabase
+    .from('novels')
+    .select('id, title, genre, novel_type, author_id, created_at, summary, catchcopy, tags, is_serial')
+    .eq('published', true)
+    .eq('novel_type', '短編')
+    .eq('is_r18', false)
+    .neq('genre', '官能')
+    .order('created_at', { ascending: false })
+    .limit(50)
+  const shuffledTanpen = [...(tanpenRaw||[])].sort(()=>Math.random()-0.5).slice(0,8)
+  const tanpenNovelsBase = await addAuthorNames(supabase, shuffledTanpen)
+  const tanpenIds = tanpenNovelsBase.map((n: any) => n.id)
+  let tanpenLikeMap: Record<string,number> = {}
+  if (tanpenIds.length > 0) {
+    const { data: tl } = await supabase.from('likes').select('novel_id').in('novel_id', tanpenIds)
+    tl?.forEach((l: any) => { tanpenLikeMap[l.novel_id] = (tanpenLikeMap[l.novel_id]||0)+1 })
+  }
+  const tanpenNovels = tanpenNovelsBase.map((n: any) => ({
+    ...n, likeCount: tanpenLikeMap[n.id]||0, like_count: tanpenLikeMap[n.id]||0,
+  }))
+
   const latestNovelsBase = await addAuthorNames(supabase, shuffledLatest || [])
   const latestIds = latestNovelsBase.map((n: any) => n.id)
   let latestLikeMap: Record<string,number> = {}
@@ -311,6 +333,20 @@ export default async function HomePage() {
             </div>
             <NovelList novels={latestNovels} />
           </div>
+          {/* 短編棚 */}
+          {tanpenNovels.length > 0 && (
+            <div style={{background:'var(--color-bg-card)',border:'1px solid var(--color-brand-border)',borderRadius:10,overflow:'hidden'}}>
+              <div style={{padding:'10px 16px',borderBottom:'1px solid var(--color-brand-border)',display:'flex',alignItems:'center',justifyContent:'space-between',background:'var(--color-bg)'}}>
+                <div style={{display:'flex',alignItems:'center',gap:8}}>
+                  <span style={{width:4,height:16,background:'var(--color-brand)',borderRadius:2,display:'inline-block'}}/>
+                  <span style={{fontSize:14,fontWeight:700,color:'var(--color-text)'}}>短編棚</span>
+                  <span style={{fontSize:11,color:'var(--color-text-faint)'}}>1話で完結する作品</span>
+                </div>
+                <Link href="/search?type=短編" style={{fontSize:12,color:'var(--color-brand)',textDecoration:'none'}}>もっと見る ›</Link>
+              </div>
+              <NovelList novels={tanpenNovels} />
+            </div>
+          )}
         </div>
         <div><HomeSidebar announcements={sidebarAnnouncements||[]} contests={sidebarContests} /></div>
       </div>
@@ -345,6 +381,22 @@ export default async function HomePage() {
           <NovelList novels={latestNovels} />
         </div>
       </div>
+
+      {/* ===== モバイル：短編棚 ===== */}
+      {tanpenNovels.length > 0 && (
+        <div className="mobile-only" style={{padding:'12px 16px 0'}}>
+          <div style={{background:'var(--color-bg-card)',border:'1px solid var(--color-brand-border)',borderRadius:10,overflow:'hidden'}}>
+            <div style={{padding:'10px 16px',borderBottom:'1px solid var(--color-brand-border)',display:'flex',alignItems:'center',justifyContent:'space-between',background:'var(--color-bg)'}}>
+              <div style={{display:'flex',alignItems:'center',gap:6}}>
+                <span style={{width:4,height:16,background:'var(--color-brand)',borderRadius:2,display:'inline-block'}}/>
+                <span style={{fontSize:14,fontWeight:700,color:'var(--color-text)'}}>短編棚</span>
+              </div>
+              <Link href="/search?type=短編" style={{fontSize:12,color:'var(--color-brand)',textDecoration:'none'}}>もっと見る ›</Link>
+            </div>
+            <NovelList novels={tanpenNovels} />
+          </div>
+        </div>
+      )}
 
       {/* モバイルボトムナビ分の余白 */}
       <div className="mobile-only" style={{height:80}}/>
