@@ -4,7 +4,6 @@ import Header from '@/components/layout/Header'
 import Footer from '@/components/layout/Footer'
 import TweetSection from '@/components/TweetSection'
 import AdBanner from '@/components/layout/AdBanner'
-import Sidebar from '@/components/layout/Sidebar'
 import Link from 'next/link'
 import FollowButton from '@/components/FollowButton'
 import BlockButton from '@/components/BlockButton'
@@ -144,7 +143,6 @@ export default async function AuthorPage({ params }: Props) {
           <NovelList/>
           <TweetSection authorId={author.user_id} currentUserId={user?.id||null} currentUserName={profile?.display_name||null} currentUserIconUrl={profile?.icon_url||null} isOwner={false}/>
         </div>
-        <Sidebar />
       </div>
 
       {/* ===== モバイル ===== */}

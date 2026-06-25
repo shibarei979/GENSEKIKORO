@@ -3,7 +3,6 @@ export const dynamic = 'force-dynamic'
 import Header from '@/components/layout/Header'
 import Footer from '@/components/layout/Footer'
 import AdBanner from '@/components/layout/AdBanner'
-import Sidebar from '@/components/layout/Sidebar'
 import Link from 'next/link'
 import NovelPreviewPopup from '@/components/NovelPreviewPopup'
 import SearchForm from './SearchForm'
@@ -348,7 +347,6 @@ export default async function SearchPage({ searchParams }: Props) {
           )}
         </div>
 
-        <div className="desktop-only"><Sidebar /></div>
       </div>
 
       <AdBanner />

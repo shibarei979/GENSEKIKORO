@@ -4,7 +4,6 @@ import { redirect } from 'next/navigation'
 import Header from '@/components/layout/Header'
 import Footer from '@/components/layout/Footer'
 import AdBanner from '@/components/layout/AdBanner'
-import Sidebar from '@/components/layout/Sidebar'
 import Link from 'next/link'
 
 export default async function HistoryPage() {
@@ -191,7 +190,6 @@ export default async function HistoryPage() {
             ))}
           </div>
         </div>
-        <div className="desktop-only"><Sidebar /></div>
       </div>
 
       <style>{`.history-title:hover,.history-title:hover div{color:var(--color-text)!important;opacity:1!important}`}</style>

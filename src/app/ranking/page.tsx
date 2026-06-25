@@ -3,7 +3,6 @@ export const revalidate = 10
 import Header from '@/components/layout/Header'
 import Footer from '@/components/layout/Footer'
 import AdBanner from '@/components/layout/AdBanner'
-import Sidebar from '@/components/layout/Sidebar'
 import Link from 'next/link'
 import NovelPreviewPopup from '@/components/NovelPreviewPopup'
 
@@ -335,7 +334,6 @@ export default async function RankingPage({ searchParams }: Props) {
 
           <div className="mobile-only" style={{height:80}}/>
         </div>
-        <div className="desktop-only"><Sidebar /></div>
       </div>
 
       <AdBanner />
