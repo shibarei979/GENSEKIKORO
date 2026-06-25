@@ -583,21 +583,30 @@ export default function MypageClient({
           {days.map((day, i) => {
             if (!day) return <div key={i} style={{background:'var(--color-bg)',aspectRatio:'1'}}/>
             const key = `${year}-${String(month+1).padStart(2,'0')}-${String(day).padStart(2,'0')}`
-            const hasPost = dateSet.has(key)
+            const postCount = postDates.filter(d => d === key).length
+            const hasPost = postCount > 0
             const isToday = today.getFullYear()===year && today.getMonth()===month && today.getDate()===day
             const dow = (startDow + day - 1) % 7
             return (
               <div key={i} style={{
                 background: hasPost ? 'var(--color-brand-light)' : 'var(--color-bg-card)',
-                aspectRatio:'1', padding:'4px', position:'relative', display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center',
+                aspectRatio:'1', padding:'2px', position:'relative', display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center', gap:1,
               }}>
                 <div style={{
-                  fontSize:12,fontWeight:isToday?700:400,
+                  fontSize:10,fontWeight:isToday?700:400,
                   color: isToday ? '#fff' : dow===0 ? '#ef4444' : dow===6 ? '#3b82f6' : 'var(--color-text)',
-                  width:22,height:22,display:'flex',alignItems:'center',justifyContent:'center',borderRadius:'50%',
+                  width:18,height:18,display:'flex',alignItems:'center',justifyContent:'center',borderRadius:'50%',
                   background: isToday ? 'var(--color-brand)' : 'transparent',
+                  flexShrink:0,
                 }}>{day}</div>
-                {hasPost && <div style={{width:6,height:6,borderRadius:'50%',background:'var(--color-brand)',position:'absolute',bottom:6,right:8}}/>}
+                {hasPost && (
+                  <div style={{
+                    fontSize:9,fontWeight:700,color:'var(--color-brand)',
+                    border:'1px solid var(--color-brand)',borderRadius:3,
+                    width:14,height:14,display:'flex',alignItems:'center',justifyContent:'center',
+                    background:'var(--color-bg-card)',lineHeight:1,
+                  }}>{postCount}</div>
+                )}
               </div>
             )
           })}
