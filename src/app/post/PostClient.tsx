@@ -1139,7 +1139,7 @@ export default function PostClient({ profile, userId }: Props) {
                     // ルビ ｜テキスト《ルビ》
                     .replace(/｜([^《]+)《([^》]+)》/g,'<ruby>$1<rt>$2</rt></ruby>')
                     // 強調 《《テキスト》》
-                    .replace(/《《([^》]+)》》/g,'<em style="font-style:normal;font-weight:700;color:var(--color-brand)">$1</em>')
+                    .replace(/《《([^》]+)》》/g,'<em style="font-style:normal;font-weight:700;color:var(--color-text)">$1</em>')
                     // 区切り線
                     .replace(/────────────/g,'<hr style="border:none;border-top:1px solid var(--color-brand-border);margin:20px 0"/>')
                 }}
