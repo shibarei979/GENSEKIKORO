@@ -72,8 +72,8 @@
 [data-theme="dark"] {
   --color-brand:        #F26A21;
   --color-brand-dark:   #d95a18;
-  --color-brand-light:  #c8a882;  /* ダークモードのピル非アクティブ背景（肌色） */
-  --color-brand-border: #a8886a;  /* ダークモードの枠線・ピルボーダー */
+  --color-brand-light:  #332418;
+  --color-brand-border: #5a3a22;
 
   /* 背景：真っ黒ではなくグレーがかった暗色 */
   --color-bg:           #2a2520;
@@ -146,16 +146,17 @@
   border-color: #a8886a !important;
 }
 
-/* ダークモード：ピルボタン アクティブ（濃いブラウン・白文字でコントラスト大） */
-[data-theme="dark"] .ranking-filter a[style*="color: rgb(255, 255, 255)"],
-[data-theme="dark"] .ranking-filter a[style*="color:#fff"],
-[data-theme="dark"] .ranking-filter a[style*="color:'#fff'"],
-[data-theme="dark"] .ranking-filter a[style*='color:"#fff"'],
-[data-theme="dark"] .ranking-filter a[style*="color:var(--color-bg-card)"],
-[data-theme="dark"] .ranking-filter a[style*="color:'var(--color-bg-card)'"] {
-  background: #6b3a18 !important;
-  color: #ffe8d0 !important;
-  border-color: #8b5a38 !important;
+/* ダークモード：ピルボタン アクティブ（オレンジ背景・白文字） */
+[data-theme="dark"] .ranking-filter a[style*="background:var(--color-brand)"],
+[data-theme="dark"] .ranking-filter a[style*="background:'var(--color-brand)'"],
+[data-theme="dark"] .ranking-filter a[style*='background:"var(--color-brand)"'],
+[data-theme="dark"] .ranking-filter a[style*="background: rgb(242, 106, 33)"],
+[data-theme="dark"] .ranking-filter a[style*="background:#F26A21"],
+[data-theme="dark"] .ranking-filter a[style*="background:'#F26A21'"],
+[data-theme="dark"] .ranking-filter a[style*='background:"#F26A21"'] {
+  background: #F26A21 !important;
+  color: #fff !important;
+  border-color: #F26A21 !important;
 }
 
 /* ダークモード：検索・ランキングのカード背景 */
