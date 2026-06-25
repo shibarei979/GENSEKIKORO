@@ -121,7 +121,21 @@ export default function MypageClient({
 }: Props) {
   const router   = useRouter()
   const supabase = createClient()
-  const [activeTab,      setActiveTab]      = useState<Tab>('mypage')
+  const [activeTab, setActiveTab] = useState<Tab>(() => {
+    if (typeof window !== 'undefined') {
+      const hash = window.location.hash.replace('#', '') as Tab
+      const valid: Tab[] = ['mypage','works','bookmarks','history','tweet','mission','contest','settings','blockmute']
+      if (valid.includes(hash)) return hash
+    }
+    return 'mypage'
+  })
+
+  function handleTabChange(tab: Tab) {
+    setActiveTab(tab)
+    if (typeof window !== 'undefined') {
+      window.location.hash = tab
+    }
+  }
   const [myNovels,       setMyNovels]       = useState(initialNovels)
   const [deleteTarget,   setDeleteTarget]   = useState<{id:string;title:string;episodes:any[]}|null>(null)
   const [deleteMode,     setDeleteMode]     = useState<'novel'|'episode'|null>(null)
@@ -567,7 +581,7 @@ export default function MypageClient({
         {/* 日グリッド */}
         <div style={{display:'grid',gridTemplateColumns:'repeat(7,1fr)',gap:1,background:'var(--color-brand-border)',padding:1}}>
           {days.map((day, i) => {
-            if (!day) return <div key={i} style={{background:'var(--color-bg)',minHeight:44}}/>
+            if (!day) return <div key={i} style={{background:'var(--color-bg)',aspectRatio:'1'}}/>
             const key = `${year}-${String(month+1).padStart(2,'0')}-${String(day).padStart(2,'0')}`
             const hasPost = dateSet.has(key)
             const isToday = today.getFullYear()===year && today.getMonth()===month && today.getDate()===day
@@ -575,7 +589,7 @@ export default function MypageClient({
             return (
               <div key={i} style={{
                 background: hasPost ? 'var(--color-brand-light)' : 'var(--color-bg-card)',
-                minHeight:44, padding:'6px 8px', position:'relative',
+                aspectRatio:'1', padding:'4px', position:'relative', display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center',
               }}>
                 <div style={{
                   fontSize:12,fontWeight:isToday?700:400,
@@ -588,9 +602,9 @@ export default function MypageClient({
             )
           })}
         </div>
-        <div style={{padding:'8px 16px',fontSize:11,color:'var(--color-text-muted)',background:'var(--color-bg)',borderTop:'1px solid var(--color-brand-border)'}}>
-          {month+1}月の投稿：{days.filter(d => d && dateSet.has(`${year}-${String(month+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`)).length}話
-          　過去1年合計：{postDates.length}話
+        <div style={{padding:'8px 16px',fontSize:11,color:'var(--color-text-muted)',background:'var(--color-bg)',borderTop:'1px solid var(--color-brand-border)',display:'flex',alignItems:'center',gap:12}}>
+          <span>{month+1}月の投稿：<span style={{display:'inline-flex',alignItems:'center',justifyContent:'center',width:22,height:22,border:'1px solid var(--color-brand)',borderRadius:4,fontSize:12,fontWeight:700,color:'var(--color-brand)',background:'var(--color-brand-light)',marginLeft:2}}>{days.filter(d => d && dateSet.has(`${year}-${String(month+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`)).length}</span>話</span>
+          <span>過去1年合計：<span style={{display:'inline-flex',alignItems:'center',justifyContent:'center',width:28,height:22,border:'1px solid var(--color-brand)',borderRadius:4,fontSize:12,fontWeight:700,color:'var(--color-brand)',background:'var(--color-brand-light)',marginLeft:2}}>{postDates.length}</span>話</span>
         </div>
       </div>
     )
@@ -951,7 +965,7 @@ export default function MypageClient({
             <div style={{background:'var(--color-bg-card)',borderBottom:'1px solid var(--color-brand-border)',overflowX:'auto',scrollbarWidth:'none' as any,position:'sticky',top:54,zIndex:10}}>
               <div style={{display:'flex',minWidth:'max-content'}}>
                 {TABS.map(tab => (
-                  <button key={tab.id} onClick={()=>setActiveTab(tab.id)}
+                  <button key={tab.id} onClick={()=>handleTabChange(tab.id as Tab)}
                     style={{padding:'10px 14px',fontSize:12,fontWeight:activeTab===tab.id?700:400,color:activeTab===tab.id?'var(--color-brand)':'var(--color-text-muted)',background:'none',border:'none',cursor:'pointer',borderBottom:activeTab===tab.id?'2px solid var(--color-brand)':'2px solid transparent',whiteSpace:'nowrap' as const}}>
                     {tab.label}
                   </button>
@@ -974,7 +988,7 @@ export default function MypageClient({
             {/* 左サイドナビ */}
             <div style={{width:180,flexShrink:0,borderRight:'1px solid var(--color-brand-border)',padding:'24px 0',position:'sticky',top:60,height:'calc(100vh - 60px)',background:'var(--color-bg-card)'}}>
               {TABS.map(tab => (
-                <button key={tab.id} onClick={()=>setActiveTab(tab.id)}
+                <button key={tab.id} onClick={()=>handleTabChange(tab.id as Tab)}
                   style={{width:'100%',padding:'11px 24px',textAlign:'left' as const,fontSize:13,fontWeight:activeTab===tab.id?700:400,color:activeTab===tab.id?'var(--color-brand)':'var(--color-text-muted)',background:'none',border:'none',borderLeft:activeTab===tab.id?'3px solid var(--color-brand)':'3px solid transparent',cursor:'pointer',display:'block',marginBottom:2,transition:'all .12s'}}>
                   {tab.label}
                 </button>
