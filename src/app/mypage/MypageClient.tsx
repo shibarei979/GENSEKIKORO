@@ -589,7 +589,7 @@ export default function MypageClient({
               <input value={folderInput} onChange={e=>setFolderInput(e.target.value)}
                 placeholder="フォルダ名" autoFocus
                 onKeyDown={e=>e.key==='Enter'&&handleCreateFolder()}
-                style={{width:'100%',padding:'9px 12px',border:'1.5px solid var(--color-brand-border)',borderRadius:8,fontSize:13,outline:'none',marginBottom:12,boxSizing:'border-box' as const}}/>
+                style={{width:'100%',padding:'9px 12px',border:'1.5px solid var(--color-brand-border)',borderRadius:8,fontSize:16,outline:'none',marginBottom:12,boxSizing:'border-box' as const}}/>
               <div style={{display:'flex',gap:8}}>
                 <button onClick={()=>{setShowFolderModal(false);setFolderInput('')}}
                   style={{flex:1,padding:'9px',border:'1px solid var(--color-brand-border)',borderRadius:8,background:'none',color:'var(--color-text-muted)',fontSize:13,cursor:'pointer'}}>
