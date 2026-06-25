@@ -4,6 +4,7 @@ import Link from 'next/link'
 import Header from '@/components/layout/Header'
 import Footer from '@/components/layout/Footer'
 import AdBanner from '@/components/layout/AdBanner'
+import Sidebar from '@/components/layout/Sidebar'
 
 function getStatusLabel(deadline: string | null, judging_end: string | null) {
   const now = new Date()
@@ -163,6 +164,7 @@ export default async function ContestsPage() {
           <div className="mobile-only" style={{height:80}}/>
         </div>
 
+        <div className="desktop-only"><Sidebar /></div>
       </div>
 
       <AdBanner />
