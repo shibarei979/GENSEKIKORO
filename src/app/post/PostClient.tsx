@@ -347,6 +347,7 @@ export default function PostClient({ profile, userId }: Props) {
           title: title.trim(), summary: summary.trim()||null, genre, tags,
           is_r18: isR18, is_r15: isR15,
           catchcopy: catchcopy.trim() || null,
+          novel_type: novelType,
         }).eq('id', savedNovelId)
         const res = await supabase.from('episodes')
           .update({
