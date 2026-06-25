@@ -581,7 +581,7 @@ export default function MypageClient({
         {/* 日グリッド */}
         <div style={{display:'grid',gridTemplateColumns:'repeat(7,1fr)',gap:1,background:'var(--color-brand-border)',padding:1}}>
           {days.map((day, i) => {
-            if (!day) return <div key={i} style={{background:'var(--color-bg)',height:28}}/>
+            if (!day) return <div key={i} style={{background:'var(--color-bg)',height:28,aspectRatio:'1'}}/>
             const key = `${year}-${String(month+1).padStart(2,'0')}-${String(day).padStart(2,'0')}`
             const postCount = postDates.filter(d => d === key).length
             const hasPost = postCount > 0
@@ -590,7 +590,7 @@ export default function MypageClient({
             return (
               <div key={i} style={{
                 background: hasPost ? 'var(--color-brand-light)' : 'var(--color-bg-card)',
-                height:28, padding:'2px 3px', display:'flex', flexDirection:'column', justifyContent:'space-between',
+                height:28, aspectRatio:'1', padding:'2px 3px', display:'flex', flexDirection:'column', justifyContent:'space-between',
               }}>
                 <div style={{
                   fontSize:9, fontWeight:isToday?700:400,
