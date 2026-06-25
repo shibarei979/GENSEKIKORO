@@ -112,15 +112,30 @@
   --admin-row-border:   #3a3028;
 }
 
-/* ダークモード：フッターのテキスト強制表示 */
+/* ダークモード：ヘッダー・フッターを肌色ベースに */
+[data-theme="dark"] header {
+  background: #3d2e22 !important;
+  border-bottom-color: #5a3e28 !important;
+}
+[data-theme="dark"] footer {
+  background: #3d2e22 !important;
+  border-top-color: #5a3e28 !important;
+}
 [data-theme="dark"] footer,
 [data-theme="dark"] footer * {
-  color: var(--color-text) !important;
+  color: #e8d8c8 !important;
 }
 [data-theme="dark"] footer a {
-  color: var(--color-text-muted) !important;
+  color: #c4a888 !important;
 }
 [data-theme="dark"] footer a:hover {
+  color: var(--color-brand) !important;
+}
+[data-theme="dark"] header nav a,
+[data-theme="dark"] header a {
+  color: #e8d8c8 !important;
+}
+[data-theme="dark"] header nav a:hover {
   color: var(--color-brand) !important;
 }
 
