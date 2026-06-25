@@ -505,7 +505,6 @@ export default function MypageClient({
           </div>
         </div>
       ))}
-      <PostCalendar />
     </div>
   )
 
@@ -538,85 +537,6 @@ export default function MypageClient({
     await supabase.from('bookmarks').update({ folder_id: folderId }).eq('novel_id', novelId).eq('user_id', profile.user_id)
     setMyBookmarks(prev => prev.map((bm:any) => bm.novel_id === novelId ? {...bm, folder_id: folderId} : bm))
     setMovingBookmark(null)
-  }
-
-  // ===== 投稿カレンダー =====
-  const PostCalendar = () => {
-    const [calMonth, setCalMonth] = React.useState(() => {
-      const d = new Date(); return { year: d.getFullYear(), month: d.getMonth() }
-    })
-    const dateSet = new Set(postDates)
-    const { year, month } = calMonth
-    const firstDay = new Date(year, month, 1)
-    const lastDay = new Date(year, month + 1, 0)
-    const startDow = firstDay.getDay() // 0=日
-    const today = new Date()
-    today.setHours(0,0,0,0)
-
-    const days: (number|null)[] = []
-    for (let i = 0; i < startDow; i++) days.push(null)
-    for (let d = 1; d <= lastDay.getDate(); d++) days.push(d)
-    while (days.length % 7 !== 0) days.push(null)
-
-    const prevMonth = () => setCalMonth(p => p.month === 0 ? {year:p.year-1,month:11} : {year:p.year,month:p.month-1})
-    const nextMonth = () => setCalMonth(p => p.month === 11 ? {year:p.year+1,month:0} : {year:p.year,month:p.month+1})
-    const isCurrentMonth = year === today.getFullYear() && month === today.getMonth()
-
-    return (
-      <div style={{marginTop:24,border:'1px solid var(--color-brand-border)',borderRadius:12,overflow:'hidden'}}>
-        {/* ヘッダー */}
-        <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',padding:'10px 16px',background:'var(--color-bg)',borderBottom:'1px solid var(--color-brand-border)'}}>
-          <button onClick={prevMonth} style={{background:'none',border:'none',cursor:'pointer',fontSize:16,color:'var(--color-brand)',padding:'0 8px'}}>‹</button>
-          <span style={{fontSize:14,fontWeight:700,color:'var(--color-text)'}}>{year}年{month+1}月</span>
-          <button onClick={nextMonth} disabled={isCurrentMonth} style={{background:'none',border:'none',cursor:'pointer',fontSize:16,color:isCurrentMonth?'var(--color-text-faint)':'var(--color-brand)',padding:'0 8px'}}>›</button>
-        </div>
-        {/* 曜日ヘッダー */}
-        <div style={{display:'grid',gridTemplateColumns:'repeat(7,1fr)',background:'var(--color-bg)'}}>
-          {['日','月','火','水','木','金','土'].map((d,i) => (
-            <div key={d} style={{textAlign:'center',padding:'3px 0',fontSize:9,fontWeight:600,color:i===0?'#ef4444':i===6?'#3b82f6':'var(--color-text-muted)'}}>
-              {d}
-            </div>
-          ))}
-        </div>
-        {/* 日グリッド */}
-        <div style={{display:'grid',gridTemplateColumns:'repeat(7,1fr)',gap:1,background:'var(--color-brand-border)',padding:1}}>
-          {days.map((day, i) => {
-            if (!day) return <div key={i} style={{background:'var(--color-bg)',height:28,aspectRatio:'1'}}/>
-            const key = `${year}-${String(month+1).padStart(2,'0')}-${String(day).padStart(2,'0')}`
-            const postCount = postDates.filter(d => d === key).length
-            const hasPost = postCount > 0
-            const isToday = today.getFullYear()===year && today.getMonth()===month && today.getDate()===day
-            const dow = (startDow + day - 1) % 7
-            return (
-              <div key={i} style={{
-                background: hasPost ? 'var(--color-brand-light)' : 'var(--color-bg-card)',
-                height:28, aspectRatio:'1', padding:'2px 3px', display:'flex', flexDirection:'column', justifyContent:'space-between',
-              }}>
-                <div style={{
-                  fontSize:9, fontWeight:isToday?700:400,
-                  color: isToday ? '#fff' : dow===0 ? '#ef4444' : dow===6 ? '#3b82f6' : 'var(--color-text)',
-                  width:14, height:14, display:'flex', alignItems:'center', justifyContent:'center', borderRadius:'50%',
-                  background: isToday ? 'var(--color-brand)' : 'transparent',
-                  alignSelf:'flex-start',
-                }}>{day}</div>
-                {hasPost && (
-                  <div style={{
-                    fontSize:8, fontWeight:700, color:'var(--color-brand)',
-                    border:'1px solid var(--color-brand)', borderRadius:2,
-                    width:12, height:12, display:'flex', alignItems:'center', justifyContent:'center',
-                    background:'var(--color-bg-card)', lineHeight:1, alignSelf:'flex-end',
-                  }}>{postCount}</div>
-                )}
-              </div>
-            )
-          })}
-        </div>
-        <div style={{padding:'8px 16px',fontSize:11,color:'var(--color-text-muted)',background:'var(--color-bg)',borderTop:'1px solid var(--color-brand-border)',display:'flex',alignItems:'center',gap:12}}>
-          <span>{month+1}月の投稿：<span style={{display:'inline-flex',alignItems:'center',justifyContent:'center',width:22,height:22,border:'1px solid var(--color-brand)',borderRadius:4,fontSize:12,fontWeight:700,color:'var(--color-brand)',background:'var(--color-brand-light)',marginLeft:2}}>{days.filter(d => d && dateSet.has(`${year}-${String(month+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`)).length}</span>話</span>
-          <span>過去1年合計：<span style={{display:'inline-flex',alignItems:'center',justifyContent:'center',width:28,height:22,border:'1px solid var(--color-brand)',borderRadius:4,fontSize:12,fontWeight:700,color:'var(--color-brand)',background:'var(--color-brand-light)',marginLeft:2}}>{postDates.length}</span>話</span>
-        </div>
-      </div>
-    )
   }
 
   // ===== 保存済みタブ =====
