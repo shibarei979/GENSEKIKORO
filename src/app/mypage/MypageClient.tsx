@@ -528,65 +528,69 @@ export default function MypageClient({
 
   // ===== 投稿カレンダー =====
   const PostCalendar = () => {
-    const dateSet = new Set(postDates)
-    const today = new Date()
-    const weeks: Date[][] = []
-    // 過去53週分
-    const start = new Date(today)
-    start.setDate(start.getDate() - 7 * 52 - start.getDay())
-    let cur = new Date(start)
-    while (cur <= today) {
-      const week: Date[] = []
-      for (let d = 0; d < 7; d++) {
-        week.push(new Date(cur))
-        cur.setDate(cur.getDate() + 1)
-      }
-      weeks.push(week)
-    }
-    const months: {label:string; col:number}[] = []
-    weeks.forEach((week, i) => {
-      const firstDay = week[0]
-      if (firstDay.getDate() <= 7) {
-        months.push({ label: `${firstDay.getMonth()+1}月`, col: i })
-      }
+    const [calMonth, setCalMonth] = React.useState(() => {
+      const d = new Date(); return { year: d.getFullYear(), month: d.getMonth() }
     })
+    const dateSet = new Set(postDates)
+    const { year, month } = calMonth
+    const firstDay = new Date(year, month, 1)
+    const lastDay = new Date(year, month + 1, 0)
+    const startDow = firstDay.getDay() // 0=日
+    const today = new Date()
+    today.setHours(0,0,0,0)
+
+    const days: (number|null)[] = []
+    for (let i = 0; i < startDow; i++) days.push(null)
+    for (let d = 1; d <= lastDay.getDate(); d++) days.push(d)
+    while (days.length % 7 !== 0) days.push(null)
+
+    const prevMonth = () => setCalMonth(p => p.month === 0 ? {year:p.year-1,month:11} : {year:p.year,month:p.month-1})
+    const nextMonth = () => setCalMonth(p => p.month === 11 ? {year:p.year+1,month:0} : {year:p.year,month:p.month+1})
+    const isCurrentMonth = year === today.getFullYear() && month === today.getMonth()
+
     return (
-      <div style={{marginTop:20}}>
-        <div style={{fontSize:13,fontWeight:700,color:'var(--color-text)',marginBottom:10}}>投稿カレンダー（過去1年）</div>
-        <div style={{overflowX:'auto',paddingBottom:4}}>
-          <div style={{position:'relative',paddingTop:18,minWidth:'max-content'}}>
-            {/* 月ラベル */}
-            <div style={{display:'flex',position:'absolute',top:0,left:0}}>
-              {months.map((m,i) => (
-                <div key={i} style={{position:'absolute',left:m.col*12,fontSize:9,color:'var(--color-text-muted)',whiteSpace:'nowrap'}}>{m.label}</div>
-              ))}
-            </div>
-            {/* グリッド */}
-            <div style={{display:'flex',gap:2}}>
-              {weeks.map((week, wi) => (
-                <div key={wi} style={{display:'flex',flexDirection:'column',gap:2}}>
-                  {week.map((day, di) => {
-                    const key = `${day.getFullYear()}-${String(day.getMonth()+1).padStart(2,'0')}-${String(day.getDate()).padStart(2,'0')}`
-                    const hasPost = dateSet.has(key)
-                    const isFuture = day > today
-                    return (
-                      <div key={di} title={hasPost?`${key} 投稿あり`:key}
-                        style={{
-                          width:10,height:10,borderRadius:2,
-                          background: isFuture ? 'transparent' : hasPost ? 'var(--color-brand)' : 'var(--color-brand-border)',
-                          opacity: isFuture ? 0 : 1,
-                        }}/>
-                    )
-                  })}
-                </div>
-              ))}
-            </div>
-          </div>
+      <div style={{marginTop:24,border:'1px solid var(--color-brand-border)',borderRadius:12,overflow:'hidden'}}>
+        {/* ヘッダー */}
+        <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',padding:'10px 16px',background:'var(--color-bg)',borderBottom:'1px solid var(--color-brand-border)'}}>
+          <button onClick={prevMonth} style={{background:'none',border:'none',cursor:'pointer',fontSize:16,color:'var(--color-brand)',padding:'0 8px'}}>‹</button>
+          <span style={{fontSize:14,fontWeight:700,color:'var(--color-text)'}}>{year}年{month+1}月</span>
+          <button onClick={nextMonth} disabled={isCurrentMonth} style={{background:'none',border:'none',cursor:'pointer',fontSize:16,color:isCurrentMonth?'var(--color-text-faint)':'var(--color-brand)',padding:'0 8px'}}>›</button>
         </div>
-        <div style={{display:'flex',alignItems:'center',gap:6,marginTop:8,fontSize:10,color:'var(--color-text-muted)'}}>
-          <div style={{width:10,height:10,borderRadius:2,background:'var(--color-brand-border)'}}/>少ない
-          <div style={{width:10,height:10,borderRadius:2,background:'var(--color-brand)'}}/>多い
-          <span style={{marginLeft:8}}>投稿数：{postDates.length}話（過去1年）</span>
+        {/* 曜日ヘッダー */}
+        <div style={{display:'grid',gridTemplateColumns:'repeat(7,1fr)',background:'var(--color-bg)'}}>
+          {['日','月','火','水','木','金','土'].map((d,i) => (
+            <div key={d} style={{textAlign:'center',padding:'6px 0',fontSize:11,fontWeight:600,color:i===0?'#ef4444':i===6?'#3b82f6':'var(--color-text-muted)'}}>
+              {d}
+            </div>
+          ))}
+        </div>
+        {/* 日グリッド */}
+        <div style={{display:'grid',gridTemplateColumns:'repeat(7,1fr)',gap:1,background:'var(--color-brand-border)',padding:1}}>
+          {days.map((day, i) => {
+            if (!day) return <div key={i} style={{background:'var(--color-bg)',minHeight:44}}/>
+            const key = `${year}-${String(month+1).padStart(2,'0')}-${String(day).padStart(2,'0')}`
+            const hasPost = dateSet.has(key)
+            const isToday = today.getFullYear()===year && today.getMonth()===month && today.getDate()===day
+            const dow = (startDow + day - 1) % 7
+            return (
+              <div key={i} style={{
+                background: hasPost ? 'var(--color-brand-light)' : 'var(--color-bg-card)',
+                minHeight:44, padding:'6px 8px', position:'relative',
+              }}>
+                <div style={{
+                  fontSize:12,fontWeight:isToday?700:400,
+                  color: isToday ? '#fff' : dow===0 ? '#ef4444' : dow===6 ? '#3b82f6' : 'var(--color-text)',
+                  width:22,height:22,display:'flex',alignItems:'center',justifyContent:'center',borderRadius:'50%',
+                  background: isToday ? 'var(--color-brand)' : 'transparent',
+                }}>{day}</div>
+                {hasPost && <div style={{width:6,height:6,borderRadius:'50%',background:'var(--color-brand)',position:'absolute',bottom:6,right:8}}/>}
+              </div>
+            )
+          })}
+        </div>
+        <div style={{padding:'8px 16px',fontSize:11,color:'var(--color-text-muted)',background:'var(--color-bg)',borderTop:'1px solid var(--color-brand-border)'}}>
+          {month+1}月の投稿：{days.filter(d => d && dateSet.has(`${year}-${String(month+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`)).length}話
+          　過去1年合計：{postDates.length}話
         </div>
       </div>
     )
