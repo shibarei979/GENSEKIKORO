@@ -198,15 +198,23 @@ export default async function NovelPage({ params }: { params: { id: string } }) 
   const topTags   = Object.entries(tagFreq).sort((a,b)=>b[1]-a[1]).slice(0,5).map(([t])=>t)
   const topAuthors = historyAuthorIds.filter((v, i, a) => a.indexOf(v) === i).slice(0,3)
 
-  // 前半：パーソナライズ or ランダム
+  // フォールバック用：ジャンル不問で全作品取得（必ず6件確保するため）
+  const { data: fallbackRaw } = await supabase
+    .from('novels')
+    .select('id, title, genre, novel_type, is_serial, author_id, summary')
+    .eq('published', true).neq('id', params.id)
+    .order('created_at', { ascending: false })
+    .limit(30)
+  const fallbackPool = (fallbackRaw || []).filter((n: any) => !readNovelIds.has(n.id))
+
+  // 前半：パーソナライズ or ランダム（3件）
   let scored: any[] = []
   if (isLoggedIn && topGenres.length > 0) {
     const preferGenre = topGenres[0]
     const { data: personalizedRaw } = await supabase
       .from('novels')
       .select('id, title, genre, novel_type, is_serial, author_id, summary, tags')
-      .eq('published', true)
-      .eq('genre', preferGenre)
+      .eq('published', true).eq('genre', preferGenre)
       .order('created_at', { ascending: false })
       .limit(20)
     scored = (personalizedRaw || [])
@@ -221,23 +229,17 @@ export default async function NovelPage({ params }: { params: { id: string } }) 
       .sort((a: any, b: any) => b.score - a.score)
       .slice(0, 3)
   } else {
-    // 未ログイン：ランダムジャンルから3件
-    const rg1 = allGenresList[Math.floor(Math.random() * allGenresList.length)]
-    const { data: randomRaw1 } = await supabase
-      .from('novels')
-      .select('id, title, genre, novel_type, is_serial, author_id, summary')
-      .eq('published', true).eq('genre', rg1).neq('id', params.id)
-      .limit(10)
-    scored = (randomRaw1 || [])
-      .sort(() => Math.random() - 0.5)
-      .slice(0, 3)
+    scored = fallbackPool.slice(0, 3)
   }
 
-  // 後半：ディスカバリー or ランダム
+  // 後半：ディスカバリー or ランダム（3件）
+  const scoredIds = new Set(scored.map((n: any) => n.id))
   let discovery: any[] = []
   if (isLoggedIn) {
     const unusedGenres = allGenresList.filter(g => !topGenres.slice(0,3).includes(g) && g !== novel.genre)
-    const discoveryGenre = unusedGenres[Math.floor(Math.random() * Math.max(1, unusedGenres.length))] || allGenresList[0]
+    const discoveryGenre = unusedGenres.length > 0
+      ? unusedGenres[Math.floor(Math.random() * unusedGenres.length)]
+      : allGenresList[Math.floor(Math.random() * allGenresList.length)]
     const { data: discoveryRaw } = await supabase
       .from('novels')
       .select('id, title, genre, novel_type, is_serial, author_id, summary')
@@ -245,22 +247,19 @@ export default async function NovelPage({ params }: { params: { id: string } }) 
       .order('created_at', { ascending: false })
       .limit(10)
     discovery = (discoveryRaw || [])
-      .filter((n: any) => !readNovelIds.has(n.id))
+      .filter((n: any) => !readNovelIds.has(n.id) && !scoredIds.has(n.id))
       .slice(0, 3)
   } else {
-    // 未ログイン：別のランダムジャンルから3件
-    const rg2 = allGenresList[Math.floor(Math.random() * allGenresList.length)]
-    const { data: randomRaw2 } = await supabase
-      .from('novels')
-      .select('id, title, genre, novel_type, is_serial, author_id, summary')
-      .eq('published', true).eq('genre', rg2).neq('id', params.id)
-      .limit(10)
-    discovery = (randomRaw2 || [])
-      .sort(() => Math.random() - 0.5)
-      .slice(0, 3)
+    discovery = fallbackPool.filter((n: any) => !scoredIds.has(n.id)).slice(0, 3)
   }
 
-  const recommendedNovels = [...scored, ...discovery]
+  // 不足分はfallbackで補填して必ず6件に
+  let recommendedNovels = [...scored, ...discovery]
+  if (recommendedNovels.length < 6) {
+    const existingIds = new Set(recommendedNovels.map((n: any) => n.id))
+    const extras = fallbackPool.filter((n: any) => !existingIds.has(n.id))
+    recommendedNovels = [...recommendedNovels, ...extras].slice(0, 6)
+  }
   const recAuthorIds = Array.from(new Set(recommendedNovels.map((n: any) => n.author_id)))
   const recAuthorMap: Record<string,string> = {}
   if (recAuthorIds.length > 0) {
