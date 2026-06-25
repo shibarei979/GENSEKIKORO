@@ -532,7 +532,7 @@ export default function MypageClient({
       const n = bm.novels; if (!n) return null
       const authorName = bmAuthorMap[n.author_id] || ''
       return (
-        <div style={{display:'flex',alignItems:'flex-start',gap:8,padding:'10px 0',borderBottom:'1px solid var(--color-brand-border)'}}>
+        <div style={{display:'flex',alignItems:'flex-start',gap:8,padding:'10px 0',borderBottom:'1px solid var(--color-brand-border)'}} onClick={e=>e.stopPropagation()}>
           <div style={{flex:1,cursor:'pointer'}} onClick={()=>router.push(`/novel/${n.id}`)}>
             <div style={{display:'flex',gap:4,marginBottom:4,flexWrap:'wrap',alignItems:'center'}}>
               <span style={{fontSize:10,background:'var(--color-brand-light)',color:'var(--color-brand)',border:'1px solid var(--color-tag-border)',padding:'1px 6px',borderRadius:4}}>{n.genre}</span>
@@ -544,8 +544,8 @@ export default function MypageClient({
             <div style={{fontSize:13,fontWeight:700,color:'var(--color-text)',marginBottom:1}}>{n.title}</div>
             <div style={{fontSize:11,color:'var(--color-text-muted)'}}>{authorName}</div>
           </div>
-          <div style={{position:'relative',flexShrink:0}}>
-            <button onClick={()=>setMovingBookmark(movingBookmark===bm.novel_id?null:bm.novel_id)}
+          <div style={{position:'relative',flexShrink:0}} onClick={e=>e.stopPropagation()}>
+            <button onClick={e=>{e.stopPropagation();setMovingBookmark(movingBookmark===bm.novel_id?null:bm.novel_id)}}
               style={{fontSize:11,padding:'3px 8px',border:'1px solid var(--color-brand-border)',borderRadius:6,background:'none',color:'var(--color-text-muted)',cursor:'pointer'}}>
               移動
             </button>
