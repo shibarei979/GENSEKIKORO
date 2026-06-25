@@ -198,12 +198,12 @@ export default function NovelPreviewPopup({ novel, children }: Props) {
         </div>
       </div>
 
-      <style>{\`
+      <style>{`
         @keyframes modalIn {
           from { opacity:0; transform:scale(.95) }
           to   { opacity:1; transform:scale(1) }
         }
-      \`}</style>
+      `}</style>
     </div>,
     document.body
   ) : null
