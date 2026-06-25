@@ -26,7 +26,7 @@ export default async function AnnouncementsPage() {
     .order('created_at', { ascending: false })
 
   // typeでフィルタリング用のユニークtypes
-  const usedTypes = [...new Set((announcements||[]).map((n:any) => n.type).filter(Boolean))]
+  const usedTypes = (announcements||[]).map((n:any) => n.type).filter(Boolean).filter((v:string,i:number,a:string[]) => a.indexOf(v) === i)
 
   return (
     <div style={{minHeight:'100vh',background:'var(--color-bg)',fontFamily:"'Noto Sans JP',sans-serif"}}>
