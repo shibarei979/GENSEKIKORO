@@ -7,6 +7,7 @@ import AdBanner from '@/components/layout/AdBanner'
 import Sidebar from '@/components/layout/Sidebar'
 import Link from 'next/link'
 import FollowButton from '@/components/FollowButton'
+import BlockButton from '@/components/BlockButton'
 
 interface Props { params: { id: string } }
 
@@ -50,11 +51,14 @@ export default async function AuthorPage({ params }: Props) {
     .eq('following_id', params.id)
 
   let isFollowing = false
+  let isBlocked = false
   if (user && user.id !== params.id) {
-    const { data: myFollow } = await supabase
-      .from('follows').select('id')
-      .eq('follower_id', user.id).eq('following_id', params.id).maybeSingle()
-    isFollowing = !!myFollow
+    const [followRes, blockRes] = await Promise.all([
+      supabase.from('follows').select('id').eq('follower_id', user.id).eq('following_id', params.id).maybeSingle(),
+      supabase.from('user_blocks').select('id').eq('blocker_id', user.id).eq('blocked_id', params.id).maybeSingle(),
+    ])
+    isFollowing = !!followRes.data
+    isBlocked   = !!blockRes.data
   }
 
   const isMe = user?.id === params.id
@@ -62,7 +66,6 @@ export default async function AuthorPage({ params }: Props) {
   const joinStr = `${joinDate.getFullYear()}年${joinDate.getMonth() + 1}月`
   const totalLikes = Object.values(likeMap).reduce((a, b) => a + b, 0)
 
-  // 作品リスト共通パーツ
   const NovelList = () => (
     <div style={{background:'var(--color-bg)',border:'1px solid var(--color-brand-border)',borderRadius:12,overflow:'hidden'}}>
       {filteredNovels.length === 0 ? (
@@ -83,7 +86,7 @@ export default async function AuthorPage({ params }: Props) {
             <div style={{fontSize:15,fontWeight:700,color:'var(--color-text)',marginBottom:3}}>{n.title}</div>
             <div style={{fontSize:11,color:'var(--color-text-muted)',marginBottom:n.summary?5:0}}>♡ {likeMap[n.id]||0}</div>
             {n.summary && (
-              <div style={{fontSize:12,color:'#5a3a20',lineHeight:1.8,overflow:'hidden',display:'-webkit-box',WebkitLineClamp:2,WebkitBoxOrient:'vertical' as any}}>
+              <div style={{fontSize:12,color:'var(--color-text)',lineHeight:1.8,overflow:'hidden',display:'-webkit-box',WebkitLineClamp:2,WebkitBoxOrient:'vertical' as any}}>
                 {n.summary}
               </div>
             )}
@@ -97,10 +100,9 @@ export default async function AuthorPage({ params }: Props) {
     <div style={{minHeight:'100vh',background:'var(--color-bg-card)',fontFamily:"'Noto Sans JP',sans-serif"}}>
       <Header profile={profile} user={user} />
 
-      {/* ===== デスクトップ（元のまま） ===== */}
+      {/* ===== デスクトップ ===== */}
       <div className="desktop-only" style={{maxWidth:1200,margin:'0 auto',padding:'28px 32px',display:'flex',gap:20,alignItems:'flex-start'}}>
         <div style={{flex:1,minWidth:0}}>
-          {/* プロフィールカード */}
           <div style={{background:'var(--color-bg)',border:'1px solid var(--color-brand-border)',borderRadius:16,padding:'28px',marginBottom:20}}>
             <div style={{display:'flex',gap:20,alignItems:'flex-start'}}>
               <div style={{flexShrink:0}}>
@@ -115,27 +117,19 @@ export default async function AuthorPage({ params }: Props) {
                 <div style={{display:'flex',alignItems:'center',gap:12,flexWrap:'wrap',marginBottom:6}}>
                   <h1 style={{fontSize:22,fontWeight:700,color:'var(--color-text)',margin:0}}>{author.display_name}</h1>
                   {!isMe && user && (
-                    <FollowButton authorId={params.id} userId={user.id} initialFollowing={isFollowing} followerCount={followerCount || 0}/>
+                    <>
+                      <FollowButton authorId={params.id} userId={user.id} initialFollowing={isFollowing} followerCount={followerCount || 0}/>
+                      <BlockButton targetId={params.id} userId={user.id} initialBlocked={isBlocked}/>
+                    </>
                   )}
                 </div>
                 <div style={{display:'flex',gap:20,marginBottom:12,fontSize:13}}>
-                  <div style={{color:'var(--color-text)'}}>
-                    <strong style={{fontSize:16}}>{(followerCount || 0).toLocaleString()}</strong>
-                    <span style={{color:'var(--color-text-muted)',marginLeft:4}}>フォロワー</span>
-                  </div>
-                  <div style={{color:'var(--color-text)'}}>
-                    <strong style={{fontSize:16}}>{filteredNovels.length}</strong>
-                    <span style={{color:'var(--color-text-muted)',marginLeft:4}}>作品</span>
-                  </div>
-                  <div style={{color:'var(--color-text)'}}>
-                    <strong style={{fontSize:16}}>{totalLikes.toLocaleString()}</strong>
-                    <span style={{color:'var(--color-text-muted)',marginLeft:4}}>総いいね</span>
-                  </div>
+                  <div><strong style={{fontSize:16}}>{(followerCount||0).toLocaleString()}</strong><span style={{color:'var(--color-text-muted)',marginLeft:4}}>フォロワー</span></div>
+                  <div><strong style={{fontSize:16}}>{filteredNovels.length}</strong><span style={{color:'var(--color-text-muted)',marginLeft:4}}>作品</span></div>
+                  <div><strong style={{fontSize:16}}>{totalLikes.toLocaleString()}</strong><span style={{color:'var(--color-text-muted)',marginLeft:4}}>総いいね</span></div>
                 </div>
                 <div style={{fontSize:12,color:'var(--color-text-faint)',marginBottom:author.bio?10:0}}>{joinStr}から活動中</div>
-                {author.bio && (
-                  <p style={{fontSize:13,color:'#5a3a20',lineHeight:1.8,margin:0,whiteSpace:'pre-wrap'}}>{author.bio}</p>
-                )}
+                {author.bio && <p style={{fontSize:13,color:'var(--color-text)',lineHeight:1.8,margin:0,whiteSpace:'pre-wrap'}}>{author.bio}</p>}
               </div>
             </div>
           </div>
@@ -152,10 +146,7 @@ export default async function AuthorPage({ params }: Props) {
 
       {/* ===== モバイル ===== */}
       <div className="mobile-only" style={{padding:'12px 16px 0'}}>
-
-        {/* プロフィールカード */}
         <div style={{background:'var(--color-bg)',border:'1px solid var(--color-brand-border)',borderRadius:14,padding:'16px',marginBottom:14}}>
-          {/* 1行目：アイコン・名前・フォローボタン */}
           <div style={{display:'flex',alignItems:'center',gap:12,marginBottom:12}}>
             {author.icon_url
               ? <img src={author.icon_url} style={{width:56,height:56,borderRadius:'50%',objectFit:'cover',flexShrink:0}} alt=""/>
@@ -168,14 +159,13 @@ export default async function AuthorPage({ params }: Props) {
               <div style={{fontSize:11,color:'var(--color-text-faint)'}}>{joinStr}から活動中</div>
             </div>
             {!isMe && user && (
-              <div style={{flexShrink:0}}>
+              <div style={{flexShrink:0,display:'flex',gap:6}}>
                 <FollowButton authorId={params.id} userId={user.id} initialFollowing={isFollowing} followerCount={followerCount || 0}/>
+                <BlockButton targetId={params.id} userId={user.id} initialBlocked={isBlocked}/>
               </div>
             )}
           </div>
-
-          {/* 統計バー */}
-          <div style={{display:'flex',background:'var(--color-bg-card)',border:'1px solid var(--color-brand-border)',borderRadius:10,overflow:'hidden',marginBottom: author.bio ? 12 : 0}}>
+          <div style={{display:'flex',background:'var(--color-bg-card)',border:'1px solid var(--color-brand-border)',borderRadius:10,overflow:'hidden',marginBottom:author.bio?12:0}}>
             {[
               {label:'フォロワー', value:(followerCount||0).toLocaleString()},
               {label:'作品', value:filteredNovels.length},
@@ -187,24 +177,15 @@ export default async function AuthorPage({ params }: Props) {
               </div>
             ))}
           </div>
-
-          {/* 自己紹介 */}
-          {author.bio && (
-            <p style={{fontSize:13,color:'#5a3a20',lineHeight:1.8,margin:0,whiteSpace:'pre-wrap'}}>{author.bio}</p>
-          )}
+          {author.bio && <p style={{fontSize:13,color:'var(--color-text)',lineHeight:1.8,margin:0,whiteSpace:'pre-wrap'}}>{author.bio}</p>}
         </div>
-
-        {/* 作品一覧 */}
-        <div style={{marginBottom:10,display:'flex',alignItems:'center'}}>
+        <div style={{marginBottom:10}}>
           <h2 style={{fontSize:15,fontWeight:700,color:'var(--color-text)',margin:0}}>
             投稿作品 <span style={{fontSize:12,fontWeight:400,color:'var(--color-text-muted)'}}>（{filteredNovels.length}作品）</span>
           </h2>
         </div>
         <NovelList/>
-
-        {/* つぶやき */}
         <TweetSection authorId={author.user_id} currentUserId={user?.id||null} currentUserName={profile?.display_name||null} currentUserIconUrl={profile?.icon_url||null} isOwner={false}/>
-
         <div style={{height:80}}/>
       </div>
 
