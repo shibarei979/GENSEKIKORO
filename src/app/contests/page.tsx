@@ -59,10 +59,9 @@ export default async function ContestsPage() {
               <div style={{display:'flex',flexDirection:'column',gap:12}}>
                 {activeContests.map((c:any) => {
                   const status = getStatusLabel(c.deadline, c.judging_end)
-                  const entryCount = entryCountMap[c.id] || 0
                   return (
                     <Link key={c.id} href={`/contests/${c.id}`} style={{textDecoration:'none'}}>
-                      <div style={{background:'var(--color-bg-card)',border:'1px solid var(--color-brand-border)',borderRadius:12,overflow:'hidden',width:231}}>
+                      <div className="contest-card" style={{background:'var(--color-bg-card)',border:'1px solid var(--color-brand-border)',borderRadius:12,overflow:'hidden',width:231}}>
                         <div className="desktop-only">
                           {c.image_url && (
                             <img src={c.image_url} alt={c.title}
@@ -104,7 +103,7 @@ export default async function ContestsPage() {
                 {externalContests.map((c:any) => {
                   const status = getStatusLabel(c.deadline, c.judging_end)
                   return (
-                    <div key={c.id} style={{background:'var(--color-bg-card)',border:'1px solid var(--color-brand-border)',borderRadius:12,overflow:'hidden',width:231}}>
+                    <div key={c.id} className="contest-card" style={{background:'var(--color-bg-card)',border:'1px solid var(--color-brand-border)',borderRadius:12,overflow:'hidden',width:231}}>
                         <div className="desktop-only">
                           {c.image_url && (
                             <img src={c.image_url} alt={c.title}

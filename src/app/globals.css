@@ -182,6 +182,12 @@
   background: #3a3028 !important;
 }
 
+/* ダークモード：コンテストカード背景を肌色に */
+[data-theme="dark"] .contest-card {
+  background: #c8a882 !important;
+  border-color: #a8886a !important;
+}
+
 /* ダークモード：検索結果カード内の文字を強制的に明るく */
 [data-theme="dark"] .search-result-row * ,
 [data-theme="dark"] .search-result-row,
