@@ -182,6 +182,26 @@
   background: #3a3028 !important;
 }
 
+/* ダークモード：検索結果カード内の文字を強制的に明るく */
+[data-theme="dark"] .search-result-row * ,
+[data-theme="dark"] .search-result-row,
+[data-theme="dark"] div[style*="color:'#5a3a20'"],
+[data-theme="dark"] div[style*='color:"#5a3a20"'],
+[data-theme="dark"] div[style*="color: rgb(90, 58, 32)"],
+[data-theme="dark"] span[style*="color:'#5a3a20'"],
+[data-theme="dark"] span[style*='color:"#5a3a20"'],
+[data-theme="dark"] span[style*="color: rgb(90, 58, 32)"] {
+  color: #d4c8bc !important;
+}
+[data-theme="dark"] div[style*="color:'#B8AEA8'"],
+[data-theme="dark"] div[style*='color:"#B8AEA8"'],
+[data-theme="dark"] div[style*="color: rgb(184, 174, 168)"],
+[data-theme="dark"] span[style*="color:'#B8AEA8'"],
+[data-theme="dark"] span[style*='color:"#B8AEA8"'],
+[data-theme="dark"] span[style*="color: rgb(184, 174, 168)"] {
+  color: #a09088 !important;
+}
+
 
 
 * { box-sizing: border-box; }
