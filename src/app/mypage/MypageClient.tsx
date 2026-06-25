@@ -550,14 +550,24 @@ export default function MypageClient({
               移動
             </button>
             {movingBookmark===bm.novel_id && (
-              <div style={{position:'absolute',right:0,top:'100%',marginTop:4,background:'var(--color-bg-card)',border:'1px solid var(--color-brand-border)',borderRadius:8,boxShadow:'0 4px 12px rgba(0,0,0,0.1)',zIndex:50,minWidth:140,overflow:'hidden'}}>
+              <div style={{position:'fixed',background:'var(--color-bg-card)',border:'1px solid var(--color-brand-border)',borderRadius:8,boxShadow:'0 4px 20px rgba(0,0,0,0.15)',zIndex:9999,minWidth:180,overflow:'auto',maxHeight:300}}
+                ref={el=>{
+                  if(el){
+                    const btn = el.previousElementSibling as HTMLElement
+                    if(btn){
+                      const rect = btn.getBoundingClientRect()
+                      el.style.top = (rect.bottom+4)+'px'
+                      el.style.left = Math.max(8, rect.right-180)+'px'
+                    }
+                  }
+                }}>
                 <button onClick={()=>handleMoveBookmark(bm.novel_id,null)}
-                  style={{width:'100%',padding:'8px 12px',border:'none',borderBottom:'1px solid var(--color-brand-border)',background:'none',fontSize:12,color:'var(--color-text)',cursor:'pointer',textAlign:'left'}}>
+                  style={{width:'100%',padding:'10px 14px',border:'none',borderBottom:'1px solid var(--color-brand-border)',background:'none',fontSize:13,color:'var(--color-text)',cursor:'pointer',textAlign:'left' as const}}>
                   未分類
                 </button>
                 {folders.map((f:any) => (
                   <button key={f.id} onClick={()=>handleMoveBookmark(bm.novel_id,f.id)}
-                    style={{width:'100%',padding:'8px 12px',border:'none',borderBottom:'1px solid var(--color-brand-border)',background:'none',fontSize:12,color:'var(--color-text)',cursor:'pointer',textAlign:'left'}}>
+                    style={{width:'100%',padding:'10px 14px',border:'none',borderBottom:'1px solid var(--color-brand-border)',background:'none',fontSize:13,color:'var(--color-text)',cursor:'pointer',textAlign:'left' as const}}>
                     {f.name}
                   </button>
                 ))}
