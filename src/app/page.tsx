@@ -286,7 +286,7 @@ export default async function HomePage() {
       </div>
 
       {/* ===== 作品を探す（デスクトップのみ） ===== */}
-      <div className="desktop-only search-banner-section" style={{background:'var(--color-bg-card)',padding:'20px 0'}}>
+      <div className="desktop-only search-banner-section" style={{background:'var(--color-bg)',padding:'20px 0'}}>
         <div style={{maxWidth:1200,margin:'0 auto',padding:'0 32px'}}>
           <SearchBanner />
         </div>
