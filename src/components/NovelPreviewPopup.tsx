@@ -45,8 +45,8 @@ export default function NovelPreviewPopup({ novel, children }: Props) {
   }
 
   const ROWS      = isMobile ? 17 : 20
-  const TEXT_COLS = 5  // モバイルも5列
-  const CELL      = isMobile ? 18 : 27  // モバイルはセル小さめ
+  const TEXT_COLS = 5
+  const CELL      = isMobile ? 18 : 27
 
   const lines = rawText.split('\n').map(toVertical)
   const processedChars: (string | null)[] = []
@@ -64,7 +64,6 @@ export default function NovelPreviewPopup({ novel, children }: Props) {
   }
   const textCells = Array.from({ length: ROWS * TEXT_COLS }, (_, i) => processedChars[i] ?? null)
 
-  // モバイル枠幅：5列 × 18px + 左右空白列 + 余白（×1.3）
   const mobileWidth = Math.round((CELL * TEXT_COLS + 36 + 24 + 32) * 1.3)
 
   function handleCardClick(e: React.MouseEvent) {
@@ -93,7 +92,7 @@ export default function NovelPreviewPopup({ novel, children }: Props) {
           flexDirection: 'column',
         }}>
 
-        {/* ヘッダー（固定） */}
+        {/* ヘッダー */}
         <div style={{background:'var(--color-brand-light)',padding:'10px 14px',borderBottom:'1px solid var(--color-brand-border)',position:'relative',flexShrink:0}}>
           <button onClick={()=>setShow(false)}
             style={{position:'absolute',top:8,right:10,background:'none',border:'none',fontSize:18,color:'var(--color-text-faint)',cursor:'pointer'}}>
@@ -121,43 +120,38 @@ export default function NovelPreviewPopup({ novel, children }: Props) {
           )}
         </div>
 
-        {/* 本文エリア（スクロール可能） */}
+        {/* 本文エリア */}
         <div style={{flex:1,overflowY:'auto',minHeight:0}}>
           {rawText ? (
             <div style={{padding:'12px 0',background:'var(--color-bg-card)'}}>
-              <div style={{fontSize:10,color:'#999',marginBottom:6,textAlign:'center',letterSpacing:'0.1em'}}>
+              <div style={{fontSize:10,color:'var(--color-text-faint)',marginBottom:6,textAlign:'center',letterSpacing:'0.1em'}}>
                 {novel.catchcopy ? '― キャッチコピー ―' : '― あらすじ ―'}
               </div>
-              {/* 縦書きマス目（原稿用紙風の罫線は専用の固定色を維持） */}
               <div style={{margin: isMobile ? '0 8px' : '0 28px'}}>
                 <div style={{
-                  display:'flex',
-                  flexDirection:'row',
-                  border:'1px solid #ccc',
-                  borderRadius:3,
-                  overflow:'hidden',
-                  padding:'8px 0',
+                  display:'flex',flexDirection:'row',
+                  border:'1px solid var(--color-brand-border)',
+                  borderRadius:3,overflow:'hidden',padding:'8px 0',
+                  background:'var(--color-bg-card)',
                 }}>
-                  {/* 右の空白 */}
                   <div style={{flex:1,display:'flex',flexDirection:'column'}}>
                     {Array.from({length: ROWS}, (_, row) => (
-                      <div key={row} style={{flex:1,height:CELL,borderBottom:row<ROWS-1?'1px solid #eee':'none',borderRight:'1px solid #ddd'}}/>
+                      <div key={row} style={{flex:1,height:CELL,borderBottom:row<ROWS-1?'1px solid var(--color-brand-border)':'none',borderRight:'1px solid var(--color-brand-border)'}}/>
                     ))}
                   </div>
-                  {/* 中央テキスト列（右→左） */}
                   {Array.from({length: TEXT_COLS}, (_, col) => {
                     const actualCol = TEXT_COLS - 1 - col
                     return (
-                      <div key={col} style={{display:'flex',flexDirection:'column',borderRight:'1px solid #ddd'}}>
+                      <div key={col} style={{display:'flex',flexDirection:'column',borderRight:'1px solid var(--color-brand-border)'}}>
                         {Array.from({length: ROWS}, (_, row) => {
                           const char = textCells[actualCol * ROWS + row]
                           return (
                             <div key={row} style={{
                               width:CELL,height:CELL,
-                              borderBottom:row<ROWS-1?'1px solid #eee':'none',
+                              borderBottom:row<ROWS-1?'1px solid var(--color-brand-border)':'none',
                               display:'flex',alignItems:'center',justifyContent:'center',
                               fontSize: isMobile ? 11 : 15,
-                              color:char?'#111':'transparent',
+                              color: char ? 'var(--color-text)' : 'transparent',
                               fontFamily:"'Noto Serif JP',serif",
                               lineHeight:1,flexShrink:0,
                             }}>
@@ -172,10 +166,9 @@ export default function NovelPreviewPopup({ novel, children }: Props) {
                       </div>
                     )
                   })}
-                  {/* 左の空白 */}
                   <div style={{flex:1,display:'flex',flexDirection:'column'}}>
                     {Array.from({length: ROWS}, (_, row) => (
-                      <div key={row} style={{flex:1,height:CELL,borderBottom:row<ROWS-1?'1px solid #eee':'none'}}/>
+                      <div key={row} style={{flex:1,height:CELL,borderBottom:row<ROWS-1?'1px solid var(--color-brand-border)':'none'}}/>
                     ))}
                   </div>
                 </div>
@@ -191,26 +184,26 @@ export default function NovelPreviewPopup({ novel, children }: Props) {
           )}
         </div>
 
-        {/* ボタン（常に下部固定） */}
+        {/* ボタン */}
         <div style={{padding:'10px 14px',borderTop:'1px solid var(--color-brand-border)',background:'var(--color-bg)',display:'flex',gap:8,flexShrink:0}}>
           <button onClick={()=>setShow(false)}
             style={{flex:1,padding:'9px',border:'1px solid var(--color-brand-border)',borderRadius:8,background:'var(--color-bg-card)',color:'var(--color-text-muted)',fontSize:13,cursor:'pointer'}}>
             閉じる
           </button>
           <a href={`/novel/${novel.id}`}
-            style={{flex:2,display:'block',padding:'9px 0',background:'var(--color-brand)',color:'var(--color-bg-card)',
+            style={{flex:2,display:'block',padding:'9px 0',background:'var(--color-brand)',color:'#fff',
               fontWeight:700,fontSize:14,borderRadius:8,textDecoration:'none',textAlign:'center'}}>
             作品を読む →
           </a>
         </div>
       </div>
 
-      <style>{`
+      <style>{\`
         @keyframes modalIn {
           from { opacity:0; transform:scale(.95) }
           to   { opacity:1; transform:scale(1) }
         }
-      `}</style>
+      \`}</style>
     </div>,
     document.body
   ) : null
