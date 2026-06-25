@@ -139,13 +139,38 @@
   color: var(--color-brand) !important;
 }
 
-/* ダークモード：ランキングピルボタン（クラスベース） */
+/* ダークモード：ランキング・検索ピルボタン */
 [data-theme="dark"] .ranking-pill-inactive {
   background: #c8a882 !important;
   color: #2a1a0e !important;
   border-color: #a8886a !important;
 }
 [data-theme="dark"] .ranking-pill-active {
+  background: #F26A21 !important;
+  color: #fff !important;
+  border-color: #F26A21 !important;
+}
+
+/* ダークモード：入力欄・セレクトボックスのみ肌色 */
+[data-theme="dark"] input:not([type="checkbox"]):not([type="radio"]):not([type="file"]),
+[data-theme="dark"] textarea,
+[data-theme="dark"] select {
+  background: #c8a882 !important;
+  color: #2a1a0e !important;
+  border-color: #a8886a !important;
+}
+[data-theme="dark"] input::placeholder,
+[data-theme="dark"] textarea::placeholder {
+  color: #7a5a3a !important;
+}
+
+/* ダークモード：気分で探す・詳細条件ボタン */
+[data-theme="dark"] button.ranking-pill-inactive {
+  background: #c8a882 !important;
+  color: #2a1a0e !important;
+  border-color: #a8886a !important;
+}
+[data-theme="dark"] button.ranking-pill-active {
   background: #F26A21 !important;
   color: #fff !important;
   border-color: #F26A21 !important;
