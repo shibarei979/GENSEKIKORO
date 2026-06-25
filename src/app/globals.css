@@ -141,9 +141,9 @@
 
 /* ダークモード：ランキング・検索ピルボタン */
 [data-theme="dark"] .ranking-pill-inactive {
-  background: #c8a882 !important;
+  background: #ddc9b0 !important;
   color: #2a1a0e !important;
-  border-color: #a8886a !important;
+  border-color: #c4a882 !important;
 }
 [data-theme="dark"] .ranking-pill-active {
   background: #F26A21 !important;
@@ -155,20 +155,20 @@
 [data-theme="dark"] input:not([type="checkbox"]):not([type="radio"]):not([type="file"]),
 [data-theme="dark"] textarea,
 [data-theme="dark"] select {
-  background: #c8a882 !important;
+  background: #ddc9b0 !important;
   color: #2a1a0e !important;
-  border-color: #a8886a !important;
+  border-color: #c4a882 !important;
 }
 [data-theme="dark"] input::placeholder,
 [data-theme="dark"] textarea::placeholder {
-  color: #7a5a3a !important;
+  color: #9a7a5a !important;
 }
 
 /* ダークモード：気分で探す・詳細条件ボタン */
 [data-theme="dark"] button.ranking-pill-inactive {
-  background: #c8a882 !important;
+  background: #ddc9b0 !important;
   color: #2a1a0e !important;
-  border-color: #a8886a !important;
+  border-color: #c4a882 !important;
 }
 [data-theme="dark"] button.ranking-pill-active {
   background: #F26A21 !important;
@@ -184,8 +184,8 @@
 
 /* ダークモード：コンテストカード背景を肌色に */
 [data-theme="dark"] .contest-card {
-  background: #c8a882 !important;
-  border-color: #a8886a !important;
+  background: #ddc9b0 !important;
+  border-color: #c4a882 !important;
 }
 
 /* ダークモード：検索結果カード内の文字を強制的に明るく */
