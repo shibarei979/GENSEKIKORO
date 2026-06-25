@@ -573,7 +573,7 @@ export default function MypageClient({
         {/* 曜日ヘッダー */}
         <div style={{display:'grid',gridTemplateColumns:'repeat(7,1fr)',background:'var(--color-bg)'}}>
           {['日','月','火','水','木','金','土'].map((d,i) => (
-            <div key={d} style={{textAlign:'center',padding:'6px 0',fontSize:11,fontWeight:600,color:i===0?'#ef4444':i===6?'#3b82f6':'var(--color-text-muted)'}}>
+            <div key={d} style={{textAlign:'center',padding:'3px 0',fontSize:9,fontWeight:600,color:i===0?'#ef4444':i===6?'#3b82f6':'var(--color-text-muted)'}}>
               {d}
             </div>
           ))}
@@ -581,7 +581,7 @@ export default function MypageClient({
         {/* 日グリッド */}
         <div style={{display:'grid',gridTemplateColumns:'repeat(7,1fr)',gap:1,background:'var(--color-brand-border)',padding:1}}>
           {days.map((day, i) => {
-            if (!day) return <div key={i} style={{background:'var(--color-bg)',aspectRatio:'1'}}/>
+            if (!day) return <div key={i} style={{background:'var(--color-bg)',height:28}}/>
             const key = `${year}-${String(month+1).padStart(2,'0')}-${String(day).padStart(2,'0')}`
             const postCount = postDates.filter(d => d === key).length
             const hasPost = postCount > 0
@@ -590,21 +590,21 @@ export default function MypageClient({
             return (
               <div key={i} style={{
                 background: hasPost ? 'var(--color-brand-light)' : 'var(--color-bg-card)',
-                aspectRatio:'1', padding:'2px', position:'relative', display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center', gap:1,
+                height:28, padding:'2px 3px', display:'flex', flexDirection:'column', justifyContent:'space-between',
               }}>
                 <div style={{
-                  fontSize:10,fontWeight:isToday?700:400,
+                  fontSize:9, fontWeight:isToday?700:400,
                   color: isToday ? '#fff' : dow===0 ? '#ef4444' : dow===6 ? '#3b82f6' : 'var(--color-text)',
-                  width:18,height:18,display:'flex',alignItems:'center',justifyContent:'center',borderRadius:'50%',
+                  width:14, height:14, display:'flex', alignItems:'center', justifyContent:'center', borderRadius:'50%',
                   background: isToday ? 'var(--color-brand)' : 'transparent',
-                  flexShrink:0,
+                  alignSelf:'flex-start',
                 }}>{day}</div>
                 {hasPost && (
                   <div style={{
-                    fontSize:9,fontWeight:700,color:'var(--color-brand)',
-                    border:'1px solid var(--color-brand)',borderRadius:3,
-                    width:14,height:14,display:'flex',alignItems:'center',justifyContent:'center',
-                    background:'var(--color-bg-card)',lineHeight:1,
+                    fontSize:8, fontWeight:700, color:'var(--color-brand)',
+                    border:'1px solid var(--color-brand)', borderRadius:2,
+                    width:12, height:12, display:'flex', alignItems:'center', justifyContent:'center',
+                    background:'var(--color-bg-card)', lineHeight:1, alignSelf:'flex-end',
                   }}>{postCount}</div>
                 )}
               </div>
