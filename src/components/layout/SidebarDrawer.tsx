@@ -6,50 +6,43 @@ interface Props {
 }
 
 export default function SidebarDrawer({ children }: Props) {
-  const [open, setOpen] = useState(false)
+  const [open, setOpen] = useState(true)
 
   return (
     <>
-      {/* オーバーレイ */}
-      {open && (
-        <div
-          onClick={() => setOpen(false)}
-          style={{position:'fixed',inset:0,background:'rgba(0,0,0,0.3)',zIndex:200}}
-        />
-      )}
-
       {/* 左端ドロワー */}
       <div style={{
         position:'fixed',
         top:0,
-        left: open ? 0 : -260,
-        width:260,
+        left: open ? 0 : -300,
+        width:300,
         height:'100vh',
         background:'var(--color-bg)',
-        boxShadow: open ? '4px 0 20px rgba(0,0,0,0.12)' : 'none',
+        boxShadow: open ? '4px 0 20px rgba(0,0,0,0.08)' : 'none',
         transition:'left 0.25s ease',
         zIndex:201,
         overflowY:'auto',
-        paddingTop:60,
+        paddingTop:70,
         paddingBottom:40,
+        borderRight:'1px solid var(--color-brand-border)',
       }}>
         {children}
       </div>
 
-      {/* 開閉タブ（左端に固定） */}
+      {/* 開閉タブ（ドロワーの右端に固定） */}
       <button
         onClick={() => setOpen(!open)}
         style={{
           position:'fixed',
-          left: open ? 260 : 0,
+          left: open ? 300 : 0,
           top:'50%',
           transform:'translateY(-50%)',
           width:20,
           height:64,
           background:'var(--color-bg-card)',
           border:'1px solid var(--color-brand-border)',
-          borderLeft: open ? '1px solid var(--color-brand-border)' : 'none',
-          borderRadius: open ? '0 6px 6px 0' : '0 6px 6px 0',
+          borderLeft: open ? 'none' : '1px solid var(--color-brand-border)',
+          borderRadius:'0 6px 6px 0',
           cursor:'pointer',
           display:'flex',
           alignItems:'center',
@@ -59,7 +52,7 @@ export default function SidebarDrawer({ children }: Props) {
           transition:'left 0.25s ease',
           padding:0,
         }}
-        title={open ? 'サイドバーを閉じる' : 'サイドバーを開く'}
+        title={open ? 'サイドバーを隠す' : 'サイドバーを表示'}
       >
         <svg width="10" height="16" viewBox="0 0 10 16" fill="none">
           <polyline
@@ -71,6 +64,13 @@ export default function SidebarDrawer({ children }: Props) {
           />
         </svg>
       </button>
+
+      {/* サイドバー分のスペース確保 */}
+      <div style={{
+        width: open ? 320 : 20,
+        flexShrink:0,
+        transition:'width 0.25s ease',
+      }}/>
     </>
   )
 }

@@ -68,7 +68,7 @@ export default async function Sidebar() {
 
   return (
     <SidebarDrawer>
-      <div style={{padding:'0 16px',display:'flex',flexDirection:'column',gap:24}}>
+      <div style={{padding:'0 20px',display:'flex',flexDirection:'column',gap:24}}>
 
         {/* お知らせ */}
         <div>
