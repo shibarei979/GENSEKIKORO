@@ -159,6 +159,7 @@ export default function SearchForm({
     color: active ? 'var(--color-bg-card)' : 'var(--color-text-muted)',
     transition: 'all .15s',
   })
+  const pillCls = (active: boolean) => active ? 'ranking-pill ranking-pill-active' : 'ranking-pill ranking-pill-inactive'
 
   const inp = {
     width: '100%', padding: '9px 14px', border: '1.5px solid var(--color-brand-border)',
@@ -366,9 +367,9 @@ export default function SearchForm({
           <div style={{marginBottom:12}}>
             <div style={{fontSize:11,color:'var(--color-text-muted)',fontWeight:600,marginBottom:6}}>ジャンル</div>
             <div style={{display:'flex',gap:6,flexWrap:'wrap'}}>
-              <button onClick={()=>setGenre('')} style={pill(!genre)}>すべて</button>
+              <button onClick={()=>setGenre('')} className={pillCls(!genre)} style={pill(!genre)}>すべて</button>
               {GENRES.map(g => (
-                <button key={g} onClick={()=>setGenre(genre===g?'':g)} style={pill(genre===g)}>{g}</button>
+                <button key={g} onClick={()=>setGenre(genre===g?'':g)} className={pillCls(genre===g)} style={pill(genre===g)}>{g}</button>
               ))}
             </div>
           </div>
@@ -376,17 +377,17 @@ export default function SearchForm({
             <div>
               <div style={{fontSize:11,color:'var(--color-text-muted)',fontWeight:600,marginBottom:6}}>作品の長さ</div>
               <div style={{display:'flex',gap:6}}>
-                <button onClick={()=>setType('')}    style={pill(!type)}>すべて</button>
-                <button onClick={()=>setType(type==='長編'?'':'長編')} style={pill(type==='長編')}>長編</button>
-                <button onClick={()=>setType(type==='短編'?'':'短編')} style={pill(type==='短編')}>短編</button>
+                <button onClick={()=>setType('')}    className={pillCls(!type)} style={pill(!type)}>すべて</button>
+                <button onClick={()=>setType(type==='長編'?'':'長編')} className={pillCls(type==='長編')} style={pill(type==='長編')}>長編</button>
+                <button onClick={()=>setType(type==='短編'?'':'短編')} className={pillCls(type==='短編')} style={pill(type==='短編')}>短編</button>
               </div>
             </div>
             <div>
               <div style={{fontSize:11,color:'var(--color-text-muted)',fontWeight:600,marginBottom:6}}>連載状況</div>
               <div style={{display:'flex',gap:6,flexWrap:'wrap'}}>
-                <button onClick={()=>setSerial('')}                          style={pill(!serial)}>すべて</button>
-                <button onClick={()=>setSerial(serial==='serial'?'':'serial')}     style={pill(serial==='serial')}>連載中</button>
-                <button onClick={()=>setSerial(serial==='complete'?'':'complete')} style={pill(serial==='complete')}>完結</button>
+                <button onClick={()=>setSerial('')}                          className={pillCls(!serial)} style={pill(!serial)}>すべて</button>
+                <button onClick={()=>setSerial(serial==='serial'?'':'serial')}     className={pillCls(serial==='serial')} style={pill(serial==='serial')}>連載中</button>
+                <button onClick={()=>setSerial(serial==='complete'?'':'complete')} className={pillCls(serial==='complete')} style={pill(serial==='complete')}>完結</button>
               </div>
             </div>
           </div>
