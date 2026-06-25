@@ -75,15 +75,15 @@
   --color-brand-light:  #332418;
   --color-brand-border: #5a3a22;
 
-  /* 背景 */
-  --color-bg:           #2a2218;
-  --color-bg-card:      #c8a882;   /* カード・入力欄を肌色に */
-  --color-bg-subtle:    #2a2218;
+  /* 背景：真っ黒ではなくグレーがかった暗色 */
+  --color-bg:           #2a2520;
+  --color-bg-card:      #332d28;
+  --color-bg-subtle:    #2a2520;
 
-  /* テキスト */
-  --color-text:         #2a1a0e;   /* 肌色背景上で読める濃いブラウン */
-  --color-text-muted:   #6b4a2a;
-  --color-text-faint:   #9a7a5a;
+  /* テキスト：純白でなくウォームホワイト */
+  --color-text:         #f2ede8;
+  --color-text-muted:   #b0a89e;
+  --color-text-faint:   #7a7068;
 
   --color-success:      #4ade80;
   --color-danger:       #f87171;
@@ -91,7 +91,7 @@
   --color-warning:      #fbbf24;
 
   --color-dark-bg:       #1e1a16;
-  --color-dark-bg-light: #3a2e20;
+  --color-dark-bg-light: #332d28;
   --color-dark-text:     #f2ede8;
 
   --color-tag-border:   #7a5030;
@@ -157,23 +157,7 @@
   background: #3a3028 !important;
 }
 
-/* ダークモード：入力欄を肌色に */
-[data-theme="dark"] input,
-[data-theme="dark"] textarea,
-[data-theme="dark"] select {
-  background: #c8a882 !important;
-  color: #2a1a0e !important;
-  border-color: #a8886a !important;
-}
-[data-theme="dark"] input::placeholder,
-[data-theme="dark"] textarea::placeholder {
-  color: #7a5a3a !important;
-}
 
-/* ダークモード：ページ暗背景上のテキストは明るく */
-[data-theme="dark"] body {
-  color: #f2ede8 !important;
-}
 
 * { box-sizing: border-box; }
 
