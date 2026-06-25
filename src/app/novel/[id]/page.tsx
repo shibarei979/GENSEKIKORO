@@ -196,7 +196,7 @@ export default async function NovelPage({ params }: { params: { id: string } }) 
   historyTags.forEach(t => { tagFreq[t] = (tagFreq[t]||0)+1 })
   const topGenres = Object.entries(genreFreq).sort((a,b)=>b[1]-a[1]).map(([g])=>g)
   const topTags   = Object.entries(tagFreq).sort((a,b)=>b[1]-a[1]).slice(0,5).map(([t])=>t)
-  const topAuthors = [...new Set(historyAuthorIds)].slice(0,3)
+  const topAuthors = historyAuthorIds.filter((v, i, a) => a.indexOf(v) === i).slice(0,3)
 
   // 前半：パーソナライズ or ランダム
   let scored: any[] = []
