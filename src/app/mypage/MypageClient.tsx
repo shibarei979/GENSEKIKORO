@@ -81,6 +81,34 @@ const TABS: { id: Tab; label: string }[] = [
   { id:'blockmute', label:'ブロック・ミュート' },
 ]
 
+function FolderCreateModal({ onClose, onCreate, saving }: { onClose:()=>void; onCreate:(name:string)=>void; saving:boolean }) {
+  const [name, setName] = React.useState('')
+  return (
+    <div style={{position:'fixed',inset:0,background:'rgba(0,0,0,0.5)',zIndex:1000,display:'flex',alignItems:'center',justifyContent:'center',padding:24}}>
+      <div style={{background:'var(--color-bg-card)',borderRadius:16,padding:24,maxWidth:360,width:'100%'}}>
+        <div style={{fontSize:15,fontWeight:700,color:'var(--color-text)',marginBottom:12}}>リストを作成</div>
+        <input
+          type="text"
+          value={name}
+          onChange={e=>setName(e.target.value)}
+          placeholder="リスト名"
+          style={{width:'100%',padding:'9px 12px',border:'1.5px solid var(--color-brand-border)',borderRadius:8,fontSize:13,outline:'none',marginBottom:12,boxSizing:'border-box' as const,fontFamily:'inherit',background:'var(--color-bg-card)',color:'var(--color-text)'}}
+        />
+        <div style={{display:'flex',gap:8}}>
+          <button onClick={onClose}
+            style={{flex:1,padding:'9px',border:'1px solid var(--color-brand-border)',borderRadius:8,background:'none',color:'var(--color-text-muted)',fontSize:13,cursor:'pointer'}}>
+            キャンセル
+          </button>
+          <button onClick={()=>onCreate(name.trim())} disabled={saving||!name.trim()}
+            style={{flex:1,padding:'9px',border:'none',borderRadius:8,background:'var(--color-brand)',color:'#fff',fontSize:13,fontWeight:700,cursor:'pointer',opacity:saving||!name.trim()?0.5:1}}>
+            {saving?'作成中...':'作成'}
+          </button>
+        </div>
+      </div>
+    </div>
+  )
+}
+
 export default function MypageClient({
   profile, novels: initialNovels, bookmarkedNovels,
   followingAuthors=[], followerCount=0, followingCount=0,
@@ -482,7 +510,7 @@ export default function MypageClient({
   }
 
   async function handleDeleteFolder(folderId: string) {
-    if (!confirm('フォルダを削除しますか？（中の作品は「未分類」に移動します）')) return
+    if (!confirm('リストを削除しますか？（中の作品は「未分類」に移動します）')) return
     await supabase.from('bookmark_folders').delete().eq('id', folderId)
     setFolders(prev => prev.filter(f => f.id !== folderId))
     if (activeFolderId === folderId) setActiveFolderId(null)
@@ -507,11 +535,11 @@ export default function MypageClient({
           <div style={{fontSize:15,fontWeight:700,color:'var(--color-text)'}}>保存済み作品（{bookmarkedNovels.length}）</div>
           <button onClick={()=>setShowFolderModal(true)}
             style={{fontSize:12,padding:'5px 12px',border:'1px solid var(--color-brand)',borderRadius:8,background:'none',color:'var(--color-brand)',cursor:'pointer'}}>
-            ＋ フォルダ作成
+            ＋ リスト作成
           </button>
         </div>
 
-        {/* フォルダタブ */}
+        {/* リストタブ */}
         <div style={{display:'flex',gap:6,flexWrap:'wrap',marginBottom:14}}>
           <button onClick={()=>setActiveFolderId('all')}
             style={{padding:'4px 12px',borderRadius:16,fontSize:12,border:`1px solid ${activeFolderId==='all'?'var(--color-brand)':'var(--color-brand-border)'}`,background:activeFolderId==='all'?'var(--color-brand)':'none',color:activeFolderId==='all'?'#fff':'var(--color-text-muted)',cursor:'pointer'}}>
@@ -525,7 +553,7 @@ export default function MypageClient({
             <div key={f.id} style={{display:'flex',alignItems:'center',gap:2}}>
               <button onClick={()=>setActiveFolderId(f.id)}
                 style={{padding:'4px 12px',borderRadius:16,fontSize:12,border:`1px solid ${activeFolderId===f.id?'var(--color-brand)':'var(--color-brand-border)'}`,background:activeFolderId===f.id?'var(--color-brand)':'none',color:activeFolderId===f.id?'#fff':'var(--color-text-muted)',cursor:'pointer'}}>
-                📁 {f.name}
+                📋 {f.name}
               </button>
               <button onClick={()=>handleDeleteFolder(f.id)}
                 style={{fontSize:10,color:'var(--color-text-faint)',background:'none',border:'none',cursor:'pointer',padding:'2px'}}>×</button>
@@ -536,7 +564,7 @@ export default function MypageClient({
         {/* 作品リスト */}
         {filteredBm.length === 0 ? (
           <div style={{textAlign:'center',padding:'40px',color:'var(--color-text-muted)',fontSize:13}}>
-            {activeFolderId==='all'?'保存した作品がありません':'このフォルダに作品がありません'}
+            {activeFolderId==='all'?'保存した作品がありません':'このリストに作品がありません'}
           </div>
         ) : filteredBm.map((bm:any) => {
           const n = bm.novels; if (!n) return null
@@ -555,11 +583,11 @@ export default function MypageClient({
                   <div style={{fontSize:14,fontWeight:700,color:'var(--color-text)',marginBottom:2}}>{n.title}</div>
                   <div style={{fontSize:12,color:'var(--color-text-muted)'}}>{authorName}</div>
                 </div>
-                {/* フォルダ移動ボタン */}
+                {/* リスト移動ボタン */}
                 <div style={{position:'relative',flexShrink:0}}>
                   <button onClick={()=>setMovingBookmark(movingBookmark===bm.novel_id?null:bm.novel_id)}
                     style={{fontSize:11,padding:'3px 8px',border:'1px solid var(--color-brand-border)',borderRadius:6,background:'none',color:'var(--color-text-muted)',cursor:'pointer'}}>
-                    📁
+                    📋
                   </button>
                   {movingBookmark===bm.novel_id && (
                     <div style={{position:'absolute',right:0,top:'100%',marginTop:4,background:'var(--color-bg-card)',border:'1px solid var(--color-brand-border)',borderRadius:8,boxShadow:'0 4px 12px rgba(0,0,0,0.1)',zIndex:50,minWidth:140,overflow:'hidden'}}>
@@ -570,7 +598,7 @@ export default function MypageClient({
                       {folders.map(f => (
                         <button key={f.id} onClick={()=>handleMoveBookmark(bm.novel_id,f.id)}
                           style={{width:'100%',padding:'8px 12px',border:'none',borderBottom:'1px solid var(--color-brand-border)',background:'none',fontSize:12,color:'var(--color-text)',cursor:'pointer',textAlign:'left' as const}}>
-                          📁 {f.name}
+                          📋 {f.name}
                         </button>
                       ))}
                     </div>
@@ -581,26 +609,19 @@ export default function MypageClient({
           )
         })}
 
-        {/* フォルダ作成モーダル */}
+        {/* リスト作成モーダル */}
         {showFolderModal && (
-          <div style={{position:'fixed',inset:0,background:'rgba(0,0,0,0.5)',zIndex:1000,display:'flex',alignItems:'center',justifyContent:'center',padding:24}}>
-            <div style={{background:'var(--color-bg-card)',borderRadius:16,padding:24,maxWidth:360,width:'100%'}}>
-              <div style={{fontSize:15,fontWeight:700,color:'var(--color-text)',marginBottom:12}}>フォルダを作成</div>
-              <input value={folderInput} onChange={e=>setFolderInput(e.target.value)}
-                placeholder="フォルダ名"
-                style={{width:'100%',padding:'9px 12px',border:'1.5px solid var(--color-brand-border)',borderRadius:8,fontSize:13,outline:'none',marginBottom:12,boxSizing:'border-box' as const}}/>
-              <div style={{display:'flex',gap:8}}>
-                <button onClick={()=>{setShowFolderModal(false);setFolderInput('')}}
-                  style={{flex:1,padding:'9px',border:'1px solid var(--color-brand-border)',borderRadius:8,background:'none',color:'var(--color-text-muted)',fontSize:13,cursor:'pointer'}}>
-                  キャンセル
-                </button>
-                <button onClick={handleCreateFolder} disabled={folderSaving||!folderInput.trim()}
-                  style={{flex:1,padding:'9px',border:'none',borderRadius:8,background:'var(--color-brand)',color:'#fff',fontSize:13,fontWeight:700,cursor:'pointer',opacity:folderSaving||!folderInput.trim()?0.5:1}}>
-                  {folderSaving?'作成中...':'作成'}
-                </button>
-              </div>
-            </div>
-          </div>
+          <FolderCreateModal
+            onClose={()=>setShowFolderModal(false)}
+            onCreate={async(name:string)=>{
+              setFolderSaving(true)
+              const { data } = await supabase.from('bookmark_folders').insert({ user_id: profile.user_id, name, order_num: folders.length }).select().single()
+              if (data) setFolders((prev:any[]) => [...prev, data])
+              setShowFolderModal(false)
+              setFolderSaving(false)
+            }}
+            saving={folderSaving}
+          />
         )}
       </div>
     )
