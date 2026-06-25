@@ -1,7 +1,7 @@
 'use client'
 import { useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
-import { TYPE_OPTIONS_ARRAY, getAnnouncementType } from './announcement-types'
+import { TYPE_OPTIONS_ARRAY, getAnnouncementType } from '@/app/announcements/announcement-types'
 
 interface Announcement {
   id: string; title: string; body: string; type: string;
