@@ -6,7 +6,6 @@ import { useRouter, useSearchParams } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import Link from 'next/link'
 import Header from '@/components/layout/Header'
-import MemoSidebar from './MemoSidebar'
 import Footer from '@/components/layout/Footer'
 
 const GENRES = ['異世界','ファンタジー','SF','恋愛','学園','ミステリー','ホラー','歴史・時代','日常','アクション','コメディ','官能','その他']
@@ -474,11 +473,7 @@ export default function PostClient({ profile, userId }: Props) {
     <div style={{minHeight:'100vh',background:'var(--color-bg-card)'}}>
       <Header profile={profile} user={true} />
 
-      <div style={{display:'flex',alignItems:'flex-start'}}>
-        {!isMobile && (
-          <MemoSidebar novelId={savedNovelId || selectedNovelId || editNovelId || null} userId={userId||''} />
-        )}
-      <div style={{flex:1,minWidth:0,maxWidth:760,margin:'0 auto',padding: isMobile ? '16px 16px 80px' : '24px 24px 60px'}}>
+      <div style={{maxWidth:760,margin:'0 auto',padding: isMobile ? '16px 16px 80px' : '24px 24px 60px'}}>
 
         {/* 編集：話選択 */}
         {editMode && (
@@ -829,7 +824,7 @@ export default function PostClient({ profile, userId }: Props) {
                   const disabled = !checked && (otherExclusiveSelected || (c.exclusive && selectedContestIds.length > 0))
                   return (
                     <label key={c.id} style={{
-                      display:'flex',alignItems:'flex-start',gap:10,
+                      display:'flex',alignItems:'flex-start' as const,gap:10,
                       cursor:disabled?'not-allowed':'pointer',
                       padding:'10px 12px',borderRadius:8,
                       border:`1.5px solid ${checked?'var(--color-brand)':disabled?'var(--color-brand-border)':'var(--color-brand-border)'}`,
@@ -1204,8 +1199,6 @@ export default function PostClient({ profile, userId }: Props) {
           {toast}
         </div>
       )}
-      </div>
-      </div>
     </div>
   )
 }
