@@ -1151,10 +1151,10 @@ export default function PostClient({ profile, userId }: Props) {
             </button>
           </div>
         )}
-        </div>{/* end maxWidth writing div */}
-        )}{/* end writing view */}
-        </div>{/* end main content */}
-      </div>{/* end flex div */}
+        </div>
+        )}
+        </div>
+      </div>
 
       <Footer user={true} />
 

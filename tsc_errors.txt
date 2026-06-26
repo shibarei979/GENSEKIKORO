@@ -1,0 +1,2 @@
+src/app/post/PostClient.tsx(1154,15): error TS1005: ')' expected.
+src/app/post/PostClient.tsx(1155,10): error TS1381: Unexpected token. Did you mean `{'}'}` or `&rbrace;`?
