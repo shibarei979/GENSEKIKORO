@@ -7,13 +7,11 @@ import { createClient } from '@/lib/supabase/client'
 import Link from 'next/link'
 import Header from '@/components/layout/Header'
 import Footer from '@/components/layout/Footer'
+import MemoSidebar from './MemoSidebar'
 
 const GENRES = ['異世界','ファンタジー','SF','恋愛','学園','ミステリー','ホラー','歴史・時代','日常','アクション','コメディ','官能','その他']
 const FONT_SIZES = [{label:'小',size:13},{label:'標準',size:15},{label:'大',size:18},{label:'特大',size:22}]
 
-// （S2用定数は削除：ヒントはインラインで表示）
-
-// S3: タグの例（100個・カテゴリなし）
 const TAG_EXAMPLES: string[] = [
   '異世界転生','現代ファンタジー','魔法','ドラゴン','剣と魔法','近未来','宇宙','学園','王宮','戦国時代',
   '最強主人公','無自覚チート','悪役令嬢','聖女','騎士','魔王','勇者','転生者','無能から覚醒','英雄',
@@ -27,7 +25,6 @@ const TAG_EXAMPLES: string[] = [
   'ループ','タイムリープ','記憶喪失','夢オチなし','どんでん返し','伏線回収','ハッピーエンド','鬱展開','残酷描写','泣ける',
 ]
 
-// 縦書き変換（NovelPreviewPopupと同じロジック）
 function toVerticalText(text: string): string {
   return text
     .replace(/0/g,'０').replace(/1/g,'１').replace(/2/g,'２')
@@ -80,7 +77,6 @@ export default function PostClient({ profile, userId }: Props) {
   const [illustPreview, setIllustPreview] = useState<string>('')
   const [illustUploading, setIllustUploading] = useState(false)
   const [isMobile, setIsMobile] = useState(false)
-  // S2: キャッチコピーのヒント表示
   const [showCatchcopyHint, setShowCatchcopyHint] = useState(false)
   const [showTagExamples, setShowTagExamples] = useState(false)
   const [mounted, setMounted] = useState(false)
@@ -141,7 +137,6 @@ export default function PostClient({ profile, userId }: Props) {
   const hasAiMarkers = aiMarkers.length > 0
 
   useEffect(() => {
-    // 募集中のコンテストを取得
     const now = new Date().toISOString()
     supabase.from('contests')
       .select('id, title, deadline, is_site_contest, exclusive')
@@ -433,7 +428,6 @@ export default function PostClient({ profile, userId }: Props) {
           }).catch(() => {})
         }
 
-        // コンテスト応募
         if (selectedContestIds.length > 0 && novelId) {
           const entries = selectedContestIds.map(cid => ({
             contest_id: cid, novel_id: novelId, user_id: userId
@@ -469,11 +463,14 @@ export default function PostClient({ profile, userId }: Props) {
       ? '予約投稿する'
       : (editMode ? '変更を保存' : '投稿する')
 
+  const currentNovelId = savedNovelId || selectedNovelId || editNovelId || null
+
   return (
     <div style={{minHeight:'100vh',background:'var(--color-bg-card)'}}>
       <Header profile={profile} user={true} />
-
-      <div style={{maxWidth:760,margin:'0 auto',padding: isMobile ? '16px 16px 80px' : '24px 24px 60px'}}>
+      <div style={{display:'flex',alignItems:'flex-start'}}>
+        {!isMobile && <MemoSidebar novelId={currentNovelId} userId={userId||''} />}
+        <div style={{flex:1,minWidth:0,maxWidth:760,margin:'0 auto',padding: isMobile ? '16px 16px 80px' : '24px 24px 60px'}}>
 
         {/* 編集：話選択 */}
         {editMode && (
@@ -539,7 +536,6 @@ export default function PostClient({ profile, userId }: Props) {
                 <textarea style={{...inp,resize:'vertical',minHeight:80}} value={summary} onChange={e=>setSummary(e.target.value)} placeholder="作品のあらすじ（省略可）"/>
               </div>
 
-              {/* ===== S2: キャッチコピー欄 with ？ヒント ===== */}
               <div style={fg}>
                 <div style={{display:'flex',alignItems:'center',gap:6,marginBottom:4}}>
                   <label style={{...lbl,marginBottom:0}}>キャッチコピー</label>
@@ -561,7 +557,6 @@ export default function PostClient({ profile, userId }: Props) {
                   </button>
                 </div>
 
-                {/* S2: キャッチコピー位置確認モーダル（実際のポップアップと同じ表示） */}
                 {showCatchcopyHint && mounted && createPortal(
                   <div style={{position:'fixed',inset:0,background:'rgba(0,0,0,0.5)',zIndex:9999,display:'flex',alignItems:'center',justifyContent:'center',padding:isMobile?'16px':20}}
                     onClick={()=>setShowCatchcopyHint(false)}>
@@ -577,7 +572,6 @@ export default function PostClient({ profile, userId }: Props) {
                       display:'flex', flexDirection:'column',
                       animation:'modalIn .2s ease',
                     }}>
-                      {/* ヘッダー */}
                       <div style={{background:'var(--color-brand-light)',padding:'10px 14px',borderBottom:'1px solid var(--color-brand-border)',position:'relative',flexShrink:0}}>
                         <button onClick={()=>setShowCatchcopyHint(false)}
                           style={{position:'absolute',top:8,right:10,background:'none',border:'none',fontSize:18,color:'var(--color-text-faint)',cursor:'pointer'}}>×</button>
@@ -597,16 +591,13 @@ export default function PostClient({ profile, userId }: Props) {
                           </div>
                         )}
                       </div>
-                      {/* 本文エリア */}
                       <div style={{flex:1,overflowY:'auto',minHeight:0,padding:'12px 0',background:'var(--color-bg-card)'}}>
-
                         <div style={{fontSize:11,fontWeight:700,color:'var(--color-brand)',textAlign:'center',marginBottom:6}}>
                           キャッチコピーはここに縦書きで表示されます
                         </div>
                         <div style={{fontSize:10,color:'#999',marginBottom:6,textAlign:'center',letterSpacing:'0.1em'}}>
                           {catchcopy ? '― キャッチコピー ―' : '― あらすじ ―'}
                         </div>
-                        {/* 縦書きテキスト（本物と同じロジック） */}
                         <div style={{margin:isMobile?'0 8px':'0 28px'}}>
                           <div style={{display:'flex',flexDirection:'row',border:'1px solid #ccc',borderRadius:3,overflow:'hidden',padding:'8px 0'}}>
                             <div style={{flex:1,display:'flex',flexDirection:'column'}}>
@@ -643,7 +634,6 @@ export default function PostClient({ profile, userId }: Props) {
                           </div>
                         </div>
                       </div>
-                      {/* ボタン */}
                       <div style={{padding:'10px 14px',borderTop:'1px solid var(--color-brand-border)',background:'var(--color-bg)',display:'flex',gap:8,flexShrink:0}}>
                         <button onClick={()=>setShowCatchcopyHint(false)}
                           style={{flex:1,padding:'9px',border:'1px solid var(--color-brand-border)',borderRadius:8,background:'var(--color-bg-card)',color:'var(--color-text-muted)',fontSize:13,cursor:'pointer'}}>
@@ -703,7 +693,6 @@ export default function PostClient({ profile, userId }: Props) {
                     style={{padding:'8px 14px',border:'1px solid var(--color-brand-border)',borderRadius:6,fontSize:12,color:'var(--color-text-muted)',background:'var(--color-bg-card)',cursor:'pointer',whiteSpace:'nowrap'}}>
                     追加
                   </button>
-                  {/* S3: ＋ボタンで例を表示 */}
                   <button onClick={()=>setShowTagExamples(!showTagExamples)} type="button"
                     title="タグの例を見る"
                     style={{
@@ -718,7 +707,6 @@ export default function PostClient({ profile, userId }: Props) {
                   </button>
                 </div>
 
-                {/* タグ例パネル */}
                 {showTagExamples && (
                   <div style={{
                     marginTop:8,
@@ -727,7 +715,7 @@ export default function PostClient({ profile, userId }: Props) {
                     borderRadius:8, padding:'12px 14px',
                   }}>
                     <div style={{fontSize:11,fontWeight:700,color:'var(--color-brand)',marginBottom:10}}>
-                      💡 タグの例（クリックで追加）
+                      タグの例（クリックで追加）
                     </div>
                     <div style={{display:'flex',flexWrap:'wrap',gap:5}}>
                       {TAG_EXAMPLES.map(ex => {
@@ -809,7 +797,6 @@ export default function PostClient({ profile, userId }: Props) {
               <div style={{fontSize:12,color:'var(--color-text-muted)',marginBottom:10,lineHeight:1.6}}>
                 投稿と同時にコンテストに応募できます。複数選択可。
               </div>
-              {/* 専任コンテスト選択中の警告 */}
               {selectedContestIds.some(id => contests.find(c=>c.id===id)?.exclusive) && (
                 <div style={{background:'#fffbeb',border:'1px solid #f59e0b',borderRadius:8,padding:'8px 12px',marginBottom:10,fontSize:12,color:'#92400e'}}>
                   ⚠️ 専任コンテストに応募中です。他のコンテストには同時応募できません。
@@ -818,9 +805,7 @@ export default function PostClient({ profile, userId }: Props) {
               <div style={{display:'flex',flexDirection:'column',gap:8}}>
                 {contests.map(c => {
                   const checked = selectedContestIds.includes(c.id)
-                  // 他の専任コンテストが選ばれている場合はdisabled
                   const otherExclusiveSelected = selectedContestIds.some(id => id!==c.id && contests.find(cc=>cc.id===id)?.exclusive)
-                  // 自分が専任で他が選ばれている場合もdisabled
                   const disabled = !checked && (otherExclusiveSelected || (c.exclusive && selectedContestIds.length > 0))
                   return (
                     <label key={c.id} style={{
@@ -835,7 +820,6 @@ export default function PostClient({ profile, userId }: Props) {
                         onChange={e=>{
                           if(e.target.checked) {
                             if(c.exclusive) {
-                              // 専任：他を全解除して自分だけ選択
                               setSelectedContestIds([c.id])
                             } else {
                               setSelectedContestIds(prev=>[...prev,c.id])
@@ -1138,7 +1122,8 @@ export default function PostClient({ profile, userId }: Props) {
             </button>
           </div>
         )}
-      </div>
+        </div>{/* end maxWidth div */}
+      </div>{/* end flex div */}
 
       <Footer user={true} />
 
@@ -1156,33 +1141,25 @@ export default function PostClient({ profile, userId }: Props) {
           </div>
           <div style={{flex:1,overflowY:'auto',background:'var(--color-bg-card)'}} onClick={e=>e.stopPropagation()}>
             <div style={{maxWidth:700,margin:'0 auto',padding:'24px 20px'}}>
-              {/* タイトル */}
               <h1 style={{fontSize:22,fontWeight:700,color:'var(--color-text)',lineHeight:1.4,marginBottom:16,fontFamily:"'Noto Serif JP',serif"}}>{epTitle||'（タイトル未入力）'}</h1>
-              {/* 前書き */}
               {preface && (
                 <div style={{fontSize:13,color:'var(--color-text-muted)',lineHeight:1.8,marginBottom:20,padding:'10px 14px',background:'var(--color-bg)',borderRadius:8,borderLeft:'3px solid var(--color-brand-border)',whiteSpace:'pre-wrap'}}>
                   {preface}
                 </div>
               )}
-              {/* 挿絵 */}
               {illustPreview && (
                 <div style={{textAlign:'center',marginBottom:20}}>
                   <img src={illustPreview} alt="挿絵" style={{maxWidth:'100%',maxHeight:400,borderRadius:8,objectFit:'contain'}}/>
                 </div>
               )}
-              {/* 本文 */}
               <div style={{fontSize:17,lineHeight:2,color:'var(--color-text)',fontFamily:"'Noto Serif JP',serif",whiteSpace:'pre-wrap',wordBreak:'break-all'}}
                 dangerouslySetInnerHTML={{__html:
                   (body||'（本文未入力）')
-                    // ルビ ｜テキスト《ルビ》
                     .replace(/｜([^《]+)《([^》]+)》/g,'<ruby>$1<rt>$2</rt></ruby>')
-                    // 強調 《《テキスト》》
                     .replace(/《《([^》]+)》》/g,'<em style="font-style:normal;font-weight:700;color:var(--color-text)">$1</em>')
-                    // 区切り線
                     .replace(/────────────/g,'<hr style="border:none;border-top:1px solid var(--color-brand-border);margin:20px 0"/>')
                 }}
               />
-              {/* あとがき */}
               {afterword && (
                 <div style={{fontSize:13,color:'var(--color-text-muted)',lineHeight:1.8,marginTop:24,padding:'10px 14px',background:'var(--color-bg)',borderRadius:8,borderLeft:'3px solid var(--color-brand-border)',whiteSpace:'pre-wrap'}}>
                   {afterword}
