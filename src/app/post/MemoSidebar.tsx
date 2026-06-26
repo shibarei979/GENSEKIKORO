@@ -11,7 +11,6 @@ interface Memo {
 }
 
 interface Props {
-  novelId: string | null
   userId: string
 }
 
@@ -19,14 +18,14 @@ const MENU_SECTIONS = [
   {
     section: '企画',
     items: [
-      { id: 'plan_summary',  label: '企画用あらすじ', placeholder: '結末までを含んだ内容を書きましょう。', maxLen: 1000 },
-      { id: 'plan_chars',    label: '登場人物',       placeholder: '主人公や重要な人物を簡単にまとめておきましょう。', maxLen: 1000 },
-      { id: 'plan_goal',     label: '作品の終着点',   placeholder: 'この作品のゴールを明確にしましょう。', maxLen: 1000 },
-      { id: 'plan_theme',    label: '作品のテーマ',   placeholder: '作中で繰り返し表現する主題を簡潔に書きましょう。', maxLen: 50 },
-      { id: 'plan_change',   label: '物語の変化',     placeholder: '作品を通して変化していく要素や、どんでん返しなどを書きましょう。', maxLen: 1000 },
-      { id: 'plan_logline',  label: 'ログライン',     placeholder: '物語の特徴を一文で表現しましょう。「誰が」「何をする」かに加え、意外性や葛藤を盛り込むと、物語の骨組みがより鮮明になります。', maxLen: 50 },
-      { id: 'plan_target',   label: 'ターゲット層',   placeholder: 'どんな人に読んで欲しいのか明確にしましょう。年齢層・性別・趣味・嗜好・ターゲット層が他に読みそうな作品など', maxLen: 500 },
-      { id: 'plan_wordcount', label: '執筆予定文字数', placeholder: '例：8万字（長編）\n・長編小説：8万字〜\n・中編小説：2万字〜\n・短編小説：5,000字〜\n・ショートショート：〜5,000字', maxLen: 200 },
+      { id: 'plan_summary',   label: '企画用あらすじ',   placeholder: '結末までを含んだ内容を書きましょう。', maxLen: 1000 },
+      { id: 'plan_chars',     label: '登場人物',         placeholder: '主人公や重要な人物を簡単にまとめておきましょう。', maxLen: 1000 },
+      { id: 'plan_goal',      label: '作品の終着点',     placeholder: 'この作品のゴールを明確にしましょう。', maxLen: 1000 },
+      { id: 'plan_theme',     label: '作品のテーマ',     placeholder: '作中で繰り返し表現する主題を簡潔に書きましょう。', maxLen: 50 },
+      { id: 'plan_change',    label: '物語の変化',       placeholder: '作品を通して変化していく要素やどんでん返しなどを書きましょう。', maxLen: 1000 },
+      { id: 'plan_logline',   label: 'ログライン',       placeholder: '物語の特徴を一文で表現しましょう。', maxLen: 50 },
+      { id: 'plan_target',    label: 'ターゲット層',     placeholder: 'どんな人に読んで欲しいか。年齢層・性別・趣味・嗜好など', maxLen: 500 },
+      { id: 'plan_wordcount', label: '執筆予定文字数',   placeholder: '例：8万字（長編）\n長編：8万字〜\n中編：2万字〜\n短編：5,000字〜', maxLen: 200 },
     ],
   },
   {
@@ -45,15 +44,9 @@ const MENU_SECTIONS = [
       { id: 'memo',      label: 'メモ',       placeholder: 'アイデアや気になったことを書きましょう。', maxLen: 5000 },
     ],
   },
-  {
-    section: '執筆',
-    items: [
-      { id: 'writing', label: '投稿ページへ', placeholder: '', maxLen: 0, isLink: true },
-    ],
-  },
 ]
 
-export default function MemoSidebar({ novelId, userId }: Props) {
+export default function MemoSidebar({ userId }: Props) {
   const supabase = createClient()
   const [open, setOpen] = useState(true)
   const [view, setView] = useState<'menu' | 'edit'>('menu')
@@ -64,15 +57,16 @@ export default function MemoSidebar({ novelId, userId }: Props) {
   const saveTimer = useRef<NodeJS.Timeout | null>(null)
 
   useEffect(() => {
-    if (!novelId) return
+    if (!userId) return
     supabase.from('novel_memos').select('*')
-      .eq('novel_id', novelId).eq('user_id', userId).order('order_num')
+      .eq('user_id', userId).is('novel_id', null).order('order_num')
       .then(({ data }) => setMemos(data || []))
-  }, [novelId])
+  }, [userId])
 
   function getMemoBody(catId: string) {
     return memos.find(m => m.category === catId)?.body || ''
   }
+
   function getMemoId(catId: string) {
     return memos.find(m => m.category === catId)?.id || null
   }
@@ -90,7 +84,7 @@ export default function MemoSidebar({ novelId, userId }: Props) {
   }
 
   function autoSave(body: string) {
-    if (!novelId || !activeItem) return
+    if (!userId || !activeItem) return
     if (saveTimer.current) clearTimeout(saveTimer.current)
     saveTimer.current = setTimeout(async () => {
       setSaving(true)
@@ -100,7 +94,7 @@ export default function MemoSidebar({ novelId, userId }: Props) {
         setMemos(prev => prev.map(m => m.id === existingId ? { ...m, body } : m))
       } else {
         const { data } = await supabase.from('novel_memos').insert({
-          novel_id: novelId, user_id: userId, category: activeItem.id,
+          novel_id: null, user_id: userId, category: activeItem.id,
           title: activeItem.label, body, order_num: 0,
         }).select().single()
         if (data) setMemos(prev => [...prev, data])
@@ -146,11 +140,7 @@ export default function MemoSidebar({ novelId, userId }: Props) {
           {/* メニュー */}
           {view === 'menu' && (
             <div style={{ flex: 1, overflowY: 'auto' }}>
-              {!novelId ? (
-                <div style={{ padding: 16, fontSize: 11, color: 'var(--color-text-faint)', textAlign: 'center', marginTop: 20 }}>
-                  作品を選択すると<br/>メモが使えます
-                </div>
-              ) : MENU_SECTIONS.map(section => (
+              {MENU_SECTIONS.map(section => (
                 <div key={section.section}>
                   <div style={{ padding: '8px 12px 4px', fontSize: 10, fontWeight: 700, color: 'var(--color-text-faint)', background: 'var(--color-bg-subtle)', letterSpacing: '0.05em' }}>
                     {section.section}
@@ -194,18 +184,14 @@ export default function MemoSidebar({ novelId, userId }: Props) {
                   {saving ? '保存中…' : '自動保存'}
                 </span>
               </div>
-              {activeItem.maxLen > 0 && (
-                <>
-                  <textarea value={editBody} onChange={e => handleBodyChange(e.target.value)}
-                    placeholder={activeItem.placeholder}
-                    style={{ flex: 1, padding: '10px 12px', border: 'none', fontSize: 12, color: 'var(--color-text)', background: 'var(--color-bg)', outline: 'none', resize: 'none', fontFamily: 'inherit', lineHeight: 1.8 }}
-                  />
-                  {activeItem.maxLen <= 1000 && (
-                    <div style={{ padding: '4px 12px', fontSize: 10, color: 'var(--color-text-faint)', borderTop: '1px solid var(--color-brand-border)', flexShrink: 0, textAlign: 'right' as const }}>
-                      {editBody.length}/{activeItem.maxLen}
-                    </div>
-                  )}
-                </>
+              <textarea value={editBody} onChange={e => handleBodyChange(e.target.value)}
+                placeholder={activeItem.placeholder}
+                style={{ flex: 1, padding: '10px 12px', border: 'none', fontSize: 12, color: 'var(--color-text)', background: 'var(--color-bg)', outline: 'none', resize: 'none', fontFamily: 'inherit', lineHeight: 1.8 }}
+              />
+              {activeItem.maxLen <= 1000 && (
+                <div style={{ padding: '4px 12px', fontSize: 10, color: 'var(--color-text-faint)', borderTop: '1px solid var(--color-brand-border)', flexShrink: 0, textAlign: 'right' as const }}>
+                  {editBody.length}/{activeItem.maxLen}
+                </div>
               )}
             </div>
           )}

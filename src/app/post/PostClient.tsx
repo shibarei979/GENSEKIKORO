@@ -463,13 +463,11 @@ export default function PostClient({ profile, userId }: Props) {
       ? '予約投稿する'
       : (editMode ? '変更を保存' : '投稿する')
 
-  const currentNovelId = savedNovelId || selectedNovelId || editNovelId || null
-
   return (
     <div style={{minHeight:'100vh',background:'var(--color-bg-card)'}}>
       <Header profile={profile} user={true} />
       <div style={{display:'flex',alignItems:'flex-start'}}>
-        {!isMobile && <MemoSidebar novelId={currentNovelId} userId={userId||''} />}
+        {!isMobile && <MemoSidebar userId={userId||''} />}
         <div style={{flex:1,minWidth:0,maxWidth:760,margin:'0 auto',padding: isMobile ? '16px 16px 80px' : '24px 24px 60px'}}>
 
         {/* 編集：話選択 */}
