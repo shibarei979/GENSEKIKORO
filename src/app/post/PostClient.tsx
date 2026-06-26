@@ -484,60 +484,7 @@ export default function PostClient({ profile, userId }: Props) {
     <div style={{minHeight:'100vh',background:'var(--color-bg-card)'}}>
       <Header profile={profile} user={true} />
 
-      {/* 初回セットアップモーダル */}
-      {showSetupModal && mounted && createPortal(
-        <div style={{position:'fixed',inset:0,background:'rgba(0,0,0,0.6)',zIndex:9999,display:'flex',alignItems:'center',justifyContent:'center',padding:16}}>
-          <div style={{background:'var(--color-bg-card)',borderRadius:16,boxShadow:'0 8px 32px rgba(0,0,0,0.2)',width:'100%',maxWidth:480,overflow:'hidden'}}>
-            <div style={{padding:'20px 24px',borderBottom:'1px solid var(--color-brand-border)',background:'var(--color-bg)'}}>
-              <div style={{fontSize:16,fontWeight:700,color:'var(--color-text)'}}>投稿する作品を選択</div>
-              <div style={{fontSize:12,color:'var(--color-text-muted)',marginTop:4}}>新しい作品を始めますか？それとも続きを書きますか？</div>
-            </div>
-            <div style={{padding:'20px 24px',display:'flex',flexDirection:'column',gap:12}}>
-              {/* 新作 */}
-              <button onClick={() => handleSetupSelect('new')}
-                style={{padding:'16px 20px',borderRadius:12,border:'2px solid var(--color-brand-border)',background:'var(--color-bg-card)',cursor:'pointer',textAlign:'left' as const,transition:'all .15s'}}
-                onMouseOver={e=>(e.currentTarget.style.borderColor='var(--color-brand)')}
-                onMouseOut={e=>(e.currentTarget.style.borderColor='var(--color-brand-border)')}>
-                <div style={{fontSize:15,fontWeight:700,color:'var(--color-brand)',marginBottom:4}}>新しい作品を書く</div>
-                <div style={{fontSize:12,color:'var(--color-text-muted)'}}>新連載・短編など、新しい作品の第1話を投稿する</div>
-              </button>
-
-              {/* 続作品 */}
-              <div style={{border:'2px solid var(--color-brand-border)',borderRadius:12,overflow:'hidden'}}>
-                <div style={{padding:'14px 20px',background:'var(--color-bg)',borderBottom:'1px solid var(--color-brand-border)'}}>
-                  <div style={{fontSize:15,fontWeight:700,color:'var(--color-text)',marginBottom:2}}>連載中の作品に追加</div>
-                  <div style={{fontSize:12,color:'var(--color-text-muted)'}}>既存の作品に新しい話を追加する</div>
-                </div>
-                <div style={{maxHeight:240,overflowY:'auto'}}>
-                  {myNovels.length === 0 ? (
-                    <div style={{padding:'20px',textAlign:'center',fontSize:13,color:'var(--color-text-faint)'}}>
-                      公開中の連載作品がありません
-                    </div>
-                  ) : myNovels.map(n => (
-                    <button key={n.id} onClick={() => handleSetupSelect('existing', n.id)}
-                      style={{width:'100%',padding:'12px 20px',border:'none',borderBottom:'1px solid var(--color-brand-light)',background:'none',cursor:'pointer',textAlign:'left' as const,display:'flex',alignItems:'center',gap:12}}
-                      onMouseOver={e=>(e.currentTarget.style.background='var(--color-brand-light)')}
-                      onMouseOut={e=>(e.currentTarget.style.background='none')}>
-                      <div style={{flex:1,minWidth:0}}>
-                        <div style={{fontSize:13,fontWeight:600,color:'var(--color-text)',overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap'}}>{n.title}</div>
-                        <div style={{fontSize:11,color:'var(--color-text-muted)',marginTop:1}}>{n.genre}</div>
-                      </div>
-                      <span style={{fontSize:12,color:'var(--color-brand)',flexShrink:0}}>選択 ›</span>
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              <Link href="/mypage" style={{textAlign:'center',fontSize:13,color:'var(--color-text-muted)',padding:'8px',textDecoration:'none'}}>
-                キャンセル
-              </Link>
-            </div>
-          </div>
-        </div>,
-        document.body
-      )}
-
-      <div style={{display:'flex',alignItems:'flex-start'}}>
+            <div style={{display:'flex',alignItems:'flex-start'}}>
         {!isMobile && <MemoSidebar currentView={currentView} onViewChange={setCurrentView} novelTitle={title||undefined} />}
         <div style={{flex:1,minWidth:0,overflowY:'auto',height:'calc(100vh - 60px)'}}>
 
