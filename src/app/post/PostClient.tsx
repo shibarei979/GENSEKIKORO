@@ -7,7 +7,8 @@ import { createClient } from '@/lib/supabase/client'
 import Link from 'next/link'
 import Header from '@/components/layout/Header'
 import Footer from '@/components/layout/Footer'
-import MemoSidebar from './MemoSidebar'
+import MemoSidebar, { type SidebarView } from './MemoSidebar'
+import MemoContent from './MemoContent'
 
 const GENRES = ['異世界','ファンタジー','SF','恋愛','学園','ミステリー','ホラー','歴史・時代','日常','アクション','コメディ','官能','その他']
 const FONT_SIZES = [{label:'小',size:13},{label:'標準',size:15},{label:'大',size:18},{label:'特大',size:22}]
@@ -77,6 +78,7 @@ export default function PostClient({ profile, userId }: Props) {
   const [illustPreview, setIllustPreview] = useState<string>('')
   const [illustUploading, setIllustUploading] = useState(false)
   const [isMobile, setIsMobile] = useState(false)
+  const [sidebarView, setSidebarView] = useState<SidebarView>('writing')
   const [showCatchcopyHint, setShowCatchcopyHint] = useState(false)
   const [showTagExamples, setShowTagExamples] = useState(false)
   const [mounted, setMounted] = useState(false)
@@ -466,9 +468,23 @@ export default function PostClient({ profile, userId }: Props) {
   return (
     <div style={{minHeight:'100vh',background:'var(--color-bg-card)'}}>
       <Header profile={profile} user={true} />
-      <div style={{display:'flex',alignItems:'flex-start'}}>
-        {!isMobile && <MemoSidebar userId={userId||''} />}
-        <div style={{flex:1,minWidth:0,maxWidth:760,margin:'0 auto',padding: isMobile ? '16px 16px 80px' : '24px 24px 60px'}}>
+      <div style={{display:'flex',alignItems:'flex-start',height:'calc(100vh - 60px)',overflow:'hidden'}}>
+        {!isMobile && (
+          <MemoSidebar
+            userId={userId||''}
+            currentView={sidebarView}
+            onViewChange={setSidebarView}
+          />
+        )}
+        {!isMobile && sidebarView !== 'writing' ? (
+          <MemoContent
+            userId={userId||''}
+            view={sidebarView}
+            onViewChange={setSidebarView}
+            writingContent={null}
+          />
+        ) : (
+        <div style={{flex:1,minWidth:0,maxWidth:760,margin:'0 auto',padding: isMobile ? '16px 16px 80px' : '24px 24px 60px',overflowY:'auto',height:'100%'}}>
 
         {/* 編集：話選択 */}
         {editMode && (
@@ -1120,8 +1136,9 @@ export default function PostClient({ profile, userId }: Props) {
             </button>
           </div>
         )}
-        </div>{/* end maxWidth div */}
-      </div>{/* end flex div */}
+        </div>
+        )}
+      </div>
 
       <Footer user={true} />
 
