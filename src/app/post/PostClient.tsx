@@ -141,7 +141,7 @@ export default function PostClient({ profile, userId }: Props) {
   const [selectedContestIds, setSelectedContestIds] = useState<string[]>([])
   const [editEpisodes,  setEditEpisodes]  = useState<any[]>([])
   const [editEpId,      setEditEpId]      = useState<string>('')
-  const [currentView,   setCurrentView]   = useState<View>('writing')
+  const [currentView,   setCurrentView]   = useState('writing' as View)
 
   const aiMarkers = detectAiMarkers(body)
   const hasAiMarkers = aiMarkers.length > 0
