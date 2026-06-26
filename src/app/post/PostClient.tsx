@@ -7,7 +7,7 @@ import { createClient } from '@/lib/supabase/client'
 import Link from 'next/link'
 import Header from '@/components/layout/Header'
 import Footer from '@/components/layout/Footer'
-import MemoSidebar, { type View } from './MemoSidebar'
+import MemoSidebar from './MemoSidebar'
 import PlanView from './PlanView'
 import PlotView from './PlotView'
 import PlotMakerView from './PlotMakerView'
@@ -16,6 +16,8 @@ import CharacterView from './CharacterView'
 import RelationView from './RelationView'
 import WorldView from './WorldView'
 import MemoView from './MemoView'
+
+type View = 'writing' | 'plan' | 'plot' | 'timeline' | 'character' | 'relation' | 'world' | 'memo' | 'plotmaker'
 
 const GENRES = ['異世界','ファンタジー','SF','恋愛','学園','ミステリー','ホラー','歴史・時代','日常','アクション','コメディ','官能','その他']
 const FONT_SIZES = [{label:'小',size:13},{label:'標準',size:15},{label:'大',size:18},{label:'特大',size:22}]
@@ -492,7 +494,7 @@ export default function PostClient({ profile, userId }: Props) {
         {currentView === 'memo' && currentNovelId && <MemoView novelId={currentNovelId} userId={userId||''}/>}
         {(currentView !== 'writing' && !currentNovelId) && (
           <div style={{display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',height:'60vh',color:'var(--color-text-faint)',fontSize:14,gap:12}}>
-            <div style={{fontSize:32}}>📝</div>
+            <div style={{fontSize:32}}></div>
             <div>まず執筆タブで作品を作成してください</div>
             <button onClick={()=>setCurrentView('writing')} style={{background:'var(--color-brand)',color:'#fff',border:'none',borderRadius:8,padding:'8px 20px',fontSize:13,cursor:'pointer'}}>執筆へ</button>
           </div>
@@ -767,7 +769,7 @@ export default function PostClient({ profile, userId }: Props) {
                               color: alreadyAdded ? 'var(--color-success)' : 'var(--color-text-muted)',
                               opacity: tags.length >= 10 && !alreadyAdded ? 0.4 : 1,
                             }}>
-                            {alreadyAdded ? '✓ ' : ''}{ex}
+                            {alreadyAdded ? ' ' : ''}{ex}
                           </button>
                         )
                       })}
@@ -827,7 +829,7 @@ export default function PostClient({ profile, userId }: Props) {
               </div>
               {selectedContestIds.some(id => contests.find(c=>c.id===id)?.exclusive) && (
                 <div style={{background:'#fffbeb',border:'1px solid #f59e0b',borderRadius:8,padding:'8px 12px',marginBottom:10,fontSize:12,color:'#92400e'}}>
-                  ⚠️ 専任コンテストに応募中です。他のコンテストには同時応募できません。
+                   専任コンテストに応募中です。他のコンテストには同時応募できません。
                 </div>
               )}
               <div style={{display:'flex',flexDirection:'column',gap:8}}>
@@ -979,7 +981,7 @@ export default function PostClient({ profile, userId }: Props) {
                     <div style={{color:'var(--color-brand)',fontSize:13}}>アップロード中...</div>
                   ) : (
                     <div>
-                      <div style={{fontSize:32,marginBottom:8}}>🖼</div>
+                      <div style={{fontSize:32,marginBottom:8}}></div>
                       <div style={{fontSize:13,color:'var(--color-text-muted)',marginBottom:4}}>クリックまたはドラッグで画像を追加</div>
                       <div style={{fontSize:11,color:'var(--color-text-faint)'}}>JPG・PNG・GIF・WEBP対応</div>
                     </div>
@@ -1051,7 +1053,7 @@ export default function PostClient({ profile, userId }: Props) {
                 {hasAiMarkers && (
                   <div style={{background:'#fffbeb',border:'1.5px solid #f59e0b',borderRadius:8,padding:'10px 14px',marginBottom:8}}>
                     <div style={{display:'flex',alignItems:'center',gap:6,marginBottom:4}}>
-                      <span style={{fontSize:14}}>⚠️</span>
+                      <span style={{fontSize:14}}></span>
                       <span style={{fontSize:12,fontWeight:700,color:'var(--color-warning)'}}>AI生成コンテンツの可能性が検出されました</span>
                     </div>
                     <div style={{fontSize:11,color:'#78350f',lineHeight:1.7}}>
@@ -1131,7 +1133,7 @@ export default function PostClient({ profile, userId }: Props) {
             </button>
             <button onClick={()=>handleSubmit(false)} disabled={loading||draftSaved}
               style={{width:'100%',border:'1.5px solid var(--color-brand)',color:draftSaved?'var(--color-success)':'var(--color-brand)',padding:'12px',borderRadius:10,fontSize:14,background:draftSaved?'#e8f5e9':'var(--color-bg-card)',cursor:draftSaved?'default':'pointer',opacity:loading?0.5:1}}>
-              {draftSaved?'✓ 保存しました':'下書き保存'}
+              {draftSaved?' 保存しました':'下書き保存'}
             </button>
             <Link href="/mypage" style={{display:'block',textAlign:'center',border:'1px solid var(--color-brand-border)',color:'var(--color-text-muted)',padding:'11px',borderRadius:10,fontSize:14,background:'var(--color-bg-card)',textDecoration:'none'}}>
               キャンセル
@@ -1142,7 +1144,7 @@ export default function PostClient({ profile, userId }: Props) {
             <Link href="/mypage" style={{border:'1px solid var(--color-brand-border)',color:'var(--color-text-muted)',padding:'9px 20px',borderRadius:20,fontSize:13,background:'var(--color-bg-card)'}}>キャンセル</Link>
             <button onClick={()=>handleSubmit(false)} disabled={loading||draftSaved}
               style={{border:'1.5px solid var(--color-brand)',color:draftSaved?'var(--color-success)':'var(--color-brand)',padding:'9px 20px',borderRadius:20,fontSize:13,background:draftSaved?'#e8f5e9':'var(--color-bg-card)',cursor:draftSaved?'default':'pointer',opacity:loading?0.5:1,transition:'all .3s'}}>
-              {draftSaved?'✓ 保存しました':'下書き保存'}
+              {draftSaved?' 保存しました':'下書き保存'}
             </button>
             <button onClick={()=>handleSubmit(true)} disabled={loading}
               style={{background:'var(--color-brand)',color:'var(--color-bg-card)',padding:'10px 24px',borderRadius:20,fontSize:13,fontWeight:700,border:'none',cursor:'pointer',opacity:loading?0.5:1}}>

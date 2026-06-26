@@ -48,7 +48,7 @@ export default function PlanView({ novelId, userId }: Props) {
       <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 24 }}>
         <h2 style={{ fontSize: 20, fontWeight: 700, color: 'var(--color-text)', margin: 0 }}> 企画</h2>
         <span style={{ fontSize: 11, color: saving ? 'var(--color-brand)' : saved ? 'var(--color-success)' : 'var(--color-text-faint)' }}>
-          {saving ? '保存中…' : saved ? '✓ 保存しました' : '自動保存'}
+          {saving ? '保存中…' : saved ? ' 保存しました' : '自動保存'}
         </span>
       </div>
       <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
