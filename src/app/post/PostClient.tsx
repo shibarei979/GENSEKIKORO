@@ -1204,6 +1204,8 @@ export default function PostClient({ profile, userId }: Props) {
           {toast}
         </div>
       )}
+      </div>
+      </div>
     </div>
   )
 }
