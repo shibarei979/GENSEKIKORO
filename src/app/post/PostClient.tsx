@@ -6,6 +6,7 @@ import { useRouter, useSearchParams } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import Link from 'next/link'
 import Header from '@/components/layout/Header'
+import MemoSidebar from './MemoSidebar'
 import Footer from '@/components/layout/Footer'
 
 const GENRES = ['異世界','ファンタジー','SF','恋愛','学園','ミステリー','ホラー','歴史・時代','日常','アクション','コメディ','官能','その他']
@@ -473,7 +474,11 @@ export default function PostClient({ profile, userId }: Props) {
     <div style={{minHeight:'100vh',background:'var(--color-bg-card)'}}>
       <Header profile={profile} user={true} />
 
-      <div style={{maxWidth:760,margin:'0 auto',padding: isMobile ? '16px 16px 80px' : '24px 24px 60px'}}>
+      <div style={{display:'flex',alignItems:'flex-start'}}>
+        {!isMobile && (
+          <MemoSidebar novelId={savedNovelId || selectedNovelId || editNovelId || null} userId={userId||''} />
+        )}
+      <div style={{flex:1,minWidth:0,maxWidth:760,margin:'0 auto',padding: isMobile ? '16px 16px 80px' : '24px 24px 60px'}}>
 
         {/* 編集：話選択 */}
         {editMode && (
