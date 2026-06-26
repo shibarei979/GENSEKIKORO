@@ -7,7 +7,7 @@ import { createClient } from '@/lib/supabase/client'
 import Link from 'next/link'
 import Header from '@/components/layout/Header'
 import Footer from '@/components/layout/Footer'
-import MemoSidebar from './MemoSidebar'
+import MemoSidebar, { type View } from './MemoSidebar'
 import PlanView from './PlanView'
 import PlotView from './PlotView'
 import PlotMakerView from './PlotMakerView'
@@ -17,7 +17,6 @@ import RelationView from './RelationView'
 import WorldView from './WorldView'
 import MemoView from './MemoView'
 
-type View = 'writing' | 'plan' | 'plot' | 'timeline' | 'character' | 'relation' | 'world' | 'memo' | 'plotmaker'
 
 const GENRES = ['異世界','ファンタジー','SF','恋愛','学園','ミステリー','ホラー','歴史・時代','日常','アクション','コメディ','官能','その他']
 const FONT_SIZES = [{label:'小',size:13},{label:'標準',size:15},{label:'大',size:18},{label:'特大',size:22}]
