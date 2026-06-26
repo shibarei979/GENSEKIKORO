@@ -10,15 +10,15 @@ interface Props {
 }
 
 const MENU: { id: View; label: string; section: string; icon: string }[] = [
-  { id: 'plan',       label: '企画',         section: '企画',   icon: '💡' },
-  { id: 'plot',       label: 'プロット',     section: '構成',   icon: '📋' },
-  { id: 'plotmaker',  label: 'プロットメーカー', section: '構成', icon: '🔧' },
-  { id: 'timeline',   label: '時系列',       section: '構成',   icon: '📅' },
-  { id: 'character',  label: '登場人物',     section: '資料',   icon: '👤' },
-  { id: 'relation',   label: '相関関係',     section: '資料',   icon: '🔗' },
-  { id: 'world',      label: '世界観',       section: '資料',   icon: '🌍' },
-  { id: 'memo',       label: 'メモ',         section: '資料',   icon: '📝' },
-  { id: 'writing',    label: '執筆',         section: '執筆',   icon: '✍️' },
+  { id: 'plan',       label: '企画',         section: '企画',   icon: '' },
+  { id: 'plot',       label: 'プロット',     section: '構成',   icon: '' },
+  { id: 'plotmaker',  label: 'プロットメーカー', section: '構成', icon: '' },
+  { id: 'timeline',   label: '時系列',       section: '構成',   icon: '' },
+  { id: 'character',  label: '登場人物',     section: '資料',   icon: '' },
+  { id: 'relation',   label: '相関関係',     section: '資料',   icon: '' },
+  { id: 'world',      label: '世界観',       section: '資料',   icon: '' },
+  { id: 'memo',       label: 'メモ',         section: '資料',   icon: '' },
+  { id: 'writing',    label: '執筆',         section: '執筆',   icon: '' },
 ]
 
 const SECTIONS = ['企画', '構成', '資料', '執筆']

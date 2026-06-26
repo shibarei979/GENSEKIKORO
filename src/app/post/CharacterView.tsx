@@ -72,7 +72,7 @@ export default function CharacterView({ novelId, userId }: Props) {
             style={{ padding: '10px 12px', borderBottom: '1px solid var(--color-brand-light)', cursor: 'pointer', background: selected?.id === c.id ? 'var(--color-brand-light)' : 'none', display: 'flex', alignItems: 'center', gap: 8 }}>
             {c.image_url
               ? <img src={c.image_url} style={{ width: 32, height: 32, borderRadius: '50%', objectFit: 'cover', flexShrink: 0 }} alt=""/>
-              : <div style={{ width: 32, height: 32, borderRadius: '50%', background: 'var(--color-brand-border)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 14, flexShrink: 0 }}>👤</div>
+              : <div style={{ width: 32, height: 32, borderRadius: '50%', background: 'var(--color-brand-border)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 14, flexShrink: 0 }}></div>
             }
             <div style={{ minWidth: 0 }}>
               <div style={{ fontSize: 12, fontWeight: 600, color: selected?.id === c.id ? 'var(--color-brand)' : 'var(--color-text)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{c.name}</div>
@@ -100,7 +100,7 @@ export default function CharacterView({ novelId, userId }: Props) {
                 onClick={() => document.getElementById('char-img')?.click()}>
                 {form.image_url
                   ? <img src={form.image_url} style={{ width: '100%', height: '100%', objectFit: 'cover' }} alt=""/>
-                  : <span style={{ fontSize: 32 }}>👤</span>
+                  : <span style={{ fontSize: 32 }}></span>
                 }
               </div>
               <input id="char-img" type="file" accept="image/*" style={{ display: 'none' }} onChange={handleImageUpload}/>

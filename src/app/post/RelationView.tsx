@@ -46,7 +46,7 @@ export default function RelationView({ novelId, userId }: Props) {
     <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4 }}>
       {c.image_url
         ? <img src={c.image_url} style={{ width: 48, height: 48, borderRadius: '50%', objectFit: 'cover', border: '2px solid var(--color-brand-border)' }} alt=""/>
-        : <div style={{ width: 48, height: 48, borderRadius: '50%', background: 'var(--color-brand-border)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 20 }}>👤</div>
+        : <div style={{ width: 48, height: 48, borderRadius: '50%', background: 'var(--color-brand-border)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 20 }}></div>
       }
       <span style={{ fontSize: 11, fontWeight: 600, color: 'var(--color-text)' }}>{c.name}</span>
     </div>
@@ -54,7 +54,7 @@ export default function RelationView({ novelId, userId }: Props) {
 
   return (
     <div style={{ maxWidth: 700, margin: '0 auto', padding: '24px 20px' }}>
-      <h2 style={{ fontSize: 20, fontWeight: 700, color: 'var(--color-text)', marginBottom: 20 }}>🔗 相関関係</h2>
+      <h2 style={{ fontSize: 20, fontWeight: 700, color: 'var(--color-text)', marginBottom: 20 }}> 相関関係</h2>
 
       {chars.length < 2 ? (
         <div style={{ textAlign: 'center', padding: '40px', color: 'var(--color-text-faint)', fontSize: 13, border: '2px dashed var(--color-brand-border)', borderRadius: 12 }}>

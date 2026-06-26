@@ -33,7 +33,7 @@ export default function TimelineView({ novelId, userId }: Props) {
   return (
     <div style={{ maxWidth: 700, margin: '0 auto', padding: '24px 20px' }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 24 }}>
-        <h2 style={{ fontSize: 20, fontWeight: 700, color: 'var(--color-text)', margin: 0 }}>📅 時系列</h2>
+        <h2 style={{ fontSize: 20, fontWeight: 700, color: 'var(--color-text)', margin: 0 }}> 時系列</h2>
         <button onClick={handleAdd} style={{ marginLeft: 'auto', background: 'var(--color-brand)', color: '#fff', border: 'none', borderRadius: 8, padding: '6px 16px', fontSize: 12, cursor: 'pointer' }}>＋ 追加</button>
       </div>
 

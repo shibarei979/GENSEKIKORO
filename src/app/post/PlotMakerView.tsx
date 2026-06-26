@@ -51,7 +51,7 @@ export default function PlotMakerView({ novelId, userId }: Props) {
   return (
     <div style={{ maxWidth: 700, margin: '0 auto', padding: '24px 20px' }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 8 }}>
-        <h2 style={{ fontSize: 20, fontWeight: 700, color: 'var(--color-text)', margin: 0 }}>🔧 プロットメーカー</h2>
+        <h2 style={{ fontSize: 20, fontWeight: 700, color: 'var(--color-text)', margin: 0 }}> プロットメーカー</h2>
         <span style={{ fontSize: 11, color: saving ? 'var(--color-brand)' : saved ? 'var(--color-success)' : 'var(--color-text-faint)' }}>
           {saving ? '保存中…' : saved ? '✓ 保存' : '自動保存'}
         </span>

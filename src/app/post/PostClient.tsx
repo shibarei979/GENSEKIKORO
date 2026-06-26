@@ -140,6 +140,7 @@ export default function PostClient({ profile, userId }: Props) {
   const [selectedContestIds, setSelectedContestIds] = useState<string[]>([])
   const [editEpisodes,  setEditEpisodes]  = useState<any[]>([])
   const [editEpId,      setEditEpId]      = useState<string>('')
+  const [currentView,   setCurrentView]   = useState<View>('writing')
 
   const aiMarkers = detectAiMarkers(body)
   const hasAiMarkers = aiMarkers.length > 0
@@ -472,7 +473,6 @@ export default function PostClient({ profile, userId }: Props) {
       : (editMode ? '変更を保存' : '投稿する')
 
   const currentNovelId = savedNovelId || selectedNovelId || editNovelId || null
-  const [currentView, setCurrentView] = useState<View>('writing')
 
   return (
     <div style={{minHeight:'100vh',background:'var(--color-bg-card)'}}>
