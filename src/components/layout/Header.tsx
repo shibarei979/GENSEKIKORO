@@ -207,7 +207,7 @@ export default function Header({ profile, user, activeGenre }: Props) {
           <div style={{display:'flex',alignItems:'center',gap:12,position:'relative',zIndex:1,flexShrink:0}}>
             {user ? (
               <>
-                <Link href="/post" className="header-post-btn"
+                <Link href="/post/setup" className="header-post-btn"
                   style={{
                     border:'1.5px solid var(--color-brand)', color:'var(--color-brand)', borderRadius:20,
                     background:'var(--color-bg-card)', fontSize:13, fontWeight:600,
@@ -357,7 +357,7 @@ export default function Header({ profile, user, activeGenre }: Props) {
                   {label:'コンテスト',    href:'/contests'},
                   {label:'閲覧履歴',     href:'/history'},
                   {label:'ミッション',    href:'/mission'},
-                  ...(user ? [{label:'投稿する', href:'/post'},{label:'マイページ', href:'/mypage'}] : []),
+                  ...(user ? [{label:'投稿する', href:'/post/setup'},{label:'マイページ', href:'/mypage'}] : []),
                 ].map(item=>(
                   <Link key={item.href} href={item.href} onClick={()=>setShowMobileMenu(false)}
                     style={{display:'flex',alignItems:'center',justifyContent:'space-between',padding:'13px 16px',borderBottom:'1px solid var(--color-brand-light)',textDecoration:'none',
