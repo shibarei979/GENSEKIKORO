@@ -423,7 +423,12 @@ export default function MemoSidebar({ userId }: Props) {
           {(view as string) === 'world_view' && (
             <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
               <Header back="menu" title="世界観"/>
-              <textarea value={getMemoBody('world')} onChange={e => autoSaveMemo('world', '世界観', e.target.value) || setMemos(prev => { const id = getMemoId('world'); return id ? prev.map(m => m.id === id ? { ...m, body: e.target.value } : m) : prev })}
+              <textarea value={getMemoBody('world')} onChange={e => {
+                  const v = e.target.value
+                  const id = getMemoId('world')
+                  if (id) setMemos(prev => prev.map(m => m.id === id ? { ...m, body: v } : m))
+                  autoSaveMemo('world', '世界観', v)
+                }}
                 placeholder="世界の設定を書きましょう。"
                 style={{ ...ta, flex: 1, padding: '10px 12px', border: 'none', fontSize: 12, background: 'var(--color-bg)' }}/>
             </div>
@@ -433,7 +438,12 @@ export default function MemoSidebar({ userId }: Props) {
           {(view as string) === 'memo_view' && (
             <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
               <Header back="menu" title="メモ"/>
-              <textarea value={getMemoBody('memo')} onChange={e => autoSaveMemo('memo', 'メモ', e.target.value) || setMemos(prev => { const id = getMemoId('memo'); return id ? prev.map(m => m.id === id ? { ...m, body: e.target.value } : m) : prev })}
+              <textarea value={getMemoBody('memo')} onChange={e => {
+                  const v = e.target.value
+                  const id = getMemoId('memo')
+                  if (id) setMemos(prev => prev.map(m => m.id === id ? { ...m, body: v } : m))
+                  autoSaveMemo('memo', 'メモ', v)
+                }}
                 placeholder="アイデアや気になったことを書きましょう。"
                 style={{ ...ta, flex: 1, padding: '10px 12px', border: 'none', fontSize: 12, background: 'var(--color-bg)' }}/>
             </div>
