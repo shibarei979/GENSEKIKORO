@@ -31,7 +31,7 @@ const MENU = [
 
 const SECTIONS = ['企画', '構成', '資料', '執筆']
 
-export default function MemoSidebar({ userId, currentView, onViewChange }: Props) {
+export default function MemoSidebar({ novelId, userId }: Props) {
   const [open, setOpen] = useState(true)
   const W = open ? 160 : 36
 
