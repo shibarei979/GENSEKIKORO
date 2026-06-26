@@ -79,6 +79,7 @@ export default function PostClient({ profile, userId }: Props) {
   const router        = useRouter()
   const searchParams  = useSearchParams()
   const editNovelId   = searchParams.get('edit')
+  const novelIdParam  = searchParams.get('novel')
   const supabase      = createClient()
   const bodyRef    = useRef(null as HTMLTextAreaElement | null)
   const illustRef   = useRef(null as HTMLInputElement | null)
@@ -142,7 +143,6 @@ export default function PostClient({ profile, userId }: Props) {
   const [editEpisodes,  setEditEpisodes]  = useState([] as any[])
   const [editEpId,      setEditEpId]      = useState('' as string)
   const [currentView,   setCurrentView]   = useState('writing' as View)
-  const [showSetupModal, setShowSetupModal] = useState(true)
 
   const aiMarkers = detectAiMarkers(body)
   const hasAiMarkers = aiMarkers.length > 0
@@ -161,12 +161,15 @@ export default function PostClient({ profile, userId }: Props) {
   useEffect(() => {
     supabase.from('novels').select('id,title,genre').eq('author_id', userId).eq('published', true)
       .then(({ data }) => setMyNovels(data || []))
+    if (novelIdParam) {
+      setMode('existing')
+      setSelectedNovelId(novelIdParam)
+    }
   }, [userId])
 
   useEffect(() => {
     if (!editNovelId) return
     setEditMode(true)
-    setShowSetupModal(false)
     supabase.from('novels').select('*').eq('id', editNovelId).single()
       .then(({ data: novel }) => {
         if (!novel) return
@@ -476,14 +479,6 @@ export default function PostClient({ profile, userId }: Props) {
       : (editMode ? '変更を保存' : '投稿する')
 
   const currentNovelId = savedNovelId || selectedNovelId || editNovelId || null
-
-  function handleSetupSelect(type: 'new' | 'existing', novelId?: string) {
-    setMode(type)
-    if (type === 'existing' && novelId) {
-      setSelectedNovelId(novelId)
-    }
-    setShowSetupModal(false)
-  }
 
   return (
     <div style={{minHeight:'100vh',background:'var(--color-bg-card)'}}>
