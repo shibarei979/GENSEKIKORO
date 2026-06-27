@@ -19,7 +19,9 @@ export default function CharacterView({ novelId, userId }: Props) {
   }, [novelId])
 
   async function handleNew() {
-    const { data } = await supabase.from('novel_characters').insert({ novel_id: novelId, user_id: userId, name: '新キャラクター', role: '', description: '', order_num: chars.length }).select().single()
+    if (!novelId || !userId) { alert('作品が選択されていません。執筆タブで作品を選択してください。'); return }
+    const { data, error } = await supabase.from('novel_characters').insert({ novel_id: novelId, user_id: userId, name: '新キャラクター', role: '', description: '', order_num: chars.length }).select().single()
+    if (error) { console.error('character insert error:', error); alert('追加に失敗しました: ' + error.message); return }
     if (data) { setChars(prev => [...prev, data]); selectChar(data) }
   }
 
