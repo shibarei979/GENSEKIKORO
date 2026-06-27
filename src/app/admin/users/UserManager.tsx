@@ -9,6 +9,8 @@ interface UserProfile {
   frozen?: boolean
 }
 
+const PROTECTED_EMAIL = 'gensekikoro@gmail.com'
+
 const btn = (color: string, bg: string, border: string) => ({
   padding:'5px 12px',borderRadius:6,fontSize:11,fontWeight:600,cursor:'pointer',color,background:bg,border:`1px solid ${border}`,
 })
@@ -167,10 +169,12 @@ export default function UserManager({ initialUsers, total, currentPage, q }: { i
             <div style={{fontSize:11,color:'#94a3b8'}}>{u.login_provider==='google'?'Google':'メール'}</div>
             <div style={{display:'flex',gap:4,flexWrap:'wrap'}}>
               {u.is_admin ? (
-                <button onClick={()=>handleAdminRevoke(u)} style={btn('#dc2626','#fef2f2','#fca5a5')}>権限剥奪</button>
+                u.email === PROTECTED_EMAIL
+                  ? <span style={{fontSize:11,color:'#94a3b8',padding:'5px 8px'}}>保護されたアカウント</span>
+                  : <button onClick={()=>handleAdminRevoke(u)} style={btn('#dc2626','#fef2f2','#fca5a5')}>権限剥奪</button>
               ) : (
                 <>
-                  <button onClick={()=>openAdminModal(u)} style={btn('#f59e0b','#fffbeb','#fde68a')}>管理者に</button>
+                  {u.email !== PROTECTED_EMAIL && <button onClick={()=>openAdminModal(u)} style={btn('#f59e0b','#fffbeb','#fde68a')}>管理者に</button>}
                   <button onClick={()=>handleFreeze(u)} style={btn(u.frozen?'#10b981':'#f59e0b',u.frozen?'#f0fdf4':'#fffbeb',u.frozen?'#86efac':'#fde68a')}>
                     {u.frozen?'解除':'凍結'}
                   </button>
