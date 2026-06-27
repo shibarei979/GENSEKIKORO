@@ -5,6 +5,7 @@ import { useRouter, usePathname } from 'next/navigation'
 import { useState, useEffect, useRef } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import SettingsModal from '@/components/SettingsModal'
+import FloatingMemo from '@/components/FloatingMemo'
 
 interface Props {
   profile?: { display_name: string; user_number?: number; icon_url?: string | null } | null
@@ -423,6 +424,7 @@ export default function Header({ profile, user, activeGenre }: Props) {
       </nav>
 
       <SettingsModal show={showSettingsModal} onClose={()=>setShowSettingsModal(false)} profile={profile} userId={user?.id||''} />
+      <FloatingMemo userId={user?.id||null} />
 
       <style>{`
         .desktop-header { display: flex !important; }

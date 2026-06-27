@@ -3,7 +3,7 @@ import { useState, useEffect, useRef } from 'react'
 import { createClient } from '@/lib/supabase/client'
 
 interface MemoItem { id: string; title: string; body: string; order_num: number }
-interface Props { novelId: string; userId: string }
+interface Props { novelId?: string; userId: string }
 
 export default function MemoView({ novelId, userId }: Props) {
   const supabase = createClient()
@@ -15,12 +15,12 @@ export default function MemoView({ novelId, userId }: Props) {
   const timer = useRef<NodeJS.Timeout | null>(null)
 
   useEffect(() => {
-    supabase.from('novel_memos').select('*').eq('novel_id', novelId).eq('user_id', userId).eq('category', 'memo').order('order_num')
+    supabase.from('novel_memos').select('*').eq('user_id', userId).eq('category', 'memo').order('order_num')
       .then(({ data }) => setItems(data || []))
-  }, [novelId])
+  }, [userId])
 
   async function handleNew() {
-    const { data } = await supabase.from('novel_memos').insert({ novel_id: novelId, user_id: userId, category: 'memo', title: '新しいメモ', body: '', order_num: items.length }).select().single()
+    const { data } = await supabase.from('novel_memos').insert({ novel_id: null, user_id: userId, category: 'memo', title: '新しいメモ', body: '', order_num: items.length }).select().single()
     if (data) { setItems(prev => [...prev, data]); select(data) }
   }
 
