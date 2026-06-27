@@ -19,7 +19,7 @@ export default async function AdminNovelsPage({ searchParams }: { searchParams: 
   const PAGE_SIZE = 20
   const offset = (page - 1) * PAGE_SIZE
 
-  let query = supabase.from('novels').select('id, title, genre, author_id, published, is_r18, created_at, aims_publishing', { count: 'exact' })
+  let query = supabase.from('novels').select('id, title, genre, author_id, published, is_r18, created_at, aims_publishing, official_tags', { count: 'exact' })
   if (q) query = (query as any).ilike('title', `%${q}%`)
   if (publishingOnly) query = (query as any).eq('aims_publishing', true)
   const { data: novels, count } = await (query as any).order('created_at', { ascending: false }).range(offset, offset + PAGE_SIZE - 1)

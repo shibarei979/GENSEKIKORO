@@ -340,6 +340,11 @@ export default async function NovelPage({ params }: { params: { id: string } }) 
               {novel.novel_type && (
                 <span style={{fontSize:10,background:'var(--color-info-bg)',color:'var(--color-info)',border:'1px solid var(--color-info-border)',padding:'2px 8px',borderRadius:4}}>{novel.novel_type}</span>
               )}
+              {(novel.official_tags||[]).map((tag:string) => (
+                <span key={tag} style={{fontSize:10,background:'#fef9c3',color:'#854d0e',border:'1px solid #fde047',padding:'2px 8px',borderRadius:4,fontWeight:700}}>
+                  {tag}
+                </span>
+              ))}
               {(novel.tags||[]).map((t: string) => (
                 <span key={t} style={{fontSize:10,background:'var(--color-bg)',color:'var(--color-text-muted)',border:'1px solid var(--color-brand-border)',padding:'2px 8px',borderRadius:4}}>#{t}</span>
               ))}
