@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import LoginPromptModal from '@/components/LoginPromptModal'
 
@@ -25,6 +25,8 @@ function fmtNum(n: number): string {
   return n.toString()
 }
 
+const DAILY_LIMIT = 3
+
 export default function NovelActions({ novelId, userId, authorId, novelTitle, isAuthor, initialLiked, initialBookmarked, initialDiscovered, likeCount, bookmarkCount, discoverCount, userDisplayName }: Props) {
   const supabase = createClient()
   const [liked,       setLiked]       = useState(initialLiked)
@@ -39,6 +41,15 @@ export default function NovelActions({ novelId, userId, authorId, novelTitle, is
   const [submitting,  setSubmitting]  = useState(false)
   const [showLogin,   setShowLogin]   = useState(false)
   const [loginMsg,    setLoginMsg]    = useState('')
+  const [todayShares, setTodayShares] = useState(0)
+
+  useEffect(() => {
+    if (!userId) return
+    const today = new Date().toISOString().slice(0, 10)
+    supabase.from('novel_shares').select('id', { count: 'exact', head: true })
+      .eq('user_id', userId).eq('shared_at', today)
+      .then(({ count }) => setTodayShares(count || 0))
+  }, [userId])
 
   function requireLogin(msg: string) { setLoginMsg(msg); setShowLogin(true) }
 
@@ -84,12 +95,26 @@ export default function NovelActions({ novelId, userId, authorId, novelTitle, is
       setDiscovered(false); setDiscovers(c => Math.max(0, c - 1))
       setShowComment(false)
     } else {
+      if (todayShares >= DAILY_LIMIT) {
+        alert(`拡散は1日${DAILY_LIMIT}回までです。明日またご利用ください。`)
+        return
+      }
       setShowComment(true)
     }
   }
 
   async function submitDiscover() {
     if (!userId || !comment.trim()) return
+    // 直前にもう一度チェック
+    const today = new Date().toISOString().slice(0, 10)
+    const { count } = await supabase.from('novel_shares').select('id', { count: 'exact', head: true })
+      .eq('user_id', userId).eq('shared_at', today)
+    if ((count || 0) >= DAILY_LIMIT) {
+      alert(`拡散は1日${DAILY_LIMIT}回までです。明日またご利用ください。`)
+      setShowComment(false); setComment('')
+      return
+    }
+
     setSubmitting(true)
     let isPending = false, pendingReason = ''
     try {
@@ -101,11 +126,17 @@ export default function NovelActions({ novelId, userId, authorId, novelTitle, is
       isPending = checkData.pending || false
       pendingReason = checkData.reason || ''
     } catch (_) {}
+
     await supabase.from('discovers').insert({
       novel_id: novelId, user_id: userId, comment: comment.trim(),
       display_name: userDisplayName || '', is_pending: isPending,
       pending_reason: pendingReason || null,
     })
+
+    // 拡散回数を記録
+    await supabase.from('novel_shares').insert({ novel_id: novelId, user_id: userId })
+    setTodayShares(c => c + 1)
+
     setDiscovered(true)
     if (!isPending) setDiscovers(c => c + 1)
     setShowComment(false); setComment(''); setSubmitting(false)
@@ -137,6 +168,8 @@ export default function NovelActions({ novelId, userId, authorId, novelTitle, is
     opacity: loading ? 0.7 : 1,
   })
 
+  const reachedLimit = !discovered && userId && !isAuthor && todayShares >= DAILY_LIMIT
+
   return (
     <div>
       <LoginPromptModal show={showLogin} onClose={()=>setShowLogin(false)} message={loginMsg} />
@@ -152,10 +185,15 @@ export default function NovelActions({ novelId, userId, authorId, novelTitle, is
           {fmtNum(bookmarks)}
         </button>
         <button onClick={handleDiscover}
-          disabled={isAuthor}
-          style={isAuthor ? {...btn(false,'var(--color-text-faint)','transparent'), cursor:'not-allowed' as const, opacity:0.4} : btn(discovered,'var(--color-brand)','var(--color-brand-light)')}
-          title={isAuthor ? '自分の作品は拡散できません' : 'この作品をもっと広めたい！という気持ちを伝える'}>
+          disabled={isAuthor || !!reachedLimit}
+          style={isAuthor || reachedLimit
+            ? {...btn(false,'var(--color-text-faint)','transparent'), cursor:'not-allowed' as const, opacity:0.4}
+            : btn(discovered,'var(--color-brand)','var(--color-brand-light)')}
+          title={isAuthor ? '自分の作品は拡散できません' : reachedLimit ? `本日の拡散上限（${DAILY_LIMIT}回）に達しました` : 'この作品をもっと広めたい！という気持ちを伝える'}>
           拡散する {discovers > 0 && fmtNum(discovers)}
+          {userId && !isAuthor && todayShares > 0 && !discovered && (
+            <span style={{fontSize:10,marginLeft:2,color:'var(--color-text-faint)'}}>({DAILY_LIMIT - todayShares}回残)</span>
+          )}
         </button>
         <button onClick={handleXShare}
           style={{display:'inline-flex',alignItems:'center',gap:5,padding:'8px 14px',borderRadius:20,
@@ -172,7 +210,10 @@ export default function NovelActions({ novelId, userId, authorId, novelTitle, is
       {showComment && (
         <div style={{marginTop:12,background:'var(--color-brand-light)',border:'1.5px solid var(--color-tag-border)',borderRadius:12,padding:'14px'}}>
           <div style={{fontSize:13,fontWeight:700,color:'var(--color-brand)',marginBottom:6}}>この作品の魅力を伝えよう！</div>
-          <div style={{fontSize:11,color:'var(--color-text)',marginBottom:8,lineHeight:1.6}}>紹介コメントを書いてください。作品ページに表示されます。</div>
+          <div style={{fontSize:11,color:'var(--color-text)',marginBottom:8,lineHeight:1.6}}>
+            紹介コメントを書いてください。作品ページに表示されます。
+            <span style={{display:'block',color:'var(--color-text-muted)',marginTop:2}}>本日残り{DAILY_LIMIT - todayShares}回拡散できます</span>
+          </div>
           <textarea value={comment} onChange={e=>setComment(e.target.value)}
             placeholder="例：世界観が独特で、主人公の成長が胸に刺さります！続きが気になりすぎる作品です。"
             rows={3}
