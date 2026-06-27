@@ -87,8 +87,14 @@ export default function RelationView({ novelId, userId }: Props) {
             const path = offset === 0
               ? `M ${a.x} ${a.y} L ${b.x} ${b.y}`
               : `M ${a.x} ${a.y} Q ${cx1} ${cy1} ${b.x} ${b.y}`
-            const lx = offset === 0 ? mx : (a.x/4 + cx1/2 + b.x/4)
-            const ly = offset === 0 ? my : (a.y/4 + cy1/2 + b.y/4)
+            // ラベルを1/3点に配置して中心交差を避ける
+            const t = 0.35
+            const lx = offset === 0
+              ? a.x * (1-t) + b.x * t
+              : a.x*(1-t)*(1-t) + cx1*2*t*(1-t) + b.x*t*t
+            const ly = offset === 0
+              ? a.y * (1-t) + b.y * t
+              : a.y*(1-t)*(1-t) + cy1*2*t*(1-t) + b.y*t*t
             return (
               <g key={r.id}>
                 <path d={path} fill="none" stroke="var(--color-brand-border)" strokeWidth={1.5}/>
