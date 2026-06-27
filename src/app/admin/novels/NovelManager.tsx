@@ -16,11 +16,31 @@ export default function NovelManager({ initialNovels, total, currentPage, q, pub
   const [novels, setNovels] = useState(initialNovels)
   const [tagModal, setTagModal] = useState(null as Novel | null)
   const [tagInput, setTagInput] = useState('')
+  const [notifyModal, setNotifyModal] = useState(null as Novel | null)
+  const [notifySending, setNotifySending] = useState(false)
+  const [notifyResult, setNotifyResult] = useState('')
   const [search, setSearch] = useState(q)
 
   async function togglePublish(n: Novel) {
     await supabase.from('novels').update({ published: !n.published }).eq('id', n.id)
     setNovels(novels.map(x => x.id === n.id ? {...x, published: !n.published} : x))
+  }
+
+  async function handleNotifyFirst100() {
+    if (!notifyModal) return
+    setNotifySending(true)
+    setNotifyResult('')
+    try {
+      const res = await fetch('/api/notify-first100', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ novel_id: notifyModal.id, novel_title: notifyModal.title }),
+      })
+      const data = await res.json()
+      if (res.ok) setNotifyResult(`${data.sent}人に通知を送信しました`)
+      else setNotifyResult('送信失敗: ' + (data.error || '不明なエラー'))
+    } catch { setNotifyResult('送信に失敗しました') }
+    setNotifySending(false)
   }
 
   const PRESET_TAGS = ['受賞作', '月間賞', '編集部イチオシ', '特別賞', '読者賞', '新人賞']
@@ -47,6 +67,36 @@ export default function NovelManager({ initialNovels, total, currentPage, q, pub
 
   return (
     <div>
+      {/* 最初の100人通知モーダル */}
+      {notifyModal && (
+        <div style={{position:'fixed',inset:0,background:'rgba(0,0,0,0.5)',zIndex:9999,display:'flex',alignItems:'center',justifyContent:'center',padding:16}}>
+          <div style={{background:'#fff',borderRadius:16,padding:'24px',maxWidth:420,width:'100%',boxShadow:'0 8px 32px rgba(0,0,0,0.2)'}}>
+            <div style={{fontSize:15,fontWeight:800,color:'#1e293b',marginBottom:4}}>最初の100人に通知</div>
+            <div style={{fontSize:12,color:'#64748b',marginBottom:16}}>{notifyModal.title}</div>
+            <div style={{background:'#eff6ff',border:'1px solid #bfdbfe',borderRadius:8,padding:'12px',marginBottom:16,fontSize:12,color:'#1d4ed8',lineHeight:1.7}}>
+              この作品を最初に拡散した最大100人に以下の通知が送られます：<br/>
+              <strong>「あなたは「{notifyModal.title}」を最初に応援した100人の一人です！」</strong>
+            </div>
+            {notifyResult && (
+              <div style={{background: notifyResult.includes('失敗') ? '#fef2f2' : '#f0fdf4', border:`1px solid ${notifyResult.includes('失敗')?'#fca5a5':'#86efac'}`, borderRadius:8, padding:'10px 12px', marginBottom:12, fontSize:12, color: notifyResult.includes('失敗') ? '#dc2626' : '#16a34a', fontWeight:600}}>
+                {notifyResult}
+              </div>
+            )}
+            <div style={{display:'flex',gap:8,justifyContent:'flex-end'}}>
+              <button onClick={()=>{setNotifyModal(null);setNotifyResult('')}} style={btn('#64748b','#fff','#e2e8f0')}>
+                {notifyResult ? '閉じる' : 'キャンセル'}
+              </button>
+              {!notifyResult && (
+                <button onClick={handleNotifyFirst100} disabled={notifySending}
+                  style={btn('#fff','#F26A21','#F26A21')}>
+                  {notifySending ? '送信中...' : '通知を送る'}
+                </button>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* タグ付けモーダル */}
       {tagModal && (
         <div style={{position:'fixed',inset:0,background:'rgba(0,0,0,0.5)',zIndex:9999,display:'flex',alignItems:'center',justifyContent:'center',padding:16}}>
@@ -125,6 +175,7 @@ export default function NovelManager({ initialNovels, total, currentPage, q, pub
             </div>
             <div style={{display:'flex',gap:4,flexShrink:0}}>
               <button onClick={()=>setTagModal(n)} style={btn('#F26A21','#FFF1E6','#f5b080')}>タグ</button>
+              <button onClick={()=>{setNotifyModal(n);setNotifyResult('')}} style={btn('#6366f1','#eef2ff','#c7d2fe')}>100人</button>
               <button onClick={()=>togglePublish(n)} style={btn(n.published?'#f59e0b':'#10b981',n.published?'#fffbeb':'#f0fdf4',n.published?'#fde68a':'#86efac')}>
                 {n.published?'非公開':'公開'}
               </button>
