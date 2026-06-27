@@ -1,2 +1,1 @@
-src/app/post/PostClient.tsx(1154,15): error TS1005: ')' expected.
-src/app/post/PostClient.tsx(1155,10): error TS1381: Unexpected token. Did you mean `{'}'}` or `&rbrace;`?
+src/app/novel/[id]/page.tsx(343,23): error TS2339: Property 'official_tags' does not exist on type '{ id: any; title: any; summary: any; genre: any; tags: any; is_serial: any; published: any; views: any; author_id: any; created_at: any; novel_type: any; }'.

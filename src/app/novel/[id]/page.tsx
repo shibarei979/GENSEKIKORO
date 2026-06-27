@@ -46,7 +46,7 @@ export default async function NovelPage({ params }: { params: { id: string } }) 
 
   const { data: novel, error: novelError } = await supabase
     .from('novels')
-    .select('id, title, summary, genre, tags, is_serial, published, views, author_id, created_at, novel_type')
+    .select('id, title, summary, genre, tags, is_serial, published, views, author_id, created_at, novel_type, official_tags')
     .eq('id', params.id).maybeSingle()
 
   if (!novel || novelError) notFound()
