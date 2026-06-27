@@ -44,44 +44,77 @@ export default function RelationView({ novelId, userId }: Props) {
 
   // 相関図（4人以上）
   const RelationGraph = () => {
-    const W = 520, H = 400, CX = W / 2, CY = H / 2
-    const R = Math.min(CX, CY) - 56
+    const W = 560, H = 440, CX = W / 2, CY = H / 2
+    const R = Math.min(CX, CY) - 64
     const positions = chars.map((c, i) => {
       const angle = (2 * Math.PI * i) / chars.length - Math.PI / 2
       return { id: c.id, x: CX + R * Math.cos(angle), y: CY + R * Math.sin(angle), name: c.name, image_url: c.image_url }
     })
     const posMap = Object.fromEntries(positions.map(p => [p.id, p]))
 
+    // 同じペア間に複数の関係がある場合、曲率をずらす
+    const pairCount: Record<string, number> = {}
+    const pairIndex: Record<string, number> = {}
+    relations.forEach(r => {
+      const key = [r.char_a_id, r.char_b_id].sort().join('|')
+      pairCount[key] = (pairCount[key] || 0) + 1
+    })
+    const pairCurrent: Record<string, number> = {}
+
     return (
       <div style={{ overflowX: 'auto' }}>
         <svg width={W} height={H} style={{ display: 'block', margin: '0 auto' }}>
-          {/* 関係線 */}
+          <defs>
+            <filter id="label-bg">
+              <feFlood floodColor="var(--color-bg-card)" result="bg"/>
+              <feMerge><feMergeNode in="bg"/><feMergeNode in="SourceGraphic"/></feMerge>
+            </filter>
+          </defs>
+          {/* 関係線（ベジェ曲線） */}
           {relations.map(r => {
             const a = posMap[r.char_a_id], b = posMap[r.char_b_id]
             if (!a || !b) return null
+            const key = [r.char_a_id, r.char_b_id].sort().join('|')
+            pairCurrent[key] = (pairCurrent[key] || 0) + 1
+            const total = pairCount[key] || 1
+            const idx = pairCurrent[key] - 1
+            // 曲率：複数の場合は交互にずらす
+            const offset = total === 1 ? 0 : (idx % 2 === 0 ? 1 : -1) * (Math.ceil((idx + 1) / 2) * 40)
             const mx = (a.x + b.x) / 2, my = (a.y + b.y) / 2
+            const dx = b.y - a.y, dy = -(b.x - a.x)
+            const len = Math.sqrt(dx*dx + dy*dy) || 1
+            const cx1 = mx + (dx/len) * offset, cy1 = my + (dy/len) * offset
+            const path = offset === 0
+              ? `M ${a.x} ${a.y} L ${b.x} ${b.y}`
+              : `M ${a.x} ${a.y} Q ${cx1} ${cy1} ${b.x} ${b.y}`
+            const lx = offset === 0 ? mx : (a.x/4 + cx1/2 + b.x/4)
+            const ly = offset === 0 ? my : (a.y/4 + cy1/2 + b.y/4)
             return (
               <g key={r.id}>
-                <line x1={a.x} y1={a.y} x2={b.x} y2={b.y} stroke="var(--color-brand-border)" strokeWidth={2}/>
+                <path d={path} fill="none" stroke="var(--color-brand-border)" strokeWidth={1.5}/>
                 {r.relation_label && (
-                  <text x={mx} y={my} textAnchor="middle" dominantBaseline="middle"
-                    style={{ fontSize: 10, fill: 'var(--color-brand)', fontWeight: 700, pointerEvents: 'none' }}>
-                    <tspan style={{ background: 'white' }}>{r.relation_label}</tspan>
-                  </text>
+                  <g>
+                    <rect x={lx - r.relation_label.length * 3.5 - 4} y={ly - 9} width={r.relation_label.length * 7 + 8} height={16} rx={4} fill="var(--color-bg-card)" stroke="var(--color-brand-border)" strokeWidth={0.8}/>
+                    <text x={lx} y={ly + 1} textAnchor="middle" dominantBaseline="middle"
+                      style={{ fontSize: 9, fill: 'var(--color-brand)', fontWeight: 700, pointerEvents: 'none' }}>
+                      {r.relation_label}
+                    </text>
+                  </g>
                 )}
               </g>
             )
           })}
-          {/* キャラクターノード */}
+          {/* キャラクターノード（線の上に描画） */}
           {positions.map(p => (
             <g key={p.id}>
               <circle cx={p.x} cy={p.y} r={26} fill="var(--color-bg-card)" stroke="var(--color-brand)" strokeWidth={2}/>
               {p.image_url
                 ? <image href={p.image_url} x={p.x - 22} y={p.y - 22} width={44} height={44} clipPath={`circle(22px at 22px 22px)`} preserveAspectRatio="xMidYMid slice"/>
-                : <text x={p.x} y={p.y} textAnchor="middle" dominantBaseline="middle" style={{ fontSize: 16, fill: 'var(--color-brand)' }}>人</text>
+                : <text x={p.x} y={p.y} textAnchor="middle" dominantBaseline="middle" style={{ fontSize: 14, fill: 'var(--color-brand)' }}>人</text>
               }
-              <text x={p.x} y={p.y + 34} textAnchor="middle" style={{ fontSize: 11, fill: 'var(--color-text)', fontWeight: 600 }}>
-                {p.name.length > 6 ? p.name.slice(0, 6) + '…' : p.name}
+              <rect x={p.x - 28} y={p.y + 29} width={56} height={14} rx={3} fill="var(--color-bg-card)"/>
+              <text x={p.x} y={p.y + 38} textAnchor="middle" style={{ fontSize: 10, fill: 'var(--color-text)', fontWeight: 600 }}>
+                {p.name.length > 7 ? p.name.slice(0, 7) + '…' : p.name}
               </text>
             </g>
           ))}
