@@ -2,6 +2,7 @@
 import { useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import Link from 'next/link'
+import * as XLSX from 'xlsx'
 
 interface Contest {
   id: string; title: string; description: string | null; prize: string | null;
@@ -12,7 +13,12 @@ interface Contest {
 interface Entry {
   novel_id: string
   novel_title: string
+  novel_genre: string
+  novel_summary: string
+  novel_url: string
   author_name: string
+  like_count: number
+  discover_count: number
   created_at: string
 }
 
@@ -122,6 +128,29 @@ export default function ContestManager({ initialContests, entriesMap }: Props) {
     setItems(items.filter(i => i.id !== id))
   }
 
+  function handleExportExcel(contest: Contest) {
+    const entries = entriesMap[contest.id] || []
+    const rows = entries.map((e, i) => ({
+      '応募番号': i + 1,
+      '作品タイトル': e.novel_title,
+      'ジャンル': e.novel_genre,
+      '作者名': e.author_name,
+      'あらすじ': e.novel_summary,
+      '作品URL': e.novel_url,
+      'いいね数': e.like_count,
+      '拡散数': e.discover_count,
+      '応募日': new Date(e.created_at).toLocaleDateString('ja-JP'),
+    }))
+    const ws = XLSX.utils.json_to_sheet(rows)
+    ws['!cols'] = [
+      {wch:8},{wch:30},{wch:10},{wch:15},{wch:50},{wch:50},{wch:8},{wch:8},{wch:12}
+    ]
+    const wb = XLSX.utils.book_new()
+    XLSX.utils.book_append_sheet(wb, ws, '応募作品')
+    const fileName = `${contest.title}_応募作品_${new Date().toISOString().slice(0,10)}.xlsx`
+    XLSX.writeFile(wb, fileName)
+  }
+
   const inputStyle = (key: string) => ({
     padding:'7px 12px',
     border:`1px solid ${errors[key] ? '#fca5a5' : '#e2e8f0'}`,
@@ -164,14 +193,12 @@ export default function ContestManager({ initialContests, entriesMap }: Props) {
                 <input type="datetime-local" value={form.deadline} onChange={e=>{setForm({...form,deadline:e.target.value});setErrors(ev=>({...ev,deadline:'',judging_end:''}))}}
                   style={inputStyle('deadline')}/>
                 {errors.deadline && <div style={{fontSize:11,color:'#ef4444',marginTop:3}}>{errors.deadline}</div>}
-                {!errors.deadline && <div style={{fontSize:10,color:'#94a3b8',marginTop:3}}>この日以降「選考中」になります</div>}
               </div>
               <div>
                 <label style={{fontSize:12,color:'#64748b',display:'block',marginBottom:4}}>選考終了日時 <span style={{color:'#ef4444'}}>*</span></label>
                 <input type="datetime-local" value={form.judging_end} onChange={e=>{setForm({...form,judging_end:e.target.value});setErrors(ev=>({...ev,judging_end:''}))}}
                   style={inputStyle('judging_end')}/>
                 {errors.judging_end && <div style={{fontSize:11,color:'#ef4444',marginTop:3}}>{errors.judging_end}</div>}
-                {!errors.judging_end && <div style={{fontSize:10,color:'#94a3b8',marginTop:3}}>この日以降「結果発表」→1ヶ月で自動非表示</div>}
               </div>
             </div>
             <div>
@@ -189,8 +216,6 @@ export default function ContestManager({ initialContests, entriesMap }: Props) {
                 </div>
               )}
             </div>
-
-            {/* 公開・種別・専任 */}
             <div style={{display:'flex',flexDirection:'column',gap:10}}>
               <label style={{display:'flex',alignItems:'center',gap:8,fontSize:13,cursor:'pointer'}}>
                 <input type="checkbox" checked={form.is_published} onChange={e=>setForm({...form,is_published:e.target.checked})}/>公開する
@@ -200,19 +225,14 @@ export default function ContestManager({ initialContests, entriesMap }: Props) {
                 <div style={{display:'flex',gap:16}}>
                   <label style={{display:'flex',alignItems:'center',gap:6,fontSize:13,cursor:'pointer'}}>
                     <input type="radio" name="contest_type" checked={!form.is_site_contest} onChange={()=>setForm({...form,is_site_contest:false})}/>
-                    外部コンテスト（応募URLへ誘導）
+                    外部コンテスト
                   </label>
                   <label style={{display:'flex',alignItems:'center',gap:6,fontSize:13,cursor:'pointer'}}>
                     <input type="radio" name="contest_type" checked={form.is_site_contest} onChange={()=>setForm({...form,is_site_contest:true})}/>
-                    サイトコンテスト（原石航路内で応募）
+                    サイトコンテスト
                   </label>
                 </div>
-                <div style={{fontSize:10,color:'#94a3b8',marginTop:3}}>
-                  {form.is_site_contest ? 'マイページから作品を応募でき、コンテストページに応募作品が表示されます' : '外部の応募URLへ誘導します'}
-                </div>
               </div>
-
-              {/* 専任フラグ（サイトコンテストのみ） */}
               {form.is_site_contest && (
                 <div style={{padding:'12px 14px',background:'#fef2f2',border:'1px solid #fca5a5',borderRadius:8}}>
                   <label style={{display:'flex',alignItems:'flex-start',gap:8,cursor:'pointer'}}>
@@ -221,8 +241,7 @@ export default function ContestManager({ initialContests, entriesMap }: Props) {
                     <div>
                       <div style={{fontSize:13,fontWeight:600,color:'#dc2626'}}>専任コンテスト</div>
                       <div style={{fontSize:11,color:'#7f1d1d',marginTop:2,lineHeight:1.5}}>
-                        ONにすると、このコンテストを選んだ場合に他のコンテストへの同時応募ができなくなります。<br/>
-                        投稿ページで「専任」バッジが表示されます。
+                        ONにすると他のコンテストへの同時応募ができなくなります。
                       </div>
                     </div>
                   </label>
@@ -255,9 +274,7 @@ export default function ContestManager({ initialContests, entriesMap }: Props) {
                 }
                 <div style={{flex:1,minWidth:0}}>
                   <div style={{display:'flex',alignItems:'center',gap:6,marginBottom:3,flexWrap:'wrap'}}>
-                    <span style={{fontSize:10,fontWeight:700,color:status.color,background:status.bg,border:`1px solid ${status.border}`,padding:'1px 7px',borderRadius:10}}>
-                      {status.label}
-                    </span>
+                    <span style={{fontSize:10,fontWeight:700,color:status.color,background:status.bg,border:`1px solid ${status.border}`,padding:'1px 7px',borderRadius:10}}>{status.label}</span>
                     {c.exclusive && <span style={{fontSize:10,fontWeight:700,color:'#dc2626',background:'#fef2f2',border:'1px solid #fca5a5',padding:'1px 7px',borderRadius:10}}>専任</span>}
                     {!c.is_published && <span style={{fontSize:10,color:'#94a3b8',background:'#f1f5f9',padding:'1px 7px',borderRadius:10}}>非公開</span>}
                   </div>
@@ -267,11 +284,17 @@ export default function ContestManager({ initialContests, entriesMap }: Props) {
                     {c.judging_end && <span>選考終了：{new Date(c.judging_end).toLocaleDateString('ja-JP')}</span>}
                   </div>
                 </div>
-                <div style={{display:'flex',gap:6,flexShrink:0,alignItems:'center'}}>
+                <div style={{display:'flex',gap:6,flexShrink:0,alignItems:'center',flexWrap:'wrap'}}>
                   <button onClick={()=>setExpandedId(isExpanded ? null : c.id)}
                     style={{...btn('#F26A21','#FFF1E6','#f5b080'),fontSize:11}}>
                     応募 {contestEntries.length}件 {isExpanded ? '▲' : '▼'}
                   </button>
+                  {contestEntries.length > 0 && (
+                    <button onClick={()=>handleExportExcel(c)}
+                      style={btn('#10b981','#f0fdf4','#86efac')}>
+                      Excel
+                    </button>
+                  )}
                   <button onClick={async()=>{await supabase.from('contests').update({is_published:!c.is_published}).eq('id',c.id);setItems(items.map(x=>x.id===c.id?{...x,is_published:!c.is_published}:x))}}
                     style={btn(c.is_published?'#f59e0b':'#10b981',c.is_published?'#fffbeb':'#f0fdf4',c.is_published?'#fde68a':'#86efac')}>
                     {c.is_published?'非公開':'公開'}
@@ -298,7 +321,9 @@ export default function ContestManager({ initialContests, entriesMap }: Props) {
                           <div style={{flex:1,minWidth:0}}>
                             <Link href={`/novel/${e.novel_id}`} target="_blank"
                               style={{fontSize:13,fontWeight:600,color:'#F26A21',textDecoration:'none'}}>{e.novel_title}</Link>
-                            <div style={{fontSize:11,color:'#94a3b8'}}>作者：{e.author_name} · 応募日：{new Date(e.created_at).toLocaleDateString('ja-JP')}</div>
+                            <div style={{fontSize:11,color:'#94a3b8'}}>
+                              作者：{e.author_name} · ♡{e.like_count} · 拡散{e.discover_count} · 応募日：{new Date(e.created_at).toLocaleDateString('ja-JP')}
+                            </div>
                           </div>
                         </div>
                       ))}

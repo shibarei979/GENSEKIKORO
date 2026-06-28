@@ -17,35 +17,49 @@ export default async function AdminContestsPage() {
   const { data: contests } = await adminSupabase
     .from('contests').select('*').order('created_at', { ascending: false })
 
-  // 応募データ取得
   const { data: allEntries } = await adminSupabase
     .from('contest_entries')
     .select('contest_id, novel_id, user_id, created_at')
     .order('created_at', { ascending: false })
 
-  // novel_id → タイトル・作者名マップ
-  const novelIds = Array.from(new Set((allEntries||[]).map((e:any) => e.novel_id)))
-  const userIds  = Array.from(new Set((allEntries||[]).map((e:any) => e.user_id)))
-  let novelMap: Record<string,string> = {}
+  const novelIds = (allEntries||[]).map((e:any) => e.novel_id).filter((v:string,i:number,a:string[]) => a.indexOf(v)===i)
+  const userIds  = (allEntries||[]).map((e:any) => e.user_id).filter((v:string,i:number,a:string[]) => a.indexOf(v)===i)
+
+  let novelMap: Record<string, { title:string; genre:string; summary:string }> = {}
   let authorMap: Record<string,string> = {}
+  let likeMap: Record<string,number> = {}
+  let discoverMap: Record<string,number> = {}
 
   if (novelIds.length > 0) {
-    const { data: novels } = await adminSupabase.from('novels').select('id, title').in('id', novelIds)
-    novels?.forEach((n:any) => { novelMap[n.id] = n.title })
+    const { data: novels } = await adminSupabase.from('novels').select('id, title, genre, summary').in('id', novelIds)
+    novels?.forEach((n:any) => { novelMap[n.id] = { title: n.title, genre: n.genre, summary: n.summary || '' } })
+
+    const { data: likes } = await adminSupabase.from('likes').select('novel_id').in('novel_id', novelIds)
+    likes?.forEach((l:any) => { likeMap[l.novel_id] = (likeMap[l.novel_id] || 0) + 1 })
+
+    const { data: discovers } = await adminSupabase.from('discovers').select('novel_id').eq('is_pending', false).in('novel_id', novelIds)
+    discovers?.forEach((d:any) => { discoverMap[d.novel_id] = (discoverMap[d.novel_id] || 0) + 1 })
   }
   if (userIds.length > 0) {
     const { data: profiles } = await adminSupabase.from('profiles').select('user_id, display_name').in('user_id', userIds)
     profiles?.forEach((p:any) => { authorMap[p.user_id] = p.display_name })
   }
 
-  // contest_id → entries マップ
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://gensekikoro.vercel.app'
+
   const entriesMap: Record<string, any[]> = {}
   for (const e of (allEntries||[])) {
     if (!entriesMap[e.contest_id]) entriesMap[e.contest_id] = []
+    const novel = novelMap[e.novel_id]
     entriesMap[e.contest_id].push({
       novel_id: e.novel_id,
-      novel_title: novelMap[e.novel_id] || '不明',
+      novel_title: novel?.title || '不明',
+      novel_genre: novel?.genre || '',
+      novel_summary: novel?.summary || '',
+      novel_url: `${siteUrl}/novel/${e.novel_id}`,
       author_name: authorMap[e.user_id] || '不明',
+      like_count: likeMap[e.novel_id] || 0,
+      discover_count: discoverMap[e.novel_id] || 0,
       created_at: e.created_at,
     })
   }
