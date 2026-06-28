@@ -186,6 +186,8 @@ export default function MypageClient({
   const [epList,         setEpList]         = useState<any[]>([])
   const [epToggling,     setEpToggling]     = useState('')
   const [expandedNovels, setExpandedNovels] = useState<Set<string>>(new Set())
+  const [userRole, setUserRole] = useState(profile.user_role || '')
+  const [roleSaving, setRoleSaving] = useState(false)
   const [notifyLike,       setNotifyLike]       = useState(profile.notify_like       !== false)
   const [notifyComment,    setNotifyComment]    = useState(profile.notify_comment    !== false)
   const [notifyFollow,     setNotifyFollow]     = useState(profile.notify_follow     !== false)
