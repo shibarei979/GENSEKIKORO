@@ -47,7 +47,7 @@ export default async function AuthorPage({ params }: Props) {
   if (seriesIds.length > 0) {
     const { data: sn } = await supabase
       .from('series_novels')
-      .select('series_id, order_num, novels(id, title, genre)')
+      .select('series_id, order_num, novels(id, title, genre, novel_type, is_serial, is_r18, summary)')
       .in('series_id', seriesIds).order('order_num')
     ;(sn || []).forEach((s: any) => {
       if (!seriesNovelsMap[s.series_id]) seriesNovelsMap[s.series_id] = []
@@ -143,13 +143,22 @@ export default async function AuthorPage({ params }: Props) {
                 )}
                 {sNovels.map((n: any, i: number) => (
                   <Link key={n.id} href={`/novel/${n.id}`} style={{textDecoration:'none',display:'block'}}>
-                    <div style={{padding:'10px 14px 10px 28px',borderTop:'1px solid var(--color-brand-light)',display:'flex',gap:8,alignItems:'center',background:'var(--color-bg)'}}>
-                      <span style={{fontSize:11,color:'var(--color-brand)',fontWeight:700,minWidth:20}}>#{i+1}</span>
-                      <div style={{flex:1,minWidth:0}}>
-                        <div style={{fontSize:13,fontWeight:500,color:'var(--color-text)',overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap'}}>{n.title}</div>
-                        <div style={{fontSize:10,color:'var(--color-text-muted)'}}>{n.genre}</div>
+                    <div style={{padding:'14px 16px',borderTop:'1px solid var(--color-brand-light)',background:i%2===0?'var(--color-bg-card)':'#fffcfa',cursor:'pointer'}}>
+                      <div style={{display:'flex',gap:6,marginBottom:5,flexWrap:'wrap',alignItems:'center'}}>
+                        <span style={{fontSize:10,background:'var(--color-brand-light)',color:'var(--color-brand)',border:'1px solid var(--color-tag-border)',padding:'1px 6px',borderRadius:3}}>{n.genre}</span>
+                        <span style={{fontSize:10,background:'var(--color-info-bg)',color:'var(--color-info)',border:'1px solid var(--color-info-border)',padding:'1px 6px',borderRadius:3}}>{n.novel_type}</span>
+                        {n.is_serial
+                          ? <span style={{fontSize:10,background:'#f0fdf4',color:'#15803d',border:'1px solid #86efac',padding:'1px 6px',borderRadius:3}}>連載中</span>
+                          : <span style={{fontSize:10,background:'#f5f5f5',color:'#757575',border:'1px solid #e0e0e0',padding:'1px 6px',borderRadius:3}}>完結</span>}
+                        {n.is_r18 && <span style={{fontSize:10,background:'#fef2f2',color:'var(--color-danger)',border:'1px solid #fca5a5',padding:'1px 6px',borderRadius:3}}>R18</span>}
                       </div>
-                      <div style={{fontSize:11,color:'var(--color-text-muted)'}}>♡ {likeMap[n.id]||0}</div>
+                      <div style={{fontSize:15,fontWeight:700,color:'var(--color-text)',marginBottom:3}}>{n.title}</div>
+                      <div style={{fontSize:11,color:'var(--color-text-muted)',marginBottom:n.summary?5:0}}>♡ {likeMap[n.id]||0}</div>
+                      {n.summary && (
+                        <div style={{fontSize:12,color:'var(--color-text)',lineHeight:1.8,overflow:'hidden',display:'-webkit-box',WebkitLineClamp:2,WebkitBoxOrient:'vertical' as any}}>
+                          {n.summary}
+                        </div>
+                      )}
                     </div>
                   </Link>
                 ))}
