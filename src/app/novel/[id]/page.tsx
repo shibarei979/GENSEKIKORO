@@ -179,7 +179,7 @@ export default async function NovelPage({ params }: { params: { id: string } }) 
   const seriesNovelIds = new Set(seriesNovels.map((n: any) => n.id))
 
   // ===== おすすめ作品（パーソナライズ） =====
-  let readNovelIds = new Set<string>([params.id, ...seriesNovelIds])
+  let readNovelIds = new Set<string>([params.id, ...Array.from(seriesNovelIds)])
   let historyGenres: string[] = []
   let historyTags: string[] = []
   let historyAuthorIds: string[] = []
