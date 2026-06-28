@@ -131,7 +131,6 @@ export default function ContestManager({ initialContests, entriesMap }: Props) {
   function handleExportExcel(contest: Contest) {
     const entries = entriesMap[contest.id] || []
 
-    // ヘッダー行
     const headers = ['応募番号','作品タイトル','ジャンル','作者名','あらすじ','作品URL','いいね数','拡散数','応募日']
     const rows = entries.map((e, i) => [
       i + 1,
@@ -147,54 +146,46 @@ export default function ContestManager({ initialContests, entriesMap }: Props) {
 
     const ws = XLSX.utils.aoa_to_sheet([headers, ...rows])
 
-    // 列幅
     ws['!cols'] = [
       {wch:8},{wch:32},{wch:12},{wch:18},{wch:60},{wch:55},{wch:10},{wch:10},{wch:14}
     ]
+    ws['!rows'] = [{ hpt: 22 }, ...rows.map(() => ({ hpt: 18 }))]
 
-    // ヘッダー行のスタイル
     const range = XLSX.utils.decode_range(ws['!ref'] || 'A1')
+    const gridBorder = {
+      top:    { style: 'thin', color: { rgb: '555555' } },
+      bottom: { style: 'thin', color: { rgb: '555555' } },
+      left:   { style: 'thin', color: { rgb: '555555' } },
+      right:  { style: 'thin', color: { rgb: '555555' } },
+    }
+
+    // ヘッダー行：黒背景・白文字・太字
     for (let c = range.s.c; c <= range.e.c; c++) {
-      const cellAddr = XLSX.utils.encode_cell({ r: 0, c })
-      if (!ws[cellAddr]) continue
-      ws[cellAddr].s = {
-        font: { bold: true, color: { rgb: 'FFFFFF' } },
-        fill: { fgColor: { rgb: 'F26A21' } },
-        alignment: { horizontal: 'center', vertical: 'center', wrapText: false },
-        border: {
-          top:    { style: 'thin', color: { rgb: 'E0E0E0' } },
-          bottom: { style: 'thin', color: { rgb: 'E0E0E0' } },
-          left:   { style: 'thin', color: { rgb: 'E0E0E0' } },
-          right:  { style: 'thin', color: { rgb: 'E0E0E0' } },
-        }
+      const addr = XLSX.utils.encode_cell({ r: 0, c })
+      if (!ws[addr]) continue
+      ws[addr].s = {
+        font: { bold: true, color: { rgb: 'FFFFFF' }, sz: 11 },
+        fill: { patternType: 'solid', fgColor: { rgb: '222222' } },
+        alignment: { horizontal: 'center', vertical: 'center' },
+        border: gridBorder,
       }
     }
 
-    // データ行のスタイル
+    // データ行：交互背景・格子罫線
     for (let r = 1; r <= rows.length; r++) {
       for (let c = range.s.c; c <= range.e.c; c++) {
-        const cellAddr = XLSX.utils.encode_cell({ r, c })
-        if (!ws[cellAddr]) ws[cellAddr] = { t: 's', v: '' }
-        ws[cellAddr].s = {
-          fill: { fgColor: { rgb: r % 2 === 0 ? 'FFF8F2' : 'FFFFFF' } },
+        const addr = XLSX.utils.encode_cell({ r, c })
+        if (!ws[addr]) ws[addr] = { t: 's', v: '' }
+        ws[addr].s = {
+          fill: { patternType: 'solid', fgColor: { rgb: r % 2 === 0 ? 'F2F2F2' : 'FFFFFF' } },
           alignment: { vertical: 'top', wrapText: c === 4 },
-          border: {
-            top:    { style: 'thin', color: { rgb: 'F0D9C9' } },
-            bottom: { style: 'thin', color: { rgb: 'F0D9C9' } },
-            left:   { style: 'thin', color: { rgb: 'F0D9C9' } },
-            right:  { style: 'thin', color: { rgb: 'F0D9C9' } },
-          }
+          border: gridBorder,
         }
       }
     }
-
-    // 行の高さ
-    ws['!rows'] = [{ hpt: 24 }, ...rows.map(() => ({ hpt: 18 }))]
 
     const wb = XLSX.utils.book_new()
     XLSX.utils.book_append_sheet(wb, ws, '応募作品')
-
-    // シート名・タイトルをプロパティに
     wb.Props = { Title: contest.title, Author: '原石航路' }
 
     const fileName = `${contest.title}_応募作品_${new Date().toISOString().slice(0,10)}.xlsx`
