@@ -6,6 +6,8 @@ import Header from '@/components/layout/Header'
 import Footer from '@/components/layout/Footer'
 import ContestManager from './ContestManager'
 
+export const dynamic = 'force-dynamic'
+
 export default async function AdminContestsPage() {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
@@ -22,8 +24,8 @@ export default async function AdminContestsPage() {
     .select('contest_id, novel_id, user_id, created_at')
     .order('created_at', { ascending: false })
 
-  const novelIds = (allEntries||[]).map((e:any) => e.novel_id).filter((v:string,i:number,a:string[]) => a.indexOf(v)===i)
-  const userIds  = (allEntries||[]).map((e:any) => e.user_id).filter((v:string,i:number,a:string[]) => a.indexOf(v)===i)
+  const novelIds: string[] = Array.from(new Set((allEntries||[]).map((e:any) => e.novel_id as string).filter(Boolean)))
+  const userIds: string[]  = Array.from(new Set((allEntries||[]).map((e:any) => e.user_id as string).filter(Boolean)))
 
   let novelMap: Record<string, { title:string; genre:string; summary:string }> = {}
   let authorMap: Record<string,string> = {}
