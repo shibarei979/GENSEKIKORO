@@ -74,6 +74,7 @@ type Tab = 'mypage' | 'works' | 'bookmarks' | 'history' | 'tweet' | 'mission' | 
 const TABS: { id: Tab; label: string }[] = [
   { id:'mypage',    label:'マイページ' },
   { id:'works',     label:'作品管理' },
+  { id:'series',    label:'シリーズ' },
   { id:'bookmarks', label:'保存済み' },
   { id:'history',   label:'閲覧履歴' },
   { id:'tweet',     label:'つぶやき' },
@@ -81,7 +82,6 @@ const TABS: { id: Tab; label: string }[] = [
   { id:'contest',   label:'コンテスト' },
   { id:'settings',  label:'設定' },
   { id:'blockmute', label:'ブロック・ミュート' },
-  { id:'series',    label:'シリーズ' },
 ]
 
 function FolderCreateModal({ onClose, onCreate, saving }: { onClose:()=>void; onCreate:(name:string)=>void; saving:boolean }) {
