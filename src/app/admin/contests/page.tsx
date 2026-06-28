@@ -31,10 +31,13 @@ export default async function AdminContestsPage() {
   let discoverMap: Record<string,number> = {}
 
   if (novelIds.length > 0) {
-    const { data: novels } = await adminSupabase.from('novels').select('id, title, genre, summary').in('id', novelIds)
+    const { data: novels, error: novelError } = await adminSupabase.from('novels').select('id, title, genre, summary').in('id', novelIds)
+    if (novelError) console.error('novels fetch error:', novelError)
+    console.log('novelIds:', novelIds, 'novels:', novels)
     novels?.forEach((n:any) => { novelMap[n.id] = { title: n.title, genre: n.genre, summary: n.summary || '' } })
 
-    const { data: likes } = await adminSupabase.from('likes').select('novel_id').in('novel_id', novelIds)
+    const { data: likes, error: likesError } = await adminSupabase.from('likes').select('novel_id').in('novel_id', novelIds)
+    if (likesError) console.error('likes fetch error:', likesError)
     likes?.forEach((l:any) => { likeMap[l.novel_id] = (likeMap[l.novel_id] || 0) + 1 })
 
     const { data: discovers } = await adminSupabase.from('discovers').select('novel_id').eq('is_pending', false).in('novel_id', novelIds)
