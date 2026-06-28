@@ -912,7 +912,7 @@ export default function MypageClient({
               {activeTab==='mission' && <MissionTab/>}
               {activeTab==='contest' && <ContestTab/>}
               {activeTab==='settings' && <SettingsTab/>}
-              {activeTab==='series' && <SeriesManager userId={profile.user_id} myNovels={novels||[]} />}
+              {activeTab==='series' && <SeriesManager userId={profile.user_id} myNovels={myNovels||[]} />}
             </div>
           </>
         ) : (
@@ -936,7 +936,7 @@ export default function MypageClient({
               {activeTab==='mission' && <MissionTab/>}
               {activeTab==='contest' && <ContestTab/>}
               {activeTab==='settings' && <SettingsTab/>}
-              {activeTab==='series' && <SeriesManager userId={profile.user_id} myNovels={novels||[]} />}
+              {activeTab==='series' && <SeriesManager userId={profile.user_id} myNovels={myNovels||[]} />}
             </div>
           </div>
         )}
