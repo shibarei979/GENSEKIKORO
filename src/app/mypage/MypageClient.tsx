@@ -1,5 +1,5 @@
 'use client'
-// SeriesManager is dynamically imported below
+import SeriesManager from '@/components/SeriesManager'
 
 import React, { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
@@ -912,6 +912,7 @@ export default function MypageClient({
               {activeTab==='mission' && <MissionTab/>}
               {activeTab==='contest' && <ContestTab/>}
               {activeTab==='settings' && <SettingsTab/>}
+              {activeTab==='series' && <SeriesManager userId={profile.user_id} myNovels={novels||[]} />}
             </div>
           </>
         ) : (
@@ -935,6 +936,7 @@ export default function MypageClient({
               {activeTab==='mission' && <MissionTab/>}
               {activeTab==='contest' && <ContestTab/>}
               {activeTab==='settings' && <SettingsTab/>}
+              {activeTab==='series' && <SeriesManager userId={profile.user_id} myNovels={novels||[]} />}
             </div>
           </div>
         )}
