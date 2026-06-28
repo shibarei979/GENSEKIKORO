@@ -59,10 +59,12 @@ export default function SeriesManager({ userId, myNovels }: Props) {
   async function handleSave() {
     if (!selected) return
     setSaving(true)
-    await supabase.from('series').update({ title: editTitle, description: editDesc, updated_at: new Date().toISOString() }).eq('id', selected.id)
+    const { error } = await supabase.from('series').update({ title: editTitle, description: editDesc, updated_at: new Date().toISOString() }).eq('id', selected.id)
+    if (error) { alert('保存失敗: ' + error.message); setSaving(false); return }
     setSeries(prev => prev.map(s => s.id === selected.id ? { ...s, title: editTitle, description: editDesc } : s))
     setSelected(prev => prev ? { ...prev, title: editTitle, description: editDesc } : null)
     setSaving(false)
+    alert('保存しました')
   }
 
   async function handleDelete() {
