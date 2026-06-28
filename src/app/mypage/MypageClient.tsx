@@ -70,7 +70,7 @@ const ALL_BADGES = [
   { id:'_slot2',      name:'？？？',                  color:'#94a3b8' },
 ]
 
-type Tab = 'mypage' | 'works' | 'bookmarks' | 'history' | 'tweet' | 'mission' | 'contest' | 'settings' | 'blockmute'
+type Tab = 'mypage' | 'works' | 'bookmarks' | 'history' | 'tweet' | 'mission' | 'contest' | 'settings' | 'blockmute' | 'series'
 const TABS: { id: Tab; label: string }[] = [
   { id:'mypage',    label:'マイページ' },
   { id:'works',     label:'作品管理' },
