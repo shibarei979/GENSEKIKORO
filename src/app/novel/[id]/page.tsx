@@ -175,8 +175,11 @@ export default async function NovelPage({ params }: { params: { id: string } }) 
     is_pinned: c.is_pinned || false,
   }))
 
+  // シリーズ内の作品IDを収集
+  const seriesNovelIds = new Set(seriesNovels.map((n: any) => n.id))
+
   // ===== おすすめ作品（パーソナライズ） =====
-  let readNovelIds = new Set<string>([params.id])
+  let readNovelIds = new Set<string>([params.id, ...seriesNovelIds])
   let historyGenres: string[] = []
   let historyTags: string[] = []
   let historyAuthorIds: string[] = []

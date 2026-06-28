@@ -115,6 +115,74 @@ export default async function AuthorPage({ params }: Props) {
     </div>
   )
 
+  // シリーズに属する作品IDのセット
+  const seriesNovelIds = new Set(
+    Object.values(seriesNovelsMap).flat().map((n: any) => n.id)
+  )
+  const nonSeriesNovels = filteredNovels.filter((n: any) => !seriesNovelIds.has(n.id))
+
+  const NovelListWithSeries = () => (
+    <div style={{background:'var(--color-bg)',border:'1px solid var(--color-brand-border)',borderRadius:12,overflow:'hidden'}}>
+      {filteredNovels.length === 0 ? (
+        <div style={{padding:'48px',textAlign:'center',color:'var(--color-text-faint)',fontSize:13}}>公開中の作品はありません</div>
+      ) : (
+        <>
+          {/* シリーズ（折りたたみ） */}
+          {(seriesList||[]).map((s: any) => {
+            const sNovels = seriesNovelsMap[s.id] || []
+            if (sNovels.length === 0) return null
+            return (
+              <details key={s.id} style={{borderBottom:'1px solid var(--color-brand-light)'}}>
+                <summary style={{padding:'12px 16px',cursor:'pointer',listStyle:'none',display:'flex',alignItems:'center',gap:10,background:'var(--color-bg-card)'}}>
+                  <span style={{fontSize:10,background:'var(--color-brand)',color:'#fff',padding:'1px 7px',borderRadius:10,fontWeight:700,flexShrink:0}}>シリーズ</span>
+                  <span style={{fontSize:14,fontWeight:700,color:'var(--color-text)',flex:1}}>{s.title}</span>
+                  <span style={{fontSize:11,color:'var(--color-text-faint)'}}>{sNovels.length}作品 ▼</span>
+                </summary>
+                {s.description && (
+                  <div style={{padding:'6px 16px 0',fontSize:12,color:'var(--color-text-muted)'}}>{s.description}</div>
+                )}
+                {sNovels.map((n: any, i: number) => (
+                  <Link key={n.id} href={`/novel/${n.id}`} style={{textDecoration:'none',display:'block'}}>
+                    <div style={{padding:'10px 14px 10px 28px',borderTop:'1px solid var(--color-brand-light)',display:'flex',gap:8,alignItems:'center',background:'var(--color-bg)'}}>
+                      <span style={{fontSize:11,color:'var(--color-brand)',fontWeight:700,minWidth:20}}>#{i+1}</span>
+                      <div style={{flex:1,minWidth:0}}>
+                        <div style={{fontSize:13,fontWeight:500,color:'var(--color-text)',overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap'}}>{n.title}</div>
+                        <div style={{fontSize:10,color:'var(--color-text-muted)'}}>{n.genre}</div>
+                      </div>
+                      <div style={{fontSize:11,color:'var(--color-text-muted)'}}>♡ {likeMap[n.id]||0}</div>
+                    </div>
+                  </Link>
+                ))}
+              </details>
+            )
+          })}
+          {/* シリーズ外の作品 */}
+          {nonSeriesNovels.map((n: any, i: number) => (
+            <Link key={n.id} href={`/novel/${n.id}`} style={{textDecoration:'none',display:'block'}}>
+              <div style={{padding:'14px 16px',borderBottom:i<nonSeriesNovels.length-1?'1px solid var(--color-brand-light)':'none',background:i%2===0?'var(--color-bg-card)':'#fffcfa',cursor:'pointer'}}>
+                <div style={{display:'flex',gap:6,marginBottom:5,flexWrap:'wrap',alignItems:'center'}}>
+                  <span style={{fontSize:10,background:'var(--color-brand-light)',color:'var(--color-brand)',border:'1px solid var(--color-tag-border)',padding:'1px 6px',borderRadius:3}}>{n.genre}</span>
+                  <span style={{fontSize:10,background:'var(--color-info-bg)',color:'var(--color-info)',border:'1px solid var(--color-info-border)',padding:'1px 6px',borderRadius:3}}>{n.novel_type}</span>
+                  {n.is_serial
+                    ? <span style={{fontSize:10,background:'#f0fdf4',color:'#15803d',border:'1px solid #86efac',padding:'1px 6px',borderRadius:3}}>連載中</span>
+                    : <span style={{fontSize:10,background:'#f5f5f5',color:'#757575',border:'1px solid #e0e0e0',padding:'1px 6px',borderRadius:3}}>完結</span>}
+                  {n.is_r18 && <span style={{fontSize:10,background:'#fef2f2',color:'var(--color-danger)',border:'1px solid #fca5a5',padding:'1px 6px',borderRadius:3}}>R18</span>}
+                </div>
+                <div style={{fontSize:15,fontWeight:700,color:'var(--color-text)',marginBottom:3}}>{n.title}</div>
+                <div style={{fontSize:11,color:'var(--color-text-muted)',marginBottom:n.summary?5:0}}>♡ {likeMap[n.id]||0}</div>
+                {n.summary && (
+                  <div style={{fontSize:12,color:'var(--color-text)',lineHeight:1.8,overflow:'hidden',display:'-webkit-box',WebkitLineClamp:2,WebkitBoxOrient:'vertical' as any}}>
+                    {n.summary}
+                  </div>
+                )}
+              </div>
+            </Link>
+          ))}
+        </>
+      )}
+    </div>
+  )
+
   return (
     <div style={{minHeight:'100vh',background:'var(--color-bg-card)',fontFamily:"'Noto Sans JP',sans-serif"}}>
       <Header profile={profile} user={user} />
@@ -152,43 +220,12 @@ export default async function AuthorPage({ params }: Props) {
               </div>
             </div>
           </div>
-          {/* シリーズ */}
-          {(seriesList||[]).length > 0 && (
-            <div style={{marginBottom:20}}>
-              <h2 style={{fontSize:17,fontWeight:700,color:'var(--color-text)',marginBottom:12}}>シリーズ</h2>
-              <div style={{display:'flex',flexDirection:'column',gap:10}}>
-                {(seriesList||[]).map((s: any) => (
-                  <div key={s.id} style={{background:'var(--color-bg)',border:'1px solid var(--color-brand-border)',borderRadius:12,overflow:'hidden'}}>
-                    <div style={{padding:'10px 14px',borderBottom:'1px solid var(--color-brand-border)',background:'var(--color-bg-card)',display:'flex',alignItems:'center',gap:8}}>
-                      <span style={{fontSize:13,fontWeight:700,color:'var(--color-text)'}}>{s.title}</span>
-                      <span style={{fontSize:11,color:'var(--color-text-faint)',marginLeft:'auto'}}>{(seriesNovelsMap[s.id]||[]).length}作品</span>
-                    </div>
-                    {s.description && <div style={{padding:'8px 14px',fontSize:12,color:'var(--color-text-muted)'}}>{s.description}</div>}
-                    <div style={{display:'flex',flexDirection:'column'}}>
-                      {(seriesNovelsMap[s.id]||[]).map((n: any, i: number) => (
-                        <Link key={n.id} href={`/novel/${n.id}`} style={{textDecoration:'none',display:'block',borderTop:i>0?'1px solid var(--color-brand-light)':'none'}}>
-                          <div style={{padding:'8px 14px',display:'flex',gap:8,alignItems:'center'}}>
-                            <span style={{fontSize:11,color:'var(--color-brand)',fontWeight:700,minWidth:20}}>#{i+1}</span>
-                            <div style={{flex:1,minWidth:0}}>
-                              <div style={{fontSize:13,fontWeight:500,color:'var(--color-text)',overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap'}}>{n.title}</div>
-                              <div style={{fontSize:10,color:'var(--color-text-muted)'}}>{n.genre}</div>
-                            </div>
-                          </div>
-                        </Link>
-                      ))}
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-
           <div style={{marginBottom:12,display:'flex',alignItems:'center',justifyContent:'space-between'}}>
             <h2 style={{fontSize:17,fontWeight:700,color:'var(--color-text)',margin:0}}>
               投稿作品 <span style={{fontSize:13,fontWeight:400,color:'var(--color-text-muted)'}}>（{filteredNovels.length}作品）</span>
             </h2>
           </div>
-          <NovelList/>
+          <NovelListWithSeries/>
           <TweetSection authorId={author.user_id} currentUserId={user?.id||null} currentUserName={profile?.display_name||null} currentUserIconUrl={profile?.icon_url||null} isOwner={false}/>
         </div>
       </div>
@@ -228,36 +265,12 @@ export default async function AuthorPage({ params }: Props) {
           </div>
           {author.bio && <p style={{fontSize:13,color:'var(--color-text)',lineHeight:1.8,margin:0,whiteSpace:'pre-wrap'}}>{author.bio}</p>}
         </div>
-        {(seriesList||[]).length > 0 && (
-          <div style={{marginBottom:14}}>
-            <h2 style={{fontSize:15,fontWeight:700,color:'var(--color-text)',marginBottom:10}}>シリーズ</h2>
-            {(seriesList||[]).map((s: any) => (
-              <div key={s.id} style={{background:'var(--color-bg)',border:'1px solid var(--color-brand-border)',borderRadius:10,overflow:'hidden',marginBottom:8}}>
-                <div style={{padding:'8px 12px',borderBottom:'1px solid var(--color-brand-border)',background:'var(--color-bg-card)',display:'flex',alignItems:'center',gap:6}}>
-                  <span style={{fontSize:12,fontWeight:700,color:'var(--color-text)'}}>{s.title}</span>
-                  <span style={{fontSize:10,color:'var(--color-text-faint)',marginLeft:'auto'}}>{(seriesNovelsMap[s.id]||[]).length}作品</span>
-                </div>
-                {(seriesNovelsMap[s.id]||[]).map((n: any, i: number) => (
-                  <Link key={n.id} href={`/novel/${n.id}`} style={{textDecoration:'none',display:'block',borderTop:i>0?'1px solid var(--color-brand-light)':'none'}}>
-                    <div style={{padding:'8px 12px',display:'flex',gap:6,alignItems:'center'}}>
-                      <span style={{fontSize:10,color:'var(--color-brand)',fontWeight:700,minWidth:18}}>#{i+1}</span>
-                      <div style={{flex:1,minWidth:0}}>
-                        <div style={{fontSize:12,fontWeight:500,color:'var(--color-text)',overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap'}}>{n.title}</div>
-                      </div>
-                    </div>
-                  </Link>
-                ))}
-              </div>
-            ))}
-          </div>
-        )}
-
         <div style={{marginBottom:10}}>
           <h2 style={{fontSize:15,fontWeight:700,color:'var(--color-text)',margin:0}}>
             投稿作品 <span style={{fontSize:12,fontWeight:400,color:'var(--color-text-muted)'}}>（{filteredNovels.length}作品）</span>
           </h2>
         </div>
-        <NovelList/>
+        <NovelListWithSeries/>
         <TweetSection authorId={author.user_id} currentUserId={user?.id||null} currentUserName={profile?.display_name||null} currentUserIconUrl={profile?.icon_url||null} isOwner={false}/>
         <div style={{height:80}}/>
       </div>
