@@ -21,7 +21,7 @@ interface MissionStats {
 }
 
 interface Props {
-  profile: Profile & { birthdate?: string | null; notify_like?: boolean; notify_comment?: boolean; notify_follow?: boolean; notify_new_episode?: boolean; notify_new_work?: boolean; gender?: string | null; x_account?: string | null; allow_comments?: boolean }
+  profile: Profile & { birthdate?: string | null; notify_like?: boolean; notify_comment?: boolean; notify_follow?: boolean; notify_new_episode?: boolean; notify_new_work?: boolean; gender?: string | null; x_account?: string | null; allow_comments?: boolean; user_role?: string | null }
   novels: Novel[]
   bookmarkedNovels: any[]
   followingAuthors?: any[]
