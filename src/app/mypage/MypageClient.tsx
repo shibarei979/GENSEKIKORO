@@ -779,6 +779,26 @@ export default function MypageClient({
     <div>
       <div style={{fontSize:15,fontWeight:700,color:'var(--color-text)',marginBottom:20}}>設定</div>
 
+      {/* ホームタイプ選択 */}
+      <div style={{marginBottom:24,background:'var(--color-bg)',border:'1px solid var(--color-brand-border)',borderRadius:12,padding:'16px'}}>
+        <div style={{fontSize:12,fontWeight:700,color:'var(--color-text-muted)',letterSpacing:'.05em',marginBottom:12}}>ホームの表示タイプ</div>
+        <div style={{display:'flex',gap:10}}>
+          {([{v:'reader',l:'読み手',e:'📖',d:'作品を読む'},{v:'writer',l:'書き手',e:'✍️',d:'作品を書く'}] as const).map(({v,l,e,d})=>(
+            <button key={v} onClick={async()=>{
+              setUserRole(v); setRoleSaving(true)
+              await supabase.from('profiles').update({user_role:v}).eq('user_id',profile.user_id)
+              setRoleSaving(false)
+            }}
+              style={{flex:1,padding:'14px 10px',borderRadius:10,border:`2px solid ${userRole===v?'var(--color-brand)':'var(--color-brand-border)'}`,background:userRole===v?'var(--color-brand-light)':'var(--color-bg-card)',cursor:'pointer',textAlign:'center' as const}}>
+              <div style={{fontSize:24,marginBottom:4}}>{e}</div>
+              <div style={{fontSize:13,fontWeight:700,color:userRole===v?'var(--color-brand)':'var(--color-text)'}}>{l}</div>
+              <div style={{fontSize:11,color:'var(--color-text-muted)',marginTop:2}}>{d}</div>
+            </button>
+          ))}
+        </div>
+        {roleSaving && <div style={{fontSize:11,color:'var(--color-brand)',marginTop:8,textAlign:'center'}}>保存中...</div>}
+      </div>
+
       {/* 通知設定 */}
       <div style={{marginBottom:24}}>
         <div style={{fontSize:12,fontWeight:700,color:'var(--color-text-muted)',letterSpacing:'.05em',marginBottom:10}}>通知設定</div>
