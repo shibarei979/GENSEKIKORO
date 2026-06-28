@@ -55,6 +55,22 @@ export default async function NovelPage({ params }: { params: { id: string } }) 
     .from('profiles').select('display_name, user_id')
     .eq('user_id', novel.author_id).maybeSingle()
 
+  // シリーズ情報取得
+  const { data: seriesNovelData } = await supabase
+    .from('series_novels').select('series_id').eq('novel_id', params.id).maybeSingle()
+  let seriesNovels: any[] = []
+  let seriesTitle = ''
+  if (seriesNovelData?.series_id) {
+    const { data: seriesData } = await supabase.from('series').select('title').eq('id', seriesNovelData.series_id).single()
+    seriesTitle = seriesData?.title || ''
+    const { data: sn } = await supabase
+      .from('series_novels')
+      .select('order_num, novels(id, title, genre)')
+      .eq('series_id', seriesNovelData.series_id)
+      .order('order_num')
+    seriesNovels = (sn || []).map((s: any) => ({ ...s.novels, order_num: s.order_num }))
+  }
+
   const isAuthor = user?.id === novel.author_id
 
   const { data: rawEpisodes } = await supabase
@@ -445,6 +461,32 @@ export default async function NovelPage({ params }: { params: { id: string } }) 
               comments={novelComments}
             />
           </div>
+
+          {/* ===== 同シリーズの作品 ===== */}
+          {seriesNovels.length > 1 && (
+            <div style={{marginTop:20,background:'var(--color-bg-card)',border:'1px solid var(--color-brand-border)',borderRadius:12,overflow:'hidden'}}>
+              <div style={{padding:'10px 14px',borderBottom:'1px solid var(--color-brand-border)',background:'var(--color-bg)',display:'flex',alignItems:'center',gap:8}}>
+                <span style={{width:4,height:16,background:'var(--color-brand)',borderRadius:2,display:'inline-block'}}/>
+                <span style={{fontSize:14,fontWeight:700,color:'var(--color-text)'}}>シリーズ：{seriesTitle}</span>
+              </div>
+              <div style={{display:'flex',flexDirection:'column'}}>
+                {seriesNovels.map((n: any, i: number) => (
+                  <Link key={n.id} href={`/novel/${n.id}`}
+                    style={{textDecoration:'none',display:'block',borderBottom:i<seriesNovels.length-1?'1px solid var(--color-brand-light)':'none',background:n.id===params.id?'var(--color-brand-light)':'none'}}>
+                    <div style={{padding:'10px 14px',display:'flex',gap:10,alignItems:'center'}}>
+                      <span style={{fontSize:12,fontWeight:700,color:'var(--color-brand)',minWidth:24,flexShrink:0}}>#{i+1}</span>
+                      <div style={{flex:1,minWidth:0}}>
+                        <div style={{fontSize:13,fontWeight:n.id===params.id?700:500,color:n.id===params.id?'var(--color-brand)':'var(--color-text)',overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap'}}>
+                          {n.title}{n.id===params.id?' ◀ 現在':''}
+                        </div>
+                        <div style={{fontSize:10,color:'var(--color-text-muted)'}}>{n.genre}</div>
+                      </div>
+                    </div>
+                  </Link>
+                ))}
+              </div>
+            </div>
+          )}
 
           {/* ===== おすすめ作品 ===== */}
           {recommendedNovels.length > 0 && (
