@@ -1,4 +1,5 @@
 'use client'
+// SeriesManager is dynamically imported below
 
 import React, { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
@@ -80,6 +81,7 @@ const TABS: { id: Tab; label: string }[] = [
   { id:'contest',   label:'コンテスト' },
   { id:'settings',  label:'設定' },
   { id:'blockmute', label:'ブロック・ミュート' },
+  { id:'series',    label:'シリーズ' },
 ]
 
 function FolderCreateModal({ onClose, onCreate, saving }: { onClose:()=>void; onCreate:(name:string)=>void; saving:boolean }) {
@@ -124,7 +126,7 @@ export default function MypageClient({
   const [activeTab, setActiveTab] = useState<Tab>(() => {
     if (typeof window !== 'undefined') {
       const hash = window.location.hash.replace('#', '') as Tab
-      const valid: Tab[] = ['mypage','works','bookmarks','history','tweet','mission','contest','settings','blockmute']
+      const valid: Tab[] = ['mypage','works','bookmarks','history','tweet','mission','contest','settings','blockmute','series']
       if (valid.includes(hash)) return hash
     }
     return 'mypage'
