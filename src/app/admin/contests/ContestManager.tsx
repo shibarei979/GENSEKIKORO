@@ -2,7 +2,7 @@
 import { useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import Link from 'next/link'
-import * as XLSX from 'xlsx'
+import * as XLSX from 'xlsx-js-style'
 
 interface Contest {
   id: string; title: string; description: string | null; prize: string | null;
