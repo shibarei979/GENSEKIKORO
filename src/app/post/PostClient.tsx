@@ -143,6 +143,8 @@ export default function PostClient({ profile, userId }: Props) {
   const [editEpisodes,  setEditEpisodes]  = useState([] as any[])
   const [editEpId,      setEditEpId]      = useState('' as string)
   const [currentView,   setCurrentView]   = useState('writing' as View)
+  const [showReadabilityCheck, setShowReadabilityCheck] = useState(false)
+  const [pendingPublish, setPendingPublish] = useState(false)
 
   const aiMarkers = detectAiMarkers(body)
   const hasAiMarkers = aiMarkers.length > 0
@@ -317,6 +319,52 @@ export default function PostClient({ profile, userId }: Props) {
       }
     }
     return errs
+  }
+
+  function getReadabilityChecks() {
+    const checks: { ok: boolean; msg: string; tip: string }[] = []
+    if (mode === 'new' || editMode) {
+      checks.push({
+        ok: title.trim().length >= 10,
+        msg: `タイトルの長さ（現在${title.trim().length}文字）`,
+        tip: '10文字以上のタイトルは検索で見つかりやすくなります',
+      })
+      checks.push({
+        ok: summary.trim().length >= 200,
+        msg: `あらすじ（現在${summary.trim().length}文字）`,
+        tip: '200文字以上のあらすじで読者が内容をイメージしやすくなります',
+      })
+      checks.push({
+        ok: catchcopy.trim().length >= 30,
+        msg: `キャッチコピー（現在${catchcopy.trim().length}文字）`,
+        tip: '30文字以上のキャッチコピーで作品カードのクリック率が上がります',
+      })
+      checks.push({
+        ok: tags.length >= 8,
+        msg: `タグ数（現在${tags.length}個）`,
+        tip: '8個以上のタグで検索に引っかかりやすくなります',
+      })
+    }
+    checks.push({
+      ok: body.trim().length >= 2000,
+      msg: `1話の文字数（現在${body.trim().length}文字）`,
+      tip: '2,000文字以上あると読者が満足しやすくなります',
+    })
+    return checks
+  }
+
+  function handlePublishClick() {
+    // 新作の初回投稿時のみチェック
+    if ((mode === 'new' && !savedNovelId) || editMode) {
+      const checks = getReadabilityChecks()
+      const hasWarning = checks.some(c => !c.ok)
+      if (hasWarning) {
+        setPendingPublish(true)
+        setShowReadabilityCheck(true)
+        return
+      }
+    }
+    handleSubmit(true)
   }
 
   async function handleSubmit(publish: boolean) {
@@ -1132,7 +1180,7 @@ export default function PostClient({ profile, userId }: Props) {
         {/* ボタン行 */}
         {isMobile ? (
           <div style={{display:'flex',flexDirection:'column',gap:10}}>
-            <button onClick={()=>handleSubmit(true)} disabled={loading}
+            <button onClick={handlePublishClick} disabled={loading}
               style={{width:'100%',background:'var(--color-brand)',color:'var(--color-bg-card)',padding:'14px',borderRadius:10,fontSize:15,fontWeight:700,border:'none',cursor:'pointer',opacity:loading?0.5:1}}>
               {submitButtonLabel}
             </button>
@@ -1151,7 +1199,7 @@ export default function PostClient({ profile, userId }: Props) {
               style={{border:'1.5px solid var(--color-brand)',color:draftSaved?'var(--color-success)':'var(--color-brand)',padding:'9px 20px',borderRadius:20,fontSize:13,background:draftSaved?'#e8f5e9':'var(--color-bg-card)',cursor:draftSaved?'default':'pointer',opacity:loading?0.5:1,transition:'all .3s'}}>
               {draftSaved?' 保存しました':'下書き保存'}
             </button>
-            <button onClick={()=>handleSubmit(true)} disabled={loading}
+            <button onClick={handlePublishClick} disabled={loading}
               style={{background:'var(--color-brand)',color:'var(--color-bg-card)',padding:'10px 24px',borderRadius:20,fontSize:13,fontWeight:700,border:'none',cursor:'pointer',opacity:loading?0.5:1}}>
               {submitButtonLabel}
             </button>
@@ -1161,6 +1209,40 @@ export default function PostClient({ profile, userId }: Props) {
         )}
         </div>
       </div>
+
+      {/* 読まれやすさチェックモーダル */}
+      {showReadabilityCheck && mounted && createPortal(
+        <div style={{position:'fixed',inset:0,background:'rgba(0,0,0,0.6)',zIndex:9999,display:'flex',alignItems:'center',justifyContent:'center',padding:16}}>
+          <div style={{background:'var(--color-bg-card)',borderRadius:16,width:'100%',maxWidth:460,boxShadow:'0 8px 32px rgba(0,0,0,0.2)',overflow:'hidden'}}>
+            <div style={{padding:'16px 20px',borderBottom:'1px solid var(--color-brand-border)',background:'var(--color-bg)'}}>
+              <div style={{fontSize:15,fontWeight:700,color:'var(--color-text)'}}>読まれやすさチェック</div>
+              <div style={{fontSize:12,color:'var(--color-text-muted)',marginTop:2}}>改善すると読者に見つけてもらいやすくなります</div>
+            </div>
+            <div style={{padding:'16px 20px',display:'flex',flexDirection:'column',gap:10}}>
+              {getReadabilityChecks().map((c, i) => (
+                <div key={i} style={{display:'flex',alignItems:'flex-start',gap:10,padding:'10px 12px',borderRadius:8,background:c.ok?'#f0fdf4':'#fffbeb',border:`1px solid ${c.ok?'#86efac':'#fde68a'}`}}>
+                  <span style={{fontSize:16,flexShrink:0}}>{c.ok ? '✅' : '⚠️'}</span>
+                  <div style={{flex:1,minWidth:0}}>
+                    <div style={{fontSize:13,fontWeight:600,color:c.ok?'#15803d':'#92400e'}}>{c.msg}</div>
+                    {!c.ok && <div style={{fontSize:11,color:'#78350f',marginTop:2,lineHeight:1.6}}>{c.tip}</div>}
+                  </div>
+                </div>
+              ))}
+            </div>
+            <div style={{padding:'12px 20px',borderTop:'1px solid var(--color-brand-border)',display:'flex',gap:8}}>
+              <button onClick={()=>setShowReadabilityCheck(false)}
+                style={{flex:1,padding:'10px',border:'1px solid var(--color-brand-border)',borderRadius:8,background:'var(--color-bg-card)',color:'var(--color-text-muted)',fontSize:13,cursor:'pointer'}}>
+                修正する
+              </button>
+              <button onClick={()=>{setShowReadabilityCheck(false);handleSubmit(pendingPublish)}}
+                style={{flex:1,padding:'10px',background:'var(--color-brand)',color:'#fff',border:'none',borderRadius:8,fontSize:13,fontWeight:700,cursor:'pointer'}}>
+                このまま投稿する
+              </button>
+            </div>
+          </div>
+        </div>,
+        document.body
+      )}
 
       <Footer user={true} />
 
