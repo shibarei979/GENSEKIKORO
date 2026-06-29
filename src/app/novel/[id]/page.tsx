@@ -219,7 +219,7 @@ export default async function NovelPage({ params }: { params: { id: string } }) 
   // フォールバック用：ジャンル不問で全作品取得（必ず6件確保するため）
   const { data: fallbackRaw } = await supabase
     .from('novels')
-    .select('id, title, genre, novel_type, is_serial, author_id, summary')
+    .select('id, title, genre, novel_type, is_serial, author_id, summary, originality_score')
     .eq('published', true).neq('id', params.id)
     .order('created_at', { ascending: false })
     .limit(30)
@@ -231,7 +231,7 @@ export default async function NovelPage({ params }: { params: { id: string } }) 
     const preferGenre = topGenres[0]
     const { data: personalizedRaw } = await supabase
       .from('novels')
-      .select('id, title, genre, novel_type, is_serial, author_id, summary, tags')
+      .select('id, title, genre, novel_type, is_serial, author_id, summary, tags, originality_score')
       .eq('published', true).eq('genre', preferGenre)
       .order('created_at', { ascending: false })
       .limit(20)
@@ -242,6 +242,7 @@ export default async function NovelPage({ params }: { params: { id: string } }) 
         if (topAuthors.includes(n.author_id)) score += 3
         const matchTags = (n.tags || []).filter((t: string) => topTags.includes(t)).length
         score += matchTags * 2
+        score += (n.originality_score || 50) / 20  // 独創性スコアを加味（最大5点）
         return { ...n, score }
       })
       .sort((a: any, b: any) => b.score - a.score)
@@ -260,7 +261,7 @@ export default async function NovelPage({ params }: { params: { id: string } }) 
       : allGenresList[Math.floor(Math.random() * allGenresList.length)]
     const { data: discoveryRaw } = await supabase
       .from('novels')
-      .select('id, title, genre, novel_type, is_serial, author_id, summary')
+      .select('id, title, genre, novel_type, is_serial, author_id, summary, originality_score')
       .eq('published', true).eq('genre', discoveryGenre)
       .order('created_at', { ascending: false })
       .limit(10)
@@ -278,6 +279,34 @@ export default async function NovelPage({ params }: { params: { id: string } }) 
     const extras = fallbackPool.filter((n: any) => !existingIds.has(n.id))
     recommendedNovels = [...recommendedNovels, ...extras].slice(0, 6)
   }
+  // おすすめ作品のいいね数を取得
+  const recNovelIds = recommendedNovels.map((n: any) => n.id)
+  const recLikeMap: Record<string, number> = {}
+  const recDiscoverMap: Record<string, number> = {}
+  if (recNovelIds.length > 0) {
+    const [{ data: recLikes }, { data: recDiscovers }] = await Promise.all([
+      supabase.from('likes').select('novel_id').in('novel_id', recNovelIds),
+      supabase.from('discovers').select('novel_id').eq('is_pending', false).in('novel_id', recNovelIds),
+    ])
+    recLikes?.forEach((l: any) => { recLikeMap[l.novel_id] = (recLikeMap[l.novel_id] || 0) + 1 })
+    recDiscovers?.forEach((d: any) => { recDiscoverMap[d.novel_id] = (recDiscoverMap[d.novel_id] || 0) + 1 })
+  }
+
+  // 総合スコアで再ソート（独創性50% + いいね30% + 拡散20% + 新着ブースト）
+  const maxLikes = Math.max(1, ...Object.values(recLikeMap))
+  const maxDiscovers = Math.max(1, ...Object.values(recDiscoverMap))
+  const now48 = Date.now() - 48 * 60 * 60 * 1000
+  recommendedNovels = recommendedNovels.map((n: any) => {
+    const originality = (n.originality_score || 50) / 100
+    const likeNorm = (recLikeMap[n.id] || 0) / maxLikes
+    const discoverNorm = (recDiscoverMap[n.id] || 0) / maxDiscovers
+    // 投稿から48時間以内はブースト（+0.3）
+    const isNew = new Date(n.created_at).getTime() > now48
+    const newBoost = isNew ? 0.3 : 0
+    const finalScore = originality * 0.5 + likeNorm * 0.3 + discoverNorm * 0.2 + newBoost
+    return { ...n, finalScore, isNew }
+  }).sort((a: any, b: any) => b.finalScore - a.finalScore)
+
   const recAuthorIds = Array.from(new Set(recommendedNovels.map((n: any) => n.author_id)))
   const recAuthorMap: Record<string,string> = {}
   if (recAuthorIds.length > 0) {
@@ -504,6 +533,7 @@ export default async function NovelPage({ params }: { params: { id: string } }) 
                     <div style={{padding:'12px 14px',display:'flex',gap:10,alignItems:'flex-start'}}>
                       <div style={{flex:1,minWidth:0}}>
                         <div style={{display:'flex',gap:4,marginBottom:4,flexWrap:'wrap'}}>
+                          {n.isNew && <span style={{fontSize:10,background:'var(--color-brand)',color:'#fff',padding:'1px 6px',borderRadius:3,fontWeight:700}}>NEW</span>}
                           <span style={{fontSize:10,background:'var(--color-brand-light)',color:'var(--color-brand)',border:'1px solid var(--color-tag-border)',padding:'1px 6px',borderRadius:3}}>{n.genre}</span>
                           {n.novel_type && <span style={{fontSize:10,background:'var(--color-info-bg)',color:'var(--color-info)',border:'1px solid var(--color-info-border)',padding:'1px 6px',borderRadius:3}}>{n.novel_type}</span>}
                           {n.is_serial && <span style={{fontSize:10,background:'#f0fdf4',color:'#15803d',border:'1px solid #86efac',padding:'1px 6px',borderRadius:3}}>連載中</span>}
