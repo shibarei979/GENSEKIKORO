@@ -385,6 +385,28 @@ export default function PostSetupPage() {
               </div>
             )}
 
+            {/* 読まれやすさ警告 */}
+            {(() => {
+              const warns: string[] = []
+              if (summary.trim().length < 200) warns.push(`あらすじが短い（${summary.trim().length}文字 / 推奨200文字以上）`)
+              if (catchcopy.trim().length < 30) warns.push(`キャッチコピーが短い（${catchcopy.trim().length}文字 / 推奨30文字以上）`)
+              if (tags.length < 8) warns.push(`タグが少ない（${tags.length}個 / 推奨8個以上）`)
+              if (warns.length === 0) return null
+              return (
+                <div style={{background:'#fff1f1',border:'1.5px solid var(--color-danger)',borderRadius:10,padding:'14px 16px',marginBottom:16}}>
+                  <div style={{fontSize:13,fontWeight:700,color:'var(--color-danger)',marginBottom:8}}>⚠️ このままだと読まれにくい可能性があります</div>
+                  <div style={{display:'flex',flexDirection:'column',gap:6}}>
+                    {warns.map((w,i) => (
+                      <div key={i} style={{fontSize:12,color:'#b91c1c',display:'flex',alignItems:'flex-start',gap:6}}>
+                        <span style={{flexShrink:0}}>・</span><span>{w}</span>
+                      </div>
+                    ))}
+                  </div>
+                  <div style={{fontSize:11,color:'#9f1239',marginTop:8}}>改善してから投稿すると、より多くの読者に届きます。このまま進むこともできます。</div>
+                </div>
+              )
+            })()}
+
             <button onClick={handleCreateAndGo} disabled={loading}
               style={{width:'100%',padding:'14px',background:'var(--color-brand)',color:'#fff',border:'none',borderRadius:10,fontSize:15,fontWeight:700,cursor:'pointer',opacity:loading?0.6:1}}>
               {loading ? '作成中...' : '作品を作成して執筆へ'}
