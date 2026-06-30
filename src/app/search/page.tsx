@@ -196,13 +196,21 @@ export default async function SearchPage({ searchParams }: Props) {
     Object.entries(authorCount).forEach(([id, cnt]) => { if (cnt <= 3) newbieSet.add(id) })
   }
 
-  let novels = results.map((n: any) => ({
-    ...n,
-    display_name: authorMap[n.author_id] || '',
-    is_newbie: newbieSet.has(n.author_id),
-    likeCount: likeMap[n.id] || 0,
-    charCount: charCountMap[n.id] || 0,
-  }))
+  const sevenDaysAgo = Date.now() - 7 * 24 * 60 * 60 * 1000
+  let novels = results.map((n: any) => {
+    const likeCount = likeMap[n.id] || 0
+    const isNewWork = new Date(n.created_at).getTime() > sevenDaysAgo
+    // 投稿7日以内 かつ いいねが5未満の場合、数値を控えめ表示
+    const hideStats = isNewWork && likeCount < 50
+    return {
+      ...n,
+      display_name: authorMap[n.author_id] || '',
+      is_newbie: newbieSet.has(n.author_id),
+      likeCount,
+      charCount: charCountMap[n.id] || 0,
+      hideStats,
+    }
+  })
 
   // ポストソート（いいね・ブックマーク・閲覧数・コメント・話数・文字数・受賞）
   if (hasSearch) {
@@ -293,7 +301,7 @@ export default async function SearchPage({ searchParams }: Props) {
                 <div style={{fontSize:12}}>検索条件を変えてお試しください</div>
               </div>
             ) : novels.map((n: any, idx: number) => (
-              <NovelPreviewPopup key={n.id} novel={{...n, like_count: n.likeCount||0}}>
+              <NovelPreviewPopup key={n.id} novel={{...n, like_count: n.hideStats ? 0 : (n.likeCount||0)}}>
               <div style={{cursor:'pointer',padding:'16px 20px',borderBottom:idx<novels.length-1?'1px solid var(--color-brand-light)':'none'}}>
                 <span style={{display:'flex',gap:5,marginBottom:6,flexWrap:'wrap',alignItems:'center'}}>
                   <span style={{fontSize:10,background:'var(--color-brand-light)',color:'var(--color-brand)',border:'1px solid var(--color-tag-border)',padding:'1px 6px',borderRadius:3}}>{n.genre}</span>
@@ -318,10 +326,14 @@ export default async function SearchPage({ searchParams }: Props) {
                     ))}
                   </span>
                 )}
-                <span style={{display:'flex',gap:12,fontSize:11,color:'var(--color-text-faint)',flexWrap:'wrap'}}>
+                <span style={{display:'flex',gap:12,fontSize:11,color:'var(--color-text-faint)',flexWrap:'wrap',alignItems:'center'}}>
                   {n.charCount > 0 && <span>{n.charCount >= 10000 ? `${(n.charCount/10000).toFixed(1)}万文字` : `${n.charCount.toLocaleString()}文字`}</span>}
                   {n.updated_at && <span>最終更新：{new Date(n.updated_at).toLocaleDateString('ja-JP',{year:'numeric',month:'numeric',day:'numeric'})}</span>}
-                  {n.likeCount > 0 && <span style={{color:'var(--color-text-muted)',fontWeight:600}}>♡ {fmtNum(n.likeCount)}</span>}
+                  {n.hideStats ? (
+                    <span style={{background:'var(--color-brand-light)',color:'var(--color-brand)',fontWeight:700,padding:'1px 8px',borderRadius:10,fontSize:10}}>発掘されるのを待っています</span>
+                  ) : (
+                    n.likeCount > 0 && <span style={{color:'var(--color-text-muted)',fontWeight:600}}>♡ {fmtNum(n.likeCount)}</span>
+                  )}
                 </span>
               </div>
               </NovelPreviewPopup>
