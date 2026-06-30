@@ -24,13 +24,17 @@ export default function RandomVoyageButton() {
     <>
       <button onClick={handleClick} disabled={loading}
         style={{
-          display: 'inline-flex', alignItems: 'center', gap: 8,
-          padding: '10px 22px', borderRadius: 24,
-          background: 'linear-gradient(135deg, var(--color-brand) 0%, #ff8c4a 100%)',
-          color: '#fff', border: 'none', fontSize: 14, fontWeight: 700,
-          cursor: 'pointer', boxShadow: '0 3px 10px rgba(242,106,33,0.3)',
+          display: 'flex', alignItems: 'center', gap: 6,
+          fontSize: 12.5, fontWeight: 700, color: 'var(--color-bg-card)',
+          background: 'linear-gradient(135deg, var(--color-brand), var(--color-brand-dark))',
+          border: 'none',
+          borderRadius: 16, padding: '7px 16px',
+          cursor: 'pointer', boxShadow: '0 2px 8px rgba(242,106,33,0.35)',
           opacity: loading ? 0.7 : 1,
         }}>
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--color-bg-card)" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" style={{flexShrink:0}}>
+          <polyline points="16 3 21 3 21 8"/><line x1="4" y1="20" x2="21" y2="3"/><polyline points="8 21 3 21 3 16"/><line x1="15" y1="15" x2="21" y2="21"/><line x1="4" y1="4" x2="9" y2="9"/>
+        </svg>
         {loading ? '航海中...' : 'ランダム航海'}
       </button>
 
