@@ -3,8 +3,9 @@ import { NextResponse } from 'next/server'
 
 export async function GET() {
   const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
 
-  // 未発掘作品の候補を広めに取得（公開済み・全年齢のみ）
+  // 候補プール取得（公開済み・全年齢のみ）
   const { data: novels } = await supabase
     .from('novels')
     .select('id, title, genre, novel_type, author_id, created_at, summary, catchcopy, tags, is_serial')
@@ -12,7 +13,7 @@ export async function GET() {
     .eq('is_r18', false)
     .neq('genre', '官能')
     .order('created_at', { ascending: false })
-    .limit(200)
+    .limit(300)
 
   if (!novels || novels.length === 0) {
     return NextResponse.json({ novel: null })
@@ -43,10 +44,43 @@ export async function GET() {
     (discoverMap[n.id] || 0) < 5
   )
 
-  const pool = undiscovered.length > 0 ? undiscovered : novels
+  // ユーザーの好みジャンルを取得（閲覧履歴から）
+  let preferredGenres: string[] = []
+  if (user) {
+    const { data: historyData } = await supabase
+      .from('page_views')
+      .select('novel_id, novels(genre)')
+      .eq('user_id', user.id)
+      .order('created_at', { ascending: false })
+      .limit(30)
+    const genreFreq: Record<string, number> = {}
+    historyData?.forEach((h: any) => {
+      const g = h.novels?.genre
+      if (g) genreFreq[g] = (genreFreq[g] || 0) + 1
+    })
+    preferredGenres = Object.entries(genreFreq).sort((a, b) => b[1] - a[1]).slice(0, 3).map(([g]) => g)
+  }
+
+  const preferredPool = preferredGenres.length > 0
+    ? novels.filter(n => preferredGenres.includes(n.genre))
+    : []
+
+  // 抽選：未発掘50% / 傾向に合う作品40% / 完全ランダム10%
+  const rand = Math.random()
+  let pool: typeof novels
+
+  if (rand < 0.5 && undiscovered.length > 0) {
+    pool = undiscovered
+  } else if (rand < 0.9 && preferredPool.length > 0) {
+    pool = preferredPool
+  } else {
+    pool = novels
+  }
+
+  if (pool.length === 0) pool = novels
+
   const picked = pool[Math.floor(Math.random() * pool.length)]
 
-  // 作者名取得
   const { data: author } = await supabase.from('profiles').select('display_name').eq('user_id', picked.author_id).maybeSingle()
 
   return NextResponse.json({
