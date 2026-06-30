@@ -484,16 +484,6 @@ export default async function NovelPage({ params }: { params: { id: string } }) 
           </div>
 
           <div style={{marginTop:20}}>
-            {novelComments.length === 0 && (
-              <div style={{background:'var(--color-brand-light)',border:'1.5px solid var(--color-brand-border)',borderRadius:12,padding:'20px 24px',marginBottom:16,textAlign:'center'}}>
-                <div style={{fontSize:28,marginBottom:8}}>✍️</div>
-                <div style={{fontSize:14,fontWeight:700,color:'var(--color-brand)',marginBottom:6}}>まだ感想がありません</div>
-                <div style={{fontSize:13,color:'var(--color-text)',lineHeight:1.8}}>
-                  あなたの一言が、作者の次の一話につながります。<br/>
-                  <span style={{fontSize:12,color:'var(--color-text-muted)'}}>最初の感想を書いてみませんか？</span>
-                </div>
-              </div>
-            )}
             <NovelCommentSection
               novelId={params.id}
               userId={user?.id || null}
