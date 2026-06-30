@@ -200,8 +200,8 @@ export default async function SearchPage({ searchParams }: Props) {
   let novels = results.map((n: any) => {
     const likeCount = likeMap[n.id] || 0
     const isNewWork = new Date(n.created_at).getTime() > sevenDaysAgo
-    // 投稿7日以内 かつ いいねが5未満の場合、数値を控えめ表示
-    const hideStats = isNewWork && likeCount < 50
+    // 投稿7日以内 または いいねが50未満の場合、数値を非表示
+    const hideStats = isNewWork || likeCount < 50
     return {
       ...n,
       display_name: authorMap[n.author_id] || '',
@@ -329,11 +329,7 @@ export default async function SearchPage({ searchParams }: Props) {
                 <span style={{display:'flex',gap:12,fontSize:11,color:'var(--color-text-faint)',flexWrap:'wrap',alignItems:'center'}}>
                   {n.charCount > 0 && <span>{n.charCount >= 10000 ? `${(n.charCount/10000).toFixed(1)}万文字` : `${n.charCount.toLocaleString()}文字`}</span>}
                   {n.updated_at && <span>最終更新：{new Date(n.updated_at).toLocaleDateString('ja-JP',{year:'numeric',month:'numeric',day:'numeric'})}</span>}
-                  {n.hideStats ? (
-                    <span style={{background:'var(--color-brand-light)',color:'var(--color-brand)',fontWeight:700,padding:'1px 8px',borderRadius:10,fontSize:10}}>発掘されるのを待っています</span>
-                  ) : (
-                    n.likeCount > 0 && <span style={{color:'var(--color-text-muted)',fontWeight:600}}>♡ {fmtNum(n.likeCount)}</span>
-                  )}
+                  {!n.hideStats && n.likeCount > 0 && <span style={{color:'var(--color-text-muted)',fontWeight:600}}>♡ {fmtNum(n.likeCount)}</span>}
                 </span>
               </div>
               </NovelPreviewPopup>

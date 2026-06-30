@@ -19,7 +19,7 @@ const HIDE_LIKE_THRESHOLD = 50
 
 function hideStatsFor(createdAt: string, likeCount: number) {
   const isNewWork = Date.now() - new Date(createdAt).getTime() < SEVEN_DAYS_MS
-  return isNewWork && likeCount < HIDE_LIKE_THRESHOLD
+  return isNewWork || likeCount < HIDE_LIKE_THRESHOLD
 }
 
 function getContestStatusKey(deadline: string | null, judging_end: string | null) {
