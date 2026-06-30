@@ -3,6 +3,7 @@ export const dynamic = 'force-dynamic'
 import Header from '@/components/layout/Header'
 import Footer from '@/components/layout/Footer'
 import AdBanner from '@/components/layout/AdBanner'
+import RandomVoyageButton from '@/components/RandomVoyageButton'
 import Link from 'next/link'
 import NovelPreviewPopup from '@/components/NovelPreviewPopup'
 import SearchForm from './SearchForm'
@@ -280,6 +281,10 @@ export default async function SearchPage({ searchParams }: Props) {
 
       <div className="main-layout" style={{maxWidth:1200,margin:'0 auto',padding:'24px 32px',display:'flex',gap:20,alignItems:'flex-start'}}>
         <div style={{flex:1,minWidth:0}}>
+
+          <div style={{display:'flex',justifyContent:'center',marginBottom:16}}>
+            <RandomVoyageButton/>
+          </div>
 
           <SearchForm
             defaultQ={q} defaultExclude={exclude} defaultGenre={genre}
