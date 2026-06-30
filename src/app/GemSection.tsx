@@ -122,11 +122,7 @@ function BookItem({ n, discoverComments }: { n: Novel; discoverComments: {commen
               <div style={{fontSize:14,fontWeight:700,color:'var(--color-bg-card)',lineHeight:1.5,marginBottom:8,fontFamily:"'Noto Serif JP',serif",textShadow:'0 1px 3px rgba(0,0,0,0.3)',overflow:'hidden',display:'-webkit-box',WebkitLineClamp:3,WebkitBoxOrient:'vertical' as any}}>{n.title}</div>
               <div style={{width:24,height:1,background:'rgba(255,230,190,0.5)',marginBottom:8}}/>
               <div style={{fontSize:10,color:'rgba(255,230,190,0.9)',overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap',maxWidth:'100%'}}>{n.display_name}</div>
-              {n.hideStats ? (
-                <span style={{fontSize:9,color:'rgba(255,230,190,0.9)',marginTop:4,fontWeight:700}}>発掘されるのを待っています</span>
-              ) : (
-                n.likeCount2 > 0 && <span style={{fontSize:9,color:'rgba(255,230,190,0.7)',marginTop:4}}>♡ {n.likeCount2}</span>
-              )}
+              {!n.hideStats && n.likeCount2 > 0 && <span style={{fontSize:9,color:'rgba(255,230,190,0.7)',marginTop:4}}>♡ {n.likeCount2}</span>}
             </div>
             <div style={{position:'relative',zIndex:1,background:'var(--color-bg-card)',borderTop:`2px solid ${SPINE_DARK}`}}>
               <GemComment novelId={n.id} discoverCount={n.discoverCount} likeCount={n.hideStats ? 0 : n.likeCount2} discoverComments={discoverComments} />

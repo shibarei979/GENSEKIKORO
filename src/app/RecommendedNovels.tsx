@@ -72,11 +72,7 @@ export default function RecommendedNovels({ novels }: Props) {
                 <div style={{fontSize:13,fontWeight:700,color:'var(--color-text)',marginBottom:1}}>{n.title}</div>
                 <div style={{display:'flex',gap:8,fontSize:10,color:'var(--color-text-muted)',alignItems:'center',flexWrap:'wrap'}}>
                   <span>作者：{n.display_name}</span>
-                  {n.hideStats ? (
-                    <span style={{color:'var(--color-brand)',fontWeight:700}}>発掘されるのを待っています</span>
-                  ) : (
-                    <span>♡ {n.likeCount||0}</span>
-                  )}
+                  {!n.hideStats && <span>♡ {n.likeCount||0}</span>}
                 </div>
               </div>
             </NovelPreviewPopup>
