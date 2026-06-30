@@ -101,6 +101,7 @@ export default async function RankingPage({ searchParams }: Props) {
         if (!lastUpdateMap[ep.novel_id] || ep.created_at > lastUpdateMap[ep.novel_id]) lastUpdateMap[ep.novel_id] = ep.created_at
       })
     }
+    const sevenDaysAgo = Date.now() - 7*24*60*60*1000
     return {
       total,
       items: paged.map((n: any) => ({
@@ -109,6 +110,7 @@ export default async function RankingPage({ searchParams }: Props) {
         score:         likeMap[n.id]||0,
         char_count:    charCountMap[n.id]||0,
         last_updated:  lastUpdateMap[n.id]||n.created_at,
+        hideStats: period !== 'rising' && (new Date(n.created_at).getTime() > sevenDaysAgo || (likeMap[n.id]||0) < 50),
       }))
     }
   }
@@ -255,7 +257,7 @@ export default async function RankingPage({ searchParams }: Props) {
               const abs = offset + i
               return (
                 <div key={n.id} style={{borderBottom:'1px solid var(--color-brand-light)'}}>
-                  <NovelPreviewPopup novel={{...n, like_count: n.like_count||0}}>
+                  <NovelPreviewPopup novel={{...n, like_count: n.hideStats ? 0 : (n.score||n.like_count||0)}}>
                   <div style={{display:'flex',gap:12,padding:'12px 14px',alignItems:'flex-start',cursor:'pointer'}}>
                     <div style={{width:28,textAlign:'center',flexShrink:0,paddingTop:2}}>
                       <span style={{fontSize:rankSize(abs),fontWeight:800,color:rankColor(abs),fontFamily:"'Noto Serif JP',serif"}}>{abs+1}</span>
@@ -283,7 +285,7 @@ export default async function RankingPage({ searchParams }: Props) {
                       <div style={{display:'flex',gap:10,fontSize:11,color:'var(--color-text-faint)',flexWrap:'wrap'}}>
                         {n.char_count > 0 && <span>{fmtChar(n.char_count)}</span>}
                         <span>更新：{fmtDate(n.last_updated)}</span>
-                        <span style={{color:'var(--color-text-muted)',fontWeight:600}}>{scoreLabel} {fmtNum(n.score)}</span>
+                        {!n.hideStats && <span style={{color:'var(--color-text-muted)',fontWeight:600}}>{scoreLabel} {fmtNum(n.score)}</span>}
                       </div>
                     </div>
                   </div>
