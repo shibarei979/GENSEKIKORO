@@ -5,22 +5,16 @@ export async function generateMetadata({ params }: { params: { id: string; epId:
   const { createClient } = await import('@/lib/supabase/server')
   const supabase = await createClient()
   const [{ data: episode }, { data: novel }] = await Promise.all([
-    supabase.from('episodes').select('title, illust_url').eq('id', params.epId).maybeSingle(),
+    supabase.from('episodes').select('title').eq('id', params.epId).maybeSingle(),
     supabase.from('novels').select('title').eq('id', params.id).maybeSingle(),
   ])
-  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://genseki-koro.vercel.app'
-  const ogImage = episode?.illust_url || `${siteUrl}/og-image.png`
   const title = episode?.title && novel?.title
     ? `${novel.title}「${episode.title}」| 原石航路`
     : '原石航路'
   const description = novel?.title
     ? `${novel.title} - ライトノベル投稿サイト「原石航路」`
     : 'ライトノベル投稿サイト「原石航路」'
-  return {
-    title, description,
-    openGraph: { title, description, images: [ogImage] },
-    twitter: { card: 'summary_large_image', title, description, images: [ogImage] },
-  }
+  return { title, description }
 }
 
 import { notFound } from 'next/navigation'

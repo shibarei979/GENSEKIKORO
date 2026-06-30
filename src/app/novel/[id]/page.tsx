@@ -6,21 +6,9 @@ export async function generateMetadata({ params }: { params: { id: string } }) {
   const supabase = await createClient()
   const { data: novel } = await supabase
     .from('novels').select('title, summary').eq('id', params.id).maybeSingle()
-  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://genseki-koro.vercel.app'
   return {
     title: novel?.title ? `${novel.title} | 原石航路` : '原石航路',
     description: novel?.summary || 'ライトノベル投稿サイト「原石航路」',
-    openGraph: {
-      title: novel?.title || '原石航路',
-      description: novel?.summary || 'ライトノベル投稿サイト「原石航路」',
-      images: [`${siteUrl}/og-image.png`],
-    },
-    twitter: {
-      card: 'summary_large_image',
-      title: novel?.title || '原石航路',
-      description: novel?.summary || 'ライトノベル投稿サイト「原石航路」',
-      images: [`${siteUrl}/og-image.png`],
-    },
   }
 }
 
