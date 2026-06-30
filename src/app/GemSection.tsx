@@ -14,6 +14,7 @@ interface Novel {
   summary?: string | null
   catchcopy?: string | null
   tags?: string[]
+  hideStats?: boolean
 }
 
 interface Props {
@@ -21,7 +22,6 @@ interface Props {
   discoverCommentMap: Record<string, {comment:string;display_name:string}[]>
 }
 
-// 統一した本のテーマカラー（原石航路のブランドカラー系）。globals.css の --color-spine-* と同じ値。
 const SPINE_BASE = 'var(--color-spine-base)'
 const SPINE_DARK = 'var(--color-spine-dark)'
 const SPINE_LIGHT = 'var(--color-spine-light)'
@@ -30,7 +30,7 @@ function BookItem({ n, discoverComments }: { n: Novel; discoverComments: {commen
   const [hover, setHover] = useState(false)
 
   return (
-    <NovelPreviewPopup novel={{...n, like_count: n.likeCount2}}>
+    <NovelPreviewPopup novel={{...n, like_count: n.hideStats ? 0 : n.likeCount2}}>
       <div
         onMouseEnter={()=>setHover(true)}
         onMouseLeave={()=>setHover(false)}
@@ -45,12 +45,7 @@ function BookItem({ n, discoverComments }: { n: Novel; discoverComments: {commen
           perspective: 1000,
           zIndex: hover ? 5 : 1,
         }}>
-        <div style={{
-          position:'absolute', inset:0,
-          transformStyle:'preserve-3d',
-          transformOrigin:'left center',
-        }}>
-          {/* ===== 背表紙（通常時・左端を軸に回転して開く） ===== */}
+        <div style={{ position:'absolute', inset:0, transformStyle:'preserve-3d', transformOrigin:'left center' }}>
           <div style={{
             position:'absolute', inset:0,
             transformOrigin:'left center',
@@ -64,13 +59,10 @@ function BookItem({ n, discoverComments }: { n: Novel; discoverComments: {commen
             transition:'opacity .15s ease, transform .35s ease',
             backfaceVisibility:'hidden',
           }}>
-            {/* 上部装飾ライン（二重） */}
             <div style={{display:'flex',flexDirection:'column',gap:3,alignItems:'center',width:'100%'}}>
               <div style={{width:'62%',height:1,background:'rgba(255,215,150,0.55)'}}/>
               <div style={{width:'40%',height:1,background:'rgba(255,215,150,0.3)'}}/>
             </div>
-
-            {/* タイトルラベル（枠付き） */}
             <div style={{
               border:'1px solid rgba(255,215,150,0.5)', borderRadius:3,
               padding:'10px 6px', background:'rgba(0,0,0,0.08)',
@@ -84,15 +76,12 @@ function BookItem({ n, discoverComments }: { n: Novel; discoverComments: {commen
                 {n.title.length > 11 ? n.title.slice(0,11)+'…' : n.title}
               </div>
             </div>
-
-            {/* 下部装飾ライン（二重） */}
             <div style={{display:'flex',flexDirection:'column',gap:3,alignItems:'center',width:'100%'}}>
               <div style={{width:'40%',height:1,background:'rgba(255,215,150,0.3)'}}/>
               <div style={{width:'62%',height:1,background:'rgba(255,215,150,0.55)'}}/>
             </div>
           </div>
 
-          {/* ===== 本の小口（ページの厚み・表紙の右側に見える紙の重なり） ===== */}
           <div style={{
             position:'absolute', top:3, bottom:3, right: hover ? -7 : -2, width:7,
             background:'repeating-linear-gradient(180deg, #f5ede0 0px, #f5ede0 2px, #e8dcc8 2px, #e8dcc8 3px)',
@@ -106,7 +95,6 @@ function BookItem({ n, discoverComments }: { n: Novel; discoverComments: {commen
             zIndex: 1,
           }}/>
 
-          {/* ===== 表紙（ホバー時・本の表紙デザイン） ===== */}
           <div style={{
             position:'absolute', inset:0,
             transformOrigin:'left center',
@@ -119,17 +107,13 @@ function BookItem({ n, discoverComments }: { n: Novel; discoverComments: {commen
             transition:'opacity .2s ease .12s, transform .35s ease',
             backfaceVisibility:'hidden',
           }}>
-            {/* 装飾の二重枠線（画像参考の本の表紙デザイン） */}
             <svg width="100%" height="100%" style={{position:'absolute',inset:0,pointerEvents:'none'}} viewBox="0 0 168 195" preserveAspectRatio="none">
               <rect x="8" y="8" width="152" height="179" rx="3" fill="none" stroke="rgba(255,230,190,0.55)" strokeWidth="1.5"/>
-              <path d="M 16 22 Q 16 16 22 16 L 146 16 Q 152 16 152 22"
-                fill="none" stroke="rgba(255,230,190,0.7)" strokeWidth="1.2"/>
-              <path d="M 16 173 Q 16 179 22 179 L 146 179 Q 152 179 152 173"
-                fill="none" stroke="rgba(255,230,190,0.7)" strokeWidth="1.2"/>
+              <path d="M 16 22 Q 16 16 22 16 L 146 16 Q 152 16 152 22" fill="none" stroke="rgba(255,230,190,0.7)" strokeWidth="1.2"/>
+              <path d="M 16 173 Q 16 179 22 179 L 146 179 Q 152 179 152 173" fill="none" stroke="rgba(255,230,190,0.7)" strokeWidth="1.2"/>
               <line x1="16" y1="16" x2="16" y2="179" stroke="rgba(255,230,190,0.7)" strokeWidth="1.2"/>
               <line x1="152" y1="16" x2="152" y2="179" stroke="rgba(255,230,190,0.7)" strokeWidth="1.2"/>
             </svg>
-
             <div style={{position:'relative',zIndex:1,padding:'18px 16px 10px',flex:1,display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',textAlign:'center'}}>
               <div style={{display:'flex',gap:4,marginBottom:8,flexWrap:'wrap',justifyContent:'center'}}>
                 <span style={{fontSize:8,fontWeight:700,color:'var(--color-bg-card)',background:'rgba(255,255,255,0.15)',border:'1px solid rgba(255,230,190,0.5)',padding:'1px 6px',borderRadius:3,letterSpacing:'0.05em'}}>原石</span>
@@ -138,12 +122,14 @@ function BookItem({ n, discoverComments }: { n: Novel; discoverComments: {commen
               <div style={{fontSize:14,fontWeight:700,color:'var(--color-bg-card)',lineHeight:1.5,marginBottom:8,fontFamily:"'Noto Serif JP',serif",textShadow:'0 1px 3px rgba(0,0,0,0.3)',overflow:'hidden',display:'-webkit-box',WebkitLineClamp:3,WebkitBoxOrient:'vertical' as any}}>{n.title}</div>
               <div style={{width:24,height:1,background:'rgba(255,230,190,0.5)',marginBottom:8}}/>
               <div style={{fontSize:10,color:'rgba(255,230,190,0.9)',overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap',maxWidth:'100%'}}>{n.display_name}</div>
-              {n.likeCount2 > 0 && <span style={{fontSize:9,color:'rgba(255,230,190,0.7)',marginTop:4}}>♡ {n.likeCount2}</span>}
+              {n.hideStats ? (
+                <span style={{fontSize:9,color:'rgba(255,230,190,0.9)',marginTop:4,fontWeight:700}}>発掘されるのを待っています</span>
+              ) : (
+                n.likeCount2 > 0 && <span style={{fontSize:9,color:'rgba(255,230,190,0.7)',marginTop:4}}>♡ {n.likeCount2}</span>
+              )}
             </div>
-
-            {/* 帯（読者の声） */}
             <div style={{position:'relative',zIndex:1,background:'var(--color-bg-card)',borderTop:`2px solid ${SPINE_DARK}`}}>
-              <GemComment novelId={n.id} discoverCount={n.discoverCount} likeCount={n.likeCount2} discoverComments={discoverComments} />
+              <GemComment novelId={n.id} discoverCount={n.discoverCount} likeCount={n.hideStats ? 0 : n.likeCount2} discoverComments={discoverComments} />
             </div>
           </div>
         </div>
@@ -152,7 +138,6 @@ function BookItem({ n, discoverComments }: { n: Novel; discoverComments: {commen
   )
 }
 
-// 本棚の中に埋め込む見出しブロック（本の代わりに表示）
 function IntroBlock() {
   return (
     <div style={{
@@ -319,7 +304,6 @@ export default function GemSection({ novels, discoverCommentMap }: Props) {
 
   return (
     <>
-      {/* デスクトップ：本棚スタイル（自動スライド＋矢印操作） */}
       <div className="gem-desktop" style={{flex:1,overflow:'hidden',position:'relative'}}
         onMouseEnter={()=>{pausedRef.current = true}}
         onMouseLeave={()=>{pausedRef.current = false}}>
@@ -340,10 +324,8 @@ export default function GemSection({ novels, discoverCommentMap }: Props) {
             return item
           })}
         </div>
-        {/* 本棚の板 */}
         <div style={{position:'absolute',left:0,right:0,bottom:-6,height:8,background:'linear-gradient(180deg,#c8a87a,#a8855a)',borderRadius:2,boxShadow:'0 3px 6px rgba(0,0,0,0.2)',zIndex:0}}/>
 
-        {/* ← → 操作バー */}
         <button onClick={()=>jump(-1)} aria-label="前へ"
           style={{
             position:'absolute', left:6, top:'42%', transform:'translateY(-50%)',
@@ -366,7 +348,6 @@ export default function GemSection({ novels, discoverCommentMap }: Props) {
         </button>
       </div>
 
-      {/* モバイル：お知らせ風デザイン */}
       <div className="gem-mobile" style={{display:'none',width:'100%'}}>
         <div>
           <div style={{background:'var(--color-bg-card)',border:'1px solid var(--color-brand-border)',borderRadius:10,overflow:'hidden'}}>
@@ -375,7 +356,7 @@ export default function GemSection({ novels, discoverCommentMap }: Props) {
               <a href="/search" style={{fontSize:12,color:'var(--color-brand)',textDecoration:'none'}}>作品を探す ›</a>
             </div>
             {novels.slice(0,4).map((n, i) => !n ? null : (
-              <NovelPreviewPopup key={n.id} novel={{...n, like_count: n.likeCount2}}>
+              <NovelPreviewPopup key={n.id} novel={{...n, like_count: n.hideStats ? 0 : n.likeCount2}}>
                 <div style={{padding:'10px 16px',borderBottom:'1px solid var(--color-brand-light)',cursor:'pointer'}}>
                   <div style={{display:'flex',gap:4,marginBottom:3,flexWrap:'wrap'}}>
                     <span style={{fontSize:9,fontWeight:700,color:'var(--color-brand)',background:'var(--color-brand-light)',border:'1px solid var(--color-tag-border)',padding:'1px 5px',borderRadius:3}}>原石</span>

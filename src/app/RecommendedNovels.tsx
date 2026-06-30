@@ -14,6 +14,7 @@ interface Novel {
   summary?: string | null
   catchcopy?: string | null
   tags?: string[]
+  hideStats?: boolean
 }
 
 interface Props {
@@ -62,16 +63,20 @@ export default function RecommendedNovels({ novels }: Props) {
           const n = displayed[i]
           return n ? (
             <div key={n.id}>
-            <NovelPreviewPopup novel={{...n, like_count: n.likeCount || n.like_count || 0}}>
+            <NovelPreviewPopup novel={{...n, like_count: n.hideStats ? 0 : (n.likeCount || n.like_count || 0)}}>
               <div style={{padding:'9px 14px',borderBottom:'1px solid var(--color-brand-light)',borderRight:i%2===0?'1px solid var(--color-brand-light)':'none',minHeight:60,cursor:'pointer'}}>
                 <div style={{display:'flex',gap:4,marginBottom:2,flexWrap:'wrap'}}>
                   <span style={{fontSize:9,background:'var(--color-brand-light)',color:'var(--color-brand)',border:'1px solid var(--color-tag-border)',padding:'1px 5px',borderRadius:3}}>{n.genre}</span>
                   {n.novel_type && <span style={{fontSize:9,background:'var(--color-info-bg)',color:'var(--color-info)',border:'1px solid var(--color-info-border)',padding:'1px 5px',borderRadius:3}}>{n.novel_type}</span>}
                 </div>
                 <div style={{fontSize:13,fontWeight:700,color:'var(--color-text)',marginBottom:1}}>{n.title}</div>
-                <div style={{display:'flex',gap:8,fontSize:10,color:'var(--color-text-muted)'}}>
+                <div style={{display:'flex',gap:8,fontSize:10,color:'var(--color-text-muted)',alignItems:'center',flexWrap:'wrap'}}>
                   <span>作者：{n.display_name}</span>
-                  <span>♡ {n.likeCount||0}</span>
+                  {n.hideStats ? (
+                    <span style={{color:'var(--color-brand)',fontWeight:700}}>発掘されるのを待っています</span>
+                  ) : (
+                    <span>♡ {n.likeCount||0}</span>
+                  )}
                 </div>
               </div>
             </NovelPreviewPopup>

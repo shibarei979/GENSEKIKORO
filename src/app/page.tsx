@@ -14,6 +14,14 @@ import HeroSlider from './HeroSlider'
 import GemSection from './GemSection'
 import LatestEpisodesSection from './LatestEpisodesSection'
 
+const SEVEN_DAYS_MS = 7 * 24 * 60 * 60 * 1000
+const HIDE_LIKE_THRESHOLD = 50
+
+function hideStatsFor(createdAt: string, likeCount: number) {
+  const isNewWork = Date.now() - new Date(createdAt).getTime() < SEVEN_DAYS_MS
+  return isNewWork && likeCount < HIDE_LIKE_THRESHOLD
+}
+
 function getContestStatusKey(deadline: string | null, judging_end: string | null) {
   const now = new Date()
   if (!deadline) return '募集中'
@@ -176,6 +184,7 @@ export default async function HomePage() {
     likeCount:     latestLikeMap[n.id]     || 0,
     like_count:    latestLikeMap[n.id]     || 0,
     bookmarkCount: latestBookmarkMap[n.id] || 0,
+    hideStats: hideStatsFor(n.created_at, latestLikeMap[n.id] || 0),
   }))
 
   const { data: allNovelsRaw } = await supabase
@@ -206,6 +215,7 @@ export default async function HomePage() {
     score: (likeMap[n.id]||0)*3 + (bookmarkMap[n.id]||0)*2 + (discoverMap[n.id]||0)*4 + Math.round((n.originality_score||0)/5),
     likeCount: likeMap[n.id]||0,
     like_count: likeMap[n.id]||0,
+    hideStats: hideStatsFor(n.created_at, likeMap[n.id] || 0),
   }))
   const recommended = [...scored.sort((a: any,b: any)=>b.score-a.score).slice(0,20)].sort(()=>Math.random()-0.5).slice(0,8)
 
@@ -220,6 +230,7 @@ export default async function HomePage() {
     gemScore: (discoverMap[n.id]||0)*4 + (likeMap[n.id]||0)*1 + (commentCountMap[n.id]||0)*2 + Math.round((n.originality_score||0)/10),
     discoverCount: discoverMap[n.id]||0,
     likeCount2: likeMap[n.id]||0,
+    hideStats: hideStatsFor(n.created_at, likeMap[n.id] || 0),
   }))
   const seed = Date.now()
   const shuffledGem = [...gemScored.sort((a:any,b:any)=>b.gemScore-a.gemScore).slice(0,60)].sort((a:any,b:any)=>{
