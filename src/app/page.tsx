@@ -200,23 +200,30 @@ export default async function HomePage() {
   let likeMap: Record<string,number> = {}
   let discoverMap: Record<string,number> = {}
   let bookmarkMap: Record<string,number> = {}
+  let epCountMap: Record<string,number> = {}
   if (allIds.length > 0) {
-    const [lData, dData, bData] = await Promise.all([
+    const [lData, dData, bData, eData] = await Promise.all([
       supabase.from('likes').select('novel_id').in('novel_id', allIds),
       supabase.from('discovers').select('novel_id').in('novel_id', allIds).eq('is_pending', false),
       supabase.from('bookmarks').select('novel_id').in('novel_id', allIds),
+      supabase.from('episodes').select('novel_id').in('novel_id', allIds).eq('published', true),
     ])
     lData.data?.forEach((l: any) => { likeMap[l.novel_id]     = (likeMap[l.novel_id]     || 0) + 1 })
     dData.data?.forEach((d: any) => { discoverMap[d.novel_id] = (discoverMap[d.novel_id] || 0) + 1 })
     bData.data?.forEach((b: any) => { bookmarkMap[b.novel_id] = (bookmarkMap[b.novel_id] || 0) + 1 })
+    eData.data?.forEach((e: any) => { epCountMap[e.novel_id]  = (epCountMap[e.novel_id]  || 0) + 1 })
   }
-  const scored = allNovels.map((n: any) => ({
-    ...n,
-    score: (likeMap[n.id]||0)*3 + (bookmarkMap[n.id]||0)*2 + (discoverMap[n.id]||0)*4 + Math.round((n.originality_score||0)/5),
-    likeCount: likeMap[n.id]||0,
-    like_count: likeMap[n.id]||0,
-    hideStats: hideStatsFor(n.created_at, likeMap[n.id] || 0),
-  }))
+  const scored = allNovels.map((n: any) => {
+    const epCount = epCountMap[n.id] || 0
+    const updateBoost = epCount > 0 && epCount <= 3 ? 8 : 0  // 3話目まで更新ブースト
+    return {
+      ...n,
+      score: (likeMap[n.id]||0)*3 + (bookmarkMap[n.id]||0)*2 + (discoverMap[n.id]||0)*4 + Math.round((n.originality_score||0)/5) + updateBoost,
+      likeCount: likeMap[n.id]||0,
+      like_count: likeMap[n.id]||0,
+      hideStats: hideStatsFor(n.created_at, likeMap[n.id] || 0),
+    }
+  })
   const recommended = [...scored.sort((a: any,b: any)=>b.score-a.score).slice(0,20)].sort(()=>Math.random()-0.5).slice(0,8)
 
   const novelIds4Gem = allNovels.map((n: any) => n.id)
@@ -225,13 +232,17 @@ export default async function HomePage() {
     const { data: gemComments } = await supabase.from('comments').select('novel_id').in('novel_id', novelIds4Gem)
     gemComments?.forEach((c: any) => { commentCountMap[c.novel_id] = (commentCountMap[c.novel_id] || 0) + 1 })
   }
-  const gemScored = allNovels.map((n: any) => ({
-    ...n,
-    gemScore: (discoverMap[n.id]||0)*4 + (likeMap[n.id]||0)*1 + (commentCountMap[n.id]||0)*2 + Math.round((n.originality_score||0)/10),
-    discoverCount: discoverMap[n.id]||0,
-    likeCount2: likeMap[n.id]||0,
-    hideStats: hideStatsFor(n.created_at, likeMap[n.id] || 0),
-  }))
+  const gemScored = allNovels.map((n: any) => {
+    const epCount = epCountMap[n.id] || 0
+    const gemUpdateBoost = epCount > 0 && epCount <= 3 ? 6 : 0
+    return {
+      ...n,
+      gemScore: (discoverMap[n.id]||0)*4 + (likeMap[n.id]||0)*1 + (commentCountMap[n.id]||0)*2 + Math.round((n.originality_score||0)/10) + gemUpdateBoost,
+      discoverCount: discoverMap[n.id]||0,
+      likeCount2: likeMap[n.id]||0,
+      hideStats: hideStatsFor(n.created_at, likeMap[n.id] || 0),
+    }
+  })
   const seed = Date.now()
   const shuffledGem = [...gemScored.sort((a:any,b:any)=>b.gemScore-a.gemScore).slice(0,60)].sort((a:any,b:any)=>{
     const ha = (a.id.charCodeAt(0) * seed) % 997

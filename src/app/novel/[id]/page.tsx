@@ -283,16 +283,19 @@ export default async function NovelPage({ params }: { params: { id: string } }) 
   const recNovelIds = recommendedNovels.map((n: any) => n.id)
   const recLikeMap: Record<string, number> = {}
   const recDiscoverMap: Record<string, number> = {}
+  const recEpCountMap: Record<string, number> = {}
   if (recNovelIds.length > 0) {
-    const [{ data: recLikes }, { data: recDiscovers }] = await Promise.all([
+    const [{ data: recLikes }, { data: recDiscovers }, { data: recEpisodes }] = await Promise.all([
       supabase.from('likes').select('novel_id').in('novel_id', recNovelIds),
       supabase.from('discovers').select('novel_id').eq('is_pending', false).in('novel_id', recNovelIds),
+      supabase.from('episodes').select('novel_id').in('novel_id', recNovelIds).eq('published', true),
     ])
     recLikes?.forEach((l: any) => { recLikeMap[l.novel_id] = (recLikeMap[l.novel_id] || 0) + 1 })
     recDiscovers?.forEach((d: any) => { recDiscoverMap[d.novel_id] = (recDiscoverMap[d.novel_id] || 0) + 1 })
+    recEpisodes?.forEach((e: any) => { recEpCountMap[e.novel_id] = (recEpCountMap[e.novel_id] || 0) + 1 })
   }
 
-  // 総合スコアで再ソート（独創性50% + いいね30% + 拡散20% + 新着ブースト）
+  // 総合スコアで再ソート（独創性50% + いいね30% + 拡散20% + 新着ブースト + 更新ブースト）
   const maxLikes = Math.max(1, ...Object.values(recLikeMap))
   const maxDiscovers = Math.max(1, ...Object.values(recDiscoverMap))
   const now48 = Date.now() - 48 * 60 * 60 * 1000
@@ -303,7 +306,10 @@ export default async function NovelPage({ params }: { params: { id: string } }) 
     // 投稿から48時間以内はブースト（+0.3）
     const isNew = new Date(n.created_at).getTime() > now48
     const newBoost = isNew ? 0.3 : 0
-    const finalScore = originality * 0.5 + likeNorm * 0.3 + discoverNorm * 0.2 + newBoost
+    // 3話目まで更新ブースト（+0.15）
+    const epCount = recEpCountMap[n.id] || 0
+    const updateBoost = epCount > 0 && epCount <= 3 ? 0.15 : 0
+    const finalScore = originality * 0.5 + likeNorm * 0.3 + discoverNorm * 0.2 + newBoost + updateBoost
     return { ...n, finalScore, isNew }
   }).sort((a: any, b: any) => b.finalScore - a.finalScore)
 
