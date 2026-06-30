@@ -34,6 +34,88 @@ export default async function RankingPage({ searchParams }: Props) {
     const likeMap: Record<string,number> = {}
     let likeIds: string[] = []
 
+    const GROWTH_PERIODS = ['discover_rate', 'read_rate', 'bookmark_rate', 'newbie_focus']
+    const MIN_VIEWS = 30 // 母数が少なすぎる作品を除外
+
+    if (GROWTH_PERIODS.includes(period)) {
+      // 候補プール取得（公開済み・全年齢のみ・直近300件）
+      const { data: poolNovels } = await supabase
+        .from('novels')
+        .select('id, title, genre, novel_type, is_serial, author_id, summary, catchcopy, tags, created_at')
+        .eq('published', true).eq('is_r18', false).neq('genre', '官能')
+        .order('created_at', { ascending: false }).limit(300)
+
+      if (!poolNovels || poolNovels.length === 0) return { items: [], total: 0 }
+      const poolIds = poolNovels.map((n:any) => n.id)
+
+      const [{ data: viewsData }, { data: discoversData }, { data: likesData }, { data: bookmarksData }, { data: readData }] = await Promise.all([
+        supabase.from('novel_views').select('novel_id, view_count').in('novel_id', poolIds),
+        supabase.from('discovers').select('novel_id').in('novel_id', poolIds).eq('is_pending', false),
+        supabase.from('likes').select('novel_id').in('novel_id', poolIds),
+        supabase.from('bookmarks').select('novel_id').in('novel_id', poolIds),
+        supabase.from('read_episodes').select('novel_id').in('novel_id', poolIds),
+      ])
+
+      const viewMap: Record<string,number> = {}
+      viewsData?.forEach((v:any) => { viewMap[v.novel_id] = v.view_count || 0 })
+      const discoverCountMap: Record<string,number> = {}
+      discoversData?.forEach((d:any) => { discoverCountMap[d.novel_id] = (discoverCountMap[d.novel_id]||0)+1 })
+      const likeCountMap: Record<string,number> = {}
+      likesData?.forEach((l:any) => { likeCountMap[l.novel_id] = (likeCountMap[l.novel_id]||0)+1 })
+      const bookmarkCountMap: Record<string,number> = {}
+      bookmarksData?.forEach((b:any) => { bookmarkCountMap[b.novel_id] = (bookmarkCountMap[b.novel_id]||0)+1 })
+      const readCountMap: Record<string,number> = {}
+      readData?.forEach((r:any) => { readCountMap[r.novel_id] = (readCountMap[r.novel_id]||0)+1 })
+
+      // 新人注目：作者ごとの公開作品数をカウント
+      let newbieAuthorSet = new Set<string>()
+      if (period === 'newbie_focus') {
+        const { data: authorWorks } = await supabase.from('novels').select('author_id').eq('published', true)
+        const authorCount: Record<string,number> = {}
+        authorWorks?.forEach((n:any) => { authorCount[n.author_id] = (authorCount[n.author_id]||0)+1 })
+        newbieAuthorSet = new Set(Object.entries(authorCount).filter(([,c])=>c<=4).map(([id])=>id))
+      }
+
+      let candidates = poolNovels.filter((n:any) => (viewMap[n.id]||0) >= MIN_VIEWS)
+      if (period === 'newbie_focus') {
+        candidates = candidates.filter((n:any) => newbieAuthorSet.has(n.author_id))
+      }
+      if (genre !== '全て') {
+        candidates = candidates.filter((n:any) => n.genre === genre)
+      }
+
+      const rateScored = candidates.map((n:any) => {
+        const views = viewMap[n.id] || 1
+        let rate = 0
+        let rateLabel = ''
+        if (period === 'discover_rate') { rate = (discoverCountMap[n.id]||0) / views; rateLabel = '発掘率' }
+        else if (period === 'read_rate') { rate = (readCountMap[n.id]||0) / views; rateLabel = '読了率' }
+        else if (period === 'bookmark_rate') { rate = (bookmarkCountMap[n.id]||0) / views; rateLabel = '保存率' }
+        else if (period === 'newbie_focus') {
+          rate = ((discoverCountMap[n.id]||0)*2 + (likeCountMap[n.id]||0) + (bookmarkCountMap[n.id]||0)*1.5) / views
+          rateLabel = '注目度'
+        }
+        return { ...n, rate, rateLabel, score: likeCountMap[n.id]||0, char_count: 0, last_updated: n.created_at }
+      }).sort((a:any,b:any) => b.rate - a.rate)
+
+      const total = rateScored.length
+      const paged = rateScored.slice(offset, offset + PAGE_SIZE)
+      const authorIds = Array.from(new Set(paged.map((n:any) => n.author_id)))
+      const authorMap: Record<string,string> = {}
+      if (authorIds.length > 0) {
+        const { data: authors } = await supabase.from('profiles').select('user_id, display_name').in('user_id', authorIds as string[])
+        authors?.forEach((a:any) => { authorMap[a.user_id] = a.display_name })
+      }
+      return {
+        total,
+        items: paged.map((n:any) => ({
+          ...n,
+          display_name: authorMap[n.author_id]||'',
+          ratePercent: (n.rate * 100).toFixed(1),
+        }))
+      }
+    }
+
     if (period === 'rising') {
       const { data: risingData } = await supabase.from('rising_novels').select('id, rising_score').limit(100)
       const risingIds = (risingData || []).map((r:any) => r.id)
@@ -152,6 +234,10 @@ export default async function RankingPage({ searchParams }: Props) {
     { value:'quarterly', label:'四半期' },
     { value:'yearly',    label:'年間' },
     { value:'rising',    label:'急上昇' },
+    { value:'discover_rate',  label:'発掘率' },
+    { value:'read_rate',      label:'読了率' },
+    { value:'bookmark_rate',  label:'保存率' },
+    { value:'newbie_focus',   label:'新人注目' },
   ]
   const genres = ['全て','異世界','ファンタジー','SF','恋愛','学園','ミステリー','ホラー','歴史・時代','日常','アクション','コメディ','その他']
   const typeOptions   = [{ value:'全て',label:'全て' },{ value:'長編',label:'長編' },{ value:'短編',label:'短編' }]
@@ -161,6 +247,8 @@ export default async function RankingPage({ searchParams }: Props) {
     return `/ranking?period=${p}&type=${encodeURIComponent(t)}&serial=${s}&genre=${encodeURIComponent(genre)}&page=${pg}`
   }
 
+  const GROWTH_PERIODS = ['discover_rate', 'read_rate', 'bookmark_rate', 'newbie_focus']
+  const isGrowthRanking = GROWTH_PERIODS.includes(period)
   const periodLabel = periodOptions.find(o=>o.value===period)?.label||'週間'
   const scoreLabel  = period === 'rising' ? '↑' : '♡'
 
@@ -201,18 +289,20 @@ export default async function RankingPage({ searchParams }: Props) {
                 </div>
               </div>
             </div>
-            <div style={{marginBottom:10}}>
-              <div style={{fontSize:11,color:'var(--color-text-muted)',fontWeight:600,marginBottom:5}}>作品の長さ</div>
-              <div style={{overflowX:'auto',msOverflowStyle:'none',scrollbarWidth:'none'} as any}>
-                <div style={{display:'flex',gap:6,flexWrap:'nowrap'}}>
-                  {typeOptions.map(o => (
-                    <Link key={o.value} href={buildUrl(period,o.value,serial)} className={pillClass(novelType===o.value)} style={pill(novelType===o.value)}>
-                      {o.label}
-                    </Link>
-                  ))}
+            {!isGrowthRanking && (
+              <div style={{marginBottom:10}}>
+                <div style={{fontSize:11,color:'var(--color-text-muted)',fontWeight:600,marginBottom:5}}>作品の長さ</div>
+                <div style={{overflowX:'auto',msOverflowStyle:'none',scrollbarWidth:'none'} as any}>
+                  <div style={{display:'flex',gap:6,flexWrap:'nowrap'}}>
+                    {typeOptions.map(o => (
+                      <Link key={o.value} href={buildUrl(period,o.value,serial)} className={pillClass(novelType===o.value)} style={pill(novelType===o.value)}>
+                        {o.label}
+                      </Link>
+                    ))}
+                  </div>
                 </div>
               </div>
-            </div>
+            )}
             <div style={{marginBottom:10}}>
               <div style={{fontSize:11,color:'var(--color-text-muted)',fontWeight:600,marginBottom:5}}>ジャンル</div>
               <div style={{overflowX:'auto',msOverflowStyle:'none',scrollbarWidth:'none'} as any}>
@@ -226,18 +316,25 @@ export default async function RankingPage({ searchParams }: Props) {
                 </div>
               </div>
             </div>
-            <div>
-              <div style={{fontSize:11,color:'var(--color-text-muted)',fontWeight:600,marginBottom:5}}>絞り込み</div>
-              <div style={{overflowX:'auto',msOverflowStyle:'none',scrollbarWidth:'none'} as any}>
-                <div style={{display:'flex',gap:6,flexWrap:'nowrap'}}>
-                  {serialOptions.map(o => (
-                    <Link key={o.value} href={buildUrl(period,novelType,o.value)} className={pillClass(serial===o.value)} style={pill(serial===o.value)}>
-                      {o.label}
-                    </Link>
-                  ))}
+            {!isGrowthRanking && (
+              <div>
+                <div style={{fontSize:11,color:'var(--color-text-muted)',fontWeight:600,marginBottom:5}}>絞り込み</div>
+                <div style={{overflowX:'auto',msOverflowStyle:'none',scrollbarWidth:'none'} as any}>
+                  <div style={{display:'flex',gap:6,flexWrap:'nowrap'}}>
+                    {serialOptions.map(o => (
+                      <Link key={o.value} href={buildUrl(period,novelType,o.value)} className={pillClass(serial===o.value)} style={pill(serial===o.value)}>
+                        {o.label}
+                      </Link>
+                    ))}
+                  </div>
                 </div>
               </div>
-            </div>
+            )}
+            {isGrowthRanking && (
+              <div style={{fontSize:11,color:'var(--color-text-faint)',marginTop:4}}>
+                ※ このランキングは一定以上の閲覧数がある作品が対象です
+              </div>
+            )}
           </div>
 
           <div style={{background:'var(--color-bg-card)',border:'1px solid var(--color-brand-border)',borderRadius:12,overflow:'hidden'}}>
@@ -282,10 +379,14 @@ export default async function RankingPage({ searchParams }: Props) {
                           ))}
                         </div>
                       )}
-                      <div style={{display:'flex',gap:10,fontSize:11,color:'var(--color-text-faint)',flexWrap:'wrap'}}>
+                      <div style={{display:'flex',gap:10,fontSize:11,color:'var(--color-text-faint)',flexWrap:'wrap',alignItems:'center'}}>
                         {n.char_count > 0 && <span>{fmtChar(n.char_count)}</span>}
                         <span>更新：{fmtDate(n.last_updated)}</span>
-                        {!n.hideStats && <span style={{color:'var(--color-text-muted)',fontWeight:600}}>{scoreLabel} {fmtNum(n.score)}</span>}
+                        {isGrowthRanking ? (
+                          <span style={{background:'var(--color-brand-light)',color:'var(--color-brand)',fontWeight:700,padding:'1px 8px',borderRadius:10,fontSize:11}}>{n.rateLabel} {n.ratePercent}%</span>
+                        ) : (
+                          !n.hideStats && <span style={{color:'var(--color-text-muted)',fontWeight:600}}>{scoreLabel} {fmtNum(n.score)}</span>
+                        )}
                       </div>
                     </div>
                   </div>
