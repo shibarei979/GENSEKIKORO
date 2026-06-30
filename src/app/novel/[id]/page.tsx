@@ -442,6 +442,7 @@ export default async function NovelPage({ params }: { params: { id: string } }) 
               likeCount={likeCount??0}
               bookmarkCount={bookmarkCount??0}
               discoverCount={discoverCount??0}
+              hideStats={Date.now() - new Date(novel.created_at).getTime() < 7*24*60*60*1000 && (likeCount??0) < 50}
             />
           </div>
 

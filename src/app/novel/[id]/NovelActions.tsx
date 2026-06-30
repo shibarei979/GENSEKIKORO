@@ -17,6 +17,7 @@ interface Props {
   bookmarkCount: number
   discoverCount: number
   userDisplayName?: string
+  hideStats?: boolean
 }
 
 function fmtNum(n: number): string {
@@ -27,7 +28,7 @@ function fmtNum(n: number): string {
 
 const DAILY_LIMIT = 3
 
-export default function NovelActions({ novelId, userId, authorId, novelTitle, isAuthor, initialLiked, initialBookmarked, initialDiscovered, likeCount, bookmarkCount, discoverCount, userDisplayName }: Props) {
+export default function NovelActions({ novelId, userId, authorId, novelTitle, isAuthor, initialLiked, initialBookmarked, initialDiscovered, likeCount, bookmarkCount, discoverCount, userDisplayName, hideStats }: Props) {
   const supabase = createClient()
   const [liked,       setLiked]       = useState(initialLiked)
   const [bookmarked,  setBookmarked]  = useState(initialBookmarked)
@@ -176,13 +177,13 @@ export default function NovelActions({ novelId, userId, authorId, novelTitle, is
 
       <div style={{display:'flex',gap:8,flexWrap:'wrap',alignItems:'center'}}>
         <button onClick={toggleLike} style={btn(liked,'var(--color-danger)','#fef2f2')}>
-          {liked?'♥':'♡'} {fmtNum(likes)}
+          {liked?'♥':'♡'}{!hideStats && ` ${fmtNum(likes)}`}
         </button>
         <button onClick={toggleBookmark} style={btn(bookmarked,'var(--color-brand)','var(--color-brand-light)')}>
           <svg width="13" height="13" viewBox="0 0 24 24" fill={bookmarked?'var(--color-brand)':'none'} stroke={bookmarked?'var(--color-brand)':'var(--color-text-faint)'} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
             <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/>
           </svg>
-          {fmtNum(bookmarks)}
+          {!hideStats && fmtNum(bookmarks)}
         </button>
         <button onClick={handleDiscover}
           disabled={isAuthor || !!reachedLimit}
@@ -190,7 +191,7 @@ export default function NovelActions({ novelId, userId, authorId, novelTitle, is
             ? {...btn(false,'var(--color-text-faint)','transparent'), cursor:'not-allowed' as const, opacity:0.4}
             : btn(discovered,'var(--color-brand)','var(--color-brand-light)')}
           title={isAuthor ? '自分の作品は拡散できません' : reachedLimit ? `本日の拡散上限（${DAILY_LIMIT}回）に達しました` : 'この作品をもっと広めたい！という気持ちを伝える'}>
-          拡散する {discovers > 0 && fmtNum(discovers)}
+          拡散する {!hideStats && discovers > 0 && fmtNum(discovers)}
           {userId && !isAuthor && todayShares > 0 && !discovered && (
             <span style={{fontSize:10,marginLeft:2,color:'var(--color-text-faint)'}}>({DAILY_LIMIT - todayShares}回残)</span>
           )}
