@@ -472,7 +472,7 @@ export default function MypageClient({
         <div style={{display:'flex',gap:8,alignItems:'center'}}>
           <Link href="/mypage/analytics" style={{display:'inline-flex',alignItems:'center',gap:5,border:'1px solid var(--color-brand-border)',color:'var(--color-brand)',fontSize:12,fontWeight:600,padding:'7px 14px',borderRadius:16,textDecoration:'none'}}>
             <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
-            アクセス解析
+            ダッシュボード
           </Link>
           <Link href="/post" style={{background:'var(--color-brand)',color:'#fff',fontSize:12,fontWeight:700,padding:'7px 16px',borderRadius:16,textDecoration:'none'}}>＋ 新しく投稿する</Link>
         </div>

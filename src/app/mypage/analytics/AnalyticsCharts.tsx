@@ -29,6 +29,7 @@ interface NovelStat {
   dailyTop: { date: string; views: number }[]
   monthlyTop: { month: string; views: number }[]
   episodeRows: EpisodeRow[]
+  commentList: { body: string; author: string; created_at: string; episode_title: string }[]
 }
 
 export default function AnalyticsCharts({ novels }: { novels: NovelStat[] }) {
@@ -38,22 +39,28 @@ export default function AnalyticsCharts({ novels }: { novels: NovelStat[] }) {
 
   return (
     <div>
-      {/* 作品選択 */}
+      {/* 作品選択（ドロップダウン） */}
       <div style={{marginBottom:20}}>
         <div style={{fontSize:12,color:'var(--color-text-muted)',fontWeight:600,marginBottom:8}}>作品を選択</div>
-        <div style={{display:'flex',gap:8,flexWrap:'wrap'}}>
-          {novels.map(n => (
-            <button key={n.id} onClick={()=>setSelectedId(n.id)}
-              style={{
-                padding:'8px 16px',borderRadius:8,fontSize:13,fontWeight:600,cursor:'pointer',
-                border: selectedId===n.id ? '1.5px solid var(--color-brand)' : '1px solid var(--color-brand-border)',
-                background: selectedId===n.id ? 'var(--color-brand-light)' : 'var(--color-bg-card)',
-                color: selectedId===n.id ? 'var(--color-brand)' : 'var(--color-text-muted)',
-                maxWidth:220,overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap',
-              }}>
-              {n.title}{n.published===false && ' (非公開)'}
-            </button>
-          ))}
+        <div style={{position:'relative',display:'inline-block',minWidth:260,maxWidth:'100%'}}>
+          <select value={selectedId} onChange={e=>setSelectedId(e.target.value)}
+            style={{
+              width:'100%',appearance:'none',WebkitAppearance:'none',
+              padding:'10px 40px 10px 16px',borderRadius:10,
+              border:'1.5px solid var(--color-brand-border)',
+              background:'var(--color-bg-card)',color:'var(--color-text)',
+              fontSize:14,fontWeight:600,cursor:'pointer',
+            }}>
+            {novels.map(n => (
+              <option key={n.id} value={n.id}>
+                {n.title}{n.published===false ? '（非公開）' : ''}
+              </option>
+            ))}
+          </select>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--color-brand)" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"
+            style={{position:'absolute',right:14,top:'50%',transform:'translateY(-50%)',pointerEvents:'none'}}>
+            <polyline points="6 9 12 15 18 9"/>
+          </svg>
         </div>
       </div>
 
@@ -159,6 +166,28 @@ export default function AnalyticsCharts({ novels }: { novels: NovelStat[] }) {
         )}
       </div>
 
+      {/* コメント一覧（全幅） */}
+      <div style={{background:'var(--color-bg-card)',border:'1px solid var(--color-brand-border)',borderRadius:12,overflow:'hidden',marginTop:16}}>
+        <div style={{padding:'12px 16px',borderBottom:'1px solid var(--color-brand-border)',background:'var(--color-bg)',fontSize:13,fontWeight:700,color:'var(--color-text)',display:'flex',alignItems:'center',justifyContent:'space-between'}}>
+          <span>寄せられたコメント</span>
+          <span style={{fontSize:12,color:'var(--color-text-muted)',fontWeight:400}}>{selected.comments}件</span>
+        </div>
+        {selected.commentList.length === 0 ? (
+          <div style={{padding:'30px',textAlign:'center',color:'var(--color-text-faint)',fontSize:12}}>まだコメントがありません</div>
+        ) : (
+          selected.commentList.map((c, i) => (
+            <div key={i} style={{padding:'14px 18px',borderBottom:i<selected.commentList.length-1?'1px solid var(--color-brand-light)':'none'}}>
+              <div style={{display:'flex',alignItems:'center',gap:8,marginBottom:6,flexWrap:'wrap'}}>
+                <span style={{fontSize:13,fontWeight:700,color:'var(--color-text)'}}>{c.author}</span>
+                <span style={{fontSize:11,color:'var(--color-brand)',background:'var(--color-brand-light)',padding:'1px 8px',borderRadius:10}}>{c.episode_title}</span>
+                <span style={{fontSize:11,color:'var(--color-text-faint)',marginLeft:'auto'}}>{fmtDateShort(c.created_at)}</span>
+              </div>
+              <div style={{fontSize:13,color:'var(--color-text)',lineHeight:1.7,whiteSpace:'pre-wrap',wordBreak:'break-word'}}>{c.body}</div>
+            </div>
+          ))
+        )}
+      </div>
+
       <style>{`
         @media (max-width: 900px) {
           .ana-layout { grid-template-columns: 1fr !important; }
@@ -166,6 +195,12 @@ export default function AnalyticsCharts({ novels }: { novels: NovelStat[] }) {
       `}</style>
     </div>
   )
+}
+
+function fmtDateShort(s: string) {
+  if (!s) return ''
+  const d = new Date(s)
+  return `${d.getMonth()+1}/${d.getDate()} ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`
 }
 
 // 時間帯別（0-23時）

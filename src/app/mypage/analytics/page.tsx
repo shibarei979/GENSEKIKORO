@@ -41,10 +41,21 @@ export default async function AnalyticsPage() {
       epIds.length > 0 ? supabase.from('page_views').select('episode_id, user_id, created_at').in('episode_id', epIds) : Promise.resolve({ data: [] }),
       supabase.from('likes').select('novel_id').in('novel_id', novelIds),
       supabase.from('bookmarks').select('novel_id').in('novel_id', novelIds),
-      supabase.from('comments').select('novel_id, episode_id').in('novel_id', novelIds),
+      supabase.from('comments').select('novel_id, episode_id, body, user_id, created_at').in('novel_id', novelIds).order('created_at', { ascending: false }),
       epIds.length > 0 ? supabase.from('episode_likes').select('episode_id').in('episode_id', epIds) : Promise.resolve({ data: [] }),
       Promise.resolve({ data: [] }),
     ])
+
+    // コメント投稿者名を取得
+    const commentUserIds = Array.from(new Set((comments || []).map((c: any) => c.user_id).filter(Boolean)))
+    const commentUserMap: Record<string, string> = {}
+    if (commentUserIds.length > 0) {
+      const { data: cu } = await supabase.from('profiles').select('user_id, display_name').in('user_id', commentUserIds as string[])
+      cu?.forEach((p: any) => { commentUserMap[p.user_id] = p.display_name || '名無し' })
+    }
+    // 話タイトルマップ
+    const epTitleMap: Record<string, string> = {}
+    allEpisodes.forEach((e: any) => { epTitleMap[e.id] = e.title })
 
     novelIds.forEach((id: string) => {
       statsMap[id] = {
@@ -59,6 +70,7 @@ export default async function AnalyticsPage() {
         episodeViews: {},
         episodeLikes: {},
         episodeComments: {},
+        commentList: [],
       }
     })
 
@@ -97,6 +109,15 @@ export default async function AnalyticsPage() {
         if (c.episode_id) {
           statsMap[c.novel_id].episodeComments[c.episode_id] = (statsMap[c.novel_id].episodeComments[c.episode_id] || 0) + 1
         }
+        // コメント本文リスト（最新30件まで）
+        if (statsMap[c.novel_id].commentList.length < 30) {
+          statsMap[c.novel_id].commentList.push({
+            body: c.body,
+            author: commentUserMap[c.user_id] || '名無し',
+            created_at: c.created_at,
+            episode_title: c.episode_id ? (epTitleMap[c.episode_id] || '') : '作品ページ',
+          })
+        }
       }
     })
     ;(epLikes || []).forEach((el: any) => {
@@ -114,7 +135,7 @@ export default async function AnalyticsPage() {
     const empty = {
       views:0,likes:0,bookmarks:0,comments:0,viewsToday:0,viewsYesterday:0,viewsWeek:0,viewsMonth:0,
       uniqueUsers:new Set(),hourlyToday:new Array(24).fill(0),hourlyYesterday:new Array(24).fill(0),
-      daily7:{},daily30:{},monthly:{},episodeViews:{},episodeLikes:{},episodeComments:{},
+      daily7:{},daily30:{},monthly:{},episodeViews:{},episodeLikes:{},episodeComments:{},commentList:[],
     }
     const st = s || empty
 
@@ -163,6 +184,7 @@ export default async function AnalyticsPage() {
       dailyTop,
       monthlyTop,
       episodeRows,
+      commentList: st.commentList,
     }
   })
 
@@ -171,7 +193,7 @@ export default async function AnalyticsPage() {
       <Header profile={profile} user={user} />
       <div style={{maxWidth:1100,margin:'0 auto',padding:'24px 16px'}}>
         <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',marginBottom:20,flexWrap:'wrap',gap:8}}>
-          <h1 style={{fontSize:20,fontWeight:700,color:'var(--color-text)'}}>アクセス解析</h1>
+          <h1 style={{fontSize:20,fontWeight:700,color:'var(--color-text)'}}>ダッシュボード</h1>
           <Link href="/mypage?tab=works" style={{fontSize:13,color:'var(--color-brand)',textDecoration:'none'}}>← 作品管理に戻る</Link>
         </div>
         {novelStats.length === 0 ? (
