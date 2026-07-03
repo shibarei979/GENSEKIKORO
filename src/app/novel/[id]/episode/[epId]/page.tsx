@@ -76,7 +76,7 @@ export default async function EpisodePage({ params }: Props) {
 
   const { data: rawComments } = await supabase
     .from('comments')
-    .select('id, body, created_at, user_id, is_pinned')
+    .select('id, body, created_at, user_id, is_pinned, rating, quoted_text')
     .eq('novel_id', params.id)
     .order('created_at', { ascending: false })
     .limit(50)
@@ -100,6 +100,8 @@ export default async function EpisodePage({ params }: Props) {
     icon_url: commentProfiles[c.user_id]?.icon_url || '',
     like_count: commentLikeCounts[c.id] || 0,
     is_pinned: c.is_pinned || false,
+    rating: c.rating ?? null,
+    quoted_text: c.quoted_text ?? null,
   }))
 
   const { count: epLikeCount } = await supabase
