@@ -22,13 +22,13 @@ export default async function AnalyticsPage() {
 
   const novelIds = (novels || []).map((n: any) => n.id)
 
-  const statsMap: Record<string, any> = {}
   let allEpisodes: any[] = []
+  const statsMap: Record<string, any> = {}
 
   if (novelIds.length > 0) {
     const { data: episodes } = await supabase
       .from('episodes')
-      .select('id, novel_id, title, ep_number, body, published, created_at')
+      .select('id, novel_id, title, ep_number, published, created_at')
       .in('novel_id', novelIds)
       .order('ep_number', { ascending: true })
     allEpisodes = episodes || []
@@ -37,140 +37,149 @@ export default async function AnalyticsPage() {
     const epToNovel: Record<string, string> = {}
     allEpisodes.forEach((e: any) => { epToNovel[e.id] = e.novel_id })
 
-    const [{ data: pageViews }, { data: likes }, { data: bookmarks }, { data: comments }] = await Promise.all([
-      epIds.length > 0 ? supabase.from('page_views').select('episode_id, created_at').in('episode_id', epIds) : Promise.resolve({ data: [] }),
+    const [{ data: pageViews }, { data: likes }, { data: bookmarks }, { data: comments }, { data: epLikes }, { data: epComments }] = await Promise.all([
+      epIds.length > 0 ? supabase.from('page_views').select('episode_id, user_id, created_at').in('episode_id', epIds) : Promise.resolve({ data: [] }),
       supabase.from('likes').select('novel_id').in('novel_id', novelIds),
       supabase.from('bookmarks').select('novel_id').in('novel_id', novelIds),
-      supabase.from('comments').select('novel_id').in('novel_id', novelIds),
+      supabase.from('comments').select('novel_id, episode_id').in('novel_id', novelIds),
+      epIds.length > 0 ? supabase.from('episode_likes').select('episode_id').in('episode_id', epIds) : Promise.resolve({ data: [] }),
+      Promise.resolve({ data: [] }),
     ])
 
     novelIds.forEach((id: string) => {
       statsMap[id] = {
         views: 0, likes: 0, bookmarks: 0, comments: 0,
-        viewsToday: 0, viewsWeek: 0, viewsMonth: 0,
+        viewsToday: 0, viewsYesterday: 0, viewsWeek: 0, viewsMonth: 0,
+        uniqueUsers: new Set<string>(),
+        hourlyToday: new Array(24).fill(0),
+        hourlyYesterday: new Array(24).fill(0),
+        daily7: {},   // 直近7日
+        daily30: {},  // 直近30日（日別上位用）
+        monthly: {},  // 月別
         episodeViews: {},
         episodeLikes: {},
-        dailyViews: {},
+        episodeComments: {},
       }
     })
 
     const now = new Date()
     const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime()
+    const yesterdayStart = todayStart - 24 * 60 * 60 * 1000
     const weekStart = todayStart - 6 * 24 * 60 * 60 * 1000
     const monthStart = todayStart - 29 * 24 * 60 * 60 * 1000
 
     ;(pageViews || []).forEach((pv: any) => {
       const nId = epToNovel[pv.episode_id]
       if (!nId || !statsMap[nId]) return
-      statsMap[nId].views++
-      statsMap[nId].episodeViews[pv.episode_id] = (statsMap[nId].episodeViews[pv.episode_id] || 0) + 1
-      const t = new Date(pv.created_at).getTime()
-      if (t >= todayStart) statsMap[nId].viewsToday++
-      if (t >= weekStart) statsMap[nId].viewsWeek++
-      if (t >= monthStart) statsMap[nId].viewsMonth++
+      const st = statsMap[nId]
+      st.views++
+      st.episodeViews[pv.episode_id] = (st.episodeViews[pv.episode_id] || 0) + 1
+      if (pv.user_id) st.uniqueUsers.add(pv.user_id)
+      const dt = new Date(pv.created_at)
+      const t = dt.getTime()
+      const hour = dt.getHours()
+      if (t >= todayStart) { st.viewsToday++; st.hourlyToday[hour]++ }
+      else if (t >= yesterdayStart) { st.viewsYesterday++; st.hourlyYesterday[hour]++ }
+      if (t >= weekStart) st.viewsWeek++
+      if (t >= monthStart) st.viewsMonth++
       const day = (pv.created_at || '').slice(0, 10)
-      if (day) statsMap[nId].dailyViews[day] = (statsMap[nId].dailyViews[day] || 0) + 1
+      if (t >= weekStart) st.daily7[day] = (st.daily7[day] || 0) + 1
+      if (t >= monthStart) st.daily30[day] = (st.daily30[day] || 0) + 1
+      const month = (pv.created_at || '').slice(0, 7)
+      if (month) st.monthly[month] = (st.monthly[month] || 0) + 1
     })
 
     ;(likes || []).forEach((l: any) => { if (statsMap[l.novel_id]) statsMap[l.novel_id].likes++ })
     ;(bookmarks || []).forEach((b: any) => { if (statsMap[b.novel_id]) statsMap[b.novel_id].bookmarks++ })
-    ;(comments || []).forEach((c: any) => { if (statsMap[c.novel_id]) statsMap[c.novel_id].comments++ })
-
-    // 話別いいね（episode_likes）
-    if (epIds.length > 0) {
-      const { data: epLikes } = await supabase.from('episode_likes').select('episode_id').in('episode_id', epIds)
-      ;(epLikes || []).forEach((el: any) => {
-        const nId = epToNovel[el.episode_id]
-        if (nId && statsMap[nId]) {
-          statsMap[nId].episodeLikes[el.episode_id] = (statsMap[nId].episodeLikes[el.episode_id] || 0) + 1
+    ;(comments || []).forEach((c: any) => {
+      if (statsMap[c.novel_id]) {
+        statsMap[c.novel_id].comments++
+        if (c.episode_id) {
+          statsMap[c.novel_id].episodeComments[c.episode_id] = (statsMap[c.novel_id].episodeComments[c.episode_id] || 0) + 1
         }
-      })
-    }
+      }
+    })
+    ;(epLikes || []).forEach((el: any) => {
+      const nId = epToNovel[el.episode_id]
+      if (nId && statsMap[nId]) {
+        statsMap[nId].episodeLikes[el.episode_id] = (statsMap[nId].episodeLikes[el.episode_id] || 0) + 1
+      }
+    })
   }
 
   const novelStats = (novels || []).map((n: any) => {
-    const s = statsMap[n.id] || { views:0,likes:0,bookmarks:0,comments:0,viewsToday:0,viewsWeek:0,viewsMonth:0,episodeViews:{},episodeLikes:{},dailyViews:{} }
+    const s = statsMap[n.id]
     const eps = allEpisodes.filter((e: any) => e.novel_id === n.id && e.published !== false)
+
+    const empty = {
+      views:0,likes:0,bookmarks:0,comments:0,viewsToday:0,viewsYesterday:0,viewsWeek:0,viewsMonth:0,
+      uniqueUsers:new Set(),hourlyToday:new Array(24).fill(0),hourlyYesterday:new Array(24).fill(0),
+      daily7:{},daily30:{},monthly:{},episodeViews:{},episodeLikes:{},episodeComments:{},
+    }
+    const st = s || empty
 
     const episodeRows = eps.map((ep: any) => ({
       ep_number: ep.ep_number,
       title: ep.title,
-      charCount: (ep.body || '').length,
-      views: s.episodeViews[ep.id] || 0,
-      likes: s.episodeLikes[ep.id] || 0,
+      views: st.episodeViews[ep.id] || 0,
+      likes: st.episodeLikes[ep.id] || 0,
+      comments: st.episodeComments[ep.id] || 0,
       created_at: ep.created_at,
     }))
 
-    const totalChars = eps.reduce((sum: number, ep: any) => sum + (ep.body || '').length, 0)
-    const lastUpdated = eps.length > 0 ? eps[eps.length-1].created_at : n.created_at
-
-    const daily: { date: string; views: number }[] = []
-    for (let i = 29; i >= 0; i--) {
+    // 直近7日の日別配列
+    const daily7: { date: string; views: number }[] = []
+    for (let i = 6; i >= 0; i--) {
       const d = new Date(Date.now() - i * 24 * 60 * 60 * 1000)
       const key = d.toISOString().slice(0, 10)
-      daily.push({ date: key.slice(5), views: s.dailyViews[key] || 0 })
+      daily7.push({ date: key.slice(5), views: st.daily7[key] || 0 })
     }
+    // 日別上位（直近30日）
+    const dailyTop = Object.entries(st.daily30)
+      .map(([date, views]) => ({ date, views: views as number }))
+      .sort((a, b) => b.views - a.views).slice(0, 5)
+    // 月別上位
+    const monthlyTop = Object.entries(st.monthly)
+      .map(([month, views]) => ({ month, views: views as number }))
+      .sort((a, b) => b.views - a.views).slice(0, 5)
 
     return {
       id: n.id,
       title: n.title,
       genre: n.genre,
       published: n.published,
-      views: s.views,
-      viewsToday: s.viewsToday,
-      viewsWeek: s.viewsWeek,
-      viewsMonth: s.viewsMonth,
-      likes: s.likes,
-      bookmarks: s.bookmarks,
-      comments: s.comments,
-      totalChars,
-      lastUpdated,
-      epCount: eps.length,
+      views: st.views,
+      viewsToday: st.viewsToday,
+      viewsYesterday: st.viewsYesterday,
+      viewsWeek: st.viewsWeek,
+      viewsMonth: st.viewsMonth,
+      likes: st.likes,
+      bookmarks: st.bookmarks,
+      comments: st.comments,
+      uniqueCount: st.uniqueUsers.size,
+      hourlyToday: st.hourlyToday,
+      hourlyYesterday: st.hourlyYesterday,
+      daily7,
+      dailyTop,
+      monthlyTop,
       episodeRows,
-      daily,
     }
   })
-
-  const totalViews = novelStats.reduce((s, n) => s + n.views, 0)
-  const totalToday = novelStats.reduce((s, n) => s + n.viewsToday, 0)
-  const totalWeek = novelStats.reduce((s, n) => s + n.viewsWeek, 0)
-  const totalMonth = novelStats.reduce((s, n) => s + n.viewsMonth, 0)
-  const totalLikes = novelStats.reduce((s, n) => s + n.likes, 0)
-  const totalBookmarks = novelStats.reduce((s, n) => s + n.bookmarks, 0)
-  const totalComments = novelStats.reduce((s, n) => s + n.comments, 0)
 
   return (
     <div style={{minHeight:'100vh',background:'var(--color-bg)'}}>
       <Header profile={profile} user={user} />
-
-      <div style={{maxWidth:1000,margin:'0 auto',padding:'24px 16px'}}>
+      <div style={{maxWidth:1100,margin:'0 auto',padding:'24px 16px'}}>
         <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',marginBottom:20,flexWrap:'wrap',gap:8}}>
           <h1 style={{fontSize:20,fontWeight:700,color:'var(--color-text)'}}>アクセス解析</h1>
           <Link href="/mypage?tab=works" style={{fontSize:13,color:'var(--color-brand)',textDecoration:'none'}}>← 作品管理に戻る</Link>
         </div>
-
-        {/* 全体サマリー（コンパクト） */}
-        <div style={{background:'var(--color-bg-card)',border:'1px solid var(--color-brand-border)',borderRadius:12,padding:'16px 18px',marginBottom:20}}>
-          <div style={{fontSize:12,color:'var(--color-text-muted)',fontWeight:600,marginBottom:12}}>全作品の合計</div>
-          <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit, minmax(80px, 1fr))',gap:8}}>
-            {[['今日',totalToday],['今週',totalWeek],['今月',totalMonth],['累計PV',totalViews],['いいね',totalLikes],['保存',totalBookmarks],['コメント',totalComments]].map(([label,val]) => (
-              <div key={label as string} style={{textAlign:'center'}}>
-                <div style={{fontSize:20,fontWeight:700,color:'var(--color-text)'}}>{(val as number).toLocaleString()}</div>
-                <div style={{fontSize:10,color:'var(--color-text-muted)',marginTop:2}}>{label}</div>
-              </div>
-            ))}
-          </div>
-        </div>
-
         {novelStats.length === 0 ? (
-          <div style={{textAlign:'center',padding:'60px 20px',color:'var(--color-text-muted)'}}>
-            まだ作品がありません
-          </div>
+          <div style={{textAlign:'center',padding:'60px 20px',color:'var(--color-text-muted)'}}>まだ作品がありません</div>
         ) : (
           <AnalyticsCharts novels={novelStats} />
         )}
       </div>
-
       <Footer user={user} />
     </div>
   )
