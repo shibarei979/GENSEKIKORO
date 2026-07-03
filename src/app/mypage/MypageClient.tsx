@@ -530,7 +530,7 @@ export default function MypageClient({
           <Link href="/post" style={{background:'var(--color-brand)',color:'#fff',fontSize:13,fontWeight:700,padding:'10px 24px',borderRadius:20,display:'inline-block',textDecoration:'none',marginTop:12}}>最初の作品を投稿する</Link>
         </div>
       ) : myNovels.map((novel, i) => (
-        <div key={novel.id} style={{border:'1px solid var(--color-brand-border)',borderRadius:12,overflow:'hidden',marginBottom:14,background:'var(--color-bg-card)'}}>
+        <div key={novel.id} style={{border:'1px solid var(--color-brand-border)',borderRadius:12,overflow:editMenuOpen===novel.id?'visible':'hidden',marginBottom:14,background:'var(--color-bg-card)'}}>
           {/* 作品ヘッダー部分 */}
           <div style={{padding:'16px 18px',borderBottom:'1px solid var(--color-brand-light)'}}>
             <div style={{display:'flex',alignItems:'flex-start',gap:10}}>
@@ -603,7 +603,7 @@ export default function MypageClient({
               {editMenuOpen===novel.id && (
                 <>
                   <div style={{position:'fixed',inset:0,zIndex:98}} onClick={()=>setEditMenuOpen(null)}/>
-                  <div style={{position:'absolute',top:'calc(100% + 4px)',left:0,background:'var(--color-bg-card)',border:'1px solid var(--color-brand-border)',borderRadius:10,boxShadow:'0 4px 16px rgba(0,0,0,0.12)',zIndex:99,minWidth:180,overflow:'hidden'}}>
+                  <div style={{position:'absolute',bottom:'calc(100% + 4px)',left:0,background:'var(--color-bg-card)',border:'1px solid var(--color-brand-border)',borderRadius:10,boxShadow:'0 4px 16px rgba(0,0,0,0.15)',zIndex:99,minWidth:180,overflow:'hidden'}}>
                     <button onClick={()=>{setEditMenuOpen(null);handleOpenEpManage(novel)}}
                       style={{display:'block',width:'100%',textAlign:'left',padding:'11px 16px',fontSize:13,color:'var(--color-text)',background:'none',border:'none',borderBottom:'1px solid var(--color-brand-light)',cursor:'pointer'}}>
                       既存の話を編集
