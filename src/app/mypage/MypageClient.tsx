@@ -469,7 +469,13 @@ export default function MypageClient({
           <span style={{fontSize:15,fontWeight:700,color:'var(--color-text)'}}>投稿作品</span>
           <span style={{fontSize:12,color:'var(--color-text-muted)',marginLeft:8}}>{published.length}公開・{drafts.length}下書き</span>
         </div>
-        <Link href="/post" style={{background:'var(--color-brand)',color:'#fff',fontSize:12,fontWeight:700,padding:'7px 16px',borderRadius:16,textDecoration:'none'}}>＋ 新しく投稿する</Link>
+        <div style={{display:'flex',gap:8,alignItems:'center'}}>
+          <Link href="/mypage/analytics" style={{display:'inline-flex',alignItems:'center',gap:5,border:'1px solid var(--color-brand-border)',color:'var(--color-brand)',fontSize:12,fontWeight:600,padding:'7px 14px',borderRadius:16,textDecoration:'none'}}>
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+            アクセス解析
+          </Link>
+          <Link href="/post" style={{background:'var(--color-brand)',color:'#fff',fontSize:12,fontWeight:700,padding:'7px 16px',borderRadius:16,textDecoration:'none'}}>＋ 新しく投稿する</Link>
+        </div>
       </div>
       {myNovels.length === 0 ? (
         <div style={{textAlign:'center',padding:'60px 0',color:'var(--color-text-muted)'}}>
