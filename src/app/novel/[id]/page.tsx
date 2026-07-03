@@ -322,6 +322,13 @@ export default async function NovelPage({ params }: { params: { id: string } }) 
   const readCount  = readEpisodeIds.size
   const totalCount = episodes?.length ?? 0
 
+  // 続きから読む：未読の最初の話を特定（既読が1話以上ある場合のみ）
+  let continueEp: any = null
+  if (user && readCount > 0 && episodes && episodes.length > 0) {
+    const publishedEps = episodes.filter((ep: any) => ep.published !== false)
+    continueEp = publishedEps.find((ep: any) => !readEpisodeIds.has(ep.id)) || null
+  }
+
   const allEpisodes = episodes || []
   const hasChapters = (chapters || []).length > 0
   const unassignedEpisodes = allEpisodes.filter(ep => !ep.chapter_id)
@@ -452,6 +459,19 @@ export default async function NovelPage({ params }: { params: { id: string } }) 
                 </div>
               </div>
             </div>
+
+            {continueEp && (
+              <Link href={`/novel/${params.id}/episode/${continueEp.id}`}
+                style={{display:'flex',alignItems:'center',justifyContent:'space-between',gap:10,padding:'13px 16px',background:'var(--color-brand-light)',borderBottom:'1px solid var(--color-brand-border)',textDecoration:'none'}}>
+                <div style={{flex:1,minWidth:0}}>
+                  <div style={{fontSize:11,color:'var(--color-brand)',fontWeight:700,marginBottom:2}}>続きから読む</div>
+                  <div style={{fontSize:13,fontWeight:700,color:'var(--color-text)',overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap'}}>{continueEp.title}</div>
+                </div>
+                <div style={{flexShrink:0,background:'var(--color-brand)',color:'#fff',fontSize:12,fontWeight:700,padding:'8px 18px',borderRadius:18}}>
+                  読む ›
+                </div>
+              </Link>
+            )}
 
             {!episodes || episodes.length === 0 ? (
               <div style={{padding:'32px',textAlign:'center',color:'var(--color-text-faint)',fontSize:13}}>まだ話がありません</div>
