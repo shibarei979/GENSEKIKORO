@@ -309,14 +309,14 @@ function QuotableBody({ body, fontSize, lineHeight, fontFamily, onQuote, selecti
   const [hoverIdx, setHoverIdx] = useState<number | null>(null)
 
   function handleClick(raw: string, idx: number) {
-    if (!onQuote || !selecting) return
+    if (!selecting) return
     const clean = raw
       .replace(/｜([^《]+)《[^》]+》/g, '$1')
       .replace(/《《([^》]+)》》/g, '$1')
       .replace(/\n/g, '')
       .trim()
     if (!clean) return
-    onQuote(clean)
+    if (onQuote) onQuote(clean)
     onAfterQuote?.()
   }
 
@@ -341,7 +341,7 @@ function QuotableBody({ body, fontSize, lineHeight, fontFamily, onQuote, selecti
             }}
             onClick={()=>handleClick(raw, idx)}
           >
-            <span dangerouslySetInnerHTML={{__html: htmlInner}}/>
+            <span dangerouslySetInnerHTML={{__html: htmlInner}} style={{pointerEvents: selecting ? 'none' : 'auto'}}/>
             {selecting && (
               <span
                 aria-hidden="true"
