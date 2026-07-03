@@ -18,6 +18,7 @@ import Header from '@/components/layout/Header'
 import Footer from '@/components/layout/Footer'
 import AdBanner from '@/components/layout/AdBanner'
 import NovelActions from './NovelActions'
+import ExportButton from './ExportButton'
 import NovelCommentSection from './NovelCommentSection'
 import FollowButton from '@/components/FollowButton'
 import ChapterAccordion from './ChapterAccordion'
@@ -438,6 +439,9 @@ export default async function NovelPage({ params }: { params: { id: string } }) 
               discoverCount={discoverCount??0}
               hideStats={Date.now() - new Date(novel.created_at).getTime() < 7*24*60*60*1000 || (likeCount??0) < 50}
             />
+            <div style={{display:'flex',justifyContent:'flex-end',marginTop:10}}>
+              <ExportButton novelId={params.id} novelTitle={novel.title} authorName={author?.display_name || ''}/>
+            </div>
           </div>
 
           <div style={{background:'var(--color-bg-card)',border:'1px solid var(--color-brand-border)',borderRadius:12,overflow:'hidden'}}>

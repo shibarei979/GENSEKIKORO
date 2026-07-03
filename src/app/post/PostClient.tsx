@@ -82,6 +82,8 @@ export default function PostClient({ profile, userId }: Props) {
   const novelIdParam  = searchParams.get('novel')
   const supabase      = createClient()
   const bodyRef    = useRef(null as HTMLTextAreaElement | null)
+  const importFileRef = useRef(null as HTMLInputElement | null)
+  const [importing, setImporting] = useState(false)
   const illustRef   = useRef(null as HTMLInputElement | null)
   const [illustFile, setIllustFile] = useState(null as File | null)
   const [illustPreview, setIllustPreview] = useState('' as string)
@@ -232,6 +234,32 @@ export default function PostClient({ profile, userId }: Props) {
   function addTag() {
     const t = tagInput.trim()
     if (t && !tags.includes(t) && tags.length < 10) { setTags([...tags,t]); setTagInput('') }
+  }
+
+  async function handleImportFile(file: File) {
+    setImporting(true)
+    try {
+      const ext = file.name.split('.').pop()?.toLowerCase()
+      let text = ''
+      if (ext === 'txt') {
+        text = await file.text()
+      } else if (ext === 'docx') {
+        const mammoth = await import('mammoth')
+        const arrayBuffer = await file.arrayBuffer()
+        const result = await mammoth.extractRawText({ arrayBuffer })
+        text = result.value
+      } else {
+        setToast('txtまたはWord（.docx）ファイルを選択してください')
+        setImporting(false)
+        return
+      }
+      // 既存の本文がある場合は末尾に追加、なければ置き換え
+      setBody(prev => prev.trim() ? prev + '\n\n' + text : text)
+      setToast(`「${file.name}」を読み込みました`)
+    } catch (e) {
+      setToast('ファイルの読み込みに失敗しました')
+    }
+    setImporting(false)
   }
 
   function insertText(before: string, after = '') {
@@ -1071,6 +1099,13 @@ export default function PostClient({ profile, userId }: Props) {
                     <button type="button" onClick={()=>insertText('\n────────────\n')} style={toolBtn}>区切り線</button>
                     <button type="button" onClick={indentNonDialogue} style={toolBtn}>一文字下げ</button>
                     <button type="button" onClick={()=>insertText('\n\n')} style={toolBtn}>改行</button>
+                    <div style={{width:1,background:'var(--color-brand-border)',margin:'0 2px'}}/>
+                    <button type="button" onClick={()=>importFileRef.current?.click()} disabled={importing}
+                      style={{...toolBtn,color:'var(--color-brand)',borderColor:'var(--color-brand-border)'}}>
+                      {importing ? '読込中...' : 'ファイル読込'}
+                    </button>
+                    <input ref={importFileRef} type="file" accept=".txt,.docx" style={{display:'none'}}
+                      onChange={e=>{const f=e.target.files?.[0];if(f){handleImportFile(f);e.target.value=''}}}/>
                     <div style={{width:1,background:'var(--color-brand-border)',margin:'0 2px'}}/>
                     <button type="button" onClick={()=>setShowPreview(true)}
                       style={{...toolBtn,background:'var(--color-brand)',color:'#fff',borderColor:'var(--color-brand)'}}>
