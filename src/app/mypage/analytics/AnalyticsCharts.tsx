@@ -29,7 +29,7 @@ interface NovelStat {
   dailyTop: { date: string; views: number }[]
   monthlyTop: { month: string; views: number }[]
   episodeRows: EpisodeRow[]
-  commentList: { body: string; author: string; created_at: string; episode_title: string }[]
+  commentList: { body: string; author: string; created_at: string; episode_title: string; rating?: number | null }[]
 }
 
 export default function AnalyticsCharts({ novels }: { novels: NovelStat[] }) {
@@ -179,6 +179,11 @@ export default function AnalyticsCharts({ novels }: { novels: NovelStat[] }) {
             <div key={i} style={{padding:'14px 18px',borderBottom:i<selected.commentList.length-1?'1px solid var(--color-brand-light)':'none'}}>
               <div style={{display:'flex',alignItems:'center',gap:8,marginBottom:6,flexWrap:'wrap'}}>
                 <span style={{fontSize:13,fontWeight:700,color:'var(--color-text)'}}>{c.author}</span>
+                {c.rating && c.rating >= 1 && (
+                  <span style={{display:'inline-flex',gap:1}}>
+                    {[1,2,3].map(i => <span key={i} style={{fontSize:11,color:i<=(c.rating||0)?'#f5a623':'#ddd'}}>★</span>)}
+                  </span>
+                )}
                 <span style={{fontSize:11,color:'var(--color-brand)',background:'var(--color-brand-light)',padding:'1px 8px',borderRadius:10}}>{c.episode_title}</span>
                 <span style={{fontSize:11,color:'var(--color-text-faint)',marginLeft:'auto'}}>{fmtDateShort(c.created_at)}</span>
               </div>

@@ -41,7 +41,7 @@ export default async function AnalyticsPage() {
       epIds.length > 0 ? supabase.from('page_views').select('episode_id, user_id, created_at').in('episode_id', epIds) : Promise.resolve({ data: [] }),
       supabase.from('likes').select('novel_id').in('novel_id', novelIds),
       supabase.from('bookmarks').select('novel_id').in('novel_id', novelIds),
-      supabase.from('comments').select('novel_id, episode_id, body, user_id, created_at').in('novel_id', novelIds).neq('user_id', user.id).order('created_at', { ascending: false }),
+      supabase.from('comments').select('novel_id, episode_id, body, user_id, created_at, rating').in('novel_id', novelIds).neq('user_id', user.id).order('created_at', { ascending: false }),
       epIds.length > 0 ? supabase.from('episode_likes').select('episode_id').in('episode_id', epIds) : Promise.resolve({ data: [] }),
       Promise.resolve({ data: [] }),
     ])
@@ -116,6 +116,7 @@ export default async function AnalyticsPage() {
             author: commentUserMap[c.user_id] || '名無し',
             created_at: c.created_at,
             episode_title: c.episode_id ? (epTitleMap[c.episode_id] || '') : '作品ページ',
+            rating: c.rating || null,
           })
         }
       }
