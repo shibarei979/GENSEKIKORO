@@ -147,9 +147,13 @@ export default function ExportButton({ novelId, novelTitle, authorName }: Props)
   }
 
   function downloadFile(content: string, filename: string, type: string) {
-    // UTF-8 BOMを付与（Windowsのメモ帳などで文字化けを防ぐ）
+    // TextEncoderで明示的にUTF-8バイト列に変換し、先頭にBOMを付与
     const bom = new Uint8Array([0xEF, 0xBB, 0xBF])
-    const blob = new Blob([bom, content], { type })
+    const utf8 = new TextEncoder().encode(content)
+    const merged = new Uint8Array(bom.length + utf8.length)
+    merged.set(bom, 0)
+    merged.set(utf8, bom.length)
+    const blob = new Blob([merged], { type: 'text/plain;charset=utf-8' })
     downloadBlob(blob, filename)
   }
   function downloadBlob(blob: Blob, filename: string) {
