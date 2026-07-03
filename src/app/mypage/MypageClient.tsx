@@ -567,8 +567,12 @@ export default function MypageClient({
                     <span style={{flex:1}}>エピソード</span>
                     <span style={{width:56,textAlign:'right'}}>文字数</span>
                     <span style={{width:40,textAlign:'right'}}>PV</span>
-                    <span style={{width:36,textAlign:'right'}}>♥</span>
-                    <span style={{width:36,textAlign:'right'}}>💬</span>
+                    <span style={{width:36,textAlign:'right',display:'inline-flex',justifyContent:'flex-end',alignItems:'center'}}>
+                      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+                    </span>
+                    <span style={{width:36,textAlign:'right',display:'inline-flex',justifyContent:'flex-end',alignItems:'center'}}>
+                      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+                    </span>
                   </div>
                   {(workEpisodes[novel.id] || []).map((ep: any) => (
                     <div key={ep.id} style={{display:'flex',alignItems:'center',padding:'10px 18px',borderBottom:'1px solid var(--color-brand-light)'}}>
@@ -581,8 +585,8 @@ export default function MypageClient({
                       </div>
                       <span style={{width:56,textAlign:'right',fontSize:11,color:'var(--color-text-muted)'}}>{ep.charCount.toLocaleString()}</span>
                       <span style={{width:40,textAlign:'right',fontSize:12,fontWeight:700,color:'var(--color-text)'}}>{ep.pv}</span>
-                      <span style={{width:36,textAlign:'right',fontSize:11,color:'var(--color-danger)'}}>{ep.likes}</span>
-                      <span style={{width:36,textAlign:'right',fontSize:11,color:'var(--color-info)'}}>{ep.comments}</span>
+                      <span style={{width:36,textAlign:'right',fontSize:11,color:'var(--color-text-muted)'}}>{ep.likes}</span>
+                      <span style={{width:36,textAlign:'right',fontSize:11,color:'var(--color-text-muted)'}}>{ep.comments}</span>
                     </div>
                   ))}
                 </>
