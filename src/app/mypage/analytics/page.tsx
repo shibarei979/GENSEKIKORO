@@ -98,7 +98,11 @@ export default async function AnalyticsPage() {
       charCount: (ep.body || '').length,
       views: s.episodeViews[ep.id] || 0,
       likes: s.episodeLikes[ep.id] || 0,
+      created_at: ep.created_at,
     }))
+
+    const totalChars = eps.reduce((sum: number, ep: any) => sum + (ep.body || '').length, 0)
+    const lastUpdated = eps.length > 0 ? eps[eps.length-1].created_at : n.created_at
 
     const daily: { date: string; views: number }[] = []
     for (let i = 29; i >= 0; i--) {
@@ -119,6 +123,9 @@ export default async function AnalyticsPage() {
       likes: s.likes,
       bookmarks: s.bookmarks,
       comments: s.comments,
+      totalChars,
+      lastUpdated,
+      epCount: eps.length,
       episodeRows,
       daily,
     }
@@ -142,27 +149,17 @@ export default async function AnalyticsPage() {
           <Link href="/mypage?tab=works" style={{fontSize:13,color:'var(--color-brand)',textDecoration:'none'}}>← 作品管理に戻る</Link>
         </div>
 
-        {/* PVサマリー（今日/今週/今月/累計） */}
-        <div style={{background:'var(--color-bg-card)',border:'1px solid var(--color-brand-border)',borderRadius:12,padding:'18px',marginBottom:16}}>
-          <div style={{fontSize:12,color:'var(--color-text-muted)',fontWeight:600,marginBottom:12}}>ページビュー</div>
-          <div style={{display:'grid',gridTemplateColumns:'repeat(4, 1fr)',gap:8}}>
-            {[['今日',totalToday],['今週',totalWeek],['今月',totalMonth],['累計',totalViews]].map(([label,val]) => (
+        {/* 全体サマリー（コンパクト） */}
+        <div style={{background:'var(--color-bg-card)',border:'1px solid var(--color-brand-border)',borderRadius:12,padding:'16px 18px',marginBottom:20}}>
+          <div style={{fontSize:12,color:'var(--color-text-muted)',fontWeight:600,marginBottom:12}}>全作品の合計</div>
+          <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit, minmax(80px, 1fr))',gap:8}}>
+            {[['今日',totalToday],['今週',totalWeek],['今月',totalMonth],['累計PV',totalViews],['いいね',totalLikes],['保存',totalBookmarks],['コメント',totalComments]].map(([label,val]) => (
               <div key={label as string} style={{textAlign:'center'}}>
-                <div style={{fontSize:24,fontWeight:700,color:'var(--color-brand)'}}>{(val as number).toLocaleString()}</div>
-                <div style={{fontSize:11,color:'var(--color-text-muted)',marginTop:2}}>{label} PV</div>
+                <div style={{fontSize:20,fontWeight:700,color:'var(--color-text)'}}>{(val as number).toLocaleString()}</div>
+                <div style={{fontSize:10,color:'var(--color-text-muted)',marginTop:2}}>{label}</div>
               </div>
             ))}
           </div>
-        </div>
-
-        {/* 反応サマリー */}
-        <div style={{display:'grid',gridTemplateColumns:'repeat(3, 1fr)',gap:12,marginBottom:24}}>
-          {[['総いいね',totalLikes],['総保存',totalBookmarks],['総コメント',totalComments]].map(([label,val]) => (
-            <div key={label as string} style={{background:'var(--color-bg-card)',border:'1px solid var(--color-brand-border)',borderRadius:12,padding:'16px',textAlign:'center'}}>
-              <div style={{fontSize:22,fontWeight:700,color:'var(--color-text)'}}>{(val as number).toLocaleString()}</div>
-              <div style={{fontSize:12,color:'var(--color-text-muted)',marginTop:2}}>{label}</div>
-            </div>
-          ))}
         </div>
 
         {novelStats.length === 0 ? (
