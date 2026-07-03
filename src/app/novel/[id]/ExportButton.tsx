@@ -147,7 +147,9 @@ export default function ExportButton({ novelId, novelTitle, authorName }: Props)
   }
 
   function downloadFile(content: string, filename: string, type: string) {
-    const blob = new Blob([content], { type })
+    // UTF-8 BOMを付与（Windowsのメモ帳などで文字化けを防ぐ）
+    const bom = new Uint8Array([0xEF, 0xBB, 0xBF])
+    const blob = new Blob([bom, content], { type })
     downloadBlob(blob, filename)
   }
   function downloadBlob(blob: Blob, filename: string) {
