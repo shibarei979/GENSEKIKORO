@@ -421,7 +421,8 @@ export default function EpisodeBody({ title, body, preface, afterword, authorNam
 
         {vertical ? (
           <VerticalBody title={title} body={body} preface={preface} afterword={afterword}
-            authorName={authorName} fontSize={settings.fontSize} fontFamily={fontFamily}/>
+            authorName={authorName} fontSize={settings.fontSize} fontFamily={fontFamily}
+            selecting={selecting} onQuote={handleQuote} onAfterQuote={handleAfterQuote}/>
         ) : (
           <>
             <div style={{padding:'32px 48px 40px'}}>
@@ -469,15 +470,31 @@ export default function EpisodeBody({ title, body, preface, afterword, authorNam
 interface VerticalProps {
   title: string; body: string; preface?: string|null; afterword?: string|null
   authorName?: string; fontSize: number; fontFamily: string
+  selecting?: boolean; onQuote?: (text:string)=>void; onAfterQuote?: () => void
 }
 
-function VerticalBody({ title, body, preface, afterword, authorName, fontSize, fontFamily }: VerticalProps) {
+function VerticalBody({ title, body, preface, afterword, authorName, fontSize, fontFamily, selecting, onQuote, onAfterQuote }: VerticalProps) {
   const scrollRef = useRef<HTMLDivElement>(null)
+  const [hoverIdx, setHoverIdx] = useState<number | null>(null)
   useEffect(() => {
     if (scrollRef.current) {
       scrollRef.current.scrollLeft = scrollRef.current.scrollWidth
     }
   }, [body])
+
+  const sentences = splitIntoSentences(body)
+
+  function handleClick(raw: string) {
+    if (!selecting) return
+    const clean = raw
+      .replace(/｜([^《]+)《[^》]+》/g, '$1')
+      .replace(/《《([^》]+)》》/g, '$1')
+      .replace(/\n/g, '')
+      .trim()
+    if (!clean) return
+    if (onQuote) onQuote(clean)
+    onAfterQuote?.()
+  }
 
   return (
     <div>
@@ -486,6 +503,14 @@ function VerticalBody({ title, body, preface, afterword, authorName, fontSize, f
           <div style={{fontSize:13,color:'var(--color-text-muted)',lineHeight:1.9,padding:'10px 14px',background:'var(--color-bg-card)',borderLeft:'3px solid var(--color-brand-border)',borderRadius:4,whiteSpace:'pre-wrap'}}>
             {preface}
           </div>
+        </div>
+      )}
+      {selecting && (
+        <div style={{display:'flex',alignItems:'center',gap:8,background:'#FFF6EC',border:'1px solid #f0d9c0',borderRadius:8,padding:'9px 14px',margin:'12px 32px',fontSize:12.5,color:'#8a5a3a'}}>
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="var(--color-brand)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{flexShrink:0}}>
+            <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/>
+          </svg>
+          引用したい文をクリックしてください
         </div>
       )}
       <style>{`
@@ -509,7 +534,28 @@ function VerticalBody({ title, body, preface, afterword, authorName, fontSize, f
             </div>
           </div>
           <div style={{display:'inline-block',fontSize,lineHeight:2.1,color:'var(--color-text)',fontFamily,wordBreak:'break-all',verticalAlign:'top'}}>
-            <VerticalText text={body}/>
+            {selecting ? (
+              sentences.map((raw, idx) => {
+                if (raw === '\n') return <br key={idx}/>
+                const isHover = hoverIdx === idx
+                return (
+                  <span key={idx}
+                    onMouseEnter={()=>setHoverIdx(idx)}
+                    onMouseLeave={()=>setHoverIdx(prev=>prev===idx?null:prev)}
+                    onClick={()=>handleClick(raw)}
+                    style={{
+                      background: isHover ? 'rgba(242,106,33,0.15)' : 'transparent',
+                      cursor: 'pointer',
+                      borderRadius: 3,
+                      transition: 'background .15s ease',
+                    }}>
+                    <VerticalText text={raw}/>
+                  </span>
+                )
+              })
+            ) : (
+              <VerticalText text={body}/>
+            )}
           </div>
         </div>
       </div>
