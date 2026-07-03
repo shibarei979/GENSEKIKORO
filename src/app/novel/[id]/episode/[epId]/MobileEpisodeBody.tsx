@@ -12,6 +12,13 @@ interface Props {
 
 const DEFAULTS: Settings = { font: 'serif', fontSize: 16, lineHeight: 2.1, writingMode: 'horizontal' }
 
+function fontFamilyOf(font: Settings['font']): string {
+  return font === 'serif'   ? "'Noto Serif JP', serif"
+       : font === 'rounded' ? "'Zen Maru Gothic', 'Noto Sans JP', sans-serif"
+       : font === 'ud'      ? "'BIZ UDPGothic', 'Noto Sans JP', sans-serif"
+       :                      "'Noto Sans JP', sans-serif"
+}
+
 function renderBody(text: string): string {
   let result = text.replace(/｜([^《]+)《([^》]+)》/g, '<ruby>$1<rt>$2</rt></ruby>')
   result = result.replace(/《《([^》]+)》》/g, '<em style="font-style:normal;font-weight:700;border-bottom:2px solid #F26A21">$1</em>')
@@ -87,17 +94,7 @@ export default function MobileEpisodeBody({ title, body, preface, afterword, aut
     setIsVertical(s.writingMode === 'vertical')
   }
 
-  function toggleVertical() {
-    const next = !isVertical
-    setIsVertical(next)
-    const newSettings = { ...settings, writingMode: next ? 'vertical' as const : 'horizontal' as const }
-    setSettings(newSettings)
-    try { localStorage.setItem('reading_settings', JSON.stringify(newSettings)) } catch {}
-  }
-
-  const fontFamily = settings.font === 'serif'
-    ? "'Noto Serif JP', serif"
-    : "'Noto Sans JP', sans-serif"
+  const fontFamily = fontFamilyOf(settings.font)
 
   const Afterword = afterword ? (
     <div style={{borderTop:'1px solid #F0D9C9'}}>
@@ -116,11 +113,7 @@ export default function MobileEpisodeBody({ title, body, preface, afterword, aut
   if (isVertical) {
     return (
       <div style={{background:'#fff',border:'1px solid #F0D9C9',borderRadius:12,overflow:'hidden',marginBottom:16}}>
-        <div style={{padding:'8px 12px',borderBottom:'1px solid #FFF1E6',background:'#FFF9F2',display:'flex',justifyContent:'space-between',alignItems:'center'}}>
-          <button onClick={toggleVertical}
-            style={{fontSize:12,padding:'5px 12px',borderRadius:14,border:'1.5px solid #F26A21',background:'#F26A21',color:'#fff',cursor:'pointer'}}>
-            横書きに戻す
-          </button>
+        <div style={{padding:'8px 12px',borderBottom:'1px solid #FFF1E6',background:'#FFF9F2',display:'flex',justifyContent:'flex-end',alignItems:'center'}}>
           <ReadingSettings onChange={handleSettingsChange} isMobile={true}/>
         </div>
 
@@ -132,7 +125,6 @@ export default function MobileEpisodeBody({ title, body, preface, afterword, aut
           </div>
         )}
 
-        {/* vertical-body クラスで globals.css の * { writing-mode: horizontal-tb !important } を回避 */}
         <style>{`
           .vertical-body, .vertical-body * {
             writing-mode: vertical-rl !important;
@@ -163,7 +155,6 @@ export default function MobileEpisodeBody({ title, body, preface, afterword, aut
             paddingBottom: 4,
           }}
         >
-          {/* vertical-body クラスを付けることで writing-mode の強制上書きを防ぐ */}
           <div
             className="vertical-body"
             style={{
@@ -175,13 +166,11 @@ export default function MobileEpisodeBody({ title, body, preface, afterword, aut
               boxSizing: 'border-box',
             }}
           >
-            {/* タイトル */}
             <div style={{display:'inline-block', marginRight:'2em', verticalAlign:'top', writingMode:'vertical-rl'}}>
               <div style={{fontSize: settings.fontSize + 4, fontWeight:700, color:'#2B211B', fontFamily, lineHeight:1.8}}>
                 {title}
               </div>
             </div>
-            {/* 本文 */}
             <div style={{display:'inline-block', fontSize: settings.fontSize, lineHeight: settings.lineHeight, color:'#2B211B', fontFamily, wordBreak:'break-all', verticalAlign:'top', writingMode:'vertical-rl'}}>
               <VerticalText text={body}/>
             </div>
@@ -200,11 +189,7 @@ export default function MobileEpisodeBody({ title, body, preface, afterword, aut
   // ===== 横書き =====
   return (
     <div style={{background:'#fff',border:'1px solid #F0D9C9',borderRadius:12,overflow:'hidden',marginBottom:16}}>
-      <div style={{padding:'8px 12px',borderBottom:'1px solid #FFF1E6',background:'#FFF9F2',display:'flex',justifyContent:'space-between',alignItems:'center'}}>
-        <button onClick={toggleVertical}
-          style={{fontSize:12,padding:'5px 12px',borderRadius:14,border:'1.5px solid #F0D9C9',background:'#fff',color:'#77706A',cursor:'pointer'}}>
-          縦書きで読む
-        </button>
+      <div style={{padding:'8px 12px',borderBottom:'1px solid #FFF1E6',background:'#FFF9F2',display:'flex',justifyContent:'flex-end',alignItems:'center'}}>
         <ReadingSettings onChange={handleSettingsChange} isMobile={true}/>
       </div>
 
