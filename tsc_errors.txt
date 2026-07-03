@@ -1,1 +1,0 @@
-src/app/novel/[id]/page.tsx(343,23): error TS2339: Property 'official_tags' does not exist on type '{ id: any; title: any; summary: any; genre: any; tags: any; is_serial: any; published: any; views: any; author_id: any; created_at: any; novel_type: any; }'.
