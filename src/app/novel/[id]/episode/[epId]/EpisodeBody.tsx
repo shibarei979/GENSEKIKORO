@@ -279,7 +279,6 @@ function SpeechPanel({ title, body, isMobile }: { title: string; body: string; i
 }
 
 // ===== 文単位コメント機能 =====
-// 本文を「。」「！」「？」「」」「』」の直後で文に分割する（記号自体は文に含める）
 function splitIntoSentences(text: string): string[] {
   const result: string[] = []
   let buf = ''
@@ -288,7 +287,6 @@ function splitIntoSentences(text: string): string[] {
     buf += ch
     const isEnder = ch === '。' || ch === '！' || ch === '？' || ch === '」' || ch === '』'
     const next = text[i+1]
-    // 改行直前でも区切る。終端記号の直後に閉じ括弧が続く場合は一旦継続させる簡易処理。
     if (ch === '\n') {
       result.push(buf)
       buf = ''
@@ -303,7 +301,6 @@ function splitIntoSentences(text: string): string[] {
   return result.filter(s => s.length > 0)
 }
 
-// 文単位でホバー→💬→クリックで引用できる本文ブロック（selectingモード中のみ反応）
 function QuotableBody({ body, fontSize, lineHeight, fontFamily, onQuote, selecting, onAfterQuote }: {
   body: string; fontSize: number; lineHeight: number; fontFamily: string
   onQuote?: (text:string)=>void; selecting?: boolean; onAfterQuote?: () => void
@@ -313,7 +310,6 @@ function QuotableBody({ body, fontSize, lineHeight, fontFamily, onQuote, selecti
 
   function handleClick(raw: string, idx: number) {
     if (!onQuote || !selecting) return
-    // 表示用にルビ記法等を簡易除去してから引用
     const clean = raw
       .replace(/｜([^《]+)《[^》]+》/g, '$1')
       .replace(/《《([^》]+)》》/g, '$1')
@@ -376,14 +372,12 @@ export default function EpisodeBody({ title, body, preface, afterword, authorNam
 
   function handleAfterQuote() {
     setSelecting(false)
-    // コメント欄まで自動スクロール
     if (commentAnchorRef.current) {
       commentAnchorRef.current.scrollIntoView({ behavior:'smooth', block:'start' })
     }
   }
 
   const [isMobile, setIsMobile] = useState(false)
-  const [vertical, setVertical] = useState(false)
   const [settings, setSettings] = useState<Settings>(() => {
     try {
       const saved = typeof window !== 'undefined' ? localStorage.getItem('reading_settings') : null
@@ -398,22 +392,13 @@ export default function EpisodeBody({ title, body, preface, afterword, authorNam
     return () => window.removeEventListener('resize', check)
   }, [])
 
-  useEffect(() => {
-    try {
-      const saved = localStorage.getItem('reading_vertical')
-      if (saved) setVertical(JSON.parse(saved))
-    } catch {}
-  }, [])
+  const vertical = settings.writingMode === 'vertical'
 
-  function toggleVertical() {
-    const next = !vertical
-    setVertical(next)
-    try { localStorage.setItem('reading_vertical', JSON.stringify(next)) } catch {}
-  }
-
-  const fontFamily = settings.font === 'serif'
-    ? "'Noto Serif JP', serif"
-    : "'Noto Sans JP', sans-serif"
+  const fontFamily =
+    settings.font === 'serif'   ? "'Noto Serif JP', serif" :
+    settings.font === 'rounded' ? "'Zen Maru Gothic', 'Noto Sans JP', sans-serif" :
+    settings.font === 'ud'      ? "'BIZ UDPGothic', 'Noto Sans JP', sans-serif" :
+                                  "'Noto Sans JP', sans-serif"
 
   // ===== モバイル =====
   if (isMobile) {
@@ -430,13 +415,8 @@ export default function EpisodeBody({ title, body, preface, afterword, authorNam
     <>
       <SpeechPanel title={title} body={body} isMobile={false}/>
       <div style={{background:'var(--color-bg-card)',border:'1px solid var(--color-brand-border)',borderRadius:12,overflow:'hidden',marginBottom:16}}>
-        <div style={{padding:'8px 16px',borderBottom:'1px solid var(--color-brand-light)',background:'var(--color-bg)',display:'flex',justifyContent:'space-between',alignItems:'center'}}>
-          <button onClick={toggleVertical}
-            style={{fontSize:12,padding:'4px 14px',borderRadius:14,border:'1.5px solid var(--color-brand-border)',
-              background:vertical?'var(--color-brand)':'var(--color-bg-card)',color:vertical?'var(--color-bg-card)':'var(--color-text-muted)',cursor:'pointer'}}>
-            {vertical ? '横書きに戻す' : '縦書きで読む'}
-          </button>
-          <ReadingSettings onChange={setSettings} isMobile={false}/>
+        <div style={{padding:'8px 16px',borderBottom:'1px solid var(--color-brand-light)',background:'var(--color-bg)',display:'flex',justifyContent:'flex-end',alignItems:'center'}}>
+          <ReadingSettings onChange={setSettings} isMobile={false} showWritingMode={true}/>
         </div>
 
         {vertical ? (

@@ -2,7 +2,7 @@
 import { useState, useEffect } from 'react'
 
 export interface Settings {
-  font: 'serif' | 'sans'
+  font: 'serif' | 'sans' | 'rounded' | 'ud'
   fontSize: number
   lineHeight: number
   writingMode: 'horizontal' | 'vertical'
@@ -14,6 +14,8 @@ const STORAGE_KEY = 'reading_settings'
 const FONT_OPTIONS = [
   { label: '明朝', value: 'serif' as const },
   { label: 'ゴシック', value: 'sans' as const },
+  { label: '丸ゴシック', value: 'rounded' as const },
+  { label: 'UD', value: 'ud' as const },
 ]
 const SIZE_OPTIONS = [
   { label: '小', value: 14 },
@@ -31,9 +33,10 @@ const LINE_OPTIONS = [
 interface Props {
   onChange: (s: Settings) => void
   isMobile?: boolean
+  showWritingMode?: boolean
 }
 
-export default function ReadingSettings({ onChange, isMobile = false }: Props) {
+export default function ReadingSettings({ onChange, isMobile = false, showWritingMode = false }: Props) {
   const [open, setOpen] = useState(false)
   const [settings, setSettings] = useState<Settings>(DEFAULTS)
 
@@ -88,10 +91,10 @@ export default function ReadingSettings({ onChange, isMobile = false }: Props) {
             position:'absolute', top:'calc(100% + 8px)', right:0,
             background:'#fff', border:'1px solid #F0D9C9', borderRadius:12,
             boxShadow:'0 4px 20px rgba(0,0,0,0.12)',
-            padding:'16px', minWidth:240, zIndex:99,
+            padding:'16px', minWidth:260, zIndex:99,
           }}>
-            {/* 縦書き/横書き（モバイルのみ） */}
-            {isMobile && (
+            {/* 縦書き/横書き（モバイル または showWritingMode時） */}
+            {(isMobile || showWritingMode) && (
               <div style={{marginBottom:14}}>
                 <div style={{fontSize:11,color:'#77706A',fontWeight:600,marginBottom:6}}>読み方向</div>
                 <div style={{display:'flex',gap:6}}>
@@ -108,7 +111,7 @@ export default function ReadingSettings({ onChange, isMobile = false }: Props) {
             {/* フォント */}
             <div style={{marginBottom:14}}>
               <div style={{fontSize:11,color:'#77706A',fontWeight:600,marginBottom:6}}>フォント</div>
-              <div style={{display:'flex',gap:6}}>
+              <div style={{display:'flex',gap:6,flexWrap:'wrap'}}>
                 {FONT_OPTIONS.map(o => (
                   <button key={o.value} onClick={()=>update({font:o.value})} style={btnBase(settings.font===o.value)}>
                     {o.label}
