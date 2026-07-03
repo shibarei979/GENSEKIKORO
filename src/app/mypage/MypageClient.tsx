@@ -139,6 +139,10 @@ export default function MypageClient({
     }
   }
   const [myNovels,       setMyNovels]       = useState(initialNovels)
+  const [expandedWork,   setExpandedWork]   = useState<string | null>(null)
+  const [workEpisodes,   setWorkEpisodes]   = useState<Record<string, any[]>>({})
+  const [loadingEps,     setLoadingEps]     = useState<string | null>(null)
+  const [editMenuOpen,   setEditMenuOpen]   = useState<string | null>(null)
   const [deleteTarget,   setDeleteTarget]   = useState<{id:string;title:string;episodes:any[]}|null>(null)
   const [deleteMode,     setDeleteMode]     = useState<'novel'|'episode'|null>(null)
   const [deleteEpId,     setDeleteEpId]     = useState('')
@@ -462,6 +466,49 @@ export default function MypageClient({
   )
 
   // ===== 作品管理タブ =====
+  async function toggleWorkExpand(novelId: string) {
+    if (expandedWork === novelId) {
+      setExpandedWork(null)
+      return
+    }
+    setExpandedWork(novelId)
+    // まだ取得していなければ話＋統計を取得
+    if (!workEpisodes[novelId]) {
+      setLoadingEps(novelId)
+      const { data: eps } = await supabase
+        .from('episodes')
+        .select('id, title, ep_number, body, published, created_at')
+        .eq('novel_id', novelId)
+        .order('ep_number', { ascending: true })
+
+      const epIds = (eps || []).map((e: any) => e.id)
+      const pvMap: Record<string, number> = {}
+      const likeMap: Record<string, number> = {}
+      const commentMap: Record<string, number> = {}
+
+      if (epIds.length > 0) {
+        const [{ data: pvs }, { data: els }, { data: cms }] = await Promise.all([
+          supabase.from('page_views').select('episode_id').in('episode_id', epIds),
+          supabase.from('episode_likes').select('episode_id').in('episode_id', epIds),
+          supabase.from('comments').select('episode_id').in('episode_id', epIds),
+        ])
+        pvs?.forEach((p: any) => { pvMap[p.episode_id] = (pvMap[p.episode_id] || 0) + 1 })
+        els?.forEach((l: any) => { likeMap[l.episode_id] = (likeMap[l.episode_id] || 0) + 1 })
+        cms?.forEach((c: any) => { if (c.episode_id) commentMap[c.episode_id] = (commentMap[c.episode_id] || 0) + 1 })
+      }
+
+      const enriched = (eps || []).map((e: any) => ({
+        ...e,
+        charCount: (e.body || '').length,
+        pv: pvMap[e.id] || 0,
+        likes: likeMap[e.id] || 0,
+        comments: commentMap[e.id] || 0,
+      }))
+      setWorkEpisodes(prev => ({ ...prev, [novelId]: enriched }))
+      setLoadingEps(null)
+    }
+  }
+
   const WorksTab = () => (
     <div>
       <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',marginBottom:16}}>
@@ -485,33 +532,96 @@ export default function MypageClient({
       ) : myNovels.map((novel, i) => (
         <div key={novel.id} style={{border:'1px solid var(--color-brand-border)',borderRadius:12,overflow:'hidden',marginBottom:14,background:'var(--color-bg-card)'}}>
           {/* 作品ヘッダー部分 */}
-          <div style={{padding:'16px 18px',borderBottom:'1px solid var(--color-brand-light)',cursor:'pointer'}} onClick={()=>router.push(`/novel/${novel.id}`)}>
-            <div style={{display:'flex',gap:6,marginBottom:8,flexWrap:'wrap',alignItems:'center'}}>
-              <span style={{fontSize:10,fontWeight:700,color:'#fff',background:novel.published?'var(--color-info)':'var(--color-text-faint)',padding:'2px 9px',borderRadius:4}}>{novel.published?'公開中':'下書き'}</span>
-              <span style={{fontSize:10,background:'var(--color-brand-light)',color:'var(--color-brand)',border:'1px solid var(--color-tag-border)',padding:'2px 9px',borderRadius:4}}>{novel.genre}</span>
-              {(novel as any).novel_type && <span style={{fontSize:10,background:'var(--color-info-bg)',color:'var(--color-info)',border:'1px solid var(--color-info-border)',padding:'2px 9px',borderRadius:4}}>{(novel as any).novel_type}</span>}
+          <div style={{padding:'16px 18px',borderBottom:'1px solid var(--color-brand-light)'}}>
+            <div style={{display:'flex',alignItems:'flex-start',gap:10}}>
+              <div style={{flex:1,minWidth:0,cursor:'pointer'}} onClick={()=>router.push(`/novel/${novel.id}`)}>
+                <div style={{display:'flex',gap:6,marginBottom:8,flexWrap:'wrap',alignItems:'center'}}>
+                  <span style={{fontSize:10,fontWeight:700,color:'#fff',background:novel.published?'var(--color-info)':'var(--color-text-faint)',padding:'2px 9px',borderRadius:4}}>{novel.published?'公開中':'下書き'}</span>
+                  <span style={{fontSize:10,background:'var(--color-brand-light)',color:'var(--color-brand)',border:'1px solid var(--color-tag-border)',padding:'2px 9px',borderRadius:4}}>{novel.genre}</span>
+                  {(novel as any).novel_type && <span style={{fontSize:10,background:'var(--color-info-bg)',color:'var(--color-info)',border:'1px solid var(--color-info-border)',padding:'2px 9px',borderRadius:4}}>{(novel as any).novel_type}</span>}
+                </div>
+                <div style={{fontSize:16,fontWeight:700,color:'var(--color-text)',lineHeight:1.4}}>{novel.title}</div>
+              </div>
+              {/* 下矢印（話一覧展開） */}
+              <button onClick={()=>toggleWorkExpand(novel.id)}
+                style={{flexShrink:0,width:36,height:36,borderRadius:8,border:'1px solid var(--color-brand-border)',background:'var(--color-bg)',cursor:'pointer',display:'flex',alignItems:'center',justifyContent:'center'}}
+                title="話一覧を表示">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--color-brand)" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"
+                  style={{transform:expandedWork===novel.id?'rotate(180deg)':'rotate(0deg)',transition:'transform .2s'}}>
+                  <polyline points="6 9 12 15 18 9"/>
+                </svg>
+              </button>
             </div>
-            <div style={{fontSize:16,fontWeight:700,color:'var(--color-text)',lineHeight:1.4}}>{novel.title}</div>
           </div>
 
+          {/* 話一覧（展開時） */}
+          {expandedWork===novel.id && (
+            <div style={{borderBottom:'1px solid var(--color-brand-light)',background:'var(--color-bg)'}}>
+              {loadingEps===novel.id ? (
+                <div style={{padding:'20px',textAlign:'center',fontSize:12,color:'var(--color-text-muted)'}}>読み込み中...</div>
+              ) : (workEpisodes[novel.id] || []).length === 0 ? (
+                <div style={{padding:'20px',textAlign:'center',fontSize:12,color:'var(--color-text-faint)'}}>話がありません</div>
+              ) : (
+                <>
+                  <div style={{display:'flex',padding:'8px 18px',borderBottom:'1px solid var(--color-brand-light)',fontSize:10,color:'var(--color-text-faint)',fontWeight:600}}>
+                    <span style={{flex:1}}>エピソード</span>
+                    <span style={{width:56,textAlign:'right'}}>文字数</span>
+                    <span style={{width:40,textAlign:'right'}}>PV</span>
+                    <span style={{width:36,textAlign:'right'}}>♥</span>
+                    <span style={{width:36,textAlign:'right'}}>💬</span>
+                  </div>
+                  {(workEpisodes[novel.id] || []).map((ep: any) => (
+                    <div key={ep.id} style={{display:'flex',alignItems:'center',padding:'10px 18px',borderBottom:'1px solid var(--color-brand-light)'}}>
+                      <div style={{flex:1,minWidth:0}}>
+                        <div style={{display:'flex',alignItems:'center',gap:6}}>
+                          <span style={{fontSize:10,color:'#fff',background:ep.published===false?'var(--color-text-faint)':'var(--color-info)',padding:'1px 6px',borderRadius:3,flexShrink:0}}>{ep.published===false?'下書':'公開'}</span>
+                          <span style={{fontSize:12,color:'var(--color-text-muted)',flexShrink:0}}>{ep.ep_number}話</span>
+                          <span style={{fontSize:13,color:'var(--color-text)',fontWeight:500,overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap'}}>{ep.title}</span>
+                        </div>
+                      </div>
+                      <span style={{width:56,textAlign:'right',fontSize:11,color:'var(--color-text-muted)'}}>{ep.charCount.toLocaleString()}</span>
+                      <span style={{width:40,textAlign:'right',fontSize:12,fontWeight:700,color:'var(--color-text)'}}>{ep.pv}</span>
+                      <span style={{width:36,textAlign:'right',fontSize:11,color:'var(--color-danger)'}}>{ep.likes}</span>
+                      <span style={{width:36,textAlign:'right',fontSize:11,color:'var(--color-info)'}}>{ep.comments}</span>
+                    </div>
+                  ))}
+                </>
+              )}
+            </div>
+          )}
+
           {/* 操作ボタン部分 */}
-          <div style={{padding:'12px 18px',background:'var(--color-bg)',display:'flex',gap:6,flexWrap:'wrap',alignItems:'center'}} onClick={e=>e.stopPropagation()}>
-            {/* 主要操作 */}
-            <Link href={`/post?edit=${novel.id}`} style={{display:'inline-flex',alignItems:'center',gap:4,fontSize:12,fontWeight:600,border:'none',padding:'7px 14px',borderRadius:8,color:'#fff',background:'var(--color-brand)',textDecoration:'none'}}>
-              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
-              編集
-            </Link>
-            <button onClick={()=>handleOpenEpManage(novel)} style={{display:'inline-flex',alignItems:'center',gap:4,fontSize:12,fontWeight:600,border:'1px solid var(--color-brand-border)',padding:'7px 14px',borderRadius:8,color:'var(--color-text-muted)',background:'var(--color-bg-card)',cursor:'pointer'}}>
-              話の管理
-            </button>
+          <div style={{padding:'12px 18px',background:'var(--color-bg)',display:'flex',gap:6,flexWrap:'wrap',alignItems:'center'}}>
+            {/* 編集（2択メニュー） */}
+            <div style={{position:'relative'}}>
+              <button onClick={()=>setEditMenuOpen(editMenuOpen===novel.id?null:novel.id)}
+                style={{display:'inline-flex',alignItems:'center',gap:4,fontSize:12,fontWeight:600,border:'none',padding:'7px 14px',borderRadius:8,color:'#fff',background:'var(--color-brand)',cursor:'pointer'}}>
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                編集
+                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><polyline points="6 9 12 15 18 9"/></svg>
+              </button>
+              {editMenuOpen===novel.id && (
+                <>
+                  <div style={{position:'fixed',inset:0,zIndex:98}} onClick={()=>setEditMenuOpen(null)}/>
+                  <div style={{position:'absolute',top:'calc(100% + 4px)',left:0,background:'var(--color-bg-card)',border:'1px solid var(--color-brand-border)',borderRadius:10,boxShadow:'0 4px 16px rgba(0,0,0,0.12)',zIndex:99,minWidth:180,overflow:'hidden'}}>
+                    <button onClick={()=>{setEditMenuOpen(null);handleOpenEpManage(novel)}}
+                      style={{display:'block',width:'100%',textAlign:'left',padding:'11px 16px',fontSize:13,color:'var(--color-text)',background:'none',border:'none',borderBottom:'1px solid var(--color-brand-light)',cursor:'pointer'}}>
+                      既存の話を編集
+                    </button>
+                    <button onClick={()=>{setEditMenuOpen(null);router.push(`/post?edit=${novel.id}`)}}
+                      style={{display:'block',width:'100%',textAlign:'left',padding:'11px 16px',fontSize:13,color:'var(--color-text)',background:'none',border:'none',cursor:'pointer'}}>
+                      作品情報を編集
+                    </button>
+                  </div>
+                </>
+              )}
+            </div>
             <button onClick={()=>setChapterTarget({id:novel.id,title:novel.title})} style={{fontSize:12,fontWeight:600,border:'1px solid var(--color-brand-border)',padding:'7px 14px',borderRadius:8,color:'var(--color-text-muted)',background:'var(--color-bg-card)',cursor:'pointer'}}>
               章の編集
             </button>
 
-            {/* 区切り */}
             <div style={{flex:1}}/>
 
-            {/* 副次操作（右寄せ・控えめ） */}
             <button onClick={()=>handleTogglePublish(novel.id,novel.published)} style={{fontSize:12,border:'none',padding:'7px 12px',borderRadius:8,color:novel.published?'var(--color-text-muted)':'#15803d',background:'none',cursor:'pointer'}}>{novel.published?'非公開にする':'公開する'}</button>
             <button onClick={async()=>{
                 const next = !((novel as any).allow_comments !== false)

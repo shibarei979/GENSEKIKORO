@@ -108,11 +108,11 @@ export default function AnalyticsCharts({ novels }: { novels: NovelStat[] }) {
               <div style={{fontSize:11,color:'var(--color-text-muted)',marginBottom:2}}>累計ユニークアクセス</div>
               <div style={{fontSize:22,fontWeight:700,color:'var(--color-text)'}}>{selected.uniqueCount.toLocaleString()} <span style={{fontSize:12,color:'var(--color-text-muted)',fontWeight:400}}>人</span></div>
             </div>
-            <div style={{display:'flex',gap:6,borderTop:'1px solid var(--color-brand-light)',paddingTop:12}}>
-              {[['いいね',selected.likes],['保存',selected.bookmarks],['コメント',selected.comments]].map(([l,v])=>(
-                <div key={l as string} style={{flex:1,textAlign:'center'}}>
-                  <div style={{fontSize:15,fontWeight:700,color:'var(--color-text)'}}>{v as number}</div>
-                  <div style={{fontSize:10,color:'var(--color-text-muted)'}}>{l}</div>
+            <div style={{borderTop:'1px solid var(--color-brand-light)',paddingTop:12,display:'flex',flexDirection:'column',gap:10}}>
+              {[['いいね',selected.likes,'var(--color-danger)'],['保存',selected.bookmarks,'var(--color-brand)'],['コメント',selected.comments,'var(--color-info)']].map(([l,v,c])=>(
+                <div key={l as string} style={{display:'flex',alignItems:'center',justifyContent:'space-between'}}>
+                  <span style={{fontSize:12,color:'var(--color-text-muted)'}}>{l as string}</span>
+                  <span style={{fontSize:18,fontWeight:700,color:c as string}}>{(v as number).toLocaleString()}</span>
                 </div>
               ))}
             </div>

@@ -124,7 +124,24 @@ export default async function EpisodePage({ params }: Props) {
   const nextEp = currentIdx >= 0 && currentIdx < visibleEps.length - 1 ? visibleEps[currentIdx + 1] : null
 
   try {
-    await supabase.from('page_views').insert({ episode_id: params.epId, user_id: user?.id || null })
+    // 1日1人1話1PV制限：同じユーザーが同じ日に同じ話を見ていたらカウントしない
+    const todayStart = new Date(); todayStart.setHours(0,0,0,0)
+    if (user) {
+      const { data: existingPv } = await supabase
+        .from('page_views')
+        .select('id')
+        .eq('episode_id', params.epId)
+        .eq('user_id', user.id)
+        .gte('created_at', todayStart.toISOString())
+        .limit(1)
+        .maybeSingle()
+      if (!existingPv) {
+        await supabase.from('page_views').insert({ episode_id: params.epId, user_id: user.id })
+      }
+    } else {
+      // 未ログインは従来通り記録（IPやCookieでの制限は行わない）
+      await supabase.from('page_views').insert({ episode_id: params.epId, user_id: null })
+    }
   } catch (_) {}
 
   const author = authorData as any
