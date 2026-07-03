@@ -31,7 +31,7 @@ function StarDisplay({ rating }: { rating?: number | null }) {
   if (!rating || rating < 1) return null
   return (
     <span style={{ display: 'inline-flex', gap: 1, marginLeft: 6 }}>
-      {[1, 2, 3].map(i => (
+      {[1, 2, 3, 4, 5].map(i => (
         <span key={i} style={{ fontSize: 12, color: i <= rating ? '#f5a623' : '#ddd' }}>★</span>
       ))}
     </span>
@@ -180,11 +180,11 @@ export default function CommentSection({ novelId, episodeId, userId, userName, u
             </div>
           )}
 
-          {/* 星評価選択 */}
+          {/* 星評価選択（5段階・任意で0もOK） */}
           <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 10 }}>
-            <span style={{ fontSize: 12, color: 'var(--color-text-muted)' }}>評価（任意）</span>
+            <span style={{ fontSize: 12, color: 'var(--color-text-muted)' }}>評価</span>
             <div style={{ display: 'flex', gap: 2 }}>
-              {[1, 2, 3].map(i => (
+              {[1, 2, 3, 4, 5].map(i => (
                 <button key={i}
                   onClick={() => setRating(rating === i ? 0 : i)}
                   onMouseEnter={() => setHoverRating(i)}
@@ -194,7 +194,6 @@ export default function CommentSection({ novelId, episodeId, userId, userName, u
                 </button>
               ))}
             </div>
-            {rating > 0 && <span style={{ fontSize: 11, color: 'var(--color-brand)' }}>{rating}つ星</span>}
           </div>
 
           <textarea

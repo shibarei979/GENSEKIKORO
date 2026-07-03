@@ -19,7 +19,6 @@ import Footer from '@/components/layout/Footer'
 import AdBanner from '@/components/layout/AdBanner'
 import NovelActions from './NovelActions'
 import ExportButton from './ExportButton'
-import NovelCommentSection from './NovelCommentSection'
 import FollowButton from '@/components/FollowButton'
 import ChapterAccordion from './ChapterAccordion'
 
@@ -63,7 +62,7 @@ export default async function NovelPage({ params }: { params: { id: string } }) 
   const isAuthor = user?.id === novel.author_id
 
   const { data: rawEpisodes } = await supabase
-    .from('episodes').select('id, title, ep_number, created_at, illust_url, chapter_id, published, scheduled_at')
+    .from('episodes').select('id, title, ep_number, created_at, updated_at, illust_url, chapter_id, published, scheduled_at')
     .eq('novel_id', params.id).order('ep_number', { ascending: true })
 
   const nowMs = Date.now()
@@ -351,8 +350,16 @@ export default async function NovelPage({ params }: { params: { id: string } }) 
           </div>
           <div style={{display:'flex',alignItems:'center',gap:6,flexShrink:0}}>
             {epLikeCounts[ep.id] > 0 && <span style={{fontSize:10,color:'var(--color-text-muted)'}}>♡ {fmtNum(epLikeCounts[ep.id])}</span>}
-            {epCommentCounts[ep.id] > 0 && <span style={{fontSize:10,color:'var(--color-text-muted)'}}>💬 {fmtNum(epCommentCounts[ep.id])}</span>}
-            <span style={{fontSize:10,color:'var(--color-text-faint)'}}>{fmtDate(ep.created_at)}</span>
+            {epCommentCounts[ep.id] > 0 && (
+              <span style={{fontSize:10,color:'var(--color-text-muted)',display:'inline-flex',alignItems:'center',gap:2}}>
+                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+                {fmtNum(epCommentCounts[ep.id])}
+              </span>
+            )}
+            <span style={{fontSize:10,color:'var(--color-text-faint)'}}>
+              {fmtDate(ep.updated_at || ep.created_at)}
+              {ep.updated_at && new Date(ep.updated_at).getTime() - new Date(ep.created_at).getTime() > 60000 && '（済）'}
+            </span>
           </div>
         </div>
       </Link>
@@ -480,17 +487,6 @@ export default async function NovelPage({ params }: { params: { id: string } }) 
                 </Link>
               </div>
             )}
-          </div>
-
-          <div style={{marginTop:20}}>
-            <NovelCommentSection
-              novelId={params.id}
-              userId={user?.id || null}
-              userName={profile?.display_name || null}
-              userIconUrl={profile?.icon_url || null}
-              authorId={author?.user_id || ''}
-              comments={novelComments}
-            />
           </div>
 
           {/* ===== 同シリーズの作品 ===== */}
