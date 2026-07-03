@@ -483,35 +483,47 @@ export default function MypageClient({
           <Link href="/post" style={{background:'var(--color-brand)',color:'#fff',fontSize:13,fontWeight:700,padding:'10px 24px',borderRadius:20,display:'inline-block',textDecoration:'none',marginTop:12}}>最初の作品を投稿する</Link>
         </div>
       ) : myNovels.map((novel, i) => (
-        <div key={novel.id} style={{borderBottom:i<myNovels.length-1?'1px solid var(--color-brand-border)':'none',paddingBottom:16,marginBottom:16}}>
-          {/* 作品ヘッダー */}
-          <div style={{display:'flex',alignItems:'flex-start',gap:12,marginBottom:10,cursor:'pointer'}} onClick={()=>router.push(`/novel/${novel.id}`)}>
-            <div style={{flex:1,minWidth:0}}>
-              <div style={{display:'flex',gap:6,marginBottom:4,flexWrap:'wrap',alignItems:'center'}}>
-                <span style={{fontSize:10,background:'var(--color-brand-light)',color:'var(--color-brand)',border:'1px solid var(--color-tag-border)',padding:'1px 7px',borderRadius:4}}>{novel.genre}</span>
-                <span style={{fontSize:10,background:novel.published?'#e8f5e9':'#f5f5f5',color:novel.published?'var(--color-success)':'#757575',border:`1px solid ${novel.published?'#a5d6a7':'#e0e0e0'}`,padding:'1px 7px',borderRadius:4}}>{novel.published?'公開中':'下書き'}</span>
-                {(novel as any).novel_type && <span style={{fontSize:10,background:'var(--color-info-bg)',color:'var(--color-info)',border:'1px solid var(--color-info-border)',padding:'1px 7px',borderRadius:4}}>{(novel as any).novel_type}</span>}
-              </div>
-              <div style={{fontSize:14,fontWeight:700,color:'var(--color-text)'}}>{novel.title}</div>
+        <div key={novel.id} style={{border:'1px solid var(--color-brand-border)',borderRadius:12,overflow:'hidden',marginBottom:14,background:'var(--color-bg-card)'}}>
+          {/* 作品ヘッダー部分 */}
+          <div style={{padding:'16px 18px',borderBottom:'1px solid var(--color-brand-light)',cursor:'pointer'}} onClick={()=>router.push(`/novel/${novel.id}`)}>
+            <div style={{display:'flex',gap:6,marginBottom:8,flexWrap:'wrap',alignItems:'center'}}>
+              <span style={{fontSize:10,fontWeight:700,color:'#fff',background:novel.published?'var(--color-info)':'var(--color-text-faint)',padding:'2px 9px',borderRadius:4}}>{novel.published?'公開中':'下書き'}</span>
+              <span style={{fontSize:10,background:'var(--color-brand-light)',color:'var(--color-brand)',border:'1px solid var(--color-tag-border)',padding:'2px 9px',borderRadius:4}}>{novel.genre}</span>
+              {(novel as any).novel_type && <span style={{fontSize:10,background:'var(--color-info-bg)',color:'var(--color-info)',border:'1px solid var(--color-info-border)',padding:'2px 9px',borderRadius:4}}>{(novel as any).novel_type}</span>}
             </div>
+            <div style={{fontSize:16,fontWeight:700,color:'var(--color-text)',lineHeight:1.4}}>{novel.title}</div>
           </div>
-          {/* 操作ボタン */}
-          <div style={{display:'flex',gap:6,flexWrap:'wrap'}} onClick={e=>e.stopPropagation()}>
-            <Link href={`/post?edit=${novel.id}`} style={{fontSize:12,border:'1px solid var(--color-brand-border)',padding:'5px 10px',borderRadius:8,color:'var(--color-text-muted)',background:'none',textDecoration:'none'}}>編集</Link>
-            <button onClick={()=>setChapterTarget({id:novel.id,title:novel.title})} style={{fontSize:12,border:'1px solid #bfdbfe',padding:'5px 10px',borderRadius:8,color:'#2563eb',background:'#eff6ff',cursor:'pointer'}}>章を編集</button>
-            <button onClick={()=>handleOpenEpManage(novel)} style={{fontSize:12,border:'1px solid #d1fae5',padding:'5px 10px',borderRadius:8,color:'#059669',background:'#ecfdf5',cursor:'pointer'}}>話の公開管理</button>
-            <button onClick={()=>handleTogglePublish(novel.id,novel.published)} style={{fontSize:12,border:`1px solid ${novel.published?'var(--color-brand-border)':'#86efac'}`,padding:'5px 10px',borderRadius:8,color:novel.published?'var(--color-text-muted)':'#15803d',background:'none',cursor:'pointer'}}>{novel.published?'非公開にする':'公開する'}</button>
+
+          {/* 操作ボタン部分 */}
+          <div style={{padding:'12px 18px',background:'var(--color-bg)',display:'flex',gap:6,flexWrap:'wrap',alignItems:'center'}} onClick={e=>e.stopPropagation()}>
+            {/* 主要操作 */}
+            <Link href={`/post?edit=${novel.id}`} style={{display:'inline-flex',alignItems:'center',gap:4,fontSize:12,fontWeight:600,border:'none',padding:'7px 14px',borderRadius:8,color:'#fff',background:'var(--color-brand)',textDecoration:'none'}}>
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+              編集
+            </Link>
+            <button onClick={()=>handleOpenEpManage(novel)} style={{display:'inline-flex',alignItems:'center',gap:4,fontSize:12,fontWeight:600,border:'1px solid var(--color-brand-border)',padding:'7px 14px',borderRadius:8,color:'var(--color-text-muted)',background:'var(--color-bg-card)',cursor:'pointer'}}>
+              話の管理
+            </button>
+            <button onClick={()=>setChapterTarget({id:novel.id,title:novel.title})} style={{fontSize:12,fontWeight:600,border:'1px solid var(--color-brand-border)',padding:'7px 14px',borderRadius:8,color:'var(--color-text-muted)',background:'var(--color-bg-card)',cursor:'pointer'}}>
+              章の編集
+            </button>
+
+            {/* 区切り */}
+            <div style={{flex:1}}/>
+
+            {/* 副次操作（右寄せ・控えめ） */}
+            <button onClick={()=>handleTogglePublish(novel.id,novel.published)} style={{fontSize:12,border:'none',padding:'7px 12px',borderRadius:8,color:novel.published?'var(--color-text-muted)':'#15803d',background:'none',cursor:'pointer'}}>{novel.published?'非公開にする':'公開する'}</button>
             <button onClick={async()=>{
                 const next = !((novel as any).allow_comments !== false)
                 await supabase.from('novels').update({allow_comments:next}).eq('id',novel.id)
                 setMyNovels((prev:any[])=>prev.map((n:any)=>n.id===novel.id?{...n,allow_comments:next}:n))
-              }} style={{fontSize:12,border:`1px solid ${(novel as any).allow_comments===false?'#fca5a5':'var(--color-brand-border)'}`,padding:'5px 10px',borderRadius:8,color:(novel as any).allow_comments===false?'var(--color-danger)':'var(--color-text-muted)',background:'none',cursor:'pointer'}}>
-              {(novel as any).allow_comments===false?'コメント不可':'コメント許可中'}
+              }} style={{fontSize:12,border:'none',padding:'7px 12px',borderRadius:8,color:(novel as any).allow_comments===false?'var(--color-danger)':'var(--color-text-muted)',background:'none',cursor:'pointer'}}>
+              {(novel as any).allow_comments===false?'コメント不可':'コメント許可'}
             </button>
             <button onClick={async()=>{
                 const{data:eps}=await supabase.from('episodes').select('id,title,ep_number').eq('novel_id',novel.id).order('ep_number',{ascending:true})
                 setDeleteTarget({id:novel.id,title:novel.title,episodes:eps||[]});setDeleteMode(null);setDeleteEpId('')
-              }} style={{fontSize:12,border:'1px solid #fca5a5',padding:'5px 10px',borderRadius:8,color:'var(--color-danger)',background:'none',cursor:'pointer'}}>削除</button>
+              }} style={{fontSize:12,border:'none',padding:'7px 12px',borderRadius:8,color:'var(--color-danger)',background:'none',cursor:'pointer'}}>削除</button>
           </div>
         </div>
       ))}
