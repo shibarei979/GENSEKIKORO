@@ -45,78 +45,6 @@ export default async function HomePage() {
     profile = data
   }
 
-  // ===== 読みかけの作品（続きから読む） =====
-  let continueReading: any[] = []
-  if (user) {
-    // 最近閲覧した話（新しい順）
-    const { data: recentViews } = await supabase
-      .from('page_views')
-      .select('episode_id, created_at')
-      .eq('user_id', user.id)
-      .order('created_at', { ascending: false })
-      .limit(50)
-
-    if (recentViews && recentViews.length > 0) {
-      const epIds = Array.from(new Set(recentViews.map((v: any) => v.episode_id).filter(Boolean)))
-      const { data: viewedEps } = await supabase
-        .from('episodes')
-        .select('id, title, ep_number, novel_id, novels(id, title, genre, author_id, published)')
-        .in('id', epIds)
-
-      // 作品ごとに最後に読んだ話を特定
-      const novelLastRead: Record<string, { epId: string; epNumber: number; readAt: string }> = {}
-      recentViews.forEach((v: any) => {
-        const ep = viewedEps?.find((e: any) => e.id === v.episode_id)
-        if (!ep || !(ep.novels as any)?.published) return
-        const nId = (ep.novels as any).id
-        if (!novelLastRead[nId]) {
-          novelLastRead[nId] = { epId: ep.id, epNumber: ep.ep_number, readAt: v.created_at }
-        }
-      })
-
-      const novelIdsRead = Object.keys(novelLastRead).slice(0, 10)
-      if (novelIdsRead.length > 0) {
-        // 各作品の全話を取得して「次の話」を特定
-        const { data: allEpsForNovels } = await supabase
-          .from('episodes')
-          .select('id, title, ep_number, novel_id, published')
-          .in('novel_id', novelIdsRead)
-          .eq('published', true)
-          .order('ep_number', { ascending: true })
-
-        const authorIdsCR = Array.from(new Set((viewedEps||[]).map((e: any) => (e.novels as any)?.author_id).filter(Boolean)))
-        const authorMapCR: Record<string,string> = {}
-        if (authorIdsCR.length > 0) {
-          const { data: authorsCR } = await supabase.from('profiles').select('user_id, display_name').in('user_id', authorIdsCR as string[])
-          authorsCR?.forEach((a: any) => { authorMapCR[a.user_id] = a.display_name })
-        }
-
-        for (const nId of novelIdsRead) {
-          const lastRead = novelLastRead[nId]
-          const novelEps = (allEpsForNovels || []).filter((e: any) => e.novel_id === nId)
-          // 最後に読んだ話の次の話
-          const nextEp = novelEps.find((e: any) => e.ep_number > lastRead.epNumber)
-          const viewedEp = viewedEps?.find((e: any) => e.id === lastRead.epId)
-          const novelInfo = viewedEp?.novels as any
-          if (!novelInfo) continue
-
-          continueReading.push({
-            novel_id: nId,
-            novel_title: novelInfo.title,
-            genre: novelInfo.genre,
-            author_name: authorMapCR[novelInfo.author_id] || '',
-            // 次の話があればそれ、なければ最後に読んだ話
-            episode_id: nextEp?.id || lastRead.epId,
-            episode_title: nextEp?.title || viewedEp?.title || '',
-            ep_number: nextEp?.ep_number || lastRead.epNumber,
-            is_next: !!nextEp,
-          })
-          if (continueReading.length >= 4) break
-        }
-      }
-    }
-  }
-
   const [
     { count: novelCount },
     { count: userCount },
@@ -427,26 +355,6 @@ export default async function HomePage() {
       {/* ===== デスクトップ：メインエリア ===== */}
       <div className="desktop-only main-layout" style={{maxWidth:1200,margin:'0 auto',padding:'20px 32px',display:'flex',gap:20,alignItems:'flex-start'}}>
         <div style={{flex:1,minWidth:0,display:'flex',flexDirection:'column',gap:16}}>
-          {continueReading.length > 0 && (
-            <div style={{background:'var(--color-bg-card)',border:'1px solid var(--color-brand-border)',borderRadius:10,overflow:'hidden'}}>
-              <div style={{padding:'10px 16px',borderBottom:'1px solid var(--color-brand-border)',background:'var(--color-bg)'}}>
-                <span style={{fontSize:14,fontWeight:700,color:'var(--color-text)'}}>続きから読む</span>
-              </div>
-              <div className="mobile-1col" style={{display:'grid',gridTemplateColumns:'1fr 1fr'}}>
-                {continueReading.map((c, i) => (
-                  <Link key={c.novel_id} href={`/novel/${c.novel_id}/episode/${c.episode_id}`}
-                    style={{display:'block',padding:'10px 14px',borderBottom:'1px solid var(--color-brand-light)',borderRight:i%2===0?'1px solid var(--color-brand-light)':'none',textDecoration:'none'}}>
-                    <div style={{display:'flex',gap:4,marginBottom:3,flexWrap:'wrap',alignItems:'center'}}>
-                      <span style={{fontSize:9,background:'var(--color-brand-light)',color:'var(--color-brand)',border:'1px solid var(--color-tag-border)',padding:'1px 5px',borderRadius:3}}>{c.genre}</span>
-                      {c.is_next && <span style={{background:'var(--color-brand)',color:'#fff',fontSize:9,padding:'0 5px',borderRadius:3,fontWeight:700}}>続きあり</span>}
-                    </div>
-                    <div style={{fontSize:13,fontWeight:700,color:'var(--color-text)',marginBottom:2,overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap'}}>{c.novel_title}</div>
-                    <div style={{fontSize:11,color:'var(--color-brand)',fontWeight:600}}>{c.is_next ? '次：' : ''}{c.episode_title} ›</div>
-                  </Link>
-                ))}
-              </div>
-            </div>
-          )}
           <RecommendedNovels novels={recommended} />
           {/* 短編棚 */}
           {tanpenEpisodes.length > 0 && (
@@ -482,28 +390,6 @@ export default async function HomePage() {
       <div className="desktop-only" style={{background:'var(--color-bg-card)',padding:'24px 0',width:'100%'}}>
         <ActionBanner isLoggedIn={!!user} />
       </div>
-
-      {/* ===== モバイル：続きから読む ===== */}
-      {continueReading.length > 0 && (
-        <div className="mobile-only" style={{padding:'12px 16px 0'}}>
-          <div style={{background:'var(--color-bg-card)',border:'1px solid var(--color-brand-border)',borderRadius:10,overflow:'hidden'}}>
-            <div style={{padding:'10px 16px',borderBottom:'1px solid var(--color-brand-border)',background:'var(--color-bg)'}}>
-              <span style={{fontSize:14,fontWeight:700,color:'var(--color-text)'}}>続きから読む</span>
-            </div>
-            {continueReading.map((c) => (
-              <Link key={c.novel_id} href={`/novel/${c.novel_id}/episode/${c.episode_id}`}
-                style={{display:'block',padding:'10px 16px',borderBottom:'1px solid var(--color-brand-light)',textDecoration:'none'}}>
-                <div style={{display:'flex',gap:4,marginBottom:3,flexWrap:'wrap',alignItems:'center'}}>
-                  <span style={{fontSize:9,background:'var(--color-brand-light)',color:'var(--color-brand)',border:'1px solid var(--color-tag-border)',padding:'1px 5px',borderRadius:3}}>{c.genre}</span>
-                  {c.is_next && <span style={{background:'var(--color-brand)',color:'#fff',fontSize:9,padding:'0 5px',borderRadius:3,fontWeight:700}}>続きあり</span>}
-                </div>
-                <div style={{fontSize:13,fontWeight:700,color:'var(--color-text)',marginBottom:2}}>{c.novel_title}</div>
-                <div style={{fontSize:11,color:'var(--color-brand)',fontWeight:600}}>{c.is_next ? '次：' : ''}{c.episode_title} ›</div>
-              </Link>
-            ))}
-          </div>
-        </div>
-      )}
 
       {/* ===== モバイル：おすすめ作品 ===== */}
       <div className="mobile-only" style={{padding:'12px 16px 0'}}>
