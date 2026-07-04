@@ -16,6 +16,8 @@ interface Comment {
   is_pinned: boolean
   rating?: number | null
   quoted_text?: string | null
+  parent_id?: string | null
+  replies?: Comment[]
 }
 
 interface Props {
@@ -43,12 +45,22 @@ export default function CommentSection({ novelId, episodeId, userId, userName, u
   const supabase = createClient()
   const { quotedText, setQuotedText, selecting, setSelecting, commentAnchorRef } = useQuote()
 
-  const [comments, setComments] = useState<Comment[]>(initialComments)
+  // 初期コメントを親子構造に組み立て（parent_idがあるものは返信）
+  const buildTree = (list: Comment[]): Comment[] => {
+    const roots = list.filter(c => !c.parent_id)
+    roots.forEach(r => { r.replies = list.filter(c => c.parent_id === r.id).sort((a,b)=>new Date(a.created_at).getTime()-new Date(b.created_at).getTime()) })
+    return roots
+  }
+
+  const [comments, setComments] = useState<Comment[]>(() => buildTree(initialComments))
   const [body, setBody] = useState('')
   const [rating, setRating] = useState(0)
   const [hoverRating, setHoverRating] = useState(0)
   const [posting, setPosting] = useState(false)
   const [likedComments, setLikedComments] = useState<Set<string>>(new Set())
+  const [replyTo, setReplyTo] = useState<{ id: string; name: string } | null>(null)
+  const [replyBody, setReplyBody] = useState('')
+  const [replyPosting, setReplyPosting] = useState(false)
   const textareaRef = useRef<HTMLTextAreaElement>(null)
 
   useEffect(() => {
@@ -119,6 +131,41 @@ export default function CommentSection({ novelId, episodeId, userId, userName, u
     setPosting(false)
   }
 
+  async function handleReplySubmit() {
+    if (!userId || !replyTo) return
+    const trimmed = replyBody.trim()
+    if (!trimmed) return
+    setReplyPosting(true)
+
+    const { data, error } = await supabase.from('comments').insert({
+      novel_id: novelId,
+      episode_id: episodeId,
+      user_id: userId,
+      body: trimmed,
+      parent_id: replyTo.id,
+    }).select().single()
+
+    if (!error && data) {
+      const newReply: Comment = {
+        id: data.id,
+        body: data.body,
+        created_at: data.created_at,
+        user_id: userId,
+        display_name: userName || '名無し',
+        icon_url: userIconUrl || '',
+        like_count: 0,
+        is_pinned: false,
+        parent_id: replyTo.id,
+      }
+      setComments(prev => prev.map(c =>
+        c.id === replyTo.id ? { ...c, replies: [...(c.replies || []), newReply] } : c
+      ))
+      setReplyBody('')
+      setReplyTo(null)
+    }
+    setReplyPosting(false)
+  }
+
   async function toggleLike(commentId: string) {
     if (!userId) return
     const isLiked = likedComments.has(commentId)
@@ -136,7 +183,10 @@ export default function CommentSection({ novelId, episodeId, userId, userName, u
   async function handleDelete(commentId: string) {
     if (!confirm('このコメントを削除しますか？')) return
     await supabase.from('comments').delete().eq('id', commentId)
-    setComments(prev => prev.filter(c => c.id !== commentId))
+    setComments(prev => prev
+      .filter(c => c.id !== commentId)  // 親コメント削除
+      .map(c => ({ ...c, replies: (c.replies || []).filter(r => r.id !== commentId) }))  // 返信削除
+    )
   }
 
   async function togglePin(commentId: string, current: boolean) {
@@ -264,6 +314,12 @@ export default function CommentSection({ novelId, episodeId, userId, userName, u
                     style={{ display: 'flex', alignItems: 'center', gap: 4, background: 'none', border: 'none', cursor: userId ? 'pointer' : 'default', fontSize: 12, color: likedComments.has(c.id) ? 'var(--color-danger)' : 'var(--color-text-muted)', padding: 0 }}>
                     {likedComments.has(c.id) ? '♥' : '♡'} {c.like_count > 0 && c.like_count}
                   </button>
+                  {userId && (
+                    <button onClick={() => { setReplyTo(replyTo?.id === c.id ? null : { id: c.id, name: c.display_name }); setReplyBody('') }}
+                      style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: 12, color: replyTo?.id === c.id ? 'var(--color-brand)' : 'var(--color-text-muted)', padding: 0, fontWeight: replyTo?.id === c.id ? 700 : 400 }}>
+                      返信
+                    </button>
+                  )}
                   {userId === authorId && (
                     <button onClick={() => togglePin(c.id, c.is_pinned)} style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: 12, color: 'var(--color-text-muted)', padding: 0 }}>
                       {c.is_pinned ? 'ピン解除' : 'ピン留め'}
@@ -275,6 +331,50 @@ export default function CommentSection({ novelId, episodeId, userId, userName, u
                     </button>
                   )}
                 </div>
+
+                {/* 返信入力欄 */}
+                {replyTo?.id === c.id && (
+                  <div style={{ marginTop: 10, background: 'var(--color-bg)', borderRadius: 8, padding: '10px 12px' }}>
+                    <div style={{ fontSize: 11, color: 'var(--color-text-muted)', marginBottom: 6 }}>{c.display_name}さんへ返信</div>
+                    <textarea value={replyBody} onChange={e => setReplyBody(e.target.value)} placeholder="返信を書く"
+                      style={{ width: '100%', minHeight: 50, padding: '8px 10px', border: '1px solid var(--color-brand-border)', borderRadius: 6, fontSize: 13, resize: 'vertical', outline: 'none', fontFamily: 'inherit', background: 'var(--color-bg-card)', color: 'var(--color-text)' }} />
+                    <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8, marginTop: 6 }}>
+                      <button onClick={() => { setReplyTo(null); setReplyBody('') }} style={{ background: 'none', border: '1px solid var(--color-brand-border)', borderRadius: 6, padding: '5px 12px', fontSize: 12, color: 'var(--color-text-muted)', cursor: 'pointer' }}>キャンセル</button>
+                      <button onClick={handleReplySubmit} disabled={replyPosting || !replyBody.trim()}
+                        style={{ background: 'var(--color-brand)', color: '#fff', border: 'none', borderRadius: 6, padding: '5px 14px', fontSize: 12, fontWeight: 700, cursor: replyPosting || !replyBody.trim() ? 'not-allowed' : 'pointer', opacity: replyPosting || !replyBody.trim() ? 0.5 : 1 }}>
+                        {replyPosting ? '送信中...' : '返信する'}
+                      </button>
+                    </div>
+                  </div>
+                )}
+
+                {/* 返信一覧 */}
+                {c.replies && c.replies.length > 0 && (
+                  <div style={{ marginTop: 10, paddingLeft: 14, borderLeft: '2px solid var(--color-brand-light)', display: 'flex', flexDirection: 'column', gap: 12 }}>
+                    {c.replies.map(r => (
+                      <div key={r.id} style={{ display: 'flex', gap: 8 }}>
+                        {r.icon_url ? (
+                          <img src={r.icon_url} alt="" style={{ width: 28, height: 28, borderRadius: '50%', objectFit: 'cover', flexShrink: 0 }} />
+                        ) : (
+                          <div style={{ width: 28, height: 28, borderRadius: '50%', background: 'var(--color-brand-light)', color: 'var(--color-brand)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 13, fontWeight: 700, flexShrink: 0 }}>
+                            {(r.display_name || '?')[0]}
+                          </div>
+                        )}
+                        <div style={{ flex: 1, minWidth: 0 }}>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 2, flexWrap: 'wrap' }}>
+                            <Link href={`/author/${r.user_id}`} style={{ fontSize: 12, fontWeight: 700, color: 'var(--color-text)', textDecoration: 'none' }}>{r.display_name}</Link>
+                            {r.user_id === authorId && <span style={{ fontSize: 9, background: 'var(--color-brand)', color: '#fff', padding: '1px 5px', borderRadius: 3, fontWeight: 700 }}>作者</span>}
+                            <span style={{ fontSize: 10, color: 'var(--color-text-faint)', marginLeft: 'auto' }}>{fmtDate(r.created_at)}</span>
+                          </div>
+                          <div style={{ fontSize: 13, color: 'var(--color-text)', lineHeight: 1.6, whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}>{r.body}</div>
+                          {(userId === r.user_id || userId === authorId) && (
+                            <button onClick={() => handleDelete(r.id)} style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: 11, color: 'var(--color-danger)', padding: 0, marginTop: 4 }}>削除</button>
+                          )}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
             </div>
           </div>

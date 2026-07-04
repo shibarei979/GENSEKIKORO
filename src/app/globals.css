@@ -651,3 +651,22 @@ footer a:hover { color: var(--color-brand) !important; opacity: 1; }
     -webkit-tap-highlight-color: rgba(242,106,33,0.08);
   }
 }
+
+/* ===== テキストコピー禁止（投稿ページ以外） ===== */
+body {
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
+/* 入力欄（執筆・検索・コメント等）は選択・コピー可能にする */
+input,
+textarea,
+[contenteditable="true"],
+.allow-select,
+.allow-select * {
+  -webkit-user-select: text;
+  -moz-user-select: text;
+  -ms-user-select: text;
+  user-select: text;
+}

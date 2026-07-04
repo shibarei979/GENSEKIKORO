@@ -557,7 +557,7 @@ export default function PostClient({ profile, userId }: Props) {
   const currentNovelId = savedNovelId || selectedNovelId || editNovelId || null
 
   return (
-    <div style={{minHeight:'100vh',background:'var(--color-bg-card)'}}>
+    <div className="allow-select" style={{minHeight:'100vh',background:'var(--color-bg-card)'}}>
       <Header profile={profile} user={true} />
 
             <div style={{display:'flex',alignItems:'flex-start'}}>
