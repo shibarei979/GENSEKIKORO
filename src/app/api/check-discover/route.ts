@@ -58,12 +58,7 @@ export async function POST(request: NextRequest) {
       }
     } catch (_) {}
 
-    // 3. 短すぎるチェック
-    if (comment.trim().length < 10) {
-      return NextResponse.json({ pending: true, reason: 'コメントが短すぎます（10文字以上必要）' })
-    }
-
-    // 4. Claude APIで内容審査
+    // 3. Claude APIで内容審査（文字数ではなく中身で判断）
     const response = await fetch('https://api.anthropic.com/v1/messages', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -86,7 +81,10 @@ export async function POST(request: NextRequest) {
 - 感情的な怒り・不満の表現
 
 【承認】
-- 作品の魅力を具体的・誠実に紹介している内容のみ
+- 作品の魅力を紹介・推薦している内容（短くても、誠実な推薦・感想ならOK）
+- 「面白い」「続きが気になる」など短い好意的な感想もOK
+
+※文章の長さは問わない。短くても好意的で作品への言及があれば承認する。
 
 JSON形式のみ（他テキスト一切不要）：
 {"ok": true} または {"ok": false, "reason": "20文字以内"}`,
