@@ -160,7 +160,7 @@ export default function NovelActions({ novelId, userId, authorId, novelTitle, is
 
   const btn = (active: boolean, colorVar: string, activeBgFallback: string) => ({
     display:'inline-flex' as const, alignItems:'center' as const, gap:5,
-    padding:'8px 14px', borderRadius:20, border:'1.5px solid', cursor:'pointer' as const,
+    padding:'11px 14px', borderRadius:20, border:'1.5px solid', cursor:'pointer' as const,
     fontSize:13, fontWeight:500 as const,
     background: active ? activeBgFallback : 'var(--color-bg-card)',
     borderColor: active ? colorVar : 'var(--color-brand-border)',
@@ -200,7 +200,7 @@ export default function NovelActions({ novelId, userId, authorId, novelTitle, is
           )}
         </button>
         <button onClick={handleXShare}
-          style={{display:'inline-flex',alignItems:'center',gap:5,padding:'8px 14px',borderRadius:20,
+          style={{display:'inline-flex',alignItems:'center',gap:5,padding:'11px 14px',borderRadius:20,
             border:'1.5px solid #e2e8f0',background:'var(--color-bg-card)',color:'#374151',
             fontSize:13,fontWeight:500,cursor:'pointer',transition:'all .15s'}}>
           <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor">
