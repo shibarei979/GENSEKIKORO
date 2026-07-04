@@ -439,17 +439,6 @@ export default async function NovelPage({ params }: { params: { id: string } }) 
                 {novel.summary}
               </div>
             )}
-            {discoverComments && discoverComments.length > 0 && (
-              <div style={{margin:'10px 0',borderRadius:10,overflow:'hidden',border:'1.5px solid var(--color-brand)'}}>
-                <div style={{background:'var(--color-brand)',padding:'6px 14px',fontSize:11,fontWeight:700,color:'var(--color-bg-card)'}}>読者の声</div>
-                {discoverComments.map((d: any) => d.comment && (
-                  <div key={d.user_id} style={{padding:'10px 14px',borderBottom:'1px solid var(--color-brand-light)',background:'var(--color-brand-light)'}}>
-                    <p style={{fontSize:13,color:'var(--color-text)',lineHeight:1.7,margin:0,marginBottom:4}}>「{d.comment}」</p>
-                    <div style={{fontSize:11,color:'var(--color-brand)'}}>{d.display_name}</div>
-                  </div>
-                ))}
-              </div>
-            )}
             <NovelActions
               novelId={params.id}
               userId={user?.id || null}
@@ -507,6 +496,21 @@ export default async function NovelPage({ params }: { params: { id: string } }) 
               </div>
             )}
           </div>
+
+          {/* ===== 読者の声（拡散推薦文） ===== */}
+          {discoverComments && discoverComments.length > 0 && (
+            <div style={{marginTop:20,background:'var(--color-bg-card)',border:'1px solid var(--color-brand-border)',borderRadius:12,overflow:'hidden'}}>
+              <div style={{padding:'10px 14px',borderBottom:'1px solid var(--color-brand-border)',background:'var(--color-bg)'}}>
+                <span style={{fontSize:14,fontWeight:700,color:'var(--color-text)'}}>読者の声</span>
+              </div>
+              {discoverComments.map((d: any) => d.comment && (
+                <div key={d.user_id} style={{padding:'12px 16px',borderBottom:'1px solid var(--color-brand-light)'}}>
+                  <p style={{fontSize:13,color:'var(--color-text)',lineHeight:1.7,margin:0,marginBottom:4}}>{d.comment}</p>
+                  <div style={{fontSize:11,color:'var(--color-text-muted)'}}>{d.display_name}</div>
+                </div>
+              ))}
+            </div>
+          )}
 
           {/* ===== 同シリーズの作品 ===== */}
           {seriesNovels.length > 1 && (
