@@ -142,7 +142,7 @@ export default async function NovelPage({ params }: { params: { id: string } }) 
   }
 
   const { data: discoverComments } = await supabase
-    .from('discovers').select('id, comment, display_name, created_at, user_id')
+    .from('discovers').select('comment, display_name, created_at, user_id')
     .eq('novel_id', params.id).not('comment', 'is', null).eq('is_pending', false)
     .order('created_at', { ascending: false }).limit(5)
 
@@ -443,7 +443,7 @@ export default async function NovelPage({ params }: { params: { id: string } }) 
               <div style={{margin:'10px 0',borderRadius:10,overflow:'hidden',border:'1.5px solid var(--color-brand)'}}>
                 <div style={{background:'var(--color-brand)',padding:'6px 14px',fontSize:11,fontWeight:700,color:'var(--color-bg-card)'}}>読者の声</div>
                 {discoverComments.map((d: any) => d.comment && (
-                  <div key={d.id} style={{padding:'10px 14px',borderBottom:'1px solid var(--color-brand-light)',background:'var(--color-brand-light)'}}>
+                  <div key={d.user_id} style={{padding:'10px 14px',borderBottom:'1px solid var(--color-brand-light)',background:'var(--color-brand-light)'}}>
                     <p style={{fontSize:13,color:'var(--color-text)',lineHeight:1.7,margin:0,marginBottom:4}}>「{d.comment}」</p>
                     <div style={{fontSize:11,color:'var(--color-brand)'}}>{d.display_name}</div>
                   </div>
