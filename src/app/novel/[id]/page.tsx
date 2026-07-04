@@ -27,44 +27,43 @@ export default async function NovelPage({ params }: { params: { id: string } }) 
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
 
-  let profile = null
-  if (user) {
-    const { data } = await supabase.from('profiles').select('*').eq('user_id', user.id).single()
-    profile = data
-  }
-
-  const { data: novel, error: novelError } = await supabase
-    .from('novels')
-    .select('id, title, summary, genre, tags, is_serial, published, views, author_id, created_at, novel_type, official_tags')
-    .eq('id', params.id).maybeSingle()
+  // profile（user依存）とnovel（独立）を並列取得
+  const [profileRes, novelRes] = await Promise.all([
+    user ? supabase.from('profiles').select('*').eq('user_id', user.id).single() : Promise.resolve({ data: null }),
+    supabase.from('novels')
+      .select('id, title, summary, genre, tags, is_serial, published, views, author_id, created_at, novel_type, official_tags')
+      .eq('id', params.id).maybeSingle(),
+  ])
+  const profile = profileRes.data
+  const novel = novelRes.data
+  const novelError = (novelRes as any).error
 
   if (!novel || novelError) notFound()
 
-  const { data: authorProfile } = await supabase
-    .from('profiles').select('display_name, user_id')
-    .eq('user_id', novel.author_id).maybeSingle()
+  // author・シリーズ情報・話一覧は互いに独立なので並列取得
+  const [authorRes, seriesNovelRes, episodesRes] = await Promise.all([
+    supabase.from('profiles').select('display_name, user_id').eq('user_id', novel.author_id).maybeSingle(),
+    supabase.from('series_novels').select('series_id').eq('novel_id', params.id).maybeSingle(),
+    supabase.from('episodes').select('id, title, ep_number, created_at, updated_at, illust_url, chapter_id, published, scheduled_at')
+      .eq('novel_id', params.id).order('ep_number', { ascending: true }),
+  ])
+  const authorProfile = authorRes.data
+  const seriesNovelData = seriesNovelRes.data
+  const rawEpisodes = episodesRes.data
 
-  // シリーズ情報取得
-  const { data: seriesNovelData } = await supabase
-    .from('series_novels').select('series_id').eq('novel_id', params.id).maybeSingle()
+  // シリーズ情報の詳細（series_idがある場合のみ）
   let seriesNovels: any[] = []
   let seriesTitle = ''
   if (seriesNovelData?.series_id) {
-    const { data: seriesData } = await supabase.from('series').select('title').eq('id', seriesNovelData.series_id).single()
-    seriesTitle = seriesData?.title || ''
-    const { data: sn } = await supabase
-      .from('series_novels')
-      .select('order_num, novels(id, title, genre)')
-      .eq('series_id', seriesNovelData.series_id)
-      .order('order_num')
-    seriesNovels = (sn || []).map((s: any) => ({ ...s.novels, order_num: s.order_num }))
+    const [seriesDataRes, snRes] = await Promise.all([
+      supabase.from('series').select('title').eq('id', seriesNovelData.series_id).single(),
+      supabase.from('series_novels').select('order_num, novels(id, title, genre)').eq('series_id', seriesNovelData.series_id).order('order_num'),
+    ])
+    seriesTitle = seriesDataRes.data?.title || ''
+    seriesNovels = (snRes.data || []).map((s: any) => ({ ...s.novels, order_num: s.order_num }))
   }
 
   const isAuthor = user?.id === novel.author_id
-
-  const { data: rawEpisodes } = await supabase
-    .from('episodes').select('id, title, ep_number, created_at, updated_at, illust_url, chapter_id, published, scheduled_at')
-    .eq('novel_id', params.id).order('ep_number', { ascending: true })
 
   const nowMs = Date.now()
   const toPublish = (rawEpisodes || []).filter(ep =>
@@ -110,11 +109,16 @@ export default async function NovelPage({ params }: { params: { id: string } }) 
     }
   }
 
-  const { count: likeCount }     = await supabase.from('likes').select('*',{count:'exact',head:true}).eq('novel_id', params.id)
-  const { data: viewData }       = await supabase.from('novel_views').select('view_count').eq('novel_id', params.id).maybeSingle()
-  const viewCount                = viewData?.view_count || 0
-  const { count: discoverCount } = await supabase.from('discovers').select('*',{count:'exact',head:true}).eq('novel_id', params.id).eq('is_pending', false)
-  const { count: bookmarkCount } = await supabase.from('bookmarks').select('*',{count:'exact',head:true}).eq('novel_id', params.id)
+  const [likeCountRes, viewDataRes, discoverCountRes, bookmarkCountRes] = await Promise.all([
+    supabase.from('likes').select('*',{count:'exact',head:true}).eq('novel_id', params.id),
+    supabase.from('novel_views').select('view_count').eq('novel_id', params.id).maybeSingle(),
+    supabase.from('discovers').select('*',{count:'exact',head:true}).eq('novel_id', params.id).eq('is_pending', false),
+    supabase.from('bookmarks').select('*',{count:'exact',head:true}).eq('novel_id', params.id),
+  ])
+  const likeCount = likeCountRes.count
+  const viewCount = viewDataRes.data?.view_count || 0
+  const discoverCount = discoverCountRes.count
+  const bookmarkCount = bookmarkCountRes.count
 
   let liked = false, discovered = false, bookmarked = false
   if (user) {
@@ -145,24 +149,6 @@ export default async function NovelPage({ params }: { params: { id: string } }) 
     .from('discovers').select('comment, display_name, created_at, user_id')
     .eq('novel_id', params.id).not('comment', 'is', null).eq('is_pending', false)
     .order('created_at', { ascending: false }).limit(5)
-
-  const { data: rawNovelComments } = await supabase
-    .from('comments').select('id, body, created_at, user_id, is_pinned, profiles(display_name, icon_url)')
-    .eq('novel_id', params.id).order('created_at', { ascending: false }).limit(50)
-
-  const novelCommentIds = (rawNovelComments || []).map((c: any) => c.id)
-  let novelCommentLikes: Record<string, number> = {}
-  if (novelCommentIds.length > 0) {
-    const { data: clData } = await supabase.from('comment_likes').select('comment_id').in('comment_id', novelCommentIds)
-    clData?.forEach((cl: any) => { novelCommentLikes[cl.comment_id] = (novelCommentLikes[cl.comment_id] || 0) + 1 })
-  }
-  const novelComments = (rawNovelComments || []).map((c: any) => ({
-    id: c.id, body: c.body, created_at: c.created_at, user_id: c.user_id,
-    display_name: (c.profiles as any)?.display_name || '名無し',
-    icon_url: (c.profiles as any)?.icon_url || '',
-    like_count: novelCommentLikes[c.id] || 0,
-    is_pinned: c.is_pinned || false,
-  }))
 
   // シリーズ内の作品IDを収集
   const seriesNovelIds = new Set(seriesNovels.map((n: any) => n.id))
