@@ -35,18 +35,16 @@ export default async function EpisodePage({ params }: Props) {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
 
-  let profile = null
-  if (user) {
-    const { data } = await supabase.from('profiles').select('*').eq('user_id', user.id).single()
-    profile = data
-  }
-
-  const { data: episode } = await supabase
-    .from('episodes').select('*').eq('id', params.epId).maybeSingle()
+  // profile（user依存）・episode・novel（独立）を並列取得
+  const [profileRes, episodeRes, novelRes] = await Promise.all([
+    user ? supabase.from('profiles').select('*').eq('user_id', user.id).single() : Promise.resolve({ data: null }),
+    supabase.from('episodes').select('*').eq('id', params.epId).maybeSingle(),
+    supabase.from('novels').select('id, title, genre, is_serial, author_id, views').eq('id', params.id).maybeSingle(),
+  ])
+  const profile = profileRes.data
+  const episode = episodeRes.data
+  const novel = novelRes.data
   if (!episode) notFound()
-
-  const { data: novel } = await supabase
-    .from('novels').select('id, title, genre, is_serial, author_id, views').eq('id', params.id).maybeSingle()
   if (!novel) notFound()
 
   // ===== 予約投稿の自動公開判定 =====
@@ -68,32 +66,30 @@ export default async function EpisodePage({ params }: Props) {
     notFound()
   }
 
-  const { data: authorData } = await supabase
-    .from('profiles').select('display_name, user_id').eq('user_id', novel.author_id).maybeSingle()
+  // author・全話・コメント・話いいね数は互いに独立なので並列取得
+  const [authorRes, allEpsRes, rawCommentsRes, epLikeCountRes] = await Promise.all([
+    supabase.from('profiles').select('display_name, user_id').eq('user_id', novel.author_id).maybeSingle(),
+    supabase.from('episodes').select('id, ep_number, title, published, scheduled_at').eq('novel_id', params.id).order('ep_number', { ascending: true }),
+    supabase.from('comments').select('id, body, created_at, user_id, is_pinned, rating, quoted_text, parent_id').eq('novel_id', params.id).order('created_at', { ascending: false }).limit(50),
+    supabase.from('episode_likes').select('*', { count: 'exact', head: true }).eq('episode_id', params.epId),
+  ])
+  const authorData = authorRes.data
+  const allEps = allEpsRes.data
+  const rawComments = rawCommentsRes.data
+  const epLikeCount = epLikeCountRes.count
 
-  const { data: allEps } = await supabase
-    .from('episodes').select('id, ep_number, title, published, scheduled_at').eq('novel_id', params.id).order('ep_number', { ascending: true })
-
-  const { data: rawComments } = await supabase
-    .from('comments')
-    .select('id, body, created_at, user_id, is_pinned, rating, quoted_text, parent_id')
-    .eq('novel_id', params.id)
-    .order('created_at', { ascending: false })
-    .limit(50)
-
+  // コメントのいいね数と投稿者プロフィール（rawCommentsに依存）を並列取得
   const commentIds = (rawComments || []).map((c: any) => c.id)
-  let commentLikeCounts: Record<string, number> = {}
-  if (commentIds.length > 0) {
-    const { data: clData } = await supabase.from('comment_likes').select('comment_id').in('comment_id', commentIds)
-    clData?.forEach((cl: any) => { commentLikeCounts[cl.comment_id] = (commentLikeCounts[cl.comment_id] || 0) + 1 })
-  }
-
   const commentUserIds = Array.from(new Set((rawComments || []).map((c: any) => c.user_id).filter(Boolean)))
+  let commentLikeCounts: Record<string, number> = {}
   let commentProfiles: Record<string, {display_name: string, icon_url: string}> = {}
-  if (commentUserIds.length > 0) {
-    const { data: cpData } = await supabase.from('profiles').select('user_id, display_name, icon_url').in('user_id', commentUserIds as string[])
-    cpData?.forEach((p: any) => { commentProfiles[p.user_id] = { display_name: p.display_name || '名無し', icon_url: p.icon_url || '' } })
-  }
+  const [clRes, cpRes] = await Promise.all([
+    commentIds.length > 0 ? supabase.from('comment_likes').select('comment_id').in('comment_id', commentIds) : Promise.resolve({ data: [] }),
+    commentUserIds.length > 0 ? supabase.from('profiles').select('user_id, display_name, icon_url').in('user_id', commentUserIds as string[]) : Promise.resolve({ data: [] }),
+  ])
+  clRes.data?.forEach((cl: any) => { commentLikeCounts[cl.comment_id] = (commentLikeCounts[cl.comment_id] || 0) + 1 })
+  cpRes.data?.forEach((p: any) => { commentProfiles[p.user_id] = { display_name: p.display_name || '名無し', icon_url: p.icon_url || '' } })
+
   const comments = (rawComments || []).map((c: any) => ({
     id: c.id, body: c.body, created_at: c.created_at, user_id: c.user_id,
     display_name: commentProfiles[c.user_id]?.display_name || '名無し',
@@ -105,8 +101,6 @@ export default async function EpisodePage({ params }: Props) {
     parent_id: c.parent_id ?? null,
   }))
 
-  const { count: epLikeCount } = await supabase
-    .from('episode_likes').select('*', { count: 'exact', head: true }).eq('episode_id', params.epId)
   let epLiked = false
   if (user) {
     const { data: el } = await supabase.from('episode_likes').select('user_id')
