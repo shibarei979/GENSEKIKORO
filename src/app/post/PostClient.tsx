@@ -156,7 +156,7 @@ export default function PostClient({ profile, userId }: Props) {
   useEffect(() => {
     const now = new Date().toISOString()
     supabase.from('contests')
-      .select('id, title, deadline, is_site_contest, exclusive')
+      .select('id, title, deadline, is_site_contest, exclusive, image_url')
       .eq('is_published', true)
       .eq('is_site_contest', true)
       .or(`deadline.is.null,deadline.gt.${now}`)
@@ -984,6 +984,10 @@ export default function PostClient({ profile, userId }: Props) {
                           }
                         }}
                         style={{width:16,height:16,accentColor:'var(--color-brand)',marginTop:2,flexShrink:0}}/>
+                      {(c as any).image_url && (
+                        <img src={(c as any).image_url} alt=""
+                          style={{width:72,height:48,objectFit:'cover',borderRadius:6,flexShrink:0,border:'1px solid var(--color-brand-light)'}}/>
+                      )}
                       <div style={{flex:1,minWidth:0}}>
                         <div style={{display:'flex',alignItems:'center',gap:6,flexWrap:'wrap'}}>
                           <div style={{fontSize:13,fontWeight:600,color:'var(--color-text)'}}>{c.title}</div>

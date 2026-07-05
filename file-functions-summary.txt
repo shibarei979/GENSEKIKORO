@@ -1,0 +1,2987 @@
+﻿
+===== C:\Users\yukku\Downloads\genseki-koro-nextjs (1)\middleware.ts =====
+import { type NextRequest } from 'next/server'
+export async function middleware(request: NextRequest) {
+export const config = {
+
+===== C:\Users\yukku\Downloads\genseki-koro-nextjs (1)\next-env.d.ts =====
+
+===== C:\Users\yukku\Downloads\genseki-koro-nextjs (1)\next.config.js =====
+/** @type {import('next').NextConfig} */
+const nextConfig = {
+
+===== C:\Users\yukku\Downloads\genseki-koro-nextjs (1)\package-lock.json =====
+
+===== C:\Users\yukku\Downloads\genseki-koro-nextjs (1)\package.json =====
+
+===== C:\Users\yukku\Downloads\genseki-koro-nextjs (1)\postcss.config.js =====
+
+===== C:\Users\yukku\Downloads\genseki-koro-nextjs (1)\tailwind.config.ts =====
+import type { Config } from 'tailwindcss'
+const config: Config = {
+export default config
+
+===== C:\Users\yukku\Downloads\genseki-koro-nextjs (1)\tsconfig.json =====
+
+===== C:\Users\yukku\Downloads\genseki-koro-nextjs (1)\tsconfig.tsbuildinfo =====
+
+===== C:\Users\yukku\Downloads\genseki-koro-nextjs (1)\vercel.json =====
+
+===== C:\Users\yukku\Downloads\genseki-koro-nextjs (1)\src\app\ActionBanner.tsx =====
+interface Props {
+function trapezoidPath(w: number, h: number, r: number, outerEdge: 'left' | 'right', flip: boolean) {
+const inset = h * 0.55 // 傾斜の強さ（高さに対する比率）
+function roundedPolygonPath(pts: {x:number;y:number;radius:number}[]) {
+const n = pts.length
+const curr = pts[i]
+const prev = pts[(i - 1 + n) % n]
+const next = pts[(i + 1) % n]
+const v1 = { x: curr.x - prev.x, y: curr.y - prev.y }
+const v2 = { x: next.x - curr.x, y: next.y - curr.y }
+const len1 = Math.hypot(v1.x, v1.y) || 1
+const len2 = Math.hypot(v2.x, v2.y) || 1
+const radius = curr.radius
+const r1 = Math.min(radius, len1 / 2)
+const r2 = Math.min(radius, len2 / 2)
+const p1 = { x: curr.x - (v1.x / len1) * r1, y: curr.y - (v1.y / len1) * r1 }
+const p2 = { x: curr.x + (v2.x / len2) * r2, y: curr.y + (v2.y / len2) * r2 }
+export default function ActionBanner({ isLoggedIn }: Props) {
+const router = useRouter()
+const [hoverLeft, setHoverLeft] = useState(false)
+const [hoverRight, setHoverRight] = useState(false)
+const W = 800
+const H = 390
+const R = 26
+const leftPath  = trapezoidPath(W, H, R, 'left', false)
+const rightPath = trapezoidPath(W, H, R, 'right', true)
+
+===== C:\Users\yukku\Downloads\genseki-koro-nextjs (1)\src\app\GemComment.tsx =====
+interface Props {
+export default function GemComment({ discoverComments=[] }: Props) {
+
+===== C:\Users\yukku\Downloads\genseki-koro-nextjs (1)\src\app\GemSection.tsx =====
+interface Novel {
+interface Props {
+const SPINE_BASE = 'var(--color-spine-base)'
+const SPINE_DARK = 'var(--color-spine-dark)'
+const SPINE_LIGHT = 'var(--color-spine-light)'
+function BookItem({ n, discoverComments }: { n: Novel; discoverComments: {comment:string;display_name:string}[] }) {
+const [hover, setHover] = useState(false)
+function IntroBlock() {
+function EmptyBook() {
+const [hover, setHover] = useState(false)
+export default function GemSection({ novels, discoverCommentMap }: Props) {
+const uniqueNovels: Novel[] = []
+const seenIds = new Set<string>()
+const bookCount = Math.min(50, Math.max(uniqueNovels.length, 15))
+const rawBookList: (Novel | null)[] = Array.from({length: bookCount}, (_,i) => uniqueNovels[i] || null)
+const introIndex = Math.max(1, Math.floor(bookCount * 0.4))
+const bookList: (Novel | null | 'INTRO')[] = [
+const loopList = [...bookList, ...bookList, ...bookList]
+const trackRef = useRef<HTMLDivElement>(null)
+const set1StartRef = useRef<HTMLDivElement>(null)
+const set2StartRef = useRef<HTMLDivElement>(null)
+const offsetRef = useRef(0)
+const oneSetWidthRef = useRef(0)
+const pausedRef = useRef(false)
+const rafRef = useRef<number | null>(null)
+const SPEED = 0.45
+const measure = useCallback(() => {
+const r1 = set1StartRef.current.getBoundingClientRect()
+const r2 = set2StartRef.current.getBoundingClientRect()
+const t1 = setTimeout(measure, 100)
+const t2 = setTimeout(measure, 500)
+function tick() {
+function jump(dir: 1 | -1) {
+const STEP = 220
+const setLen = bookList.length
+const isSet1Start = i === 0
+const isSet2Start = i === setLen
+const refProp = isSet1Start ? set1StartRef : isSet2Start ? set2StartRef : undefined
+const item = n === 'INTRO'
+
+===== C:\Users\yukku\Downloads\genseki-koro-nextjs (1)\src\app\HeroSlider.tsx =====
+interface SlideItem {
+interface Props {
+const ITEM_H = 156
+const ITEM_RATIO_W = ITEM_H * 16 / 9
+const GAP = 8
+const M_ITEM_H = 78
+const M_ITEM_RATIO_W = M_ITEM_H * 16 / 9
+const M_GAP = 4
+const VISIBLE_COUNT = 5
+function cssVar(name: string, fallback: string) {
+const v = getComputedStyle(document.documentElement).getPropertyValue(name).trim()
+export default function HeroSlider({ items }: Props) {
+const CLONE_COUNT = Math.min(items.length, 4)
+const loopItems = items.length > 1
+const startIndex = items.length > 1 ? CLONE_COUNT : 0
+const [index, setIndex] = useState(startIndex)
+const [withTransition, setWithTransition] = useState(true)
+const [containerW, setContainerW] = useState(0)
+const [mContainerW, setMContainerW] = useState(0)
+const containerRef = useRef<HTMLDivElement>(null)
+const mContainerRef = useRef<HTMLDivElement>(null)
+const isAnimatingRef = useRef(false)
+const isLooping = items.length > 1
+function measure() {
+function computeItemWidth(cw: number, gap: number) {
+const w = (cw - gap * VISIBLE_COUNT) / (VISIBLE_COUNT + 1)
+const itemW  = computeItemWidth(containerW, GAP)
+const itemH  = itemW * 9 / 16
+const mItemW = computeItemWidth(mContainerW, M_GAP)
+const mItemH = mItemW * 9 / 16
+const halfItem  = itemW / 2 + GAP / 2
+const mHalfItem = mItemW / 2 + M_GAP / 2
+function goTo(i: number, transition = true) {
+function next() { goTo(index + 1) }
+function prev() { goTo(index - 1) }
+const realIndex = isLooping
+function handleTransitionEnd() {
+const id = requestAnimationFrame(() => setWithTransition(true))
+const SlideImage = ({ item, w, h }: { item: SlideItem; w: number; h: number }) => {
+const content = (
+
+===== C:\Users\yukku\Downloads\genseki-koro-nextjs (1)\src\app\HomeSidebar.tsx =====
+const GENRES = ['異世界','ファンタジー','SF','恋愛','学園','ミステリー','ホラー','歴史・時代','日常','アクション','コメディ','その他']
+interface Props {
+const TYPE_OPTIONS: Record<string, { label: string; color: string }> = {
+function getAnnouncementType(t: string) {
+type StatusKey = '募集中' | '選考中' | '結果発表'
+const STATUS_ORDER: StatusKey[] = ['募集中', '選考中', '結果発表']
+const STATUS_STYLE: Record<StatusKey, { color: string; bg: string; border: string }> = {
+function getContestStatusKey(deadline: string | null, judging_end: string | null): StatusKey | null {
+const now = new Date()
+const d = new Date(deadline)
+const j = new Date(judging_end)
+const expire = new Date(j.getTime() + 30 * 24 * 60 * 60 * 1000)
+export default function HomeSidebar({ announcements, contests }: Props) {
+const grouped: Record<StatusKey, any[]> = { '募集中': [], '選考中': [], '結果発表': [] }
+const key = getContestStatusKey(c.deadline, c.judging_end)
+const hasAnyContest = STATUS_ORDER.some(k => grouped[k].length > 0)
+const t = getAnnouncementType(n.type)
+const group = grouped[statusKey]
+const s = STATUS_STYLE[statusKey]
+const linkUrl = contest.is_site_contest ? `/contests/${contest.id}` : contest.apply_url
+const img = contest.image_url ? (
+
+===== C:\Users\yukku\Downloads\genseki-koro-nextjs (1)\src\app\LatestEpisodesSection.tsx =====
+interface Episode {
+interface Props {
+export default function LatestEpisodesSection({ episodes }: Props) {
+const [isMobile, setIsMobile] = useState(false)
+const check = () => setIsMobile(window.innerWidth <= 768)
+const displayCount = isMobile ? 5 : 10
+const ep = episodes[i]
+
+===== C:\Users\yukku\Downloads\genseki-koro-nextjs (1)\src\app\layout.tsx =====
+import type { Metadata } from 'next'
+export const metadata: Metadata = {
+export default function RootLayout({ children }: { children: React.ReactNode }) {
+
+===== C:\Users\yukku\Downloads\genseki-koro-nextjs (1)\src\app\not-found.tsx =====
+export default function NotFound() {
+
+===== C:\Users\yukku\Downloads\genseki-koro-nextjs (1)\src\app\NovelList.tsx =====
+const GENRE_TABS = ['すべて','異世界','ファンタジー','SF','恋愛','ミステリー','ホラー','歴史・時代']
+export default function NovelList({ novels }: { novels: any[] }) {
+const [genre, setGenre] = useState('すべて')
+const [isMobile, setIsMobile] = useState(false)
+const check = () => setIsMobile(window.innerWidth <= 768)
+const displayCount = isMobile ? 5 : 8
+const filtered = genre === 'すべて' ? novels : novels.filter(n => n.genre === genre)
+const slots = Array.from({ length: displayCount }, (_, i) => filtered[i] || null)
+{n.novel_type && <span style={{fontSize:9,background:'#eff6ff',color:'var(--color-info)',border:'1px solid #bfdbfe',padding:'1px 5px',borderRadius:3}}>{n.novel_type}</span>}
+
+===== C:\Users\yukku\Downloads\genseki-koro-nextjs (1)\src\app\page.tsx =====
+export const revalidate = 30
+const SEVEN_DAYS_MS = 7 * 24 * 60 * 60 * 1000
+const HIDE_LIKE_THRESHOLD = 50
+function hideStatsFor(createdAt: string, likeCount: number) {
+const isNewWork = Date.now() - new Date(createdAt).getTime() < SEVEN_DAYS_MS
+function getContestStatusKey(deadline: string | null, judging_end: string | null) {
+const now = new Date()
+const d = new Date(deadline)
+const j = new Date(judging_end)
+const expire = new Date(j.getTime() + 30 * 24 * 60 * 60 * 1000)
+export default async function HomePage() {
+const supabase = await createClient()
+const { data: { user } } = await supabase.auth.getUser()
+const { data } = await supabase.from('profiles').select('*').eq('user_id', user.id).single()
+const [{ count: totalViews }, [{ data: sidebarAnnouncementsA }, { data: allContestsA }]] = await Promise.all([
+const sidebarAnnouncements = sidebarAnnouncementsA
+const allContests = allContestsA
+function fmtNum(n: number): string {
+const sidebarContests = (allContests || []).filter(c => getContestStatusKey(c.deadline, c.judging_end) !== null)
+const sliderAnnouncements = (sidebarAnnouncements || [])
+.filter((n: any) => n.type !== 'contest' && n.image_url)
+const sliderContests = (allContests || [])
+const sliderItems = [...sliderAnnouncements, ...sliderContests]
+const { data: latestEpisodesRaw } = await supabase
+const seenNovelIds = new Set<string>()
+const latestEpisodesFiltered = (latestEpisodesRaw || [])
+const novelId = (ep.novels as any)?.id
+const epAuthorIds = Array.from(new Set(latestEpisodesFiltered.map((ep: any) => (ep.novels as any)?.author_id).filter(Boolean)))
+const { data: epAuthors } = await supabase.from('profiles').select('user_id, display_name').in('user_id', epAuthorIds as string[])
+const latestEpisodes = latestEpisodesFiltered.map((ep: any) => ({
+const { data: tanpenEpRaw } = await supabase
+const seenTanpenIds = new Set<string>()
+const tanpenEpFiltered = (tanpenEpRaw || [])
+const n = ep.novels as any
+if (!n?.published || n?.novel_type !== '短編' || n?.is_r18) return false
+const tanpenAuthorIds = tanpenEpFiltered
+const { data: ta } = await supabase.from('profiles').select('user_id, display_name').in('user_id', tanpenAuthorIds)
+const tanpenEpisodes = tanpenEpFiltered.map((ep: any) => ({
+const hideAi = profile?.show_ai_works === false
+const oneMonthAgo = new Date(Date.now() - 30*24*60*60*1000).toISOString()
+const { data: allLatestRaw } = await latestQuery
+const shuffledLatest = [...(allLatestRaw||[])].sort(()=>Math.random()-0.5).slice(0,8)
+const latestNovelsBase = await addAuthorNames(supabase, shuffledLatest || [])
+const latestIds = latestNovelsBase.map((n: any) => n.id)
+const [ll, lb] = await Promise.all([
+const latestNovels = latestNovelsBase.map((n: any) => ({
+const { data: allNovelsRaw } = await allNovelsQuery
+const allNovels = await addAuthorNames(supabase, allNovelsRaw || [])
+const allIds = allNovels.map((n: any) => n.id)
+const [lData, dData, bData, eData, vData, rData] = await Promise.all([
+const scored = allNovels.map((n: any) => {
+const epCount = epCountMap[n.id] || 0
+const updateBoost = epCount > 0 && epCount <= 3 ? 8 : 0  // 3話目まで更新ブースト
+const q = calcQualityScore({
+const qualityBoost = q.score * 0.4  // 質スコア係数0.4
+const recommended = [...scored.sort((a: any,b: any)=>b.score-a.score).slice(0,20)].sort(()=>Math.random()-0.5).slice(0,8)
+const novelIds4Gem = allNovels.map((n: any) => n.id)
+const { data: gemComments } = await supabase.from('comments').select('novel_id').in('novel_id', novelIds4Gem)
+const gemScored = allNovels.map((n: any) => {
+const epCount = epCountMap[n.id] || 0
+const gemUpdateBoost = epCount > 0 && epCount <= 3 ? 6 : 0
+const seed = Date.now()
+const shuffledGem = [...gemScored.sort((a:any,b:any)=>b.gemScore-a.gemScore).slice(0,60)].sort((a:any,b:any)=>{
+const ha = (a.id.charCodeAt(0) * seed) % 997
+const hb = (b.id.charCodeAt(0) * seed) % 997
+const seenGemIds = new Set<string>()
+const gemNovels: any[] = []
+const gemIds = gemNovels.map((n: any) => n.id)
+const discoverCommentMap: Record<string,{comment:string;display_name:string}[]> = {}
+const { data: gemDiscovers } = await supabase
+const activeContest = (allContests || []).find((c: any) => c.image_url && getContestStatusKey(c.deadline, c.judging_end) === '募集中')
+function WelcomeToast({ profile }: { profile: any }) {
+async function addAuthorNames(supabase: any, novels: any[]) {
+const authorIds = Array.from(new Set(novels.map((n: any) => n.author_id)))
+const { data: authors } = await supabase.from('profiles').select('user_id, display_name').in('user_id', authorIds)
+const authorMap: Record<string,string> = {}
+
+===== C:\Users\yukku\Downloads\genseki-koro-nextjs (1)\src\app\RankingSection.tsx =====
+interface Novel {
+interface Props {
+export default function RankingSection({ rankingLong, rankingShort }: Props) {
+const rankColor = (i: number) => i===0?'var(--color-rank-gold)':i===1?'var(--color-rank-silver)':i===2?'var(--color-rank-bronze)':'var(--color-text)'
+const rowStyle = {borderBottom:'1px solid var(--color-brand-light)',display:'flex',gap:8,padding:'9px 14px',alignItems:'flex-start',height:'100%',boxSizing:'border-box' as const}
+const RankItem = ({n, i}: {n:Novel|undefined, i:number}) => n ? (
+
+===== C:\Users\yukku\Downloads\genseki-koro-nextjs (1)\src\app\RecommendedNovels.tsx =====
+interface Novel {
+interface Props {
+export default function RecommendedNovels({ novels }: Props) {
+const [spinning, setSpinning] = useState(false)
+const [isMobile, setIsMobile] = useState(false)
+const check = () => setIsMobile(window.innerWidth <= 768)
+const displayCount = isMobile ? 5 : 8
+const [displayed, setDisplayed] = useState<Novel[]>(() =>
+const shuffle = useCallback(() => {
+const n = displayed[i]
+{n.novel_type && <span style={{fontSize:9,background:'var(--color-info-bg)',color:'var(--color-info)',border:'1px solid var(--color-info-border)',padding:'1px 5px',borderRadius:3}}>{n.novel_type}</span>}
+
+===== C:\Users\yukku\Downloads\genseki-koro-nextjs (1)\src\app\SearchBanner.tsx =====
+export default function SearchBanner() {
+const [hovered, setHovered] = useState(false)
+const router = useRouter()
+
+===== C:\Users\yukku\Downloads\genseki-koro-nextjs (1)\src\app\about\page.tsx =====
+export default async function AboutPage() {
+const supabase = await createClient()
+const { data: { user } } = await supabase.auth.getUser()
+const { data } = await supabase.from('profiles').select('*').eq('user_id', user.id).single()
+const features = [
+const values = [
+const navLinks = [
+
+===== C:\Users\yukku\Downloads\genseki-koro-nextjs (1)\src\app\admin\AdminAnalytics.tsx =====
+interface Props {
+const COLORS = ['#F26A21','#3b82f6','#10b981','#f59e0b','#8b5cf6','#ec4899','#14b8a6','#f97316','#6366f1','#84cc16']
+const CustomTooltip = ({ active, payload, label }: any) => {
+const TAB_LABELS = [
+const MISSION_LABELS: Record<string,string> = {
+export default function AdminAnalytics({
+const [tab, setTab] = useState('genre')
+const tabBtn = (id: string) => ({
+const peak = Math.max(...hourlyAccess.map(h=>h.count))
+const peak = hourlyAccess.reduce((a,b)=>a.count>b.count?a:b,{hour:0,count:0})
+const total = hourlyAccess.reduce((s,d)=>s+d.count,0)
+const now = new Date()
+const dl  = c.deadline ? new Date(c.deadline) : null
+const status = !dl ? '募集中' : dl > now ? '募集中' : '終了'
+
+===== C:\Users\yukku\Downloads\genseki-koro-nextjs (1)\src\app\admin\AdminChart.tsx =====
+interface DayData { date: string; users: number; novels: number }
+interface Props {
+type Period    = '30' | '180' | '365' | '1825'
+type ChartType = 'bar' | 'line'
+type DataMode  = 'daily' | 'cumulative'
+const PERIODS: { value: Period; label: string }[] = [
+function toCumulative(data: DayData[]): DayData[] {
+function aggregate(data: DayData[], step: number): DayData[] {
+const result: DayData[] = []
+const chunk = data.slice(i, i + step)
+const AGG_STEPS: Record<Period, number> = {
+const CustomTooltip = ({ active, payload, label }: any) => {
+export default function AdminChart({ data30, data180, data365, data1825 }: Props) {
+const [period,    setPeriod]    = useState<Period>('30')
+const [chartType, setChartType] = useState<ChartType>('bar')
+const [dataMode,  setDataMode]  = useState<DataMode>('daily')
+const rawMap: Record<Period, DayData[]> = { '30': data30, '180': data180, '365': data365, '1825': data1825 }
+const raw        = rawMap[period]
+const aggregated = aggregate(raw, AGG_STEPS[period])
+const data       = dataMode === 'cumulative' ? toCumulative(aggregated) : aggregated
+const totalUsers  = raw.reduce((s, d) => s + d.users,  0)
+const totalNovels = raw.reduce((s, d) => s + d.novels, 0)
+const tabStyle = (active: boolean) => ({
+const ChartComp = chartType === 'bar' ? BarChart : LineChart
+{chartType === 'bar' ? (
+
+===== C:\Users\yukku\Downloads\genseki-koro-nextjs (1)\src\app\admin\AiReviewSection.tsx =====
+interface Review {
+interface Props {
+export default function AiReviewSection({ reviews: initialReviews }: Props) {
+const supabase = createClient()
+const [reviews, setReviews] = useState<Review[]>(initialReviews)
+const [loading, setLoading] = useState<string>('')
+const [toast, setToast] = useState('')
+const pending = reviews.filter(r => r.status === 'pending')
+const handled = reviews.filter(r => r.status !== 'pending')
+function showToast(msg: string) {
+async function handleClear(review: Review) {
+async function handleDeleteRequest(review: Review) {
+async function handleDelete(review: Review) {
+const statusLabel: Record<string,{label:string;color:string;bg:string}> = {
+const st = statusLabel[r.status] || { label:r.status, color:'#64748b', bg:'#f9fafb' }
+
+===== C:\Users\yukku\Downloads\genseki-koro-nextjs (1)\src\app\admin\page.tsx =====
+export const dynamic = 'force-dynamic'
+export default async function AdminPage() {
+const supabase = await createClient()
+const { data: { user } } = await supabase.auth.getUser()
+const adminSupabase = createAdminClient()
+const { data: profile } = await adminSupabase.from('profiles').select('*').eq('user_id', user.id).single()
+function makeDays(n: number) {
+const d = new Date(); d.setDate(d.getDate() - (n - 1 - i)); return d
+const startDate = new Date(); startDate.setDate(startDate.getDate() - 365 * 5)
+const [{ data: allUsers }, { data: allNovels }] = await Promise.all([
+function buildChartData(days: Date[]) {
+const s = new Date(d); s.setHours(0,0,0,0)
+const e = new Date(d); e.setHours(23,59,59,999)
+const fmt = (dt: Date) => `${dt.getMonth()+1}/${dt.getDate()}`
+users:  (allUsers  || []).filter((u: any) => { const t = new Date(u.created_at); return t >= s && t <= e }).length,
+novels: (allNovels || []).filter((n: any) => { const t = new Date(n.created_at); return t >= s && t <= e }).length,
+const chartData30   = buildChartData(makeDays(30))
+const chartData180  = buildChartData(makeDays(180))
+const chartData365  = buildChartData(makeDays(365))
+const chartData1825 = buildChartData(makeDays(365 * 5))
+const stats = [
+const menus = [
+
+===== C:\Users\yukku\Downloads\genseki-koro-nextjs (1)\src\app\admin\ai-review\page.tsx =====
+export const dynamic = 'force-dynamic'
+export default async function AdminAiReviewPage() {
+const supabase = await createClient()
+const { data: { user } } = await supabase.auth.getUser()
+const adminSupabase = createAdminClient()
+const { data: profile } = await adminSupabase.from('profiles').select('*').eq('user_id', user.id).single()
+const { data: aiReviews, count: aiReviewCount } = await supabase
+const pending = (aiReviews || []).filter((r: any) => r.status === 'pending').length
+
+===== C:\Users\yukku\Downloads\genseki-koro-nextjs (1)\src\app\admin\analytics\page.tsx =====
+export const dynamic = 'force-dynamic'
+export default async function AdminAnalyticsPage() {
+const supabase = await createClient()
+const { data: { user } } = await supabase.auth.getUser()
+const adminSupabase = createAdminClient()
+const { data: profile } = await adminSupabase.from('profiles').select('*').eq('user_id', user.id).single()
+const { data: novels } = await supabase.from('novels').select('id, genre').eq('published', true)
+const { data: likes }  = await supabase.from('likes').select('novel_id')
+const likeMap: Record<string, number> = {}
+const genreMap: Record<string, { count: number; likes: number }> = {}
+const genreStats = Object.entries(genreMap).map(([genre, v]) => ({ genre, ...v }))
+const since30 = new Date(); since30.setDate(since30.getDate() - 30)
+const { data: pageViews30 } = await supabase.from('page_views').select('created_at').gte('created_at', since30.toISOString())
+const hourMap: Record<number, number> = {}
+const hourlyAccess = Object.entries(hourMap).map(([h, count]) => ({ hour: Number(h), count })).sort((a,b)=>a.hour-b.hour)
+const { data: novelViews } = await supabase.from('novel_views').select('novel_id, view_count')
+const viewMap: Record<string, number> = {}
+const { data: topNovelData } = await supabase.from('novels').select('id, title, genre').eq('published', true).order('created_at', { ascending: false }).limit(50)
+const topNovels = (topNovelData || []).map((n: any) => ({
+const { data: allContests } = await supabase.from('contests').select('id, title, deadline').eq('is_published', true)
+const { data: allEntries }  = await supabase.from('contest_entries').select('contest_id')
+const entryCountMap: Record<string, number> = {}
+const contestStats = (allContests || []).map((c: any) => ({
+const { data: missionData } = await supabase.from('user_missions').select('mission_id')
+const missionCountMap: Record<string, number> = {}
+const missionStats = Object.entries(missionCountMap).map(([mission_id, count]) => ({ mission_id, count })).sort((a,b) => b.count - a.count)
+const { count: totalUsers } = await supabase.from('profiles').select('*', { count: 'exact', head: true })
+const { data: speechUserData } = await supabase.from('user_missions').select('user_id')
+const uniqueSpeechUsers = new Set((speechUserData || []).map((d: any) => d.user_id)).size
+const speechStats = { used: uniqueSpeechUsers, total: totalUsers || 0 }
+const { data: allPageViews } = await supabase.from('page_views').select('episode_id')
+const epViewMap: Record<string, number> = {}
+const key = pv.episode_id ? '話ページ' : 'その他'
+const pageViewStats = [
+const totalPageViews = (allPageViews || []).length
+
+===== C:\Users\yukku\Downloads\genseki-koro-nextjs (1)\src\app\admin\announcements\AnnouncementManager.tsx =====
+import { TYPE_OPTIONS_ARRAY, getAnnouncementType } from '@/app/announcements/announcement-types'
+interface Announcement {
+const btn = (color: string, bg: string, border: string) => ({
+function validate(form: { title:string; body:string; link:string; type:string; image_url:string }) {
+const errors: Record<string, string> = {}
+if (!form.type) errors.type = '種別は必須です'
+export default function AnnouncementManager({ initialAnnouncements }: { initialAnnouncements: Announcement[] }) {
+const supabase = createClient()
+const [items, setItems] = useState(initialAnnouncements)
+const [editing, setEditing] = useState<Announcement | null>(null)
+const [creating, setCreating] = useState(false)
+const [form, setForm] = useState({ title:'', body:'', type:'info', link:'', image_url:'', is_published:true })
+const [errors, setErrors] = useState<Record<string,string>>({})
+const [loading, setLoading] = useState(false)
+const [uploading, setUploading] = useState(false)
+const [notifyAll, setNotifyAll] = useState(false)
+const [notifying, setNotifying] = useState(false)
+const [notifyResult, setNotifyResult] = useState('')
+function openCreate() {
+function openEdit(a: Announcement) {
+function closeForm() { setCreating(false); setEditing(null); setErrors({}); setNotifyAll(false); setNotifyResult('') }
+async function handleImageUpload(e: React.ChangeEvent<HTMLInputElement>) {
+const file = e.target.files?.[0]; if (!file) return
+const ext = file.name.split('.').pop()
+const path = `announcements/${Date.now()}.${ext}`
+const { error } = await supabase.storage.from('images').upload(path, file, { upsert: true })
+const { data } = supabase.storage.from('images').getPublicUrl(path)
+async function handleSave() {
+const errs = validate(form)
+const payload = { ...form, image_url: form.image_url || null, link: form.link || null }
+const { data } = await supabase.from('announcements').insert(payload).select().single()
+const res = await fetch('/api/notify-all', { method:'POST', headers:{'Content-Type':'application/json'},
+const data = await res.json()
+async function handleDelete(id: string) {
+async function togglePublish(a: Announcement) {
+const inputStyle = (key: string) => ({
+{errors.type && <div style={{fontSize:11,color:'#ef4444',marginTop:3}}>{errors.type}</div>}
+const t = getAnnouncementType(a.type)
+
+===== C:\Users\yukku\Downloads\genseki-koro-nextjs (1)\src\app\admin\announcements\page.tsx =====
+export default async function AdminAnnouncementsPage() {
+const supabase = await createClient()
+const { data: { user } } = await supabase.auth.getUser()
+const { data: profile } = await supabase.from('profiles').select('*').eq('user_id', user.id).single()
+const { data: announcements } = await supabase
+
+===== C:\Users\yukku\Downloads\genseki-koro-nextjs (1)\src\app\admin\banners\BannerManager.tsx =====
+interface Banner { id: string; title: string; image_url: string|null; link_url: string|null; position: string; is_active: boolean; created_at: string }
+const btn = (color: string, bg: string, border: string) => ({
+const POSITIONS = [{ v:'sidebar', l:'サイドバー' },{ v:'home', l:'ホーム' },{ v:'header', l:'ヘッダー' }]
+export default function BannerManager({ initialBanners }: { initialBanners: Banner[] }) {
+const supabase = createClient()
+const [items, setItems] = useState(initialBanners)
+const [editing, setEditing] = useState<Banner|null>(null)
+const [creating, setCreating] = useState(false)
+const [form, setForm] = useState({ title:'', image_url:'', link_url:'', position:'sidebar', is_active:true })
+const [loading, setLoading] = useState(false)
+function openCreate() { setForm({title:'',image_url:'',link_url:'',position:'sidebar',is_active:true}); setCreating(true); setEditing(null) }
+function openEdit(b: Banner) { setForm({title:b.title,image_url:b.image_url||'',link_url:b.link_url||'',position:b.position,is_active:b.is_active}); setEditing(b); setCreating(false) }
+function closeForm() { setCreating(false); setEditing(null) }
+async function handleSave() {
+const { data } = await supabase.from('banners').insert(form).select().single()
+async function handleDelete(id: string) {
+async function toggleActive(b: Banner) {
+
+===== C:\Users\yukku\Downloads\genseki-koro-nextjs (1)\src\app\admin\banners\page.tsx =====
+export default async function AdminBannersPage() {
+const supabase = await createClient()
+const { data: { user } } = await supabase.auth.getUser()
+const { data: profile } = await supabase.from('profiles').select('*').eq('user_id', user.id).single()
+const { data: banners } = await supabase.from('banners').select('*').order('created_at', { ascending: false })
+
+===== C:\Users\yukku\Downloads\genseki-koro-nextjs (1)\src\app\admin\contacts\ContactManager.tsx =====
+interface Contact {
+const btn = (color: string, bg: string, border: string) => ({
+export default function ContactManager({ initialContacts }: { initialContacts: Contact[] }) {
+const supabase = createClient()
+const [items, setItems] = useState(initialContacts)
+const [selected, setSelected] = useState<Contact | null>(null)
+const [note, setNote] = useState('')
+const [saving, setSaving] = useState(false)
+const [filter, setFilter] = useState<'all'|'unread'|'read'>('all')
+const filtered = items.filter(c =>
+async function handleSelect(c: Contact) {
+async function handleSaveNote() {
+async function handleDelete(id: string) {
+async function toggleRead(c: Contact) {
+
+===== C:\Users\yukku\Downloads\genseki-koro-nextjs (1)\src\app\admin\contacts\page.tsx =====
+export default async function AdminContactsPage() {
+const supabase = await createClient()
+const { data: { user } } = await supabase.auth.getUser()
+const { data: profile } = await supabase.from('profiles').select('*').eq('user_id', user.id).single()
+const adminSupabase = createAdminClient()
+const { data: contacts } = await adminSupabase
+
+===== C:\Users\yukku\Downloads\genseki-koro-nextjs (1)\src\app\admin\contests\ContestManager.tsx =====
+interface Contest {
+interface Entry {
+interface Props {
+const btn = (color: string, bg: string, border: string) => ({
+function getStatus(deadline: string | null, judging_end: string | null) {
+const now = new Date()
+const d = new Date(deadline)
+const j = new Date(judging_end)
+const expire = new Date(j.getTime() + 30 * 24 * 60 * 60 * 1000)
+function validate(form: { title:string; apply_url:string; image_url:string; deadline:string; judging_end:string; is_site_contest:boolean }) {
+const errors: Record<string, string> = {}
+export default function ContestManager({ initialContests, entriesMap }: Props) {
+const supabase = createClient()
+const [items, setItems] = useState(initialContests)
+const [editing, setEditing] = useState<Contest | null>(null)
+const [creating, setCreating] = useState(false)
+const [form, setForm] = useState({ title:'', description:'', start_date:'', deadline:'', judging_end:'', apply_url:'', image_url:'', is_published:true, is_site_contest:false, exclusive:false })
+const [errors, setErrors] = useState<Record<string, string>>({})
+const [loading, setLoading] = useState(false)
+const [uploading, setUploading] = useState(false)
+const [expandedId, setExpandedId] = useState<string | null>(null)
+function openCreate() {
+function openEdit(c: Contest) {
+function closeForm() { setCreating(false); setEditing(null); setErrors({}) }
+async function handleImageUpload(e: React.ChangeEvent<HTMLInputElement>) {
+const file = e.target.files?.[0]
+const ext = file.name.split('.').pop()
+const path = `contests/${Date.now()}.${ext}`
+const { error } = await supabase.storage.from('images').upload(path, file, { upsert: true })
+const { data } = supabase.storage.from('images').getPublicUrl(path)
+async function handleSave() {
+const errs = validate({title:form.title, apply_url:form.apply_url, image_url:form.image_url, deadline:form.deadline, judging_end:form.judging_end, is_site_contest:form.is_site_contest})
+const payload = {
+const { data } = await supabase.from('contests').insert(payload).select().single()
+async function handleDelete(id: string) {
+function handleExportExcel(contest: Contest) {
+const entries = entriesMap[contest.id] || []
+const headers = ['応募番号','作品タイトル','ジャンル','作者名','あらすじ','作品URL','いいね数','拡散数','応募日']
+const rows = entries.map((e, i) => [
+const ws = XLSX.utils.aoa_to_sheet([headers, ...rows])
+const range = XLSX.utils.decode_range(ws['!ref'] || 'A1')
+const gridBorder = {
+const addr = XLSX.utils.encode_cell({ r: 0, c })
+const addr = XLSX.utils.encode_cell({ r, c })
+const wb = XLSX.utils.book_new()
+const fileName = `${contest.title}_応募作品_${new Date().toISOString().slice(0,10)}.xlsx`
+const inputStyle = (key: string) => ({
+const status = getStatus(c.deadline, c.judging_end)
+const contestEntries = entriesMap[c.id] || []
+const isExpanded = expandedId === c.id
+
+===== C:\Users\yukku\Downloads\genseki-koro-nextjs (1)\src\app\admin\contests\page.tsx =====
+export const dynamic = 'force-dynamic'
+export default async function AdminContestsPage() {
+const supabase = await createClient()
+const { data: { user } } = await supabase.auth.getUser()
+const { data: profile } = await supabase.from('profiles').select('*').eq('user_id', user.id).single()
+const adminSupabase = createAdminClient()
+const { data: contests } = await adminSupabase
+const { data: allEntries } = await adminSupabase
+const novelIds: string[] = Array.from(new Set((allEntries||[]).map((e:any) => e.novel_id as string).filter(Boolean)))
+const userIds: string[]  = Array.from(new Set((allEntries||[]).map((e:any) => e.user_id as string).filter(Boolean)))
+const { data: novels, error: novelError } = await adminSupabase.from('novels').select('id, title, genre, summary').in('id', novelIds)
+const { data: likes, error: likesError } = await adminSupabase.from('likes').select('novel_id').in('novel_id', novelIds)
+const { data: discovers } = await adminSupabase.from('discovers').select('novel_id').eq('is_pending', false).in('novel_id', novelIds)
+const { data: profiles } = await adminSupabase.from('profiles').select('user_id, display_name').in('user_id', userIds)
+const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://gensekikoro.vercel.app'
+const entriesMap: Record<string, any[]> = {}
+const novel = novelMap[e.novel_id]
+
+===== C:\Users\yukku\Downloads\genseki-koro-nextjs (1)\src\app\admin\discovers\DiscoverManager.tsx =====
+interface Item {
+const btn = (color: string, bg: string, border: string) => ({
+export default function DiscoverManager({ initialItems }: { initialItems: Item[] }) {
+const supabase = createClient()
+const [items, setItems] = useState(initialItems)
+async function handleApprove(item: Item) {
+async function handleReject(item: Item) {
+
+===== C:\Users\yukku\Downloads\genseki-koro-nextjs (1)\src\app\admin\discovers\page.tsx =====
+export default async function AdminDiscoversPage() {
+const supabase = await createClient()
+const { data: { user } } = await supabase.auth.getUser()
+const { data: profile } = await supabase.from('profiles').select('*').eq('user_id', user.id).single()
+const { data: pending } = await supabase
+const novelIds = Array.from(new Set((pending||[]).map((d:any) => d.novel_id)))
+const { data: novels } = await supabase
+const items = (pending||[]).map((d:any) => ({
+
+===== C:\Users\yukku\Downloads\genseki-koro-nextjs (1)\src\app\admin\features\FeatureFlagsManager.tsx =====
+type Status = 'off' | 'preview' | 'on'
+interface Feature {
+const STATUS_OPTIONS: { value: Status; label: string; color: string; bg: string }[] = [
+export default function FeatureFlagsManager({ features: initial }: { features: Feature[] }) {
+const [features, setFeatures] = useState<Feature[]>(initial)
+const [saving, setSaving] = useState<string | null>(null)
+const [toast, setToast] = useState('')
+async function updateStatus(key: string, label: string, status: Status) {
+const res = await fetch('/api/admin/feature-flags', {
+const cur = STATUS_OPTIONS.find(s => s.value === f.status)!
+
+===== C:\Users\yukku\Downloads\genseki-koro-nextjs (1)\src\app\admin\features\page.tsx =====
+export const dynamic = 'force-dynamic'
+const MANAGED_FEATURES = [
+export default async function AdminFeaturesPage() {
+const supabase = await createClient()
+const { data: { user } } = await supabase.auth.getUser()
+const admin = createAdminClient()
+const { data: profile } = await admin.from('profiles').select('is_admin').eq('user_id', user.id).single()
+const { data: flags } = await admin.from('feature_flags').select('key, status')
+const flagMap: Record<string, string> = {}
+const features = MANAGED_FEATURES.map(f => ({
+
+===== C:\Users\yukku\Downloads\genseki-koro-nextjs (1)\src\app\admin\messages\MessageSender.tsx =====
+interface User { user_id: string; display_name: string; email: string; icon_url: string | null }
+interface Message { id: string; to_user_id: string; to_name: string; to_email: string; subject: string; body: string; is_read: boolean; created_at: string }
+const btn = (color: string, bg: string, border: string) => ({
+export default function MessageSender({ users, sentMessages: initialMessages }: { users: User[]; sentMessages: Message[] }) {
+const supabase = createClient()
+const [messages, setMessages]   = useState(initialMessages)
+const [toUserId, setToUserId]   = useState('')
+const [subject,  setSubject]    = useState('')
+const [body,     setBody]       = useState('')
+const [search,   setSearch]     = useState('')
+const [loading,  setLoading]    = useState(false)
+const [error,    setError]      = useState('')
+const [sent,     setSent]       = useState(false)
+const [selected, setSelected]   = useState<Message | null>(null)
+const filteredUsers = users.filter(u =>
+async function handleSend() {
+const { data, error: err } = await supabase
+const toUser = users.find(u => u.user_id === toUserId)
+const newMsg: Message = {
+
+===== C:\Users\yukku\Downloads\genseki-koro-nextjs (1)\src\app\admin\messages\page.tsx =====
+export default async function AdminMessagesPage() {
+const supabase = await createClient()
+const { data: { user } } = await supabase.auth.getUser()
+const { data: profile } = await supabase.from('profiles').select('*').eq('user_id', user.id).single()
+const adminSupabase = createAdminClient()
+const { data: users } = await adminSupabase
+const { data: sentMessages } = await adminSupabase
+const userMap = Object.fromEntries((users||[]).map((u:any) => [u.user_id, u]))
+const messages = (sentMessages||[]).map((m:any) => ({
+
+===== C:\Users\yukku\Downloads\genseki-koro-nextjs (1)\src\app\admin\ngwords\NgWordManager.tsx =====
+interface NgWord { id: string; word: string; created_at: string }
+const btn = (color: string, bg: string, border: string) => ({
+export default function NgWordManager({ initialWords }: { initialWords: NgWord[] }) {
+const supabase = createClient()
+const [words,   setWords]   = useState(initialWords)
+const [input,   setInput]   = useState('')
+const [bulk,    setBulk]    = useState('')
+const [mode,    setMode]    = useState<'single'|'bulk'>('single')
+const [loading, setLoading] = useState(false)
+const [error,   setError]   = useState('')
+const [search,  setSearch]  = useState('')
+const filtered = words.filter(w => w.word.includes(search))
+async function handleAdd() {
+const word = input.trim()
+const { data, error: err } = await supabase.from('ng_words').insert({ word }).select().single()
+async function handleBulkAdd() {
+const newWords = Array.from(new Set(
+const { data, error: err } = await supabase
+async function handleDelete(id: string) {
+async function handleDeleteAll() {
+
+===== C:\Users\yukku\Downloads\genseki-koro-nextjs (1)\src\app\admin\ngwords\page.tsx =====
+export default async function AdminNgWordsPage() {
+const supabase = await createClient()
+const { data: { user } } = await supabase.auth.getUser()
+const { data: profile } = await supabase.from('profiles').select('*').eq('user_id', user.id).single()
+const adminSupabase = createAdminClient()
+const { data: words } = await adminSupabase
+
+===== C:\Users\yukku\Downloads\genseki-koro-nextjs (1)\src\app\admin\novels\NovelManager.tsx =====
+interface Novel { id: string; title: string; genre: string; display_name: string; published: boolean; is_r18: boolean; created_at: string; aims_publishing?: boolean; official_tags?: string[] }
+const btn = (color: string, bg: string, border: string) => ({
+export default function NovelManager({ initialNovels, total, currentPage, q, publishingOnly }: { initialNovels: Novel[]; total: number; currentPage: number; q: string; publishingOnly?: boolean }) {
+const supabase = createClient()
+const router = useRouter()
+const [novels, setNovels] = useState(initialNovels)
+const [tagModal, setTagModal] = useState(null as Novel | null)
+const [tagInput, setTagInput] = useState('')
+const [notifyModal, setNotifyModal] = useState(null as Novel | null)
+const [notifySending, setNotifySending] = useState(false)
+const [notifyResult, setNotifyResult] = useState('')
+const [search, setSearch] = useState(q)
+async function togglePublish(n: Novel) {
+async function handleNotifyFirst100() {
+const res = await fetch('/api/notify-first100', {
+const data = await res.json()
+const PRESET_TAGS = ['受賞作', '月間賞', '編集部イチオシ', '特別賞', '読者賞', '新人賞']
+async function handleTagSave(novel: Novel, tags: string[]) {
+async function handleDelete(n: Novel) {
+function handleSearch(e: React.FormEvent) {
+const PAGE_SIZE = 20
+const totalPages = Math.ceil(total / PAGE_SIZE)
+const active = (tagModal.official_tags||[]).includes(tag)
+const cur = tagModal.official_tags || []
+const next = active ? cur.filter(t=>t!==tag) : [...cur, tag]
+
+===== C:\Users\yukku\Downloads\genseki-koro-nextjs (1)\src\app\admin\novels\page.tsx =====
+export const dynamic = 'force-dynamic'
+export default async function AdminNovelsPage({ searchParams }: { searchParams: { q?: string; page?: string; publishing?: string } }) {
+const supabase = await createClient()
+const { data: { user } } = await supabase.auth.getUser()
+const { data: profile } = await supabase.from('profiles').select('*').eq('user_id', user.id).single()
+const q = searchParams.q || ''
+const page = Number(searchParams.page || 1)
+const publishingOnly = searchParams.publishing === '1'
+const PAGE_SIZE = 20
+const offset = (page - 1) * PAGE_SIZE
+const { data: novels, count } = await (query as any).order('created_at', { ascending: false }).range(offset, offset + PAGE_SIZE - 1)
+const authorIds = (novels||[]).map((n: any) => n.author_id).filter((v:string,i:number,a:string[]) => a.indexOf(v)===i)
+const authorMap: Record<string, string> = {}
+const { data: authors } = await supabase.from('profiles').select('user_id, display_name').in('user_id', authorIds as string[])
+const novelsWithAuthor = (novels||[]).map((n: any) => ({ ...n, display_name: authorMap[n.author_id]||'' }))
+
+===== C:\Users\yukku\Downloads\genseki-koro-nextjs (1)\src\app\admin\users\page.tsx =====
+export const dynamic = 'force-dynamic'
+export default async function AdminUsersPage({ searchParams }: { searchParams: { q?: string; page?: string } }) {
+const supabase = await createClient()
+const { data: { user } } = await supabase.auth.getUser()
+const { data: profile } = await supabase.from('profiles').select('*').eq('user_id', user.id).single()
+const q = searchParams.q || ''
+const page = Number(searchParams.page || 1)
+const PAGE_SIZE = 20
+const offset = (page - 1) * PAGE_SIZE
+const { data: users, count } = await (query as any).order('created_at', { ascending: false }).range(offset, offset + PAGE_SIZE - 1)
+
+===== C:\Users\yukku\Downloads\genseki-koro-nextjs (1)\src\app\admin\users\UserManager.tsx =====
+interface UserProfile {
+const PROTECTED_EMAIL = 'gensekikoro@gmail.com'
+const btn = (color: string, bg: string, border: string) => ({
+export default function UserManager({ initialUsers, total, currentPage, q }: { initialUsers: UserProfile[]; total: number; currentPage: number; q: string }) {
+const supabase = createClient()
+const router = useRouter()
+const [users, setUsers] = useState(initialUsers)
+const [search, setSearch] = useState(q)
+const [adminModal, setAdminModal] = useState(null as UserProfile | null)
+const [adminStep, setAdminStep] = useState(0)
+const [adminInput, setAdminInput] = useState('')
+const [adminLoading, setAdminLoading] = useState(false)
+async function handleFreeze(u: UserProfile) {
+async function handleDelete(u: UserProfile) {
+function openAdminModal(u: UserProfile) {
+function closeAdminModal() {
+async function handleAdminGrant() {
+async function handleAdminRevoke(u: UserProfile) {
+function handleSearch(e: React.FormEvent) {
+const PAGE_SIZE = 20
+const totalPages = Math.ceil(total / PAGE_SIZE)
+
+===== C:\Users\yukku\Downloads\genseki-koro-nextjs (1)\src\app\announcements\announcement-types.ts =====
+export const TYPE_OPTIONS: Record<string, { label: string; color: string }> = {
+export function getAnnouncementType(t: string) {
+export const TYPE_OPTIONS_ARRAY = Object.entries(TYPE_OPTIONS).map(([value, { label, color }]) => ({ value, label, color }))
+
+===== C:\Users\yukku\Downloads\genseki-koro-nextjs (1)\src\app\announcements\page.tsx =====
+import { TYPE_OPTIONS, getAnnouncementType } from './announcement-types'
+function getType(t: string) {
+export default async function AnnouncementsPage() {
+const supabase = await createClient()
+const { data: { user } } = await supabase.auth.getUser()
+const { data } = await supabase.from('profiles').select('*').eq('user_id', user.id).single()
+const { data: announcements } = await supabase
+const usedTypes = (announcements||[]).map((n:any) => n.type).filter(Boolean).filter((v:string,i:number,a:string[]) => a.indexOf(v) === i)
+{usedTypes.map(type => {
+const t = getType(type)
+const t = getType(n.type)
+const href = n.link || `/announcements/${n.id}`
+const isExternal = !!n.link
+
+===== C:\Users\yukku\Downloads\genseki-koro-nextjs (1)\src\app\announcements\[id]\page.tsx =====
+
+===== C:\Users\yukku\Downloads\genseki-koro-nextjs (1)\src\app\api\admin\feature-flags\route.ts =====
+export async function POST(req: Request) {
+const supabase = await createClient()
+const { data: { user } } = await supabase.auth.getUser()
+const admin = createAdminClient()
+const { data: profile } = await admin.from('profiles').select('is_admin').eq('user_id', user.id).single()
+const body = await req.json()
+const { key, label, status } = body
+const { error } = await admin.from('feature_flags').upsert({
+
+===== C:\Users\yukku\Downloads\genseki-koro-nextjs (1)\src\app\api\age-check\route.ts =====
+export async function POST() {
+const supabase = await createClient()
+const { data: { user } } = await supabase.auth.getUser()
+const { data: profile } = await supabase
+const birth = new Date(profile.birthdate)
+const today = new Date()
+const m = today.getMonth() - birth.getMonth()
+const verified = age >= 18
+
+===== C:\Users\yukku\Downloads\genseki-koro-nextjs (1)\src\app\api\check-discover\route.ts =====
+const LOCAL_NG = [
+function containsNg(text: string, ngList: string[]): string | null {
+const normalized = text.replace(/[\s　]/g, '')
+const nw = w.replace(/[\s　]/g, '')
+export async function POST(request: NextRequest) {
+const { comment } = await request.json()
+const localHit = containsNg(comment, LOCAL_NG)
+const admin = createAdminClient()
+const { data: ngWords } = await admin.from('ng_words').select('word')
+const dbHit = containsNg(comment, ngWords.map((w: any) => w.word))
+const response = await fetch('https://api.anthropic.com/v1/messages', {
+const data = await response.json()
+const text = data.content?.[0]?.text || '{}'
+const clean = text.replace(/```json|```/g, '').trim()
+const result = JSON.parse(clean)
+
+===== C:\Users\yukku\Downloads\genseki-koro-nextjs (1)\src\app\api\check-ngword\route.ts =====
+export async function POST(request: NextRequest) {
+const { text } = await request.json()
+const admin = createAdminClient()
+const { data: words } = await admin.from('ng_words').select('word')
+const lowerText = text.toLowerCase()
+const matched = words.find((w: any) => lowerText.includes(w.word.toLowerCase()))
+
+===== C:\Users\yukku\Downloads\genseki-koro-nextjs (1)\src\app\api\create-profile\route.ts =====
+export async function POST(request: NextRequest) {
+const body = await request.json()
+const { user_id, display_name, email, login_provider, birthdate, age_verified } = body
+const supabase = createAdminClient()
+const { error } = await supabase.from('profiles').upsert({
+
+===== C:\Users\yukku\Downloads\genseki-koro-nextjs (1)\src\app\api\notify\route.ts =====
+export async function POST(req: Request) {
+const supabase = await createClient()
+const { user_id, type, message, link } = await req.json()
+if (!user_id || !type || !message) return NextResponse.json({ ok: false })
+const { data: { user } } = await supabase.auth.getUser()
+const { data: profile } = await supabase
+const allowed: Record<string, boolean> = {
+
+===== C:\Users\yukku\Downloads\genseki-koro-nextjs (1)\src\app\api\notify-all\route.ts =====
+export async function POST(req: Request) {
+const { title, message, link } = await req.json()
+const supabase = await createClient()
+const { data: { user } } = await supabase.auth.getUser()
+const { data: profile } = await supabase.from('profiles').select('is_admin').eq('user_id', user.id).single()
+const { data: profiles, error: profileErr } = await supabase
+const finalMessage = message || title
+const rows = profiles.map((p: any) => ({
+const BATCH = 500
+const chunk = rows.slice(i, i + BATCH)
+const { error: insertErr } = await supabase.from('notifications').insert(chunk)
+
+===== C:\Users\yukku\Downloads\genseki-koro-nextjs (1)\src\app\api\notify-first100\route.ts =====
+export async function POST(req: NextRequest) {
+const supabase = await createClient()
+const { data: { user } } = await supabase.auth.getUser()
+const { data: profile } = await supabase.from('profiles').select('is_admin').eq('user_id', user.id).single()
+const { novel_id, novel_title } = await req.json()
+const { data: discovers } = await supabase
+const notifications = discovers.map((d: any) => ({
+const { error } = await supabase.from('notifications').insert(notifications)
+
+===== C:\Users\yukku\Downloads\genseki-koro-nextjs (1)\src\app\api\notify-ranking\route.ts =====
+export const dynamic = 'force-dynamic'
+export async function GET(req: NextRequest) {
+const authHeader = req.headers.get('authorization')
+const adminSupabase = createAdminClient()
+const periods = [
+const novelRankMap: Record<string, { novel_id: string; ranks: string[] }> = {}
+const today = new Date(); today.setHours(0,0,0,0)
+const { data: dl } = await adminSupabase.from('likes').select('novel_id').gte('created_at', today.toISOString())
+const likeMap: Record<string,number> = {}
+const { data: likes } = await adminSupabase.from(period.view!).select('novel_id, like_count').order('like_count',{ascending:false}).limit(100)
+const novelIds = Object.keys(novelRankMap)
+const { data: novels } = await adminSupabase.from('novels').select('id, title, author_id').in('id', novelIds).eq('published', true)
+const today = new Date(); today.setHours(0,0,0,0)
+const { data: alreadySent } = await adminSupabase
+const sentSet = new Set((alreadySent||[]).map((n:any) => `${n.user_id}:${n.link}`))
+const notifications: any[] = []
+const rankData = novelRankMap[novel.id]
+const key = `${novel.author_id}:/novel/${novel.id}`
+const ranksStr = rankData.ranks.join('・')
+const { error } = await adminSupabase.from('notifications').insert(notifications)
+
+===== C:\Users\yukku\Downloads\genseki-koro-nextjs (1)\src\app\api\originality\route.ts =====
+export async function POST(req: Request) {
+const supabase = await createClient()
+const { novel_id } = await req.json()
+const { data: novel } = await supabase
+const { data: pastNovels } = await supabase
+const { data: allNovels } = await supabase
+const prompt = `あなたはライトノベル評論家です。以下の作品の独創性を100点満点で採点してください。
+const response = await fetch('https://api.anthropic.com/v1/messages', {
+const data = await response.json()
+const text = data.content?.[0]?.text || ''
+const json = JSON.parse(text.replace(/```json|```/g, '').trim())
+const score = Math.min(100, Math.max(0, json.total || 0))
+
+===== C:\Users\yukku\Downloads\genseki-koro-nextjs (1)\src\app\api\random-voyage\route.ts =====
+export async function GET() {
+const supabase = await createClient()
+const { data: { user } } = await supabase.auth.getUser()
+const { data: novels } = await supabase
+const novelIds = novels.map(n => n.id)
+const [{ data: likes }, { data: discovers }, { data: comments }, { data: views }] = await Promise.all([
+const likeMap: Record<string, number> = {}
+const discoverMap: Record<string, number> = {}
+const commentMap: Record<string, number> = {}
+const viewMap: Record<string, number> = {}
+const undiscovered = novels.filter(n =>
+const { data: historyData } = await supabase
+const genreFreq: Record<string, number> = {}
+const g = h.novels?.genre
+const preferredPool = preferredGenres.length > 0
+const rand = Math.random()
+const picked = pool[Math.floor(Math.random() * pool.length)]
+const { data: author } = await supabase.from('profiles').select('display_name').eq('user_id', picked.author_id).maybeSingle()
+
+===== C:\Users\yukku\Downloads\genseki-koro-nextjs (1)\src\app\auth\callback\route.ts =====
+export async function GET(request: NextRequest) {
+const { searchParams, origin } = new URL(request.url)
+const code = searchParams.get('code')
+const next = searchParams.get('next') ?? '/'
+const supabase = await createClient()
+const { data, error } = await supabase.auth.exchangeCodeForSession(code)
+const user = data.user
+const admin = createAdminClient()
+const { data: existing } = await admin
+const { data: maxData } = await admin
+const nextNumber = (maxData?.user_number ?? 0) + 1
+const displayName =
+const response = NextResponse.redirect(`${origin}${next}`)
+
+===== C:\Users\yukku\Downloads\genseki-koro-nextjs (1)\src\app\auth\login\page.tsx =====
+export default function LoginPage() {
+const router   = useRouter()
+const supabase = createClient()
+const [email,    setEmail]    = useState('')
+const [password, setPassword] = useState('')
+const [showPw,   setShowPw]   = useState(false)
+const [error,    setError]    = useState('')
+const [loading,  setLoading]  = useState(false)
+async function handleEmailLogin(e: React.FormEvent) {
+const { error } = await supabase.auth.signInWithPassword({ email, password })
+async function handleGoogleLogin() {
+const { error } = await supabase.auth.signInWithOAuth({
+
+===== C:\Users\yukku\Downloads\genseki-koro-nextjs (1)\src\app\auth\register\page.tsx =====
+export default function RegisterPage() {
+const supabase = createClient()
+const [step, setStep]             = useState<1 | 2>(1)
+const [name, setName]             = useState('')
+const [email, setEmail]           = useState('')
+const [password, setPassword]     = useState('')
+const [pwConfirm, setPwConfirm]   = useState('')
+const [showPw, setShowPw]         = useState(false)
+const [birthYear, setBirthYear]   = useState('')
+const [birthMonth, setBirthMonth] = useState('')
+const [birthDay, setBirthDay]     = useState('')
+const [agree, setAgree]           = useState(false)
+const [agreeAge, setAgreeAge]     = useState(false)
+const [error, setError]           = useState('')
+const [loading, setLoading]       = useState(false)
+const [googleLoading, setGoogleLoading] = useState(false)
+const currentYear = new Date().getFullYear()
+const years  = Array.from({ length: 100 }, (_, i) => currentYear - i)
+const months = Array.from({ length: 12 }, (_, i) => i + 1)
+const days   = Array.from({ length: 31 }, (_, i) => i + 1)
+function getAge() {
+const birth = new Date(Number(birthYear), Number(birthMonth) - 1, Number(birthDay))
+const today = new Date()
+function pwStrength() {
+async function goNext() {
+const { data: existing } = await supabase.from('profiles').select('user_id').eq('email', email).maybeSingle()
+async function handleGoogleRegister() {
+const { error } = await supabase.auth.signInWithOAuth({
+async function handleEmailRegister() {
+const age = getAge()
+const { data, error } = await supabase.auth.signUp({
+const res = await fetch('/api/create-profile', {
+const result = await res.json()
+const age = getAge()
+const str = pwStrength()
+const strColor = str <= 1 ? '#dc2626' : str === 2 ? '#f59e0b' : str === 3 ? '#3b82f6' : '#22c55e'
+const strLabel = str <= 1 ? '弱い' : str === 2 ? '普通' : str === 3 ? '強い' : 'とても強い'
+const ageColor = age < 0 ? '#B8AEA8' : age >= 18 ? '#2e7d32' : age >= 13 ? '#e65100' : '#dc2626'
+const ageMsg   = age < 0 ? '' : age >= 18 ? '✓ 18歳以上：すべての機能を利用できます'
+
+===== C:\Users\yukku\Downloads\genseki-koro-nextjs (1)\src\app\auth\reset-password\page.tsx =====
+export default function ResetPasswordPage() {
+const supabase = createClient()
+const [email,   setEmail]   = useState('')
+const [loading, setLoading] = useState(false)
+const [sent,    setSent]    = useState(false)
+const [error,   setError]   = useState('')
+async function handleReset() {
+const { error: err } = await supabase.auth.resetPasswordForEmail(email, {
+
+===== C:\Users\yukku\Downloads\genseki-koro-nextjs (1)\src\app\auth\update-password\update_password_page.tsx =====
+export default function UpdatePasswordPage() {
+const supabase = createClient()
+const router   = useRouter()
+const [newPw,      setNewPw]      = useState('')
+const [confirm,    setConfirm]    = useState('')
+const [loading,    setLoading]    = useState(false)
+const [error,      setError]      = useState('')
+const [done,       setDone]       = useState(false)
+async function handleUpdate() {
+const { error: err } = await supabase.auth.updateUser({ password: newPw })
+
+===== C:\Users\yukku\Downloads\genseki-koro-nextjs (1)\src\app\author\[id]\page.tsx =====
+
+===== C:\Users\yukku\Downloads\genseki-koro-nextjs (1)\src\app\contact\ContactForm.tsx =====
+const SENDER_TYPES = [
+const CATEGORIES: Record<string, string[]> = {
+interface Props {
+export default function ContactForm({ userId, userEmail, userName }: Props) {
+const supabase = createClient()
+const [senderType, setSenderType] = useState('')
+const [name,       setName]       = useState(userName || '')
+const [email,      setEmail]      = useState(userEmail || '')
+const [phone,      setPhone]      = useState('')
+const [company,    setCompany]    = useState('')
+const [category,   setCategory]   = useState('')
+const [body,       setBody]       = useState('')
+const [loading,    setLoading]    = useState(false)
+const [sent,       setSent]       = useState(false)
+const [error,      setError]      = useState('')
+const inp: React.CSSProperties = {
+const rowStyle: React.CSSProperties = {
+function handleSenderType(val: string) {
+async function handleSubmit() {
+if (senderType === 'business' && !company.trim()) { setError('会社名を入力してください'); return }
+const senderLabel = SENDER_TYPES.find(s => s.value === senderType)?.label || ''
+const { error: err } = await supabase.from('contact_messages').insert({
+{senderType === 'business' && (
+{senderType ? (
+senderType === 'business'
+
+===== C:\Users\yukku\Downloads\genseki-koro-nextjs (1)\src\app\contact\page.tsx =====
+const navLinks = [
+export default async function ContactPage() {
+const supabase = await createClient()
+const { data: { user } } = await supabase.auth.getUser()
+const { data } = await supabase.from('profiles').select('*').eq('user_id', user.id).single()
+
+===== C:\Users\yukku\Downloads\genseki-koro-nextjs (1)\src\app\contests\page.tsx =====
+export const revalidate = 10
+function getStatusLabel(deadline: string | null, judging_end: string | null, start_date?: string | null) {
+const now = new Date()
+const d = new Date(deadline)
+const j = new Date(judging_end)
+const expire = new Date(j.getTime() + 30 * 24 * 60 * 60 * 1000)
+export default async function ContestsPage() {
+const supabase = await createClient()
+const { data: { user } } = await supabase.auth.getUser()
+const { data } = await supabase.from('profiles').select('*').eq('user_id', user.id).single()
+const { data: contests } = await supabase
+const contestIds = (contests||[]).map((c:any) => c.id)
+const entryCountMap: Record<string,number> = {}
+const { data: entries } = await supabase.from('contest_entries').select('contest_id').in('contest_id', contestIds)
+const siteContests     = (contests||[]).filter((c:any) => c.is_site_contest)
+const externalContests = (contests||[]).filter((c:any) => !c.is_site_contest)
+const activeContests   = siteContests.filter((c:any) => getStatusLabel(c.deadline, c.judging_end, c.start_date).label !== '終了')
+const endedContests    = siteContests.filter((c:any) => getStatusLabel(c.deadline, c.judging_end, c.start_date).label === '終了')
+const status = getStatusLabel(c.deadline, c.judging_end, c.start_date)
+const status = getStatusLabel(c.deadline, c.judging_end, c.start_date)
+
+===== C:\Users\yukku\Downloads\genseki-koro-nextjs (1)\src\app\contests\[id]\ContestClient.tsx =====
+
+===== C:\Users\yukku\Downloads\genseki-koro-nextjs (1)\src\app\contests\[id]\page.tsx =====
+
+===== C:\Users\yukku\Downloads\genseki-koro-nextjs (1)\src\app\faq\page.tsx =====
+const navLinks: {href:string;label:string;active?:boolean}[] = [
+const faqCategories = [
+export default async function FaqPage() {
+const supabase = await createClient()
+const { data: { user } } = await supabase.auth.getUser()
+const { data } = await supabase.from('profiles').select('*').eq('user_id', user.id).single()
+
+===== C:\Users\yukku\Downloads\genseki-koro-nextjs (1)\src\app\feedback\page.tsx =====
+const navLinks = [
+const categories = [
+const examples = [
+export default async function FeedbackPage() {
+const supabase = await createClient()
+const { data: { user } } = await supabase.auth.getUser()
+const { data } = await supabase.from('profiles').select('*').eq('user_id', user.id).single()
+
+===== C:\Users\yukku\Downloads\genseki-koro-nextjs (1)\src\app\genre\[genre]\page.tsx =====
+
+===== C:\Users\yukku\Downloads\genseki-koro-nextjs (1)\src\app\guide\page.tsx =====
+type NavLink = { href: string; label: string; active?: boolean }
+type SectionItem = { label: string; desc: string }
+type Section = {
+const navLinks: NavLink[] = [
+const sections: Section[] = [
+export default async function GuidePage() {
+const supabase = await createClient()
+const { data: { user } } = await supabase.auth.getUser()
+const { data } = await supabase.from('profiles').select('*').eq('user_id', user.id).single()
+
+===== C:\Users\yukku\Downloads\genseki-koro-nextjs (1)\src\app\guidelines\page.tsx =====
+export default async function GuidelinesPage() {
+const supabase = await createClient()
+const { data: { user } } = await supabase.auth.getUser()
+const { data } = await supabase.from('profiles').select('*').eq('user_id', user.id).single()
+const sections = [
+
+===== C:\Users\yukku\Downloads\genseki-koro-nextjs (1)\src\app\help\page.tsx =====
+const navLinks: {href:string;label:string;active?:boolean}[] = [
+const helpCategories = [
+export default async function HelpPage() {
+const supabase = await createClient()
+const { data: { user } } = await supabase.auth.getUser()
+const { data } = await supabase.from('profiles').select('*').eq('user_id', user.id).single()
+
+===== C:\Users\yukku\Downloads\genseki-koro-nextjs (1)\src\app\history\page.tsx =====
+export const dynamic = 'force-dynamic'
+export default async function HistoryPage() {
+const supabase = await createClient()
+const { data: { user } } = await supabase.auth.getUser()
+const { data } = await supabase.from('profiles').select('*').eq('user_id', user.id).single()
+const { data: views } = await supabase
+const epIds = Array.from(new Set((views||[]).map((v: any) => v.episode_id).filter(Boolean)))
+const latestViewMap: Record<string,string> = {}
+const { data: episodes } = await supabase
+const authorIds = Array.from(new Set((episodes||[]).map((e: any) => e.novels?.author_id).filter(Boolean)))
+const authorMap: Record<string,string> = {}
+const { data: authors } = await supabase.from('profiles').select('user_id, display_name').in('user_id', authorIds as string[])
+const novelMap: Record<string, any> = {}
+const novel = ep.novels
+const viewedAt = latestViewMap[ep.id]
+novelType: novel.novel_type || '',
+const historyNovelIds = historyItems.map((item: any) => item.novelId)
+const charCountMap: Record<string,number> = {}
+const likeMap: Record<string,number> = {}
+const newbieSet = new Set<string>()
+const [epData, likeData, authorNovels] = await Promise.all([
+const authorCount: Record<string,number> = {}
+const novelIds = historyItems.map((item: any) => item.novelId)
+const firstEpMap: Record<string, string> = {}
+const { data: firstEps } = await supabase
+function fmtDate(s: string) {
+const d = new Date(s)
+const now = new Date()
+const diff = now.getTime() - d.getTime()
+{item.novelType && <span style={{fontSize:10,background:'var(--color-info-bg)',color:'var(--color-info)',border:'1px solid var(--color-info-border)',padding:'1px 6px',borderRadius:3}}>{item.novelType}</span>}
+
+===== C:\Users\yukku\Downloads\genseki-koro-nextjs (1)\src\app\home-select\page.tsx =====
+export default function HomeSelectPage() {
+const supabase = createClient()
+const router = useRouter()
+const [loading, setLoading] = useState(false)
+const [userId, setUserId] = useState('')
+const [step, setStep] = useState<'role' | 'ai'>('role')
+const [role, setRole] = useState<'reader' | 'writer' | null>(null)
+async function handleSelectRole(r: 'reader' | 'writer') {
+async function handleReaderAi(show: boolean) {
+async function handleWriterAi(usage: 'none' | 'assist' | 'full') {
+const cardBtn = {
+const hoverOn = (e: any) => { e.currentTarget.style.borderColor = 'var(--color-brand)'; e.currentTarget.style.background = 'var(--color-brand-light)' }
+const hoverOff = (e: any) => { e.currentTarget.style.borderColor = 'var(--color-brand-border)'; e.currentTarget.style.background = 'var(--color-bg-card)' }
+
+===== C:\Users\yukku\Downloads\genseki-koro-nextjs (1)\src\app\mission\MissionClient.tsx =====
+interface Stats {
+interface Props {
+interface Mission {
+interface SeasonalQuest {
+interface ClaimTarget {
+export default function MissionClient({ user, stats, initialClaimedIds }: Props) {
+const supabase = createClient()
+const [claimedIds, setClaimedIds] = useState<Set<string>>(new Set(initialClaimedIds))
+const [claimTarget, setClaimTarget] = useState<ClaimTarget | null>(null)
+const [claiming, setClaiming] = useState(false)
+const [claimError, setClaimError] = useState('')
+const [questOpen, setQuestOpen] = useState(false)
+const missions: Mission[] = [
+const seasonalQuests: SeasonalQuest[] = [
+const categories = ['読者', '拡散', '作者', 'フォロー']
+const categoryColors: Record<string, {bg:string;border:string;color:string;bar:string}> = {
+const visibleMissions = missions.filter(m => !claimedIds.has(m.id))
+const totalMissions = missions.length + seasonalQuests.length
+const completedMissions = claimedIds.size
+function MissionCard({ m, color }: { m: Mission; color: {bg:string;border:string;color:string;bar:string} }) {
+const done = m.current >= m.target
+const pct  = Math.min(100, (m.current / m.target) * 100)
+async function handleCloseModal() {
+const { data: { user: currentUser } } = await supabase.auth.getUser()
+const rows = claimTarget.claimIds.map(mid => ({ user_id: currentUser.id, mission_id: mid }))
+const { error } = await supabase.from('user_missions').insert(rows)
+setClaimedIds(prev => { const next = new Set(Array.from(prev)); claimTarget.claimIds.forEach(id=>next.add(id)); return next })
+const questDone = quest.missions.every(m => m.current >= m.target)
+const questClaimed = claimedIds.has(quest.id)
+const allClaimIds = [quest.id, ...quest.missions.map(m => m.id)]
+const done = m.current >= m.target
+const pct  = Math.min(100,(m.current/m.target)*100)
+const catMissions = visibleMissions.filter(m => m.category === cat)
+const c = categoryColors[cat]
+const catTotal   = missions.filter(m => m.category === cat).length
+const catClaimed = missions.filter(m => m.category === cat && claimedIds.has(m.id)).length
+
+===== C:\Users\yukku\Downloads\genseki-koro-nextjs (1)\src\app\mission\page.tsx =====
+export const dynamic = 'force-dynamic'
+export default async function MissionPage() {
+const supabase = await createClient()
+const { data: { user } } = await supabase.auth.getUser()
+const { data } = await supabase.from('profiles').select('*').eq('user_id', user.id).single()
+const [likes, discovers, comments, bookmarks, novels, follows, claimed] = await Promise.all([
+const myNovelIds = (await supabase.from('novels').select('id').eq('author_id', user.id)).data?.map((n: any) => n.id) || []
+const { count } = await supabase.from('episodes').select('*', { count: 'exact', head: true }).in('novel_id', myNovelIds)
+
+===== C:\Users\yukku\Downloads\genseki-koro-nextjs (1)\src\app\mypage\ChapterEditModal.tsx =====
+interface Chapter { id: string; title: string; order_num: number }
+interface Episode { id: string; title: string; ep_number: number; chapter_id: string | null }
+interface Props {
+export default function ChapterEditModal({ novelId, novelTitle, onClose }: Props) {
+const supabase = createClient()
+const [chapters, setChapters] = useState<Chapter[]>([])
+const [episodes, setEpisodes] = useState<Episode[]>([])
+const [loading, setLoading] = useState(true)
+const [newChapterTitle, setNewChapterTitle] = useState('')
+const [adding, setAdding] = useState(false)
+const [editingChapterId, setEditingChapterId] = useState<string | null>(null)
+const [editingTitle, setEditingTitle] = useState('')
+const [toast, setToast] = useState('')
+async function loadData() {
+const [{ data: chData }, { data: epData }] = await Promise.all([
+function showToast(msg: string) {
+async function handleAddChapter() {
+const maxOrder = chapters.length > 0 ? Math.max(...chapters.map(c => c.order_num)) : 0
+const { data, error } = await supabase.from('novel_chapters').insert({
+async function handleDeleteChapter(chapterId: string) {
+async function handleRenameChapter(chapterId: string) {
+async function handleAssignEpisode(epId: string, chapterId: string | null) {
+async function moveChapter(chapterId: string, direction: 'up' | 'down') {
+const idx = chapters.findIndex(c => c.id === chapterId)
+const targetIdx = direction === 'up' ? idx - 1 : idx + 1
+const a = chapters[idx], b = chapters[targetIdx]
+const next = [...chapters]
+const unassigned = episodes.filter(e => !e.chapter_id)
+const chEpisodes = episodes.filter(e => e.chapter_id === chapter.id)
+
+===== C:\Users\yukku\Downloads\genseki-koro-nextjs (1)\src\app\mypage\ContestEntry.tsx =====
+interface Contest {
+interface Novel {
+interface Entry {
+interface Props {
+export default function ContestEntry({ novels, contests, initialEntries, userId }: Props) {
+const supabase = createClient()
+const [entries, setEntries] = useState<Entry[]>(initialEntries)
+const [selectedContest, setSelectedContest] = useState('')
+const [selectedNovel, setSelectedNovel] = useState('')
+const [loading, setLoading] = useState(false)
+const [error, setError] = useState('')
+const [success, setSuccess] = useState('')
+const publishedNovels = novels.filter(n => n.published)
+const siteContests = contests.filter(c => c.is_site_contest)
+const entriedNovelIds = entries
+async function handleEntry() {
+const { error: err } = await supabase.from('contest_entries').insert({
+async function handleCancel(contestId: string, novelId: string) {
+const contestMap = Object.fromEntries(contests.map(c => [c.id, c]))
+const novelMap   = Object.fromEntries(novels.map(n => [n.id, n]))
+
+===== C:\Users\yukku\Downloads\genseki-koro-nextjs (1)\src\app\mypage\MissionClient.tsx =====
+interface Stats {
+interface Props {
+interface Mission {
+interface SeasonalQuest {
+interface ClaimTarget {
+export default function MissionClient({ user, stats, initialClaimedIds }: Props) {
+const supabase = createClient()
+const [claimedIds, setClaimedIds] = useState<Set<string>>(new Set(initialClaimedIds))
+const [claimTarget, setClaimTarget] = useState<ClaimTarget | null>(null)
+const [claiming, setClaiming] = useState(false)
+const [claimError, setClaimError] = useState('')
+const [questOpen, setQuestOpen] = useState(false)
+const missions: Mission[] = [
+const seasonalQuests: SeasonalQuest[] = [
+const categories = ['読者', '拡散', '作者', 'フォロー']
+const categoryColors: Record<string, {bg:string;border:string;color:string;bar:string}> = {
+const visibleMissions = missions.filter(m => !claimedIds.has(m.id))
+const totalMissions = missions.length + seasonalQuests.length
+const completedMissions = claimedIds.size
+function MissionCard({ m, color }: { m: Mission; color: {bg:string;border:string;color:string;bar:string} }) {
+const done = m.current >= m.target
+const pct  = Math.min(100, (m.current / m.target) * 100)
+async function handleCloseModal() {
+const { data: { user: currentUser } } = await supabase.auth.getUser()
+const rows = claimTarget.claimIds.map(mid => ({ user_id: currentUser.id, mission_id: mid }))
+const { error } = await supabase.from('user_missions').insert(rows)
+setClaimedIds(prev => { const next = new Set(Array.from(prev)); claimTarget.claimIds.forEach(id=>next.add(id)); return next })
+const questDone = quest.missions.every(m => m.current >= m.target)
+const questClaimed = claimedIds.has(quest.id)
+const allClaimIds = [quest.id, ...quest.missions.map(m => m.id)]
+const done = m.current >= m.target
+const pct  = Math.min(100,(m.current/m.target)*100)
+const catMissions = visibleMissions.filter(m => m.category === cat)
+const c = categoryColors[cat]
+const catTotal   = missions.filter(m => m.category === cat).length
+const catClaimed = missions.filter(m => m.category === cat && claimedIds.has(m.id)).length
+
+===== C:\Users\yukku\Downloads\genseki-koro-nextjs (1)\src\app\mypage\MypageClient.tsx =====
+import type { Profile, Novel } from '@/types'
+interface Contest { id: string; title: string; deadline: string | null; is_site_contest: boolean }
+interface Entry { contest_id: string; novel_id: string }
+interface MissionStats {
+interface Props {
+const ALL_BADGES = [
+type Tab = 'mypage' | 'works' | 'bookmarks' | 'history' | 'tweet' | 'mission' | 'settings' | 'blockmute' | 'series'
+const TABS: { id: Tab; label: string }[] = [
+function FolderCreateModal({ onClose, onCreate, saving }: { onClose:()=>void; onCreate:(name:string)=>void; saving:boolean }) {
+const [name, setName] = React.useState('')
+export default function MypageClient({
+const router   = useRouter()
+const supabase = createClient()
+const [activeTab, setActiveTab] = useState<Tab>(() => {
+const hash = window.location.hash.replace('#', '') as Tab
+const valid: Tab[] = ['mypage','works','bookmarks','history','tweet','mission','settings','blockmute','series']
+function handleTabChange(tab: Tab) {
+const [myNovels,       setMyNovels]       = useState(initialNovels)
+const [expandedWork,   setExpandedWork]   = useState<string | null>(null)
+const [workEpisodes,   setWorkEpisodes]   = useState<Record<string, any[]>>({})
+const [loadingEps,     setLoadingEps]     = useState<string | null>(null)
+const [editMenuOpen,   setEditMenuOpen]   = useState<string | null>(null)
+const [deleteTarget,   setDeleteTarget]   = useState<{id:string;title:string;episodes:any[]}|null>(null)
+const [deleteMode,     setDeleteMode]     = useState<'novel'|'episode'|null>(null)
+const [deleteEpId,     setDeleteEpId]     = useState('')
+const [deleteLoading,  setDeleteLoading]  = useState(false)
+const [loading,        setLoading]        = useState(false)
+const [iconUrl,        setIconUrl]        = useState(profile.icon_url || '')
+const [iconUploading,  setIconUploading]  = useState(false)
+const iconInputRef = React.useRef<HTMLInputElement>(null)
+const [editingName,    setEditingName]    = useState(false)
+const [nameInput,      setNameInput]      = useState(profile.display_name)
+const [nameSaving,     setNameSaving]     = useState(false)
+const [nameError,      setNameError]      = useState('')
+const [nameSaved,      setNameSaved]      = useState(false)
+const [toast,          setToast]          = useState('')
+const [showWithdraw,   setShowWithdraw]   = useState(false)
+const [withdrawPw,     setWithdrawPw]     = useState('')
+const [withdrawing,    setWithdrawing]    = useState(false)
+const [withdrawError,  setWithdrawError]  = useState('')
+const [showBdModal,    setShowBdModal]    = useState(false)
+const [bdYear,         setBdYear]         = useState('')
+const [bdMonth,        setBdMonth]        = useState('')
+const [bdDay,          setBdDay]          = useState('')
+const [bdError,        setBdError]        = useState('')
+const [bdSaving,       setBdSaving]       = useState(false)
+const [showEmailModal, setShowEmailModal] = useState(false)
+const [showPwModal,    setShowPwModal]    = useState(false)
+const [showBioModal,   setShowBioModal]   = useState(false)
+const [bioInput,       setBioInput]       = useState(profile.bio || '')
+const [bioSaving,      setBioSaving]      = useState(false)
+const [newEmail,       setNewEmail]       = useState('')
+const [emailPw,        setEmailPw]        = useState('')
+const [emailError,     setEmailError]     = useState('')
+const [emailSaving,    setEmailSaving]    = useState(false)
+const [currentPw,      setCurrentPw]      = useState('')
+const [newPw,          setNewPw]          = useState('')
+const [newPwConfirm,   setNewPwConfirm]   = useState('')
+const [pwError,        setPwError]        = useState('')
+const [pwSaving,       setPwSaving]       = useState(false)
+const [isMobile,       setIsMobile]       = useState(false)
+const [showBadgeBook,  setShowBadgeBook]  = useState(false)
+const [badgePage,      setBadgePage]      = useState(0)
+const [showBoard,      setShowBoard]      = useState(false)
+const [chapterTarget,  setChapterTarget]  = useState<{id:string;title:string}|null>(null)
+const [epManageTarget, setEpManageTarget] = useState<{id:string;title:string}|null>(null)
+const [epList,         setEpList]         = useState<any[]>([])
+const [epToggling,     setEpToggling]     = useState('')
+const [expandedNovels, setExpandedNovels] = useState<Set<string>>(new Set())
+const [userRole, setUserRole] = useState(profile.user_role || '')
+const [roleSaving, setRoleSaving] = useState(false)
+const [notifyLike,       setNotifyLike]       = useState(profile.notify_like       !== false)
+const [notifyComment,    setNotifyComment]    = useState(profile.notify_comment    !== false)
+const [notifyFollow,     setNotifyFollow]     = useState(profile.notify_follow     !== false)
+const [notifyNewEpisode, setNotifyNewEpisode] = useState(profile.notify_new_episode !== false)
+const [notifyNewWork,    setNotifyNewWork]    = useState(profile.notify_new_work   !== false)
+const [notifySaving,     setNotifySaving]     = useState(false)
+const [blockList,        setBlockList]        = useState<any[]>([])
+const [folders,          setFolders]          = useState<any[]>([])
+const [activeFolderId,   setActiveFolderId]   = useState<string|null>(null)
+const [showFolderModal,  setShowFolderModal]  = useState(false)
+const [folderInput,      setFolderInput]      = useState('')
+const [folderSaving,     setFolderSaving]     = useState(false)
+const [movingBookmark,   setMovingBookmark]   = useState<string|null>(null)
+const [myBookmarks,      setMyBookmarks]      = useState<any[]>(bookmarkedNovels)
+const [foldersLoaded,    setFoldersLoaded]    = useState(false)
+const [muteList,         setMuteList]         = useState<any[]>([])
+const [blockMuteLoaded,  setBlockMuteLoaded]  = useState(false)
+const [gender,           setGender]           = useState<string>((profile as any).gender || '')
+const [xAccount,         setXAccount]         = useState<string>((profile as any).x_account || '')
+const [xSaving,          setXSaving]          = useState(false)
+const [allowComments,    setAllowComments]    = useState((profile as any).allow_comments !== false)
+const [showGenderModal,  setShowGenderModal]  = useState(false)
+const [showXModal,       setShowXModal]       = useState(false)
+const check = () => setIsMobile(window.innerWidth <= 768)
+const perPage    = isMobile ? 12 : 24
+const totalPages = Math.ceil(ALL_BADGES.length / perPage)
+const claimedSet = new Set(claimedMissionIds)
+const published  = myNovels.filter(n => n.published)
+const drafts     = myNovels.filter(n => !n.published)
+const initial    = profile.display_name.slice(0,1)
+const userNumber = (profile as any).user_number ? '#' + String((profile as any).user_number).padStart(4,'0') : null
+function fmtDate(s: string) {
+const d = new Date(s), now = new Date(), diff = now.getTime()-d.getTime()
+function fmtNum(n:number) { return n>=10000?`${(n/10000).toFixed(1)}万`:n.toString() }
+function fmtChars(n:number) { return n>=10000?`${(n/10000).toFixed(1)}万文字`:`${n.toLocaleString()}文字` }
+async function handleSaveGender(val: string) {
+async function handleSaveXAccount() {
+const cleaned = xAccount.replace(/^@/, '').trim()
+async function handleToggleAllowComments() {
+const next = !allowComments
+async function handleSaveNotify(key: string, value: boolean) {
+async function handleSaveBio() {
+async function handleIconUpload(file: File) {
+const ext = file.name.split('.').pop()
+const path = `avatars/${profile.user_id}.${ext}`
+const { error: upErr } = await supabase.storage.from('illustrations').upload(path, file, { upsert:true })
+const { data } = supabase.storage.from('illustrations').getPublicUrl(path)
+async function handleSaveName() {
+const { error } = await supabase.from('profiles').update({ display_name: nameInput.trim() }).eq('user_id', profile.user_id)
+async function handleSignOut() {
+async function handleTogglePublish(novelId: string, current: boolean) {
+async function handleOpenEpManage(novel: Novel) {
+const { data:eps } = await supabase.from('episodes').select('id,title,ep_number,published').eq('novel_id',novel.id).order('ep_number',{ascending:true})
+async function handleToggleEpPublish(epId: string, current: boolean) {
+async function handleDeleteConfirm() {
+async function handleSaveBirthdate() {
+const age = (() => {
+const birth = new Date(Number(bdYear),Number(bdMonth)-1,Number(bdDay))
+const today = new Date(); let a = today.getFullYear()-birth.getFullYear()
+const m = today.getMonth()-birth.getMonth()
+const birthdate = `${bdYear}-${String(bdMonth).padStart(2,'0')}-${String(bdDay).padStart(2,'0')}`
+const { error:bdErr } = await supabase.from('profiles').update({ birthdate, age_verified:age>=18 }).eq('user_id', profile.user_id)
+async function handleEmailChange() {
+const { data:{ user } } = await supabase.auth.getUser()
+const { error:signInErr } = await supabase.auth.signInWithPassword({ email:user.email, password:emailPw })
+const { error } = await supabase.auth.updateUser({ email:newEmail })
+async function handlePwChange() {
+const { data:{ user } } = await supabase.auth.getUser()
+const { error:signInErr } = await supabase.auth.signInWithPassword({ email:user.email, password:currentPw })
+const { error } = await supabase.auth.updateUser({ password:newPw })
+async function handleWithdraw() {
+const { data:{ user } } = await supabase.auth.getUser()
+const { error:signInErr } = await supabase.auth.signInWithPassword({ email:user.email, password:withdrawPw })
+const MypageTab = () => (
+async function toggleWorkExpand(novelId: string) {
+const { data: eps } = await supabase
+const epIds = (eps || []).map((e: any) => e.id)
+const pvMap: Record<string, number> = {}
+const likeMap: Record<string, number> = {}
+const commentMap: Record<string, number> = {}
+const [{ data: pvs }, { data: els }, { data: cms }] = await Promise.all([
+const enriched = (eps || []).map((e: any) => ({
+const WorksTab = () => (
+{(novel as any).novel_type && <span style={{fontSize:10,background:'var(--color-info-bg)',color:'var(--color-info)',border:'1px solid var(--color-info-border)',padding:'2px 9px',borderRadius:4}}>{(novel as any).novel_type}</span>}
+const next = !(novel as any).is_serial
+const next = !((novel as any).allow_comments !== false)
+async function handleCreateFolder() {
+const { data } = await supabase.from('bookmark_folders').insert({ user_id: profile.user_id, name: folderInput.trim(), order_num: folders.length }).select().single()
+async function handleDeleteFolder(folderId: string) {
+async function handleMoveBookmark(novelId: string, folderId: string | null) {
+const [openSections, setOpenSections] = useState<Set<string>>(new Set(['unclassified']))
+const toggleSection = (id: string) => setOpenSections(prev => {
+const next = new Set(prev); next.has(id) ? next.delete(id) : next.add(id); return next
+const BookmarkItem = ({ bm }: { bm: any }) => {
+const n = bm.novels; if (!n) return null
+const authorName = bmAuthorMap[n.author_id] || ''
+{n.novel_type && <span style={{fontSize:10,background:'var(--color-info-bg)',color:'var(--color-info)',border:'1px solid var(--color-info-border)',padding:'1px 6px',borderRadius:4}}>{n.novel_type}</span>}
+const BookmarkSection = ({ id, title, items, onDelete }: { id:string; title:string; items:any[]; onDelete?:()=>void }) => {
+const isOpen = openSections.has(id)
+const BookmarksTab = () => (
+const { data } = await supabase.from('bookmark_folders').insert({ user_id: profile.user_id, name, order_num: folders.length }).select().single()
+const HistoryTab = () => (
+{item.novelType && <span style={{fontSize:10,background:'var(--color-info-bg)',color:'var(--color-info)',border:'1px solid var(--color-info-border)',padding:'1px 6px',borderRadius:3}}>{item.novelType}</span>}
+const TweetTab = () => (
+const MissionTab = () => (
+const BlockMuteTab = () => {
+async function handleUnblock(targetId: string) {
+async function handleUnmute(targetId: string) {
+const UserRow = ({ u, onRemove, label }: { u:any; onRemove:()=>void; label:string }) => (
+const SettingsTab = () => (
+const next = !item.val
+const tabContent: Record<Tab, React.ReactNode> = {
+const owned = claimedSet.has(badge.id)
+const isSlot = badge.id.startsWith('_')
+const sz = isMobile?58:72
+
+===== C:\Users\yukku\Downloads\genseki-koro-nextjs (1)\src\app\mypage\page.tsx =====
+export default async function MypagePage() {
+const supabase = await createClient()
+const { data: { user } } = await supabase.auth.getUser()
+const { data: profile } = await supabase.from('profiles').select('*').eq('user_id', user.id).single()
+const { data: followingData } = await supabase
+const followingAuthors = (followingData || []).map((f: any) => f.profiles).filter(Boolean)
+const { data: novels } = await supabase
+const novelIds = (novels || []).map((n: any) => n.id)
+const novelLikeMap: Record<string,number> = {}
+const novelCommentMap: Record<string,number> = {}
+const novelViewMap: Record<string,number> = {}
+const novelEpCountMap: Record<string,number> = {}
+const [likesData, commentsData, viewsData, epsData] = await Promise.all([
+const oneYearAgo = new Date(Date.now() - 365*24*60*60*1000).toISOString()
+const { data: calendarEps } = await supabase
+const postDates = (calendarEps||[]).map((e:any) => e.created_at.slice(0,10))
+const { data: bookmarkedNovels } = await supabase
+const bmAuthorIds = Array.from(new Set((bookmarkedNovels||[]).map((b:any) => b.novels?.author_id).filter(Boolean)))
+const bmAuthorMap: Record<string,string> = {}
+const { data: bmAuthors } = await supabase.from('profiles').select('user_id, display_name').in('user_id', bmAuthorIds as string[])
+const now = new Date().toISOString()
+const { data: contests } = await supabase
+const { data: entries } = await supabase.from('contest_entries').select('contest_id, novel_id').eq('user_id', user.id)
+const { data: claimedMissions } = await supabase.from('user_missions').select('mission_id').eq('user_id', user.id)
+const claimedMissionIds = (claimedMissions || []).map((r: any) => r.mission_id)
+const { data: views } = await supabase
+const epIds = Array.from(new Set((views||[]).map((v:any) => v.episode_id).filter(Boolean)))
+const latestViewMap: Record<string,string> = {}
+const { data: episodes } = await supabase
+const authorIds2 = Array.from(new Set((episodes||[]).map((e:any) => e.novels?.author_id).filter(Boolean)))
+const authorMap2: Record<string,string> = {}
+const { data: authors2 } = await supabase.from('profiles').select('user_id, display_name').in('user_id', authorIds2 as string[])
+const novelMap: Record<string,any> = {}
+const novel = ep.novels; if (!novel) return
+const viewedAt = latestViewMap[ep.id]
+const historyNovelIds = historyItems.map((i:any) => i.novelId)
+const firstEpMap: Record<string,string> = {}
+const { data: firstEps } = await supabase.from('episodes').select('id, novel_id, ep_number')
+const charCountMap: Record<string,number> = {}
+const likeMap2: Record<string,number> = {}
+const [epData, likeData] = await Promise.all([
+const [likesM, discoversM, commentsM, bookmarksM, novelsCountM, followsCountM] = await Promise.all([
+const myNovelIds2 = (await supabase.from('novels').select('id').eq('author_id',user.id)).data?.map((n:any)=>n.id)||[]
+const {count} = await supabase.from('episodes').select('*',{count:'exact',head:true}).in('novel_id',myNovelIds2)
+const defaultProfile = {
+
+===== C:\Users\yukku\Downloads\genseki-koro-nextjs (1)\src\app\mypage\analytics\AnalyticsCharts.tsx =====
+interface EpisodeRow {
+interface NovelStat {
+export default function AnalyticsCharts({ novels }: { novels: NovelStat[] }) {
+const [selectedId, setSelectedId] = useState(novels[0]?.id || '')
+const selected = novels.find(n => n.id === selectedId) || novels[0]
+function fmtDateShort(s: string) {
+const d = new Date(s)
+function HourlyChart({ data }: { data: number[] }) {
+const max = Math.max(1, ...data)
+function DayChart({ data }: { data: { date: string; views: number }[] }) {
+const max = Math.max(1, ...data.map(d => d.views))
+
+===== C:\Users\yukku\Downloads\genseki-koro-nextjs (1)\src\app\mypage\analytics\page.tsx =====
+export const dynamic = 'force-dynamic'
+export default async function AnalyticsPage() {
+const supabase = await createClient()
+const { data: { user } } = await supabase.auth.getUser()
+const { data: profile } = await supabase.from('profiles').select('*').eq('user_id', user.id).single()
+const { data: novels } = await supabase
+const novelIds = (novels || []).map((n: any) => n.id)
+const statsMap: Record<string, any> = {}
+const { data: episodes } = await supabase
+const epIds = allEpisodes.map((e: any) => e.id)
+const epToNovel: Record<string, string> = {}
+const [{ data: pageViews }, { data: likes }, { data: bookmarks }, { data: comments }, { data: epLikes }, { data: epComments }] = await Promise.all([
+const commentUserIds = Array.from(new Set((comments || []).map((c: any) => c.user_id).filter(Boolean)))
+const commentUserMap: Record<string, string> = {}
+const { data: cu } = await supabase.from('profiles').select('user_id, display_name').in('user_id', commentUserIds as string[])
+const epTitleMap: Record<string, string> = {}
+const now = new Date()
+const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime()
+const yesterdayStart = todayStart - 24 * 60 * 60 * 1000
+const weekStart = todayStart - 6 * 24 * 60 * 60 * 1000
+const monthStart = todayStart - 29 * 24 * 60 * 60 * 1000
+const nId = epToNovel[pv.episode_id]
+const st = statsMap[nId]
+const dt = new Date(pv.created_at)
+const t = dt.getTime()
+const hour = dt.getHours()
+const day = (pv.created_at || '').slice(0, 10)
+const month = (pv.created_at || '').slice(0, 7)
+const nId = epToNovel[el.episode_id]
+const novelStats = (novels || []).map((n: any) => {
+const s = statsMap[n.id]
+const eps = allEpisodes.filter((e: any) => e.novel_id === n.id && e.published !== false)
+const empty = {
+const st = s || empty
+const episodeRows = eps.map((ep: any) => ({
+const daily7: { date: string; views: number }[] = []
+const d = new Date(Date.now() - i * 24 * 60 * 60 * 1000)
+const key = d.toISOString().slice(0, 10)
+const dailyTop = Object.entries(st.daily30)
+const monthlyTop = Object.entries(st.monthly)
+
+===== C:\Users\yukku\Downloads\genseki-koro-nextjs (1)\src\app\mypage\board\page.tsx =====
+export const dynamic = 'force-dynamic'
+export default async function BoardPage() {
+const supabase = await createClient()
+const { data: { user } } = await supabase.auth.getUser()
+const { data: profile } = await supabase.from('profiles').select('*').eq('user_id', user.id).single()
+
+===== C:\Users\yukku\Downloads\genseki-koro-nextjs (1)\src\app\mypage\board\StoryBoardPage.tsx =====
+export default function StoryBoardPage({ userId }: { userId: string }) {
+
+===== C:\Users\yukku\Downloads\genseki-koro-nextjs (1)\src\app\mypage\messages\page.tsx =====
+export default async function MessagesPage() {
+const supabase = await createClient()
+const { data: { user } } = await supabase.auth.getUser()
+const { data } = await supabase.from('profiles').select('*').eq('user_id', user.id).single()
+const { data: messages } = await supabase
+const unreadIds = (messages||[]).filter((m:any) => !m.is_read).map((m:any) => m.id)
+
+===== C:\Users\yukku\Downloads\genseki-koro-nextjs (1)\src\app\notify-update\route.ts =====
+export async function POST(req: Request) {
+const supabase = await createClient()
+const { data: { user } } = await supabase.auth.getUser()
+const { novel_id, ep_title } = await req.json()
+const { data: novel } = await supabase
+const message = `「${novel.title}」が更新されました：${ep_title}`
+const link = `/novel/${novel.id}`
+const { data: bookmarks } = await supabase
+const { data: followers } = await supabase
+const bookmarkUsers = new Set((bookmarks || []).map((b: any) => b.user_id))
+const followerUsers = new Set((followers || []).map((f: any) => f.follower_id))
+const allTargets = new Set([...Array.from(bookmarkUsers), ...Array.from(followerUsers)])
+const since = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString()
+const { data: recentNotifs } = await supabase
+const alreadyNotified = new Set((recentNotifs || []).map((n: any) => n.user_id))
+const toNotify = Array.from(allTargets).filter(uid => !alreadyNotified.has(uid))
+
+===== C:\Users\yukku\Downloads\genseki-koro-nextjs (1)\src\app\novel\[id]\ChapterAccordion.tsx =====
+
+===== C:\Users\yukku\Downloads\genseki-koro-nextjs (1)\src\app\novel\[id]\ExportButton.tsx =====
+
+===== C:\Users\yukku\Downloads\genseki-koro-nextjs (1)\src\app\novel\[id]\FollowButton.tsx =====
+
+===== C:\Users\yukku\Downloads\genseki-koro-nextjs (1)\src\app\novel\[id]\NovelActions.tsx =====
+
+===== C:\Users\yukku\Downloads\genseki-koro-nextjs (1)\src\app\novel\[id]\NovelCommentSection.tsx =====
+
+===== C:\Users\yukku\Downloads\genseki-koro-nextjs (1)\src\app\novel\[id]\NovelReportButton.tsx =====
+
+===== C:\Users\yukku\Downloads\genseki-koro-nextjs (1)\src\app\novel\[id]\opengraph-image.tsx =====
+
+===== C:\Users\yukku\Downloads\genseki-koro-nextjs (1)\src\app\novel\[id]\page.tsx =====
+
+===== C:\Users\yukku\Downloads\genseki-koro-nextjs (1)\src\app\novel\[id]\episode\[epId]\CommentSection.tsx =====
+
+===== C:\Users\yukku\Downloads\genseki-koro-nextjs (1)\src\app\novel\[id]\episode\[epId]\ContinueReaction.tsx =====
+
+===== C:\Users\yukku\Downloads\genseki-koro-nextjs (1)\src\app\novel\[id]\episode\[epId]\EpisodeBody.tsx =====
+
+===== C:\Users\yukku\Downloads\genseki-koro-nextjs (1)\src\app\novel\[id]\episode\[epId]\EpisodeLikeButton.tsx =====
+
+===== C:\Users\yukku\Downloads\genseki-koro-nextjs (1)\src\app\novel\[id]\episode\[epId]\MobileEpisodeBody.tsx =====
+
+===== C:\Users\yukku\Downloads\genseki-koro-nextjs (1)\src\app\novel\[id]\episode\[epId]\opengraph-image.tsx =====
+
+===== C:\Users\yukku\Downloads\genseki-koro-nextjs (1)\src\app\novel\[id]\episode\[epId]\page.tsx =====
+
+===== C:\Users\yukku\Downloads\genseki-koro-nextjs (1)\src\app\novel\[id]\episode\[epId]\QuoteContext.tsx =====
+
+===== C:\Users\yukku\Downloads\genseki-koro-nextjs (1)\src\app\novel\[id]\episode\[epId]\ReadButton.tsx =====
+
+===== C:\Users\yukku\Downloads\genseki-koro-nextjs (1)\src\app\novel\[id]\episode\[epId]\ReadingSettings.tsx =====
+
+===== C:\Users\yukku\Downloads\genseki-koro-nextjs (1)\src\app\novel\[id]\episode\[epId]\TypoReportButton.tsx =====
+
+===== C:\Users\yukku\Downloads\genseki-koro-nextjs (1)\src\app\post\CharacterView.tsx =====
+interface Character { id: string; name: string; role: string; description: string; image_url: string | null; order_num: number }
+interface Props { novelId: string; userId: string }
+export default function CharacterView({ novelId, userId }: Props) {
+const supabase = createClient()
+const [chars, setChars] = useState<Character[]>([])
+const [selected, setSelected] = useState<Character | null>(null)
+const [form, setForm] = useState({ name: '', role: '', description: '', image_url: '' })
+const [saving, setSaving] = useState(false)
+const [uploading, setUploading] = useState(false)
+async function handleNew() {
+const { data, error } = await supabase.from('novel_characters').insert({ novel_id: novelId, user_id: userId, name: '新キャラクター', role: '', description: '', order_num: chars.length }).select().single()
+function selectChar(c: Character) {
+async function handleSave() {
+async function handleDelete(id: string) {
+async function handleImageUpload(e: React.ChangeEvent<HTMLInputElement>) {
+const file = e.target.files?.[0]; if (!file) return
+const path = `characters/${userId}/${Date.now()}.${file.name.split('.').pop()}`
+const { error } = await supabase.storage.from('images').upload(path, file, { upsert: true })
+const { data } = supabase.storage.from('images').getPublicUrl(path)
+const inp = { width: '100%', padding: '8px 12px', border: '1.5px solid var(--color-brand-border)', borderRadius: 8, fontSize: 13, outline: 'none', fontFamily: 'inherit', color: 'var(--color-text)', background: 'var(--color-bg-card)', boxSizing: 'border-box' as const }
+
+===== C:\Users\yukku\Downloads\genseki-koro-nextjs (1)\src\app\post\MemoSidebar.tsx =====
+export type View = 'writing' | 'plan' | 'plot' | 'timeline' | 'character' | 'relation' | 'world' | 'memo' | 'plotmaker'
+interface Props {
+const MENU: { id: View; label: string; section: string; icon: string }[] = [
+const SECTIONS = ['企画', '構成', '資料', '執筆']
+export default function MemoSidebar({ currentView, onViewChange, novelTitle }: Props) {
+const [open, setOpen] = useState(true)
+const items = MENU.filter(m => m.section === section)
+const active = currentView === item.id
+
+===== C:\Users\yukku\Downloads\genseki-koro-nextjs (1)\src\app\post\MemoView.tsx =====
+interface MemoItem { id: string; title: string; body: string; order_num: number }
+interface Props { novelId?: string; userId: string }
+export default function MemoView({ novelId, userId }: Props) {
+const supabase = createClient()
+const [items, setItems] = useState<MemoItem[]>([])
+const [selected, setSelected] = useState<MemoItem | null>(null)
+const [editTitle, setEditTitle] = useState('')
+const [editBody, setEditBody] = useState('')
+const [saving, setSaving] = useState(false)
+const timer = useRef<NodeJS.Timeout | null>(null)
+async function handleNew() {
+const { data } = await supabase.from('novel_memos').insert({ novel_id: null, user_id: userId, category: 'memo', title: '新しいメモ', body: '', order_num: items.length }).select().single()
+function select(item: MemoItem) { setSelected(item); setEditTitle(item.title); setEditBody(item.body) }
+function autoSave(title: string, body: string) {
+async function handleDelete(id: string) {
+
+===== C:\Users\yukku\Downloads\genseki-koro-nextjs (1)\src\app\post\page.tsx =====
+export const dynamic = 'force-dynamic'
+export default async function PostPage() {
+const supabase = await createClient()
+const { data: { user } } = await supabase.auth.getUser()
+const { data: profile } = await supabase
+
+===== C:\Users\yukku\Downloads\genseki-koro-nextjs (1)\src\app\post\PlanView.tsx =====
+interface Props { novelId: string; userId: string }
+const FIELDS = [
+export default function PlanView({ novelId, userId }: Props) {
+const supabase = createClient()
+const [data, setData] = useState<Record<string,string>>({})
+const [saving, setSaving] = useState(false)
+const [saved, setSaved] = useState(false)
+const obj: Record<string,string> = {}
+async function save(key: string, value: string) {
+const { data: existing } = await supabase.from('novel_memos').select('id').eq('novel_id', novelId).eq('category', 'plan').eq('title', key).eq('user_id', userId).maybeSingle()
+
+===== C:\Users\yukku\Downloads\genseki-koro-nextjs (1)\src\app\post\PlotMakerView.tsx =====
+interface Props { novelId: string; userId: string }
+const STEPS = [
+export default function PlotMakerView({ novelId, userId }: Props) {
+const supabase = createClient()
+const [data, setData] = useState<Record<string,string>>({})
+const [saving, setSaving] = useState(false)
+const [saved, setSaved] = useState(false)
+const obj: Record<string,string> = {}
+async function save(key: string, value: string) {
+const { data: existing } = await supabase.from('novel_memos').select('id').eq('novel_id', novelId).eq('category', 'plotmaker').eq('title', key).eq('user_id', userId).maybeSingle()
+const filled = STEPS.filter(s => data[s.key]?.trim()).length
+
+===== C:\Users\yukku\Downloads\genseki-koro-nextjs (1)\src\app\post\PlotView.tsx =====
+interface Plot { id: string; title: string; body: string; order_num: number }
+interface Props { novelId: string; userId: string }
+export default function PlotView({ novelId, userId }: Props) {
+const supabase = createClient()
+const [plots, setPlots] = useState<Plot[]>([])
+const [selected, setSelected] = useState<Plot | null>(null)
+const [editTitle, setEditTitle] = useState('')
+const [editBody, setEditBody] = useState('')
+const [saving, setSaving] = useState(false)
+const timer = useRef<NodeJS.Timeout | null>(null)
+async function handleNew() {
+const { data } = await supabase.from('novel_plots').insert({ novel_id: novelId, user_id: userId, title: '新しい章', body: '', order_num: plots.length }).select().single()
+function select(p: Plot) { setSelected(p); setEditTitle(p.title); setEditBody(p.body) }
+function autoSave(title: string, body: string) {
+async function handleDelete(id: string) {
+async function moveUp(idx: number) {
+const newPlots = [...plots]
+const [moved] = newPlots.splice(idx, 1)
+const updated = newPlots.map((p, i) => ({ ...p, order_num: i }))
+
+===== C:\Users\yukku\Downloads\genseki-koro-nextjs (1)\src\app\post\PostClient.tsx =====
+import MemoSidebar, { type View } from './MemoSidebar'
+const GENRES = ['異世界','ファンタジー','SF','恋愛','学園','ミステリー','ホラー','歴史・時代','日常','アクション','コメディ','官能','その他']
+const FONT_SIZES = [{label:'小',size:13},{label:'標準',size:15},{label:'大',size:18},{label:'特大',size:22}]
+const TAG_EXAMPLES: string[] = [
+function toVerticalText(text: string): string {
+function isHorizontalCharPC(ch: string): boolean {
+interface Props { profile: any; userId: string }
+function detectAiMarkers(text: string): string[] {
+const patterns: string[] = []
+const boldMatches = text.match(/\*\*[^*]+\*\*/g) || []
+const headingMatches = text.match(/^#{1,3}\s+.+/gm) || []
+const lines = text.split('\n')
+function defaultScheduleValue(): string {
+const d = new Date(Date.now() + 60 * 60 * 1000)
+const pad = (n: number) => String(n).padStart(2, '0')
+export default function PostClient({ profile, userId }: Props) {
+const router        = useRouter()
+const searchParams  = useSearchParams()
+const editNovelId   = searchParams.get('edit')
+const novelIdParam  = searchParams.get('novel')
+const supabase      = createClient()
+const bodyRef    = useRef(null as HTMLTextAreaElement | null)
+const importFileRef = useRef(null as HTMLInputElement | null)
+const [importing, setImporting] = useState(false)
+const illustRef   = useRef(null as HTMLInputElement | null)
+const [illustFile, setIllustFile] = useState(null as File | null)
+const [illustPreview, setIllustPreview] = useState('' as string)
+const [illustUploading, setIllustUploading] = useState(false)
+const [isMobile, setIsMobile] = useState(false)
+const [showCatchcopyHint, setShowCatchcopyHint] = useState(false)
+const [showTagExamples, setShowTagExamples] = useState(false)
+const [mounted, setMounted] = useState(false)
+const check = () => setIsMobile(window.innerWidth <= 768)
+const [mode, setMode] = useState('new' as 'new'|'existing')
+const [modeChosen, setModeChosen] = useState(false)  // 投稿タイプを選択済みか（選択後は折りたたむ）
+const [novelChosen, setNovelChosen] = useState(false)  // 作品を選択済みか（選択後は折りたたむ）
+const [myNovels, setMyNovels] = useState([] as any[])
+const [selectedNovelId, setSelectedNovelId] = useState('')
+const [nextEpNum, setNextEpNum] = useState(1)
+const [title,   setTitle]   = useState('')
+const [summary, setSummary] = useState('')
+const [catchcopy, setCatchcopy] = useState('')
+const [genre,   setGenre]   = useState('')
+const [tags,      setTags]      = useState([] as string[])
+const [tagInput,  setTagInput]  = useState('')
+const [novelType, setNovelType] = useState('長編' as '長編'|'短編')
+const [epTitle,   setEpTitle]   = useState('')
+const [preface,   setPreface]   = useState('')
+const [body,      setBody]      = useState('')
+const [afterword, setAfterword] = useState('')
+const [fontSize,     setFontSize]     = useState(15)
+const [showReplace,  setShowReplace]  = useState(false)
+const [showPreview,  setShowPreview]  = useState(false)
+const [replaceFrom,  setReplaceFrom]  = useState('')
+const [replaceTo,    setReplaceTo]    = useState('')
+const [replaceCount, setReplaceCount] = useState(null as number|null)
+const [useSchedule,    setUseSchedule]    = useState(false)
+const [scheduleValue,  setScheduleValue]  = useState(defaultScheduleValue())
+const [scheduledAtSaved, setScheduledAtSaved] = useState(null as string | null)
+const [errors,  setErrors]  = useState({} as Record<string,string>)
+const [loading,   setLoading]   = useState(false)
+const [toast,     setToast]     = useState('')
+const [draftSaved,  setDraftSaved]  = useState(false)
+const [savedNovelId,  setSavedNovelId]  = useState('' as string)
+const [isR18,         setIsR18]         = useState(false)
+const [isR15,         setIsR15]         = useState(false)
+const [allowComments, setAllowComments] = useState(true)
+const [aimsPublishing, setAimsPublishing] = useState(false)
+const [editMode,      setEditMode]      = useState(false)
+const [contests,      setContests]      = useState([] as any[])
+const [selectedContestIds, setSelectedContestIds] = useState([] as string[])
+const [editEpisodes,  setEditEpisodes]  = useState([] as any[])
+const [editEpId,      setEditEpId]      = useState('' as string)
+const [currentView,   setCurrentView]   = useState('writing' as View)
+const [showReadabilityCheck, setShowReadabilityCheck] = useState(false)
+const [pendingPublish, setPendingPublish] = useState(false)
+const aiMarkers = detectAiMarkers(body)
+const hasAiMarkers = aiMarkers.length > 0
+const now = new Date().toISOString()
+setNovelType(novel.novel_type || '長編')
+const ep = editEpisodes.find(e => e.id === editEpId)
+const d = new Date(ep.scheduled_at)
+const pad = (n: number) => String(n).padStart(2, '0')
+const last = data?.[0]?.ep_number ?? 0
+const prefaceLen = preface.length
+const bodyLen    = body.length
+const afterLen   = afterword.length
+const bodyPct    = Math.min(100, (bodyLen / 100000) * 100)
+const bodyColor  = bodyLen < 500 ? 'var(--color-danger)' : bodyLen > 90000 ? '#f59e0b' : '#22c55e'
+function addTag() {
+const t = tagInput.trim()
+async function handleImportFile(file: File) {
+const ext = file.name.split('.').pop()?.toLowerCase()
+const mammoth = await import('mammoth')
+const arrayBuffer = await file.arrayBuffer()
+const result = await mammoth.extractRawText({ arrayBuffer })
+function insertText(before: string, after = '') {
+const el = bodyRef.current; if (!el) return
+const s = el.selectionStart, e2 = el.selectionEnd
+const sel = body.substring(s, e2)
+const newVal = body.substring(0,s) + before + sel + after + body.substring(e2)
+function insertRuby() {
+const el = bodyRef.current; if (!el) return
+const s = el.selectionStart, e2 = el.selectionEnd
+const sel = body.substring(s, e2)
+const newVal = body.substring(0,s) + '｜' + sel + '《》' + body.substring(e2)
+const rubyPos = s + 1 + sel.length + 1
+const newVal = body.substring(0,s) + '｜《》' + body.substring(e2)
+async function handleIllustUpload(file: File) {
+const ext = file.name.split('.').pop()
+const path = `illustrations/${userId}/${Date.now()}.${ext}`
+const { error } = await supabase.storage.from('illustrations').upload(path, file, { upsert: true })
+const { data } = supabase.storage.from('illustrations').getPublicUrl(path)
+function indentNonDialogue() {
+const lines = body.split('\n')
+const result = lines.map(line => {
+const trimmed = line.trimStart()
+function handleReplace() {
+const count = body.split(replaceFrom).length - 1
+function validate(publish: boolean) {
+const errs: Record<string,string> = {}
+const scheduledDate = new Date(scheduleValue)
+function getReadabilityChecks() {
+const checks: { ok: boolean; msg: string; tip: string }[] = []
+function handlePublishClick() {
+const checks = getReadabilityChecks()
+const hasWarning = checks.some(c => !c.ok)
+async function handleSubmit(publish: boolean) {
+const errs = validate(publish)
+const isScheduled = publish && useSchedule
+const scheduledIso = isScheduled ? new Date(scheduleValue).toISOString() : null
+const { data: novel, error: nErr } = await supabase.from('novels').insert({
+const found = myNovels.find(n => n.id === selectedNovelId)
+const epPublished = publish && !isScheduled
+const epScheduledAt = scheduledIso
+const res = await supabase.from('episodes')
+const res = await supabase.from('episodes')
+const res = await supabase.from('episodes').insert({
+const d = new Date(scheduleValue)
+const fmt = `${d.getMonth()+1}/${d.getDate()} ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`
+const entries = selectedContestIds.map(cid => ({
+const inp = {width:'100%',padding:'8px 10px',border:'1.5px solid var(--color-brand-border)',borderRadius:6,fontSize:13,background:'var(--color-bg-card)',color:'var(--color-text)',outline:'none',boxSizing:'border-box'} as const
+const sec = {background:'var(--color-bg-card)',border:'1px solid var(--color-brand-border)',borderRadius:10,marginBottom:12,overflow:'hidden'} as const
+const sh  = {padding:'10px 14px',fontSize:13,fontWeight:700,color:'var(--color-text)',borderBottom:'1px solid var(--color-brand-border)',background:'var(--color-bg)'} as const
+const sb  = {padding:16} as const
+const lbl = {fontSize:12,fontWeight:500,color:'var(--color-text-muted)',display:'block',marginBottom:4} as const
+const fg  = {marginBottom:14} as const
+const er  = {fontSize:11,color:'var(--color-danger)',marginTop:3} as const
+const toolBtn = {padding:'3px 9px',fontSize:11,border:'1px solid var(--color-brand-border)',borderRadius:4,background:'var(--color-bg-card)',color:'var(--color-text-muted)',cursor:'pointer'} as const
+const submitButtonLabel = loading
+const currentNovelId = savedNovelId || selectedNovelId || editNovelId || null
+const rawT = catchcopy||summary||''
+const converted = toVerticalText(rawT)
+const chars = converted.split('')
+const actualCol = 4-col
+const ch = chars[actualCol*20+row]||null
+const isHoriz = ch ? isHorizontalCharPC(ch) : false
+const alreadyAdded = tags.includes(ex)
+const checked = selectedContestIds.includes(c.id)
+const otherExclusiveSelected = selectedContestIds.some(id => id!==c.id && contests.find(cc=>cc.id===id)?.exclusive)
+const disabled = !checked && (otherExclusiveSelected || (c.exclusive && selectedContestIds.length > 0))
+
+===== C:\Users\yukku\Downloads\genseki-koro-nextjs (1)\src\app\post\RelationView.tsx =====
+interface Character { id: string; name: string; image_url: string | null }
+interface Relation { id: string; char_a_id: string; char_b_id: string; relation_label: string }
+interface Props { novelId: string; userId: string }
+export default function RelationView({ novelId, userId }: Props) {
+const supabase = createClient()
+const [chars, setChars] = useState([] as Character[])
+const [relations, setRelations] = useState([] as Relation[])
+const [selectedA, setSelectedA] = useState('')
+const [selectedB, setSelectedB] = useState('')
+const [label, setLabel] = useState('')
+async function handleAdd() {
+const { data } = await supabase.from('novel_relations').insert({ novel_id: novelId, user_id: userId, char_a_id: selectedA, char_b_id: selectedB, relation_label: label }).select().single()
+async function handleDelete(id: string) {
+async function updateLabel(id: string, v: string) {
+const charMap = Object.fromEntries(chars.map(c => [c.id, c]))
+const RelationGraph = () => {
+const W = 560, H = 440, CX = W / 2, CY = H / 2
+const R = Math.min(CX, CY) - 64
+const positions = chars.map((c, i) => {
+const angle = (2 * Math.PI * i) / chars.length - Math.PI / 2
+const posMap = Object.fromEntries(positions.map(p => [p.id, p]))
+const pairCount: Record<string, number> = {}
+const pairIndex: Record<string, number> = {}
+const key = [r.char_a_id, r.char_b_id].sort().join('|')
+const pairCurrent: Record<string, number> = {}
+const a = posMap[r.char_a_id], b = posMap[r.char_b_id]
+const key = [r.char_a_id, r.char_b_id].sort().join('|')
+const total = pairCount[key] || 1
+const idx = pairCurrent[key] - 1
+const offset = total === 1 ? 0 : (idx % 2 === 0 ? 1 : -1) * (Math.ceil((idx + 1) / 2) * 40)
+const mx = (a.x + b.x) / 2, my = (a.y + b.y) / 2
+const dx = b.y - a.y, dy = -(b.x - a.x)
+const len = Math.sqrt(dx*dx + dy*dy) || 1
+const cx1 = mx + (dx/len) * offset, cy1 = my + (dy/len) * offset
+const path = offset === 0
+const t = 0.35
+const lx = offset === 0
+const ly = offset === 0
+const Avatar = ({ c }: { c: Character }) => (
+const a = charMap[r.char_a_id], b = charMap[r.char_b_id]
+const a = charMap[r.char_a_id], b = charMap[r.char_b_id]
+
+===== C:\Users\yukku\Downloads\genseki-koro-nextjs (1)\src\app\post\TimelineView.tsx =====
+interface TimelineItem { id: string; date_label: string; event: string; order_num: number }
+interface Props { novelId: string; userId: string }
+export default function TimelineView({ novelId, userId }: Props) {
+const supabase = createClient()
+const [items, setItems] = useState<TimelineItem[]>([])
+const [editingId, setEditingId] = useState<string | null>(null)
+async function handleAdd() {
+const { data } = await supabase.from('novel_timeline').insert({ novel_id: novelId, user_id: userId, date_label: '', event: '', order_num: items.length }).select().single()
+async function handleUpdate(id: string, field: 'date_label' | 'event', value: string) {
+async function handleDelete(id: string) {
+
+===== C:\Users\yukku\Downloads\genseki-koro-nextjs (1)\src\app\post\WorldView.tsx =====
+interface WorldItem { id: string; title: string; body: string; order_num: number }
+interface Props { novelId: string; userId: string }
+const TEMPLATES = ['地理・場所', '歴史・年表', '魔法・システム', '文化・風習', '組織・勢力', '用語集', 'その他']
+export default function WorldView({ novelId, userId }: Props) {
+const supabase = createClient()
+const [items, setItems] = useState<WorldItem[]>([])
+const [selected, setSelected] = useState<WorldItem | null>(null)
+const [editTitle, setEditTitle] = useState('')
+const [editBody, setEditBody] = useState('')
+const [saving, setSaving] = useState(false)
+const timer = useRef<NodeJS.Timeout | null>(null)
+async function handleNew(title = '新しい設定') {
+const { data } = await supabase.from('novel_memos').insert({ novel_id: novelId, user_id: userId, category: 'world', title, body: '', order_num: items.length }).select().single()
+function select(item: WorldItem) { setSelected(item); setEditTitle(item.title); setEditBody(item.body) }
+function autoSave(title: string, body: string) {
+async function handleDelete(id: string) {
+
+===== C:\Users\yukku\Downloads\genseki-koro-nextjs (1)\src\app\post\setup\page.tsx =====
+const GENRES = ['異世界','ファンタジー','SF','恋愛','学園','ミステリー','ホラー','歴史・時代','日常','アクション','コメディ','官能','その他']
+const TAG_EXAMPLES: string[] = [
+function toVerticalText(text: string): string {
+function isHorizontalCharPC(ch: string): boolean {
+export default function PostSetupPage() {
+const router = useRouter()
+const supabase = createClient()
+const [profile, setProfile] = useState(null as any)
+const [userId, setUserId] = useState('')
+const [myNovels, setMyNovels] = useState([] as any[])
+const [contests, setContests] = useState([] as any[])
+const [mounted, setMounted] = useState(false)
+const [loading, setLoading] = useState(false)
+const [step, setStep] = useState('select' as 'select' | 'new' | 'existing')
+const [title, setTitle] = useState('')
+const [summary, setSummary] = useState('')
+const [catchcopy, setCatchcopy] = useState('')
+const [genre, setGenre] = useState('')
+const [tags, setTags] = useState([] as string[])
+const [tagInput, setTagInput] = useState('')
+const [novelType, setNovelType] = useState('長編' as '長編'|'短編')
+const [isR18, setIsR18] = useState(false)
+const [isR15, setIsR15] = useState(false)
+const [aimsPublishing, setAimsPublishing] = useState(false)
+const [aiUsage, setAiUsage] = useState('none' as 'none'|'assist'|'full')
+const [selectedContestIds, setSelectedContestIds] = useState([] as string[])
+const [showTagExamples, setShowTagExamples] = useState(false)
+const [showCatchcopyHint, setShowCatchcopyHint] = useState(false)
+const [errors, setErrors] = useState({} as Record<string,string>)
+const [selectedNovelId, setSelectedNovelId] = useState('')
+const now = new Date().toISOString()
+function addTag() {
+const t = tagInput.trim()
+function validateNew() {
+const errs: Record<string,string> = {}
+async function handleCreateAndGo() {
+const errs = validateNew()
+const { data: novel, error } = await supabase.from('novels').insert({
+function handleExistingGo() {
+const inp = {width:'100%',padding:'9px 12px',border:'1.5px solid var(--color-brand-border)',borderRadius:8,fontSize:13,background:'var(--color-bg-card)',color:'var(--color-text)',outline:'none',boxSizing:'border-box'} as const
+const lbl = {fontSize:12,fontWeight:600,color:'var(--color-text-muted)',display:'block',marginBottom:5} as const
+const er  = {fontSize:11,color:'var(--color-danger)',marginTop:3} as const
+const fg  = {marginBottom:18} as const
+const added = tags.includes(ex)
+const checked = selectedContestIds.includes(c.id)
+const otherExclusive = selectedContestIds.some(id=>id!==c.id&&contests.find(cc=>cc.id===id)?.exclusive)
+const disabled = !checked&&(otherExclusive||(c.exclusive&&selectedContestIds.length>0))
+const warns: string[] = []
+
+===== C:\Users\yukku\Downloads\genseki-koro-nextjs (1)\src\app\privacy\page.tsx =====
+export default async function PrivacyPage() {
+const supabase = await createClient()
+const { data: { user } } = await supabase.auth.getUser()
+const { data } = await supabase.from('profiles').select('*').eq('user_id', user.id).single()
+const sections = [
+
+===== C:\Users\yukku\Downloads\genseki-koro-nextjs (1)\src\app\projects\page.tsx =====
+export const dynamic = 'force-dynamic'
+export default async function ProjectsPage() {
+const supabase = await createClient()
+const { data: { user } } = await supabase.auth.getUser()
+const { data } = await supabase.from('profiles').select('*').eq('user_id', user.id).single()
+const { data: projects } = await supabase
+const projectIds = (projects || []).map((p: any) => p.id)
+const hostIds = Array.from(new Set((projects || []).map((p: any) => p.host_id)))
+const hostMap: Record<string, string> = {}
+const entryCountMap: Record<string, number> = {}
+const { data: hosts } = await supabase.from('profiles').select('user_id, display_name').in('user_id', hostIds)
+const { data: entries } = await supabase.from('project_entries').select('project_id').in('project_id', projectIds)
+const now = Date.now()
+function isOpen(deadline: string | null) {
+function fmtDate(s: string | null) {
+const d = new Date(s)
+const openProjects = (projects || []).filter((p: any) => isOpen(p.deadline))
+const closedProjects = (projects || []).filter((p: any) => !isOpen(p.deadline))
+const ProjectCard = ({ p }: { p: any }) => (
+
+===== C:\Users\yukku\Downloads\genseki-koro-nextjs (1)\src\app\projects\new\page.tsx =====
+export default function NewProjectPage() {
+const router = useRouter()
+const supabase = createClient()
+const [userId, setUserId] = useState<string | null>(null)
+const [title, setTitle] = useState('')
+const [theme, setTheme] = useState('')
+const [description, setDescription] = useState('')
+const [deadline, setDeadline] = useState('')
+const [saving, setSaving] = useState(false)
+const [error, setError] = useState('')
+async function handleSubmit() {
+const { data, error: err } = await supabase.from('projects').insert({
+const label = { fontSize: 13, fontWeight: 600, color: 'var(--color-text)', marginBottom: 6, display: 'block' } as const
+const input = { width: '100%', padding: '10px 12px', border: '1px solid var(--color-brand-border)', borderRadius: 8, fontSize: 14, outline: 'none', fontFamily: 'inherit', background: 'var(--color-bg-card)', color: 'var(--color-text)', boxSizing: 'border-box' as const }
+
+===== C:\Users\yukku\Downloads\genseki-koro-nextjs (1)\src\app\projects\[id]\page.tsx =====
+
+===== C:\Users\yukku\Downloads\genseki-koro-nextjs (1)\src\app\projects\[id]\ProjectJoinButton.tsx =====
+
+===== C:\Users\yukku\Downloads\genseki-koro-nextjs (1)\src\app\ranking\page.tsx =====
+export const revalidate = 10
+const PAGE_SIZE = 50
+interface Props {
+export default async function RankingPage({ searchParams }: Props) {
+const supabase = await createClient()
+const { data: { user } } = await supabase.auth.getUser()
+const { data } = await supabase.from('profiles').select('*').eq('user_id', user.id).single()
+const period    = searchParams.period || 'weekly'
+const genre     = searchParams.genre  || '全て'
+const aiMode    = (profile as any)?.show_ai_works === false ? 'human' : (searchParams.ai === 'ai' ? 'ai' : 'human')  // AI非表示設定の読み手は常にhuman
+const showMore  = searchParams.page === 'all'
+const novelType = searchParams.type   || '長編'
+const serial    = searchParams.serial || 'all'
+const page      = showMore ? 1 : Math.max(1, parseInt(searchParams.page || '1'))
+const displaySize = showMore ? 100 : PAGE_SIZE
+const offset    = (page - 1) * PAGE_SIZE
+async function getRanking(): Promise<{ items: any[]; total: number }> {
+const likeMap: Record<string,number> = {}
+const GROWTH_PERIODS = ['discover_rate', 'read_rate', 'bookmark_rate', 'newbie_focus']
+const MIN_VIEWS = 30 // 母数が少なすぎる作品を除外
+const { data: poolNovels } = await poolQuery
+const poolIds = poolNovels.map((n:any) => n.id)
+const [{ data: viewsData }, { data: discoversData }, { data: likesData }, { data: bookmarksData }, { data: readData }] = await Promise.all([
+const viewMap: Record<string,number> = {}
+const discoverCountMap: Record<string,number> = {}
+const likeCountMap: Record<string,number> = {}
+const bookmarkCountMap: Record<string,number> = {}
+const readCountMap: Record<string,number> = {}
+const { data: authorWorks } = await supabase.from('novels').select('author_id').eq('published', true)
+const authorCount: Record<string,number> = {}
+const rateScored = candidates.map((n:any) => {
+const views = viewMap[n.id] || 1
+const total = rateScored.length
+const paged = rateScored.slice(offset, offset + PAGE_SIZE)
+const authorIds = Array.from(new Set(paged.map((n:any) => n.author_id)))
+const authorMap: Record<string,string> = {}
+const { data: authors } = await supabase.from('profiles').select('user_id, display_name').in('user_id', authorIds as string[])
+const { data: risingData } = await supabase.from('rising_novels').select('id, rising_score').limit(100)
+const risingIds = (risingData || []).map((r:any) => r.id)
+const scoreMap = Object.fromEntries((risingData||[]).map((r:any) => [r.id, r.rising_score]))
+const { data: risingNovelData } = await supabase
+const risingItems = (risingNovelData || [])
+const authorIds2 = Array.from(new Set(risingItems.map((n:any) => n.author_id)))
+const authorMap2: Record<string,string> = {}
+const { data: authors2 } = await supabase.from('profiles').select('user_id, display_name').in('user_id', authorIds2 as string[])
+const today = new Date(); today.setHours(0,0,0,0)
+const { data: dl } = await supabase.from('likes').select('novel_id').gte('created_at', today.toISOString())
+const { data: recentNovels } = await supabase.from('novels').select('id').eq('published',true).order('created_at',{ascending:false}).limit(100)
+const recentIds = (recentNovels||[]).map((n:any)=>n.id)
+const tableMap: Record<string,string> = { weekly:'weekly_likes', monthly:'monthly_likes', quarterly:'quarterly_likes', yearly:'yearly_likes' }
+const { data: likes } = await supabase.from(tableMap[period]).select('novel_id, like_count').order('like_count',{ascending:false}).limit(500)
+const { data: recentNovels } = await supabase.from('novels').select('id').eq('published',true).order('created_at',{ascending:false}).limit(100)
+const recentIds = (recentNovels||[]).map((n:any)=>n.id)
+if (novelType !== '全て') q = (q as any).eq('novel_type', novelType)
+const { data: newbieAuthors } = await supabase.from('novels').select('author_id').eq('published', true)
+const authorCount: Record<string,number> = {}
+const newbieIds = Object.entries(authorCount).filter(([,c])=>c<=3).map(([id])=>id)
+const { data: novels } = await q
+const candidateNovels = novels || []
+const candidateIds = candidateNovels.map((n: any) => n.id)
+const pointMap: Record<string, number> = {}
+const likeCntMap: Record<string, number> = {}
+const bookmarkCntMap: Record<string, number> = {}
+const starSumMap: Record<string, number> = {}
+const [{ data: allLikes }, { data: allBookmarks }, { data: allRatings }] = await Promise.all([
+const bestRating: Record<string, number> = {} // key: novel_id|user_id|episode_id
+const key = `${r.novel_id}|${r.user_id}|${r.episode_id}`
+const val = Math.min(5, r.rating || 0)
+const nId = key.split('|')[0]
+const sorted = candidateNovels.sort((a: any, b: any) => (pointMap[b.id]||0) - (pointMap[a.id]||0))
+const total  = sorted.length
+const paged  = sorted.slice(offset, offset + PAGE_SIZE)
+const authorIds = Array.from(new Set(paged.map((n: any) => n.author_id)))
+const authorMap: Record<string,string> = {}
+const { data: authors } = await supabase.from('profiles').select('user_id, display_name').in('user_id', authorIds as string[])
+const novelIds = paged.map((n: any) => n.id)
+const charCountMap: Record<string,number> = {}
+const lastUpdateMap: Record<string,string> = {}
+const { data: eps } = await supabase.from('episodes').select('novel_id, body, created_at').in('novel_id', novelIds)
+const sevenDaysAgo = Date.now() - 7*24*60*60*1000
+const { items: ranking, total } = await getRanking()
+const totalPages = Math.ceil(total / PAGE_SIZE)
+function fmtDate(s: string) {
+const d = new Date(s)
+function fmtChar(n: number) {
+function fmtNum(n: number | undefined | null): string {
+function rankColor(abs: number) {
+function rankSize(abs: number) {
+const periodOptions = [
+const genres = ['全て','異世界','ファンタジー','SF','恋愛','学園','ミステリー','ホラー','歴史・時代','日常','アクション','コメディ','その他']
+const typeOptions   = [{ value:'全て',label:'全て' },{ value:'長編',label:'長編' },{ value:'短編',label:'短編' }]
+const serialOptions = [{ value:'all',label:'すべて' },{ value:'serial',label:'連載中' },{ value:'complete',label:'完結' },{ value:'new',label:'新作（1ヶ月以内）' },{ value:'newbie',label:'新人作家' }]
+function buildUrl(p: string, t: string, s: string, pg = 1, ai = aiMode) {
+const GROWTH_PERIODS = ['discover_rate', 'read_rate', 'bookmark_rate', 'newbie_focus']
+const isGrowthRanking = GROWTH_PERIODS.includes(period)
+const periodLabel = periodOptions.find(o=>o.value===period)?.label||'週間'
+const scoreLabel  = period === 'rising' ? '↑' : 'pt'
+const pill = (active: boolean, small = false) => ({
+const pillClass = (active: boolean) => active ? 'ranking-pill ranking-pill-active' : 'ranking-pill ranking-pill-inactive'
+const abs = offset + i
+
+===== C:\Users\yukku\Downloads\genseki-koro-nextjs (1)\src\app\search\page.tsx =====
+export const dynamic = 'force-dynamic'
+const PAGE_SIZE = 50
+interface Props {
+export default async function SearchPage({ searchParams }: Props) {
+const supabase = await createClient()
+const { data: { user } } = await supabase.auth.getUser()
+const { data } = await supabase.from('profiles').select('*').eq('user_id', user.id).single()
+const q        = searchParams.q       || ''
+const exclude  = searchParams.exclude || ''
+const genre    = searchParams.genre   || ''
+const type     = searchParams.type    || ''
+const serial   = searchParams.serial  || ''
+const tagParam = searchParams.tag     || ''
+const sort     = searchParams.sort    || 'new'
+const page     = Number(searchParams.page || 1)
+const offset   = (page - 1) * PAGE_SIZE
+const tags     = tagParam ? tagParam.split(',').filter(Boolean) : []
+const authorQ  = searchParams.author  || ''
+const contestId = searchParams.contest || ''
+const hasSearch = !!(q || exclude || genre || type || serial || tags.length > 0 || authorQ || contestId)
+const isAgeVerified = profile?.age_verified || false
+const { data: searchContests } = await supabase
+const now = Date.now()
+const oneDayAgo   = new Date(now - 1  * 24 * 60 * 60 * 1000).toISOString()
+const oneWeekAgo  = new Date(now - 7  * 24 * 60 * 60 * 1000).toISOString()
+const oneMonthAgo = new Date(now - 30 * 24 * 60 * 60 * 1000).toISOString()
+const { data: allData, count: allCount } = await q2
+const shuffled = [...(allData || [])].sort(() => Math.random() - 0.5)
+const { data: matchedAuthors } = await supabase
+const authorIds2 = (matchedAuthors||[]).map((a:any) => a.user_id)
+const { data: contestEntries } = await supabase
+const entryNovelIds = (contestEntries||[]).map((e:any) => e.novel_id)
+const needsPostSort = ['like','like_daily','like_weekly','like_monthly','bookmark','view','comment','rising','ep_count','char_count','award'].includes(sort)
+const { data, count: c2 } = await (query as any)
+const novelIds = results.map((n: any) => n.id)
+const charCountMap: Record<string, number> = {}
+const { data: epData } = await supabase.from('episodes').select('novel_id, body').in('novel_id', novelIds)
+const likeMap: Record<string, number> = {}
+const { data: likes } = await supabase.from('likes').select('novel_id').in('novel_id', novelIds)
+const likeDailyMap:   Record<string, number> = {}
+const likeWeeklyMap:  Record<string, number> = {}
+const likeMonthlyMap: Record<string, number> = {}
+const since = sort === 'like_daily' ? oneDayAgo : sort === 'like_weekly' ? oneWeekAgo : oneMonthAgo
+const targetMap = sort === 'like_daily' ? likeDailyMap : sort === 'like_weekly' ? likeWeeklyMap : likeMonthlyMap
+const { data: periodLikes } = await supabase
+const bookmarkMap: Record<string, number> = {}
+const { data: bookmarks } = await supabase.from('bookmarks').select('novel_id').in('novel_id', novelIds)
+const commentMap: Record<string, number> = {}
+const { data: comments } = await supabase.from('comments').select('novel_id').in('novel_id', novelIds)
+const viewMap: Record<string, number> = {}
+const { data: views } = await supabase.from('page_views').select('novel_id').in('novel_id', novelIds)
+const epCountMap: Record<string, number> = {}
+const { data: eps } = await supabase.from('episodes').select('novel_id').in('novel_id', novelIds).eq('published', true)
+const awardMap: Record<string, number> = {}
+const authorIds = Array.from(new Set(results.map((n: any) => n.author_id)))
+const authorMap: Record<string, string> = {}
+const { data: authors } = await supabase.from('profiles').select('user_id, display_name').in('user_id', authorIds as string[])
+const newbieSet = new Set<string>()
+const { data: authorNovels } = await supabase
+const authorCount: Record<string,number> = {}
+const sevenDaysAgo = Date.now() - 7 * 24 * 60 * 60 * 1000
+const likeCount = likeMap[n.id] || 0
+const isNewWork = new Date(n.created_at).getTime() > sevenDaysAgo
+const hideStats = isNewWork || likeCount < 50
+const { data: risingLikes } = await supabase
+const risingMap: Record<string, number> = {}
+const needsPostSort = ['like','like_daily','like_weekly','like_monthly','bookmark','view','comment','rising','ep_count','char_count','award'].includes(sort)
+function fmtNum(n: number | undefined | null): string {
+function buildUrl(params: Record<string, string>) {
+const base: Record<string, string> = {}
+if (type)    base.type = type
+const qs = Object.entries(base).filter(([, v]) => v).map(([k, v]) => `${k}=${encodeURIComponent(v)}`).join('&')
+const totalPages = Math.ceil(count / PAGE_SIZE)
+
+===== C:\Users\yukku\Downloads\genseki-koro-nextjs (1)\src\app\search\SearchForm.tsx =====
+const GENRES_BASE = ['異世界','ファンタジー','SF','恋愛','学園','ミステリー','ホラー','歴史・時代','日常','アクション','コメディ','その他']
+const MOODS = [
+const KEYWORD_CATEGORIES = [
+const SORT_OPTIONS = [
+interface Props {
+export default function SearchForm({
+const router = useRouter()
+const GENRES = ageVerified ? [...GENRES_BASE, '官能'] : GENRES_BASE
+const [q,                  setQ]                  = useState(defaultQ)
+const [author,             setAuthor]             = useState(defaultAuthor)
+const [exclude,            setExclude]            = useState(defaultExclude)
+const [genre,              setGenre]              = useState(defaultGenre)
+const [type,               setType]               = useState(defaultType)
+const [serial,             setSerial]             = useState(defaultSerial)
+const [tags,               setTags]               = useState<string[]>(defaultTag ? defaultTag.split(',').filter(Boolean) : [])
+const [sort,               setSort]               = useState(defaultSort)
+const [discoverMode,       setDiscoverMode]       = useState(defaultDiscover)
+const [contestId,          setContestId]          = useState(defaultContest)
+const [showDetail,         setShowDetail]         = useState(!!(defaultGenre||defaultType||defaultSerial||defaultTag||defaultContest))
+const [showSearchExamples, setShowSearchExamples] = useState(false)
+const [history,            setHistory]            = useState<string[]>([])
+const [showHistory,        setShowHistory]        = useState(false)
+const [exHistory,          setExHistory]          = useState<string[]>([])
+const [showExHistory,      setShowExHistory]      = useState(false)
+const [showMoods,          setShowMoods]          = useState(false)
+const [activeMoods,        setActiveMoods]        = useState<string[]>([])
+const [isMobile,           setIsMobile]           = useState(false)
+const MAX_HISTORY = 10
+const check = () => setIsMobile(window.innerWidth <= 768)
+const saved = localStorage.getItem('search_history')
+const savedEx = localStorage.getItem('exclude_history')
+const moodTags = activeMoods.flatMap(label => MOODS.find(m => m.label === label)?.tags.slice(0,3) || [])
+function handleMoodSelect(mood: typeof MOODS[0]) {
+function handleSearch() {
+const params = new URLSearchParams()
+const allTags = Array.from(new Set([...tags, ...moodTags]))
+const nh = [q.trim(), ...history.filter(h => h !== q.trim())].slice(0, MAX_HISTORY)
+const neh = [exclude.trim(), ...exHistory.filter(h => h !== exclude.trim())].slice(0, MAX_HISTORY)
+function handleKeyDown(e: React.KeyboardEvent) {
+const pill = (active: boolean) => ({
+const pillCls = (active: boolean) => active ? 'ranking-pill ranking-pill-active' : 'ranking-pill ranking-pill-inactive'
+const inp = {
+
+===== C:\Users\yukku\Downloads\genseki-koro-nextjs (1)\src\app\terms\page.tsx =====
+export default async function TermsPage() {
+const supabase = await createClient()
+const { data: { user } } = await supabase.auth.getUser()
+const { data } = await supabase.from('profiles').select('*').eq('user_id', user.id).single()
+const sections = [
+
+===== C:\Users\yukku\Downloads\genseki-koro-nextjs (1)\src\app\voices\page.tsx =====
+export const metadata = {
+export const revalidate = 60
+export default async function VoicesPage() {
+const supabase = await createClient()
+const { data: { user } } = await supabase.auth.getUser()
+const { data } = await supabase.from('profiles').select('*').eq('user_id', user.id).single()
+const { data: quoteComments } = await supabase
+const novelIds = Array.from(new Set((quoteComments||[]).map((c:any)=>c.novel_id).filter(Boolean)))
+const { data: novels } = await supabase.from('novels').select('id, title').in('id', novelIds)
+const allVoices = (quoteComments||[])
+const seenNovelIds = new Set<string>()
+const voices: typeof allVoices = []
+
+===== C:\Users\yukku\Downloads\genseki-koro-nextjs (1)\src\app\voices\VoicesFloat.tsx =====
+interface Voice {
+interface Props {
+interface SlotState {
+const DURATION_MIN = 1.8       // 表示時間（浮き出て→1秒ほど表示→消える）
+const DURATION_MAX = 2.4       // 表示時間（長め）
+function sizeFor(text: string) {
+const len = text.length
+function pickVoiceIdx(voicesLen: number, excludeIdx: number, activeIdxs: Set<number>): number {
+const candidates: number[] = []
+const fallback: number[] = []
+function randomMotion() {
+const angle = Math.random() * Math.PI * 2
+const dist = 90 + Math.random() * 140
+interface SlotItemProps {
+function SlotItem({ voices, slotIndex, slotCount, activeIdxsRef, onClick }: SlotItemProps) {
+const runIdRef = useRef(0)
+const initialVoiceIdx = slotIndex % voices.length
+const [state, setState] = useState<SlotState>(() => {
+const m = randomMotion()
+const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+const initialDelay = (slotIndex / slotCount) * DURATION_MIN * 1000 * 0.6 + Math.random() * 600
+function schedule(current: SlotState) {
+const others = new Set(
+const nextIdx = pickVoiceIdx(voices.length, current.voiceIdx, others)
+const m = randomMotion()
+const next: SlotState = { voiceIdx: nextIdx, ...m, runId: runIdRef.current }
+const t0 = setTimeout(() => {
+const voice = voices[state.voiceIdx % voices.length]
+export default function VoicesFloat({ voices }: Props) {
+const router = useRouter()
+const [mounted, setMounted] = useState(false)
+const activeIdxsRef = useRef<Map<number, number>>(new Map())
+function goToNovel(v: Voice) {
+const slotCount = Math.max(1, Math.min(14, voices.length))
+
+===== C:\Users\yukku\Downloads\genseki-koro-nextjs (1)\src\components\BlockButton.tsx =====
+interface Props {
+export default function BlockButton({ targetId, userId, initialBlocked, initialMuted = false }: Props) {
+const supabase = createClient()
+const [blocked, setBlocked] = useState(initialBlocked)
+const [muted,   setMuted]   = useState(initialMuted)
+const [loading, setLoading] = useState(false)
+const [showMenu, setShowMenu] = useState(false)
+async function handleBlock() {
+async function handleMute() {
+
+===== C:\Users\yukku\Downloads\genseki-koro-nextjs (1)\src\components\CharacterMode.tsx =====
+interface Character {
+interface Relation {
+interface CharacterData { characters: Character[]; relations: Relation[] }
+const CHAR_COLORS = ['#F26A21','#3b82f6','#e11d48','#22c55e','#8b5cf6','#f59e0b','#06b6d4','#ec4899']
+const RELATION_COLORS = [
+const CARD_W = 130, CARD_H = 90
+const BOARD_W = 3000, BOARD_H = 2000
+function genId() { return Math.random().toString(36).slice(2,10) }
+export default function CharacterMode({ userId }: { userId: string }) {
+const supabase = createClient()
+const svgRef  = useRef<SVGSVGElement>(null)
+const wrapRef = useRef<HTMLDivElement>(null)
+const [characters, setCharacters] = useState<Character[]>([])
+const [relations,  setRelations]  = useState<Relation[]>([])
+const [selected,   setSelected]   = useState<string|null>(null)
+const [mode, setMode] = useState<'select'|'add'|'connect'>('select')
+const [newColor, setNewColor] = useState(CHAR_COLORS[0])
+const [viewBox, setViewBox] = useState({vx:0,vy:0,vw:BOARD_W,vh:BOARD_H})
+const [fitSize, setFitSize] = useState<{vw:number;vh:number}|null>(null)
+const [ready, setReady] = useState(false)
+const [mounted, setMounted] = useState(false)
+const [saving, setSaving] = useState(false)
+const [saved, setSaved] = useState(false)
+const [editingChar, setEditingChar] = useState<Character|null>(null)
+const [relationPicker, setRelationPicker] = useState<{from:string;to:string}|null>(null)
+const [customLabel, setCustomLabel] = useState('')
+const dragRef = useRef<{id:string;ox:number;oy:number;mx:number;my:number}|null>(null)
+const panRef  = useRef<{sx:number;sy:number;ovx:number;ovy:number}|null>(null)
+const connectFromRef = useRef<string|null>(null)
+const saveTimerRef = useRef<ReturnType<typeof setTimeout>|null>(null)
+const charsRef = useRef<Character[]>([])
+const relsRef  = useRef<Relation[]>([])
+const computeFitSize = useCallback((): {vw:number;vh:number}|null => {
+const rect = wrapRef.current.getBoundingClientRect()
+const aspect = rect.height/rect.width
+const clampViewBox = useCallback((vx:number,vy:number,vw:number,vh:number,fit:{vw:number;vh:number}|null) => {
+const maxVw = fit?fit.vw:BOARD_W, maxVh = fit?fit.vh:BOARD_H
+const minVw = BOARD_W*0.1
+const cw = Math.min(Math.max(vw,minVw),maxVw)
+const ratio = vh/vw
+const ch = isFinite(ratio)&&ratio>0 ? cw*ratio : maxVh
+const cx = cw>=BOARD_W ? (BOARD_W-cw)/2 : Math.min(Math.max(vx,0),Math.max(0,BOARD_W-cw))
+const cy = ch>=BOARD_H ? (BOARD_H-ch)/2 : Math.min(Math.max(vy,0),Math.max(0,BOARD_H-ch))
+const id1 = requestAnimationFrame(() => {
+const id2 = requestAnimationFrame(() => {
+const fit = computeFitSize(); if (!fit) return
+const d = data.character_data as CharacterData
+const doSave = useCallback(async (c: Character[], r: Relation[]) => {
+const { error } = await supabase.from('story_boards').upsert(
+const scheduleSave = useCallback((c: Character[], r: Relation[]) => {
+function updateChars(fn:(prev:Character[])=>Character[]) {
+setCharacters(prev => { const next = fn(prev); charsRef.current = next; scheduleSave(next, relsRef.current); return next })
+function updateRels(fn:(prev:Relation[])=>Relation[]) {
+setRelations(prev => { const next = fn(prev); relsRef.current = next; scheduleSave(charsRef.current, next); return next })
+function screenToBoard(clientX:number, clientY:number) {
+const rect = svgRef.current.getBoundingClientRect()
+function handleSvgClick(e: React.MouseEvent<SVGSVGElement>) {
+const {x,y} = screenToBoard(e.clientX,e.clientY)
+const cx = Math.min(Math.max(x-CARD_W/2,0),BOARD_W-CARD_W)
+const cy = Math.min(Math.max(y-CARD_H/2,0),BOARD_H-CARD_H)
+const char: Character = { id:genId(), name:'新キャラ', memo:'', color:newColor, x:cx, y:cy }
+function handleCardMouseDown(e: React.MouseEvent, id: string) {
+const c = charsRef.current.find(x=>x.id===id); if (!c) return
+function handleMouseMove(e: React.MouseEvent) {
+const rect = svgRef.current.getBoundingClientRect()
+const sx = viewBox.vw/rect.width, sy = viewBox.vh/rect.height
+const dr = dragRef.current
+const nx = Math.min(Math.max(dr.ox+dx,0),BOARD_W-CARD_W)
+const ny = Math.min(Math.max(dr.oy+dy,0),BOARD_H-CARD_H)
+const pr = panRef.current
+function handleMouseUp() {
+function handleSvgMouseDown(e: React.MouseEvent<SVGSVGElement>) {
+const target = e.target as SVGElement
+function handleWheel(e: React.WheelEvent<SVGSVGElement>) {
+const rect = svgRef.current.getBoundingClientRect()
+const factor = e.deltaY>0?1.1:0.9
+function zoomBy(factor:number) { setViewBox(v=>{ const cx=v.vx+v.vw/2, cy=v.vy+v.vh/2, newVw=v.vw*factor, newVh=v.vh*factor; return clampViewBox(cx-newVw/2,cy-newVh/2,newVw,newVh,fitSize) }) }
+function fitToScreen() { const fit=computeFitSize(); if(!fit) return; setFitSize(fit); setViewBox({vx:(BOARD_W-fit.vw)/2,vy:(BOARD_H-fit.vh)/2,vw:fit.vw,vh:fit.vh}) }
+function handleDeleteChar() {
+function getCardCenter(id:string) { const c=charsRef.current.find(x=>x.id===id); if(!c) return {x:0,y:0}; return {x:c.x+CARD_W/2,y:c.y+CARD_H/2} }
+function confirmRelation(label: string, color: string) {
+function handleSaveCharEdit() {
+const zoomPercent = fitSize&&fitSize.vw>0 ? Math.round((fitSize.vw/viewBox.vw)*100) : 100
+const selectedChar = characters.find(c=>c.id===selected)
+
+===== C:\Users\yukku\Downloads\genseki-koro-nextjs (1)\src\components\FloatingMemo.tsx =====
+export default function FloatingMemo({ userId }: { userId: string | null }) {
+const supabase = createClient()
+const [open, setOpen] = useState(false)
+const [text, setText] = useState('')
+const [title, setTitle] = useState('')
+const [saving, setSaving] = useState(false)
+const [done, setDone] = useState(false)
+async function handleSubmit() {
+const { data: maxRow } = await supabase.from('novel_memos')
+const nextOrder = (maxRow?.order_num ?? -1) + 1
+
+===== C:\Users\yukku\Downloads\genseki-koro-nextjs (1)\src\components\FollowButton.tsx =====
+interface Props {
+export default function FollowButton({ authorId, userId, initialFollowing, followerCount }: Props) {
+const supabase = createClient()
+const [following, setFollowing] = useState(initialFollowing)
+const [loading,   setLoading]   = useState(false)
+const [hovered,   setHovered]   = useState(false)
+async function handleToggle() {
+
+===== C:\Users\yukku\Downloads\genseki-koro-nextjs (1)\src\components\LoginPromptModal.tsx =====
+interface Props {
+export default function LoginPromptModal({ show, onClose, message = 'この機能を使うにはログインが必要です' }: Props) {
+function handleKey(e: KeyboardEvent) { if (e.key === 'Escape') onClose() }
+
+===== C:\Users\yukku\Downloads\genseki-koro-nextjs (1)\src\components\MemoMode.tsx =====
+interface Node {
+interface Edge { id: string; from: string; to: string; type: 'arrow' | 'line'; color: string }
+interface MemoData { nodes: Node[]; edges: Edge[] }
+const NOTE_COLORS = ['#FFE066','#FF9999','#80C8FF','#80E0A0','#D4A0FF','#FFB380','#FFFFFF','#2B211B']
+const SHAPE_COLORS = ['#2B211B','#F26A21','#3b82f6','#e11d48','#22c55e','#8b5cf6']
+const EDGE_COLORS  = ['#2B211B','#F26A21','#3b82f6','#e11d48','#22c55e','#8b5cf6']
+const DEFAULT_SIZE: Record<Node['type'], {w:number;h:number}> = {
+const MIN_SIZE = 40
+const BOARD_W = 14000, BOARD_H = 9000
+function genId() { return Math.random().toString(36).slice(2,10) }
+function NodeShape({ node, selected, onMouseDown, onDoubleClick, onResizeStart }: {
+const isDark = node.color === '#2B211B'
+const textColor = isDark ? '#fff' : '#2B211B'
+const sel = '#F26A21'
+const sw = selected ? 2.5 : 1.8
+const handleSize = 11
+const ResizeHandle = () => selected ? (
+if (node.type === 'note') {
+if (node.type === 'circle') {
+const cx = node.x+node.w/2, cy = node.y+node.h/2
+if (node.type === 'rect') {
+if (node.type === 'triangle') {
+const pts = `${node.x+node.w/2},${node.y} ${node.x+node.w},${node.y+node.h} ${node.x},${node.y+node.h}`
+if (node.type === 'arrow') {
+export default function MemoMode({ userId }: { userId: string }) {
+const supabase = createClient()
+const svgRef  = useRef<SVGSVGElement>(null)
+const wrapRef = useRef<HTMLDivElement>(null)
+const [nodes, setNodes] = useState<Node[]>([])
+const [edges, setEdges] = useState<Edge[]>([])
+const [selected, setSelected] = useState<string|null>(null)
+const [tool, setTool] = useState<'select'|'note'|'circle'|'rect'|'triangle'|'arrow'|'edge'>('select')
+const [noteColor, setNoteColor] = useState('#FFE066')
+const [shapeColor, setShapeColor] = useState('#2B211B')
+const [edgeColor, setEdgeColor] = useState('#2B211B')
+const [edgeType, setEdgeType] = useState<'arrow'|'line'>('arrow')
+const [viewBox, setViewBox] = useState({vx:0,vy:0,vw:BOARD_W,vh:BOARD_H})
+const [fitSize, setFitSize] = useState<{vw:number;vh:number}|null>(null)
+const [ready, setReady] = useState(false)
+const [editing, setEditing] = useState<{id:string;text:string}|null>(null)
+const [saving, setSaving] = useState(false)
+const [saved, setSaved] = useState(false)
+const [saveErr, setSaveErr] = useState('')
+const [mounted, setMounted] = useState(false)
+const dragRef = useRef<{id:string;ox:number;oy:number;mx:number;my:number}|null>(null)
+const resizeRef = useRef<{id:string;ow:number;oh:number;mx:number;my:number}|null>(null)
+const panRef = useRef<{sx:number;sy:number;ovx:number;ovy:number}|null>(null)
+const edgeFromRef = useRef<string|null>(null)
+const saveTimerRef = useRef<ReturnType<typeof setTimeout>|null>(null)
+const nodesRef = useRef<Node[]>([])
+const edgesRef = useRef<Edge[]>([])
+const computeFitSize = useCallback((): {vw:number;vh:number}|null => {
+const rect = wrapRef.current.getBoundingClientRect()
+const aspect = rect.height/rect.width
+const clampViewBox = useCallback((vx:number,vy:number,vw:number,vh:number,fit:{vw:number;vh:number}|null) => {
+const maxVw = fit?fit.vw:BOARD_W, maxVh = fit?fit.vh:BOARD_H
+const minVw = BOARD_W*0.02
+const cw = Math.min(Math.max(vw,minVw),maxVw)
+const ratio = vh/vw
+const ch = isFinite(ratio)&&ratio>0 ? cw*ratio : Math.min(Math.max(vh,minVw*(maxVh/maxVw)),maxVh)
+const cx = cw>=BOARD_W ? (BOARD_W-cw)/2 : Math.min(Math.max(vx,0),Math.max(0,BOARD_W-cw))
+const cy = ch>=BOARD_H ? (BOARD_H-ch)/2 : Math.min(Math.max(vy,0),Math.max(0,BOARD_H-ch))
+const id1 = requestAnimationFrame(() => {
+const id2 = requestAnimationFrame(() => {
+const fit = computeFitSize()
+function onResize() { const fit = computeFitSize(); if (fit) setFitSize(fit) }
+const d = data.memo_data as MemoData
+const n = (d.nodes||[]).map(node => ({
+const doSave = useCallback(async (n: Node[], e: Edge[]) => {
+const safeNodes = n.map(node => ({
+const { error } = await supabase.from('story_boards').upsert(
+const scheduleSave = useCallback((n: Node[], e: Edge[]) => {
+function updateNodes(fn:(prev:Node[])=>Node[]) {
+setNodes(prev => { const next = fn(prev); nodesRef.current = next; scheduleSave(next, edgesRef.current); return next })
+function updateEdges(fn:(prev:Edge[])=>Edge[]) {
+setEdges(prev => { const next = fn(prev); edgesRef.current = next; scheduleSave(nodesRef.current, next); return next })
+function clampToBoard(x:number,y:number,w:number,h:number) {
+function screenToBoard(clientX:number, clientY:number) {
+const rect = svgRef.current.getBoundingClientRect()
+function handleSvgClick(e: React.MouseEvent<SVGSVGElement>) {
+const {x,y} = screenToBoard(e.clientX,e.clientY)
+const sz = DEFAULT_SIZE[tool as Node['type']]
+const color = tool==='note'?noteColor:shapeColor
+const clamped = clampToBoard(x-sz.w/2,y-sz.h/2,sz.w,sz.h)
+const node: Node = { id:genId(), type:tool as Node['type'], x:clamped.x, y:clamped.y, w:sz.w, h:sz.h, color, text:'', fontSize:12 }
+function handleNodeMouseDown(e: React.MouseEvent, id: string) {
+const node = nodesRef.current.find(n=>n.id===id); if (!node) return
+function handleResizeStart(e: React.MouseEvent, id: string) {
+const node = nodesRef.current.find(n=>n.id===id); if (!node) return
+function pixelToBoardScale() {
+const rect = svgRef.current.getBoundingClientRect()
+function handleMouseMove(e: React.MouseEvent) {
+const {sx,sy} = pixelToBoardScale()
+const dr = dragRef.current
+const rr = resizeRef.current
+const pr = panRef.current
+function handleMouseUp() {
+function handleSvgMouseDown(e: React.MouseEvent<SVGSVGElement>) {
+const target = e.target as SVGElement
+function handleWheel(e: React.WheelEvent<SVGSVGElement>) {
+const rect = svgRef.current.getBoundingClientRect()
+const factor = e.deltaY>0?1.1:0.9
+function handleDoubleClick(e: React.MouseEvent, id: string) {
+const node = nodesRef.current.find(n=>n.id===id)
+function handleEditSave() {
+const selectedNode = nodes.find(n=>n.id===selected)
+function handleDelete() {
+function handleColorChange(color:string) { if(!selected) return; updateNodes(prev=>prev.map(n=>n.id===selected?{...n,color}:n)) }
+function getNodeCenter(id:string) { const n=nodesRef.current.find(x=>x.id===id); if(!n) return {x:0,y:0}; return {x:n.x+n.w/2,y:n.y+n.h/2} }
+function zoomBy(factor:number) { setViewBox(v=>{ const cx=v.vx+v.vw/2, cy=v.vy+v.vh/2, newVw=v.vw*factor, newVh=v.vh*factor; return clampViewBox(cx-newVw/2,cy-newVh/2,newVw,newVh,fitSize) }) }
+function zoomIn(){zoomBy(0.9)} function zoomOut(){zoomBy(1.1)}
+function fitToScreen() { const fit=computeFitSize(); if(!fit) return; setFitSize(fit); setViewBox({vx:(BOARD_W-fit.vw)/2,vy:(BOARD_H-fit.vh)/2,vw:fit.vw,vh:fit.vh}) }
+const markerColors = [...EDGE_COLORS,...SHAPE_COLORS].filter((v,i,a)=>a.indexOf(v)===i)
+const zoomPercent = fitSize&&fitSize.vw>0 ? Math.round((fitSize.vw/viewBox.vw)*100) : 100
+const toolBtnStyle = (active:boolean) => ({
+
+===== C:\Users\yukku\Downloads\genseki-koro-nextjs (1)\src\components\NovelPreviewPopup.tsx =====
+interface Props {
+export default function NovelPreviewPopup({ novel, children }: Props) {
+const [show, setShow] = useState(false)
+const [mounted, setMounted] = useState(false)
+const [isMobile, setIsMobile] = useState(false)
+const check = () => setIsMobile(window.innerWidth <= 768)
+const rawText = novel.catchcopy || novel.summary || ''
+function toVertical(text: string): string {
+function isHorizontalChar(ch: string): boolean {
+const ROWS      = isMobile ? 17 : 20
+const TEXT_COLS = 5
+const CELL      = isMobile ? 18 : 27
+const lines = rawText.split('\n').map(toVertical)
+const processedChars: (string | null)[] = []
+const usedInCurrentCol = processedChars.length % ROWS
+const remaining = ROWS - usedInCurrentCol
+const textCells = Array.from({ length: ROWS * TEXT_COLS }, (_, i) => processedChars[i] ?? null)
+const mobileWidth = Math.round((CELL * TEXT_COLS + 36 + 24 + 32) * 1.3)
+function handleCardClick(e: React.MouseEvent) {
+const modal = show && mounted ? createPortal(
+{novel.novel_type && <span style={{fontSize:10,background:'var(--color-info-bg)',color:'var(--color-info)',border:'1px solid var(--color-info-border)',padding:'1px 6px',borderRadius:3}}>{novel.novel_type}</span>}
+const actualCol = TEXT_COLS - 1 - col
+const char = textCells[actualCol * ROWS + row]
+
+===== C:\Users\yukku\Downloads\genseki-koro-nextjs (1)\src\components\PlotMode.tsx =====
+interface PlotNote {
+interface PlotData { notes: PlotNote[] }
+const TYPE_INFO: Record<PlotNote['type'], {label:string;color:string;bg:string}> = {
+function genId() { return Math.random().toString(36).slice(2,10) }
+export default function PlotMode({ userId }: { userId: string }) {
+const supabase = createClient()
+const [notes, setNotes] = useState<PlotNote[]>([])
+const [mounted, setMounted] = useState(false)
+const [saving, setSaving] = useState(false)
+const [saved, setSaved] = useState(false)
+const [filterType, setFilterType] = useState<'all'|PlotNote['type']>('all')
+const [editing, setEditing] = useState<PlotNote|null>(null)
+const [showAddForEp, setShowAddForEp] = useState<number|null>(null)
+const saveTimerRef = useRef<ReturnType<typeof setTimeout>|null>(null)
+const notesRef = useRef<PlotNote[]>([])
+const d = data.plot_data as PlotData
+const doSave = useCallback(async (n: PlotNote[]) => {
+const { error } = await supabase.from('story_boards').upsert(
+const scheduleSave = useCallback((n: PlotNote[]) => {
+function updateNotes(fn:(prev:PlotNote[])=>PlotNote[]) {
+setNotes(prev => { const next = fn(prev); notesRef.current = next; scheduleSave(next); return next })
+function handleAdd(episode: number, type: PlotNote['type']) {
+const note: PlotNote = { id:genId(), episode, type, title:'', body:'', resolved:false, resolveEpisode:null }
+function handleSaveEdit() {
+function handleDelete(id: string) {
+function toggleResolved(id: string) {
+const filtered = filterType==='all' ? notes : notes.filter(n=>n.type===filterType)
+const episodes = Array.from(new Set(filtered.map(n=>n.episode))).sort((a,b)=>a-b)
+const maxEp = Math.max(1, ...notes.map(n=>n.episode), ...episodes)
+const displayEpisodes = Array.from({length: maxEp+1}, (_,i)=>i+1)
+const unresolvedForeshadows = notes.filter(n=>n.type==='foreshadow' && !n.resolved)
+const epNotes = filtered.filter(n=>n.episode===ep)
+const hasAny = notes.some(n=>n.episode===ep)
+const info = TYPE_INFO[note.type]
+
+===== C:\Users\yukku\Downloads\genseki-koro-nextjs (1)\src\components\RandomVoyageButton.tsx =====
+export default function RandomVoyageButton() {
+const router = useRouter()
+const [loading, setLoading] = useState(false)
+async function handleClick() {
+const res = await fetch('/api/random-voyage')
+const data = await res.json()
+
+===== C:\Users\yukku\Downloads\genseki-koro-nextjs (1)\src\components\ReportModal.tsx =====
+const REASONS: Record<string, string[]> = {
+interface Props {
+export default function ReportModal({ targetType, targetId, targetName, userId, onClose }: Props) {
+const supabase = createClient()
+const [reason,  setReason]  = useState('')
+const [body,    setBody]    = useState('')
+const [loading, setLoading] = useState(false)
+const [sent,    setSent]    = useState(false)
+const [error,   setError]   = useState('')
+const typeLabel = targetType === 'novel' ? '作品' : targetType === 'comment' ? 'コメント' : 'ユーザー'
+async function handleSubmit() {
+const { error: err } = await supabase.from('reports').insert({
+
+===== C:\Users\yukku\Downloads\genseki-koro-nextjs (1)\src\components\SeriesManager.tsx =====
+interface Series {
+interface SeriesNovel {
+interface Props { userId: string; myNovels: any[] }
+export default function SeriesManager({ userId, myNovels }: Props) {
+const supabase = createClient()
+const [series, setSeries] = useState([] as Series[])
+const [selected, setSelected] = useState(null as Series | null)
+const [editTitle, setEditTitle] = useState('')
+const [editDesc, setEditDesc] = useState('')
+const [saving, setSaving] = useState(false)
+const [addNovelId, setAddNovelId] = useState('')
+async function loadSeries() {
+const { data } = await supabase.from('series').select('*').eq('user_id', userId).order('order_num')
+async function loadSeriesNovels(seriesId: string) {
+const { data } = await supabase.from('series_novels')
+async function handleNew() {
+const { data } = await supabase.from('series').insert({
+async function selectSeries(s: Series) {
+const novels = await loadSeriesNovels(s.id)
+const full = { ...s, novels }
+async function handleSave() {
+const { error } = await supabase.from('series').update({ title: editTitle, description: editDesc, updated_at: new Date().toISOString() }).eq('id', selected.id)
+async function handleDelete() {
+async function handleAddNovel() {
+const already = (selected.novels || []).some(n => n.novel_id === addNovelId)
+const { data } = await supabase.from('series_novels').insert({
+const novel = myNovels.find(n => n.id === addNovelId)
+const newEntry = { ...data, novels: novel }
+async function handleRemoveNovel(entryId: string) {
+async function moveNovel(idx: number, dir: -1 | 1) {
+const novels = [...(selected.novels || [])]
+const swapIdx = idx + dir
+const tmp = novels[idx]; novels[idx] = novels[swapIdx]; novels[swapIdx] = tmp
+const updated = novels.map((n, i) => ({ ...n, order_num: i }))
+const inp = { width: '100%', padding: '8px 12px', border: '1.5px solid var(--color-brand-border)', borderRadius: 8, fontSize: 13, outline: 'none', background: 'var(--color-bg-card)', color: 'var(--color-text)', boxSizing: 'border-box' as const }
+const novel = (sn as any).novels || myNovels.find(n => n.id === sn.novel_id)
+
+===== C:\Users\yukku\Downloads\genseki-koro-nextjs (1)\src\components\SettingsModal.tsx =====
+interface Props {
+type SettingTab = 'menu' | 'email' | 'password' | 'icon' | 'name' | 'bio' | 'birthdate'
+export default function SettingsModal({ show, onClose, profile, userId }: Props) {
+const [tab, setTab] = useState<SettingTab>('menu')
+const [value, setValue] = useState('')
+const [value2, setValue2] = useState('')
+const [loading, setLoading] = useState(false)
+const [msg, setMsg] = useState('')
+const [mounted, setMounted] = useState(false)
+const supabase = createClient()
+const items: { key: SettingTab; label: string }[] = [
+async function handleSave() {
+const { error } = await supabase.auth.updateUser({ email: value })
+const { error } = await supabase.auth.updateUser({ password: value })
+const { error } = await supabase.from('profiles').update({ display_name: value }).eq('user_id', userId)
+const { error } = await supabase.from('profiles').update({ bio: value }).eq('user_id', userId)
+const { error } = await supabase.from('profiles').update({ birthdate: value }).eq('user_id', userId)
+const inp = { width:'100%', padding:'9px 12px', border:'1.5px solid var(--color-brand-border)', borderRadius:8, fontSize:13, outline:'none', boxSizing:'border-box' as const }
+
+===== C:\Users\yukku\Downloads\genseki-koro-nextjs (1)\src\components\StoryBoard.tsx =====
+interface Props {
+type Mode = 'memo' | 'character' | 'plot'
+const TABS: { id: Mode; label: string; desc: string }[] = [
+export default function StoryBoard({ userId, onClose, isModal }: Props) {
+const [mode, setMode] = useState<Mode>('memo')
+
+===== C:\Users\yukku\Downloads\genseki-koro-nextjs (1)\src\components\TweetSection.tsx =====
+interface Tweet {
+interface TweetComment {
+interface Props {
+function fmtDate(s: string) {
+const d = new Date(s), now = new Date(), diff = now.getTime() - d.getTime()
+function Avatar({ name, iconUrl, size=32 }: { name: string; iconUrl?: string | null; size?: number }) {
+export default function TweetSection({ authorId, currentUserId, currentUserName, currentUserIconUrl, isOwner }: Props) {
+const supabase = createClient()
+const [tweets, setTweets] = useState<Tweet[]>([])
+const [loading, setLoading] = useState(true)
+const [body, setBody] = useState('')
+const [imageFile, setImageFile] = useState<File | null>(null)
+const [imagePreview, setImagePreview] = useState<string | null>(null)
+const [posting, setPosting] = useState(false)
+const [commentBody, setCommentBody] = useState<Record<string, string>>({})
+const [commentPosting, setCommentPosting] = useState<Record<string, boolean>>({})
+const fileInputRef = useRef<HTMLInputElement>(null)
+async function loadTweets() {
+const { data: tweetsData } = await supabase
+const { data: profile } = await supabase
+const tweetIds = tweetsData.map(t => t.id)
+const { data: likesData } = await supabase
+const { data: commentsData } = await supabase
+const commentUserIds = Array.from(new Set((commentsData||[]).map(c => c.user_id)))
+const commentProfileMap: Record<string, any> = {}
+const { data: cProfiles } = await supabase
+const likeMap: Record<string, number> = {}
+const likedSet = new Set<string>()
+const commentMap: Record<string, TweetComment[]> = {}
+async function handlePost() {
+const ext = imageFile.name.split('.').pop()
+const path = `tweets/${currentUserId}/${Date.now()}.${ext}`
+const { error: upErr } = await supabase.storage.from('illustrations').upload(path, imageFile)
+const { data } = supabase.storage.from('illustrations').getPublicUrl(path)
+const { data, error } = await supabase
+const newTweet: Tweet = {
+async function handleLike(tweetId: string, liked: boolean) {
+async function handleComment(tweetId: string) {
+const { data, error } = await supabase
+const newComment: TweetComment = {
+async function handleDelete(tweetId: string) {
+function handleImageSelect(e: React.ChangeEvent<HTMLInputElement>) {
+const file = e.target.files?.[0]
+const reader = new FileReader()
+
+===== C:\Users\yukku\Downloads\genseki-koro-nextjs (1)\src\components\layout\AdBanner.tsx =====
+const AD_URL_1 = '' // 広告1のコード・URLをここに入力
+const AD_URL_2 = '' // 広告2のコード・URLをここに入力
+export default function AdBanner() {
+
+===== C:\Users\yukku\Downloads\genseki-koro-nextjs (1)\src\components\layout\Footer.tsx =====
+interface Props {
+export default function Footer({ user }: Props) {
+const cols = [
+
+===== C:\Users\yukku\Downloads\genseki-koro-nextjs (1)\src\components\layout\Header.tsx =====
+interface Props {
+export default function Header({ profile, user, activeGenre }: Props) {
+const router = useRouter()
+const pathname = usePathname()
+const [q, setQ] = useState('')
+const [notifications, setNotifications] = useState<any[]>([])
+const [showNotif, setShowNotif] = useState(false)
+const [showAllNotif, setShowAllNotif] = useState(false)
+const [unreadCount, setUnreadCount] = useState(0)
+const [showUserMenu, setShowUserMenu] = useState(false)
+const [showSettings, setShowSettings] = useState(false)
+const [showSettingsModal, setShowSettingsModal] = useState(false)
+const [showMobileMenu, setShowMobileMenu] = useState(false)
+const [darkMode, setDarkMode] = useState(false)
+const [scrolled, setScrolled] = useState(false)
+const notifRef = useRef<HTMLDivElement>(null)
+const userMenuRef = useRef<HTMLDivElement>(null)
+const supabase = createClient()
+const lastCheck = localStorage.getItem('age_check_date')
+const today = new Date().toDateString()
+function handleClick(e: MouseEvent) {
+const saved = localStorage.getItem('theme')
+function toggleDarkMode() {
+const next = !darkMode
+function handleScroll() {
+const userNumber = profile?.user_number
+async function handleOpenNotif() {
+async function handleLogout() {
+function fmtDate(s: string) {
+const d = new Date(s), now = new Date(), diff = now.getTime() - d.getTime()
+function handleSearch(e: React.FormEvent) {
+function isActive(href: string) {
+const NAV_LEFT = [
+const active = href==='/'?pathname==='/':pathname.startsWith(href)
+
+===== C:\Users\yukku\Downloads\genseki-koro-nextjs (1)\src\components\layout\Sidebar.tsx =====
+export default async function Sidebar() {
+const supabase = await createClient()
+const { data: { user } } = await supabase.auth.getUser()
+const { data: prof } = await supabase.from('profiles').select('age_verified').eq('user_id', user.id).single()
+const { data: weeklyLikes } = await supabase
+const weeklyIds = (weeklyLikes || []).map((w: any) => w.novel_id)
+const likeMap: Record<string,number> = {}
+const { data: novels } = await supabase.from('novels')
+const authorIds = (novels||[]).map((n:any) => n.author_id).filter((v:string,i:number,a:string[]) => a.indexOf(v)===i)
+const authorMap: Record<string,string> = {}
+const { data: authors } = await supabase.from('profiles').select('user_id, display_name').in('user_id', authorIds as string[])
+const { data: notices } = await supabase.from('announcements')
+function rankColor(i: number) {
+function noticeTypeLabel(type: string) {
+if (type === 'important') return { label: '重要', color: '#ef4444', bg: '#fef2f2', border: '#fca5a5' }
+if (type === 'contest') return { label: 'コンテスト', color: '#F26A21', bg: '#FFF1E6', border: '#f5b080' }
+const GENRES = ['異世界','ファンタジー','SF','恋愛','学園','ミステリー','ホラー','歴史・時代','日常','アクション','コメディ','その他', ...(ageVerified ? ['官能'] : [])]
+const tag = noticeTypeLabel(n.type)
+const n = weeklyNovels[i]
+
+===== C:\Users\yukku\Downloads\genseki-koro-nextjs (1)\src\components\layout\SidebarDrawer.tsx =====
+interface Props {
+export default function SidebarDrawer({ children }: Props) {
+const [open, setOpen] = useState(true)
+
+===== C:\Users\yukku\Downloads\genseki-koro-nextjs (1)\src\hooks\useAuth.ts =====
+import type { User } from '@supabase/supabase-js'
+import type { Profile } from '@/types'
+export function useAuth() {
+const [user, setUser]       = useState<User | null>(null)
+const [profile, setProfile] = useState<Profile | null>(null)
+const [loading, setLoading] = useState(true)
+const supabase = createClient()
+async function fetchProfile(userId: string) {
+const { data } = await supabase
+const { data: { subscription } } = supabase.auth.onAuthStateChange(
+async function signOut() {
+
+===== C:\Users\yukku\Downloads\genseki-koro-nextjs (1)\src\lib\featureFlags.ts =====
+export type FlagStatus = 'off' | 'preview' | 'on'
+export interface FeatureFlag {
+export async function getFeatureFlags(): Promise<Record<string, FlagStatus>> {
+const supabase = await createClient()
+const { data } = await supabase.from('feature_flags').select('key, status')
+const map: Record<string, FlagStatus> = {}
+export function isFeatureVisible(status: FlagStatus | undefined, isAdmin: boolean): boolean {
+export async function checkFeature(key: string, isAdmin: boolean): Promise<boolean> {
+const flags = await getFeatureFlags()
+
+===== C:\Users\yukku\Downloads\genseki-koro-nextjs (1)\src\lib\qualityScore.ts =====
+export interface QualityInput {
+export interface QualityResult {
+function clampRate(numerator: number, views: number): number {
+export function calcQualityScore(input: QualityInput): QualityResult {
+const readRate     = clampRate(input.readCount, input.views)
+const bookmarkRate = clampRate(input.bookmarkCount, input.views)
+const likeRate     = clampRate(input.likeCount, input.views)
+const originality  = Math.max(0, Math.min(1, (input.originalityScore || 0) / 100))
+const raw =
+const score = Math.round(raw * 100 * 10) / 10
+export function toPercent(rate: number): string {
+
+===== C:\Users\yukku\Downloads\genseki-koro-nextjs (1)\src\lib\supabase\admin.ts =====
+export function createAdminClient() {
+
+===== C:\Users\yukku\Downloads\genseki-koro-nextjs (1)\src\lib\supabase\client.ts =====
+export function createClient() {
+
+===== C:\Users\yukku\Downloads\genseki-koro-nextjs (1)\src\lib\supabase\middleware.ts =====
+import { NextResponse, type NextRequest } from 'next/server'
+export async function updateSession(request: NextRequest) {
+const supabase = createServerClient(
+const { data: { user } } = await supabase.auth.getUser()
+const protectedPaths = ['/mypage', '/post']
+const isProtected = protectedPaths.some(p => request.nextUrl.pathname.startsWith(p))
+const url = request.nextUrl.clone()
+
+===== C:\Users\yukku\Downloads\genseki-koro-nextjs (1)\src\lib\supabase\server.ts =====
+export async function createClient() {
+const cookieStore = await cookies()
+
+===== C:\Users\yukku\Downloads\genseki-koro-nextjs (1)\src\types\index.ts =====
+export type LoginProvider = 'google' | 'email'
+export interface Profile {
+export interface Novel {
+export interface NovelCounts {
+export interface Episode {
+export interface Comment {
+export const GENRES = [
+export type Genre = typeof GENRES[number]
