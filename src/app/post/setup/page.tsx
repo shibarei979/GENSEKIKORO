@@ -57,6 +57,7 @@ export default function PostSetupPage() {
   const [isR18, setIsR18] = useState(false)
   const [isR15, setIsR15] = useState(false)
   const [aimsPublishing, setAimsPublishing] = useState(false)
+  const [aiUsage, setAiUsage] = useState('none' as 'none'|'assist'|'full')
   const [selectedContestIds, setSelectedContestIds] = useState([] as string[])
   const [showTagExamples, setShowTagExamples] = useState(false)
   const [showCatchcopyHint, setShowCatchcopyHint] = useState(false)
@@ -69,7 +70,13 @@ export default function PostSetupPage() {
       if (!user) { router.push('/auth/login'); return }
       setUserId(user.id)
       supabase.from('profiles').select('*').eq('user_id', user.id).single()
-        .then(({ data }) => setProfile(data))
+        .then(({ data }) => {
+          setProfile(data)
+          // 登録時に選んだデフォルトのAI利用状況を初期値に
+          if (data?.default_ai_usage === 'assist' || data?.default_ai_usage === 'full') {
+            setAiUsage(data.default_ai_usage)
+          }
+        })
       supabase.from('novels').select('id,title,genre,novel_type').eq('author_id', user.id).eq('published', true)
         .then(({ data }) => setMyNovels(data || []))
     })
@@ -105,6 +112,7 @@ export default function PostSetupPage() {
       catchcopy: catchcopy.trim() || null,
       genre, tags,
       novel_type: novelType,
+      ai_usage: aiUsage,
       is_r18: isR18, is_r15: isR15,
       aims_publishing: aimsPublishing,
       is_serial: true,
@@ -247,6 +255,27 @@ export default function PostSetupPage() {
                     <div style={{fontSize:11,color:'var(--color-text-muted)',marginTop:2}}>{t==='長編'?'複数話にわたる作品':'1話完結の作品'}</div>
                   </button>
                 ))}
+              </div>
+            </div>
+
+            {/* AI利用状況 */}
+            <div style={fg}>
+              <label style={lbl}>AI利用状況 <span style={{color:'var(--color-danger)'}}>*</span></label>
+              <div style={{display:'flex',flexWrap:'wrap',gap:8}}>
+                {[
+                  {v:'none' as const, l:'AI未使用', d:'AIを使わずに執筆した作品'},
+                  {v:'assist' as const, l:'補助的利用', d:'校正・アイデア出し等にAIを利用'},
+                  {v:'full' as const, l:'全面的利用', d:'本文生成などAIが主体の作品'},
+                ].map(({v,l,d})=>(
+                  <button key={v} type="button" onClick={()=>setAiUsage(v)}
+                    style={{flex:1,minWidth:150,padding:'12px',borderRadius:10,border:`2px solid ${aiUsage===v?'var(--color-brand)':'var(--color-brand-border)'}`,cursor:'pointer',textAlign:'center' as const,background:aiUsage===v?'var(--color-brand-light)':'var(--color-bg-card)'}}>
+                    <div style={{fontSize:13,fontWeight:700,color:aiUsage===v?'var(--color-brand)':'var(--color-text)'}}>{l}</div>
+                    <div style={{fontSize:10.5,color:'var(--color-text-muted)',marginTop:2,lineHeight:1.4}}>{d}</div>
+                  </button>
+                ))}
+              </div>
+              <div style={{fontSize:11,color:'var(--color-text-faint)',marginTop:6,lineHeight:1.5}}>
+                「全面的利用」の作品には AI作品 バッジが付き、読者の表示設定の対象になります。
               </div>
             </div>
 

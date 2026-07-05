@@ -31,7 +31,7 @@ export default async function NovelPage({ params }: { params: { id: string } }) 
   const [profileRes, novelRes] = await Promise.all([
     user ? supabase.from('profiles').select('*').eq('user_id', user.id).single() : Promise.resolve({ data: null }),
     supabase.from('novels')
-      .select('id, title, summary, genre, tags, is_serial, published, views, author_id, created_at, novel_type, official_tags')
+      .select('id, title, summary, genre, tags, is_serial, published, views, author_id, created_at, novel_type, official_tags, ai_usage')
       .eq('id', params.id).maybeSingle(),
   ])
   const profile = profileRes.data
@@ -394,6 +394,12 @@ export default async function NovelPage({ params }: { params: { id: string } }) 
               </span>
               {novel.novel_type && (
                 <span style={{fontSize:10,background:'var(--color-info-bg)',color:'var(--color-info)',border:'1px solid var(--color-info-border)',padding:'2px 8px',borderRadius:4}}>{novel.novel_type}</span>
+              )}
+              {novel.ai_usage === 'full' && (
+                <span style={{fontSize:10,background:'#ede9fe',color:'#6d28d9',border:'1px solid #c4b5fd',padding:'2px 8px',borderRadius:4,fontWeight:700}}>AI作品</span>
+              )}
+              {novel.ai_usage === 'assist' && (
+                <span style={{fontSize:10,background:'#f5f3ff',color:'#7c3aed',border:'1px solid #ddd6fe',padding:'2px 8px',borderRadius:4}}>AI補助</span>
               )}
               {(novel.official_tags||[]).map((tag:string) => (
                 <span key={tag} style={{fontSize:10,background:'#fef9c3',color:'#854d0e',border:'1px solid #fde047',padding:'2px 8px',borderRadius:4,fontWeight:700}}>
