@@ -25,8 +25,8 @@ interface SlotState {
   runId: number   // この回の表示を一意に識別するID（key用）
 }
 
-const DURATION_MIN = 3.6       // 表示時間（短め）
-const DURATION_MAX = 5.0       // 表示時間（長め）
+const DURATION_MIN = 1.8       // 表示時間（浮き出て→1秒ほど表示→消える）
+const DURATION_MAX = 2.4       // 表示時間（長め）
 
 function sizeFor(text: string) {
   const len = text.length
@@ -198,11 +198,10 @@ export default function VoicesFloat({ voices }: Props) {
 
       <style>{`
         @keyframes voiceFloat {
-          0%   { opacity: 0;    transform: translate(-50%,-50%) translate(0px, 24px) scale(0.85); }
-          12%  { opacity: 0.95; transform: translate(-50%,-50%) translate(calc(var(--voice-driftx) * 0.25), calc(var(--voice-drifty) * 0.3 + 10px)) scale(1.02); }
-          50%  { opacity: 0.9;  transform: translate(-50%,-50%) translate(var(--voice-driftx), var(--voice-drifty)) scale(1); }
-          82%  { opacity: 0.35; transform: translate(-50%,-50%) translate(calc(var(--voice-driftx) * 1.3), calc(var(--voice-drifty) * 1.4)) scale(0.95); }
-          100% { opacity: 0;    transform: translate(-50%,-50%) translate(calc(var(--voice-driftx) * 1.5), calc(var(--voice-drifty) * 1.6)) scale(0.88); }
+          0%   { opacity: 0;    transform: translate(-50%,-50%) scale(0.92); }
+          20%  { opacity: 0.95; transform: translate(-50%,-50%) scale(1); }
+          75%  { opacity: 0.9;  transform: translate(-50%,-50%) scale(1); }
+          100% { opacity: 0;    transform: translate(-50%,-50%) scale(0.96); }
         }
         .voice-float-item:hover {
           color: #ffd9b0 !important;
