@@ -13,7 +13,7 @@ interface Props {
   searchParams: {
     q?: string; exclude?: string; genre?: string; type?: string
     serial?: string; tag?: string; sort?: string; page?: string
-    author?: string
+    author?: string; contest?: string
   }
 }
 
@@ -37,9 +37,16 @@ export default async function SearchPage({ searchParams }: Props) {
   const offset   = (page - 1) * PAGE_SIZE
   const tags     = tagParam ? tagParam.split(',').filter(Boolean) : []
   const authorQ  = searchParams.author  || ''
-  const hasSearch = !!(q || exclude || genre || type || serial || tags.length > 0 || authorQ)
+  const contestId = searchParams.contest || ''
+  const hasSearch = !!(q || exclude || genre || type || serial || tags.length > 0 || authorQ || contestId)
 
   const isAgeVerified = profile?.age_verified || false
+
+  // コンテスト絞り込み用の一覧（サイト内・公開中）
+  const { data: searchContests } = await supabase
+    .from('contests').select('id, title')
+    .eq('is_published', true).eq('is_site_contest', true)
+    .order('created_at', { ascending: false })
 
   let results: any[] = []
   let count = 0
@@ -96,6 +103,17 @@ export default async function SearchPage({ searchParams }: Props) {
     if (type)   query = (query as any).eq('novel_type', type)
     if (serial === 'serial')   query = (query as any).eq('is_serial', true)
     if (serial === 'complete') query = (query as any).eq('is_serial', false)
+    if (contestId) {
+      // 指定コンテストの参加作品に絞り込み
+      const { data: contestEntries } = await supabase
+        .from('contest_entries').select('novel_id').eq('contest_id', contestId)
+      const entryNovelIds = (contestEntries||[]).map((e:any) => e.novel_id)
+      if (entryNovelIds.length > 0) {
+        query = (query as any).in('id', entryNovelIds)
+      } else {
+        results = []; count = 0
+      }
+    }
     if (tags.length > 0) {
       for (const tag of tags) {
         query = (query as any).contains('tags', [tag])
@@ -291,6 +309,7 @@ export default async function SearchPage({ searchParams }: Props) {
             defaultQ={q} defaultExclude={exclude} defaultGenre={genre}
             defaultType={type} defaultSerial={serial} defaultTag={tagParam}
             defaultSort={sort} ageVerified={isAgeVerified}
+            defaultContest={contestId} contests={searchContests || []}
           />
 
           <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',marginBottom:10,fontSize:13,color:'var(--color-text-muted)'}}>

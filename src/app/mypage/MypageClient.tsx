@@ -7,7 +7,6 @@ import { createClient } from '@/lib/supabase/client'
 import Link from 'next/link'
 import Header from '@/components/layout/Header'
 import type { Profile, Novel } from '@/types'
-import ContestEntry from './ContestEntry'
 import MissionClient from './MissionClient'
 import TweetSection from '@/components/TweetSection'
 import StoryBoard from '@/components/StoryBoard'
@@ -70,7 +69,7 @@ const ALL_BADGES = [
   { id:'_slot2',      name:'？？？',                  color:'#94a3b8' },
 ]
 
-type Tab = 'mypage' | 'works' | 'bookmarks' | 'history' | 'tweet' | 'mission' | 'contest' | 'settings' | 'blockmute' | 'series'
+type Tab = 'mypage' | 'works' | 'bookmarks' | 'history' | 'tweet' | 'mission' | 'settings' | 'blockmute' | 'series'
 const TABS: { id: Tab; label: string }[] = [
   { id:'mypage',    label:'マイページ' },
   { id:'works',     label:'作品管理' },
@@ -79,7 +78,6 @@ const TABS: { id: Tab; label: string }[] = [
   { id:'history',   label:'閲覧履歴' },
   { id:'tweet',     label:'つぶやき' },
   { id:'mission',   label:'ミッション' },
-  { id:'contest',   label:'コンテスト' },
   { id:'settings',  label:'設定' },
   { id:'blockmute', label:'ブロック・ミュート' },
 ]
@@ -126,7 +124,7 @@ export default function MypageClient({
   const [activeTab, setActiveTab] = useState<Tab>(() => {
     if (typeof window !== 'undefined') {
       const hash = window.location.hash.replace('#', '') as Tab
-      const valid: Tab[] = ['mypage','works','bookmarks','history','tweet','mission','contest','settings','blockmute','series']
+      const valid: Tab[] = ['mypage','works','bookmarks','history','tweet','mission','settings','blockmute','series']
       if (valid.includes(hash)) return hash
     }
     return 'mypage'
@@ -843,12 +841,6 @@ export default function MypageClient({
   )
 
   // ===== コンテストタブ =====
-  const ContestTab = () => (
-    <div>
-      <div style={{fontSize:15,fontWeight:700,color:'var(--color-text)',marginBottom:16}}>コンテスト応募</div>
-      <ContestEntry novels={myNovels} contests={contests} initialEntries={initialEntries} userId={profile.user_id}/>
-    </div>
-  )
 
   // ===== ブロック・ミュートタブ =====
   const BlockMuteTab = () => {
@@ -1072,7 +1064,6 @@ export default function MypageClient({
               {activeTab==='history' && <HistoryTab/>}
               {activeTab==='tweet' && <TweetTab/>}
               {activeTab==='mission' && <MissionTab/>}
-              {activeTab==='contest' && <ContestTab/>}
               {activeTab==='settings' && <SettingsTab/>}
               {activeTab==='series' && <SeriesManager userId={profile.user_id} myNovels={myNovels||[]} />}
             </div>
@@ -1096,7 +1087,6 @@ export default function MypageClient({
               {activeTab==='history' && <HistoryTab/>}
               {activeTab==='tweet' && <TweetTab/>}
               {activeTab==='mission' && <MissionTab/>}
-              {activeTab==='contest' && <ContestTab/>}
               {activeTab==='settings' && <SettingsTab/>}
               {activeTab==='series' && <SeriesManager userId={profile.user_id} myNovels={myNovels||[]} />}
             </div>

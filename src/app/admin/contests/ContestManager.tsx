@@ -62,20 +62,21 @@ export default function ContestManager({ initialContests, entriesMap }: Props) {
   const [items, setItems] = useState(initialContests)
   const [editing, setEditing] = useState<Contest | null>(null)
   const [creating, setCreating] = useState(false)
-  const [form, setForm] = useState({ title:'', description:'', deadline:'', judging_end:'', apply_url:'', image_url:'', is_published:true, is_site_contest:false, exclusive:false })
+  const [form, setForm] = useState({ title:'', description:'', start_date:'', deadline:'', judging_end:'', apply_url:'', image_url:'', is_published:true, is_site_contest:false, exclusive:false })
   const [errors, setErrors] = useState<Record<string, string>>({})
   const [loading, setLoading] = useState(false)
   const [uploading, setUploading] = useState(false)
   const [expandedId, setExpandedId] = useState<string | null>(null)
 
   function openCreate() {
-    setForm({title:'',description:'',deadline:'',judging_end:'',apply_url:'',image_url:'',is_published:true,is_site_contest:false,exclusive:false})
+    setForm({title:'',description:'',start_date:'',deadline:'',judging_end:'',apply_url:'',image_url:'',is_published:true,is_site_contest:false,exclusive:false})
     setErrors({})
     setCreating(true); setEditing(null)
   }
   function openEdit(c: Contest) {
     setForm({
       title:c.title, description:c.description||'',
+      start_date:(c as any).start_date?(c as any).start_date.slice(0,16):'',
       deadline:c.deadline?c.deadline.slice(0,16):'',
       judging_end:c.judging_end?c.judging_end.slice(0,16):'',
       apply_url:c.apply_url||'', image_url:c.image_url||'',
@@ -108,6 +109,7 @@ export default function ContestManager({ initialContests, entriesMap }: Props) {
     setLoading(true)
     const payload = {
       ...form,
+      start_date: form.start_date ? new Date(form.start_date).toISOString() : null,
       deadline: new Date(form.deadline).toISOString(),
       judging_end: new Date(form.judging_end).toISOString(),
       image_url: form.image_url || null
@@ -227,6 +229,11 @@ export default function ContestManager({ initialContests, entriesMap }: Props) {
               <label style={{fontSize:12,color:'#64748b',display:'block',marginBottom:4}}>説明</label>
               <textarea value={form.description} onChange={e=>setForm({...form,description:e.target.value})} rows={3}
                 style={{...inputStyle('description'),resize:'vertical' as const}} placeholder="コンテストの詳細"/>
+            </div>
+            <div style={{marginBottom:12}}>
+              <label style={{fontSize:12,color:'#64748b',display:'block',marginBottom:4}}>開始日時（任意・未来にすると「近日開催」表示）</label>
+              <input type="datetime-local" value={form.start_date} onChange={e=>setForm({...form,start_date:e.target.value})}
+                style={inputStyle('start_date')}/>
             </div>
             <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:12}}>
               <div>

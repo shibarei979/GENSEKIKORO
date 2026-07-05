@@ -6,8 +6,12 @@ import Footer from '@/components/layout/Footer'
 import AdBanner from '@/components/layout/AdBanner'
 import Sidebar from '@/components/layout/Sidebar'
 
-function getStatusLabel(deadline: string | null, judging_end: string | null) {
+function getStatusLabel(deadline: string | null, judging_end: string | null, start_date?: string | null) {
   const now = new Date()
+  // 開始日が未来なら「近日開催」
+  if (start_date && now < new Date(start_date)) {
+    return { label: '近日開催', color: '#0ea5e9', bg: '#f0f9ff', border: '#7dd3fc' }
+  }
   if (!deadline) return { label: '募集中', color: '#10b981', bg: '#f0fdf4', border: '#86efac' }
   const d = new Date(deadline)
   if (now < d) return { label: '募集中', color: '#10b981', bg: '#f0fdf4', border: '#86efac' }
@@ -40,8 +44,8 @@ export default async function ContestsPage() {
 
   const siteContests     = (contests||[]).filter((c:any) => c.is_site_contest)
   const externalContests = (contests||[]).filter((c:any) => !c.is_site_contest)
-  const activeContests   = siteContests.filter((c:any) => getStatusLabel(c.deadline, c.judging_end).label !== '終了')
-  const endedContests    = siteContests.filter((c:any) => getStatusLabel(c.deadline, c.judging_end).label === '終了')
+  const activeContests   = siteContests.filter((c:any) => getStatusLabel(c.deadline, c.judging_end, c.start_date).label !== '終了')
+  const endedContests    = siteContests.filter((c:any) => getStatusLabel(c.deadline, c.judging_end, c.start_date).label === '終了')
 
   return (
     <div style={{minHeight:'100vh',background:'var(--color-bg)',fontFamily:"'Noto Sans JP',sans-serif"}}>
@@ -58,7 +62,7 @@ export default async function ContestsPage() {
               </h2>
               <div style={{display:'flex',flexDirection:'column',gap:12}}>
                 {activeContests.map((c:any) => {
-                  const status = getStatusLabel(c.deadline, c.judging_end)
+                  const status = getStatusLabel(c.deadline, c.judging_end, c.start_date)
                   return (
                     <Link key={c.id} href={`/contests/${c.id}`} style={{textDecoration:'none'}}>
                       <div className="contest-card" style={{background:'var(--color-bg-card)',border:'1px solid var(--color-brand-border)',borderRadius:12,overflow:'hidden',width:231}}>
@@ -101,7 +105,7 @@ export default async function ContestsPage() {
               </h2>
               <div style={{display:'flex',flexDirection:'column',gap:12}}>
                 {externalContests.map((c:any) => {
-                  const status = getStatusLabel(c.deadline, c.judging_end)
+                  const status = getStatusLabel(c.deadline, c.judging_end, c.start_date)
                   return (
                     <div key={c.id} className="contest-card" style={{background:'var(--color-bg-card)',border:'1px solid var(--color-brand-border)',borderRadius:12,overflow:'hidden',width:231}}>
                         <div className="desktop-only">

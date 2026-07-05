@@ -160,6 +160,7 @@ export default function PostClient({ profile, userId }: Props) {
       .eq('is_published', true)
       .eq('is_site_contest', true)
       .or(`deadline.is.null,deadline.gt.${now}`)
+      .or(`start_date.is.null,start_date.lte.${now}`)
       .order('created_at', { ascending: false })
       .then(({ data }) => setContests(data || []))
   }, [])

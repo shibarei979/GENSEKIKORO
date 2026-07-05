@@ -61,12 +61,15 @@ interface Props {
   defaultType?: string; defaultSerial?: string; defaultTag?: string
   defaultSort?: string; ageVerified?: boolean; defaultDiscover?: boolean
   defaultAuthor?: string; defaultLikeMin?: string; defaultLikeMax?: string
+  defaultContest?: string
+  contests?: { id: string; title: string }[]
 }
 
 export default function SearchForm({
   defaultQ='', defaultExclude='', defaultGenre='', defaultType='',
   defaultSerial='', defaultTag='', defaultSort='new', ageVerified=false, defaultDiscover=false,
-  defaultAuthor='', defaultLikeMin='', defaultLikeMax=''
+  defaultAuthor='', defaultLikeMin='', defaultLikeMax='',
+  defaultContest='', contests=[]
 }: Props) {
   const router = useRouter()
   const GENRES = ageVerified ? [...GENRES_BASE, '官能'] : GENRES_BASE
@@ -80,7 +83,8 @@ export default function SearchForm({
   const [tags,               setTags]               = useState<string[]>(defaultTag ? defaultTag.split(',').filter(Boolean) : [])
   const [sort,               setSort]               = useState(defaultSort)
   const [discoverMode,       setDiscoverMode]       = useState(defaultDiscover)
-  const [showDetail,         setShowDetail]         = useState(!!(defaultGenre||defaultType||defaultSerial||defaultTag))
+  const [contestId,          setContestId]          = useState(defaultContest)
+  const [showDetail,         setShowDetail]         = useState(!!(defaultGenre||defaultType||defaultSerial||defaultTag||defaultContest))
   const [showSearchExamples, setShowSearchExamples] = useState(false)
   const [showExcludeExamples,setShowExcludeExamples]= useState(false)
   const [history,            setHistory]            = useState<string[]>([])
@@ -127,6 +131,7 @@ export default function SearchForm({
     if (genre)           params.set('genre',   genre)
     if (type)            params.set('type',    type)
     if (serial)          params.set('serial',  serial)
+    if (contestId)       params.set('contest', contestId)
     const allTags = Array.from(new Set([...tags, ...moodTags]))
     if (allTags.length > 0) params.set('tag', allTags.join(','))
     if (discoverMode)    params.set('sort',    'discover')
@@ -395,6 +400,24 @@ export default function SearchForm({
               </div>
             </div>
           </div>
+          {contests.length > 0 && (
+            <div style={{marginBottom:12}}>
+              <div style={{fontSize:11,color:'var(--color-text-muted)',fontWeight:600,marginBottom:6}}>コンテスト</div>
+              <div style={{position:'relative',display:'inline-block',minWidth:240,maxWidth:'100%'}}>
+                <select value={contestId} onChange={e=>setContestId(e.target.value)}
+                  style={{width:'100%',appearance:'none',WebkitAppearance:'none',padding:'8px 36px 8px 12px',borderRadius:8,border:'1px solid var(--color-brand-border)',background:'var(--color-bg-card)',color:contestId?'var(--color-text)':'var(--color-text-muted)',fontSize:13,cursor:'pointer'}}>
+                  <option value="">指定なし</option>
+                  {contests.map(c => (
+                    <option key={c.id} value={c.id}>{c.title}</option>
+                  ))}
+                </select>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--color-brand)" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{position:'absolute',right:12,top:'50%',transform:'translateY(-50%)',pointerEvents:'none'}}>
+                  <polyline points="6 9 12 15 18 9"/>
+                </svg>
+              </div>
+              <div style={{fontSize:10.5,color:'var(--color-text-faint)',marginTop:4}}>コンテスト参加作品だけを表示します</div>
+            </div>
+          )}
           <div style={{marginBottom:12}}>
             <div style={{fontSize:11,color:'var(--color-text-muted)',fontWeight:600,marginBottom:6}}>タグ</div>
             <div style={{display:'flex',gap:6,marginBottom:8,alignItems:'center',flexWrap:'wrap'}}>
