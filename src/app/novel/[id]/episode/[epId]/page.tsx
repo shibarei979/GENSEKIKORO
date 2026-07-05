@@ -27,6 +27,7 @@ import CommentSection from './CommentSection'
 import EpisodeLikeButton from './EpisodeLikeButton'
 import ReadButton from './ReadButton'
 import EpisodeBody from './EpisodeBody'
+import TypoReportButton from './TypoReportButton'
 import { QuoteProvider } from './QuoteContext'
 
 interface Props { params: { id: string; epId: string } }
@@ -202,6 +203,9 @@ export default async function EpisodePage({ params }: Props) {
               シェア
             </a>
           </div>
+          <div style={{textAlign:'center',marginBottom:16}}>
+            <TypoReportButton novelId={params.id} episodeId={params.epId} authorId={novel.author_id} userId={user?.id||null} userName={profile?.display_name||null} novelTitle={novel.title} episodeTitle={episode.title}/>
+          </div>
           <div style={{display:'flex',justifyContent:'space-between',gap:8,marginBottom:16}}>
             {prevEp ? (
               <Link href={`/novel/${params.id}/episode/${prevEp.id}`}
@@ -275,6 +279,10 @@ export default async function EpisodePage({ params }: Props) {
             <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.748l7.73-8.835L1.254 2.25H8.08l4.253 5.622 5.911-5.622zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
             シェア
           </a>
+        </div>
+
+        <div style={{textAlign:'center',marginBottom:14}}>
+          <TypoReportButton novelId={params.id} episodeId={params.epId} authorId={novel.author_id} userId={user?.id||null} userName={profile?.display_name||null} novelTitle={novel.title} episodeTitle={episode.title}/>
         </div>
 
         <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:8,marginBottom:14}}>
