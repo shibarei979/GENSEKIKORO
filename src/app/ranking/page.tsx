@@ -9,7 +9,7 @@ import NovelPreviewPopup from '@/components/NovelPreviewPopup'
 const PAGE_SIZE = 50
 
 interface Props {
-  searchParams: { period?: string; type?: string; serial?: string; page?: string; genre?: string }
+  searchParams: { period?: string; type?: string; serial?: string; page?: string; genre?: string; ai?: string }
 }
 
 export default async function RankingPage({ searchParams }: Props) {
@@ -23,6 +23,7 @@ export default async function RankingPage({ searchParams }: Props) {
 
   const period    = searchParams.period || 'weekly'
   const genre     = searchParams.genre  || '全て'
+  const aiMode    = (profile as any)?.show_ai_works === false ? 'human' : (searchParams.ai === 'ai' ? 'ai' : 'human')  // AI非表示設定の読み手は常にhuman
   const showMore  = searchParams.page === 'all'
   const novelType = searchParams.type   || '長編'
   const serial    = searchParams.serial || 'all'
@@ -39,10 +40,13 @@ export default async function RankingPage({ searchParams }: Props) {
 
     if (GROWTH_PERIODS.includes(period)) {
       // 候補プール取得（公開済み・全年齢のみ・直近300件）
-      const { data: poolNovels } = await supabase
+      let poolQuery = supabase
         .from('novels')
         .select('id, title, genre, novel_type, is_serial, author_id, summary, catchcopy, tags, created_at')
         .eq('published', true).eq('is_r18', false).neq('genre', '官能')
+      if (aiMode === 'ai') poolQuery = (poolQuery as any).eq('ai_usage', 'full')
+      else poolQuery = (poolQuery as any).neq('ai_usage', 'full')
+      const { data: poolNovels } = await poolQuery
         .order('created_at', { ascending: false }).limit(300)
 
       if (!poolNovels || poolNovels.length === 0) return { items: [], total: 0 }
@@ -160,6 +164,9 @@ export default async function RankingPage({ searchParams }: Props) {
     let q = supabase.from('novels')
       .select('id, title, genre, novel_type, is_serial, author_id, summary, tags, created_at')
       .in('id', likeIds).eq('published', true).eq('is_r18', false).neq('genre', '官能')
+    // AI作品ランキングと人間作品ランキングを分離
+    if (aiMode === 'ai') q = (q as any).eq('ai_usage', 'full')
+    else q = (q as any).neq('ai_usage', 'full')
     if (novelType !== '全て') q = (q as any).eq('novel_type', novelType)
     if (genre !== '全て') q = (q as any).eq('genre', genre)
     if (serial === 'serial')   q = (q as any).eq('is_serial', true)
@@ -288,8 +295,8 @@ export default async function RankingPage({ searchParams }: Props) {
   const typeOptions   = [{ value:'全て',label:'全て' },{ value:'長編',label:'長編' },{ value:'短編',label:'短編' }]
   const serialOptions = [{ value:'all',label:'すべて' },{ value:'serial',label:'連載中' },{ value:'complete',label:'完結' },{ value:'new',label:'新作（1ヶ月以内）' },{ value:'newbie',label:'新人作家' }]
 
-  function buildUrl(p: string, t: string, s: string, pg = 1) {
-    return `/ranking?period=${p}&type=${encodeURIComponent(t)}&serial=${s}&genre=${encodeURIComponent(genre)}&page=${pg}`
+  function buildUrl(p: string, t: string, s: string, pg = 1, ai = aiMode) {
+    return `/ranking?period=${p}&type=${encodeURIComponent(t)}&serial=${s}&genre=${encodeURIComponent(genre)}&ai=${ai}&page=${pg}`
   }
 
   const GROWTH_PERIODS = ['discover_rate', 'read_rate', 'bookmark_rate', 'newbie_focus']
@@ -322,6 +329,19 @@ export default async function RankingPage({ searchParams }: Props) {
           </div>
 
           <div className="ranking-filter" style={{background:'var(--color-bg)',border:'1px solid var(--color-brand-border)',borderRadius:12,padding:'14px 18px',marginBottom:16}}>
+            {profile?.show_ai_works !== false && (
+              <div style={{marginBottom:10}}>
+                <div style={{fontSize:11,color:'var(--color-text-muted)',fontWeight:600,marginBottom:5}}>作品区分</div>
+                <div style={{display:'flex',gap:6,flexWrap:'nowrap'}}>
+                  <Link href={buildUrl(period,novelType,serial,1,'human')} className={pillClass(aiMode==='human')} style={pill(aiMode==='human')}>
+                    通常作品
+                  </Link>
+                  <Link href={buildUrl(period,novelType,serial,1,'ai')} className={pillClass(aiMode==='ai')} style={pill(aiMode==='ai')}>
+                    AI作品
+                  </Link>
+                </div>
+              </div>
+            )}
             <div style={{marginBottom:10}}>
               <div style={{fontSize:11,color:'var(--color-text-muted)',fontWeight:600,marginBottom:5}}>期間</div>
               <div style={{overflowX:'auto',msOverflowStyle:'none',scrollbarWidth:'none'} as any}>

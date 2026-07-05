@@ -53,12 +53,15 @@ export default async function SearchPage({ searchParams }: Props) {
   // いいね数・ブックマーク数・閲覧数・コメント数を後で集計するためnovel_idsを先に取得
   if (!hasSearch) {
     let q2 = supabase.from('novels')
-      .select('id, title, summary, catchcopy, genre, tags, novel_type, is_serial, author_id, created_at, updated_at, is_r18', { count: 'exact' })
+      .select('id, title, summary, catchcopy, genre, tags, novel_type, is_serial, author_id, created_at, updated_at, is_r18, ai_usage', { count: 'exact' })
       .eq('published', true)
       .order('created_at', { ascending: false })
       .limit(200)
     if (!user || !isAgeVerified) {
       q2 = (q2 as any).eq('is_r18', false).neq('genre', '官能')
+    }
+    if (profile?.show_ai_works === false) {
+      q2 = (q2 as any).neq('ai_usage', 'full')
     }
     const { data: allData, count: allCount } = await q2
     const shuffled = [...(allData || [])].sort(() => Math.random() - 0.5)
@@ -66,11 +69,14 @@ export default async function SearchPage({ searchParams }: Props) {
     count = allCount || 0
   } else {
     let query = supabase.from('novels')
-      .select('id, title, summary, catchcopy, genre, tags, novel_type, is_serial, author_id, created_at, updated_at, is_r18', { count: 'exact' })
+      .select('id, title, summary, catchcopy, genre, tags, novel_type, is_serial, author_id, created_at, updated_at, is_r18, ai_usage', { count: 'exact' })
       .eq('published', true)
 
     if (!user || !isAgeVerified) {
       query = (query as any).eq('is_r18', false).neq('genre', '官能')
+    }
+    if (profile?.show_ai_works === false) {
+      query = (query as any).neq('ai_usage', 'full')
     }
     if (q) {
       query = (query as any).or(`title.ilike.%${q}%,summary.ilike.%${q}%,catchcopy.ilike.%${q}%`)

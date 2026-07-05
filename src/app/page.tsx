@@ -156,14 +156,19 @@ export default async function HomePage() {
     tags: (ep.novels as any)?.tags || [],
   }))
 
+  // 読み手設定：AI作品（全面的利用）を非表示にするか
+  const hideAi = profile?.show_ai_works === false
+
   const oneMonthAgo = new Date(Date.now() - 30*24*60*60*1000).toISOString()
-  const { data: allLatestRaw } = await supabase
+  let latestQuery = supabase
     .from('novels')
     .select('id, title, genre, is_serial, novel_type, author_id, created_at, summary, catchcopy, tags')
     .eq('published', true)
     .eq('is_r18', false)
     .neq('genre', '官能')
     .gte('created_at', oneMonthAgo)
+  if (hideAi) latestQuery = latestQuery.neq('ai_usage', 'full')
+  const { data: allLatestRaw } = await latestQuery
     .order('created_at', { ascending: false })
     .limit(50)
   const shuffledLatest = [...(allLatestRaw||[])].sort(()=>Math.random()-0.5).slice(0,8)
@@ -188,12 +193,14 @@ export default async function HomePage() {
     hideStats: hideStatsFor(n.created_at, latestLikeMap[n.id] || 0),
   }))
 
-  const { data: allNovelsRaw } = await supabase
+  let allNovelsQuery = supabase
     .from('novels')
     .select('id, title, genre, novel_type, author_id, created_at, originality_score, is_r18, summary, catchcopy, tags')
     .eq('published', true)
     .eq('is_r18', false)
     .neq('genre', '官能')
+  if (hideAi) allNovelsQuery = allNovelsQuery.neq('ai_usage', 'full')
+  const { data: allNovelsRaw } = await allNovelsQuery
     .order('created_at', { ascending: false })
     .limit(50)
   const allNovels = await addAuthorNames(supabase, allNovelsRaw || [])
