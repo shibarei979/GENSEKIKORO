@@ -160,6 +160,22 @@ export default function CommentSection({ novelId, episodeId, userId, userName, u
       setComments(prev => prev.map(c =>
         c.id === replyTo.id ? { ...c, replies: [...(c.replies || []), newReply] } : c
       ))
+
+      // 親コメントの投稿者に返信通知（自分自身への返信は除く）
+      const parentComment = comments.find(c => c.id === replyTo.id)
+      if (parentComment && parentComment.user_id !== userId) {
+        fetch('/api/notify', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            user_id: parentComment.user_id,
+            type: 'reply',
+            message: `${userName || '名無し'}さんがあなたのコメントに返信しました`,
+            link: `/novel/${novelId}/episode/${episodeId}`,
+          }),
+        }).catch(() => {})
+      }
+
       setReplyBody('')
       setReplyTo(null)
     }

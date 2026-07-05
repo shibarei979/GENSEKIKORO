@@ -67,7 +67,7 @@ export default function NovelActions({ novelId, userId, authorId, novelTitle, is
       if (authorId && userId !== authorId) {
         fetch('/api/notify', { method:'POST', headers:{'Content-Type':'application/json'},
           body: JSON.stringify({ user_id: authorId, type:'like',
-            message: `「${novelTitle||'作品'}」にいいねがつきました`, link: `/novel/${novelId}` }) })
+            message: `${userDisplayName||'読者'}さんが「${novelTitle||'作品'}」にいいねしました`, link: `/novel/${novelId}` }) })
       }
     }
     setLoading(false)
@@ -83,6 +83,11 @@ export default function NovelActions({ novelId, userId, authorId, novelTitle, is
     } else {
       await supabase.from('bookmarks').insert({ novel_id: novelId, user_id: userId })
       setBookmarked(true); setBookmarks(c => c + 1)
+      if (authorId && userId !== authorId) {
+        fetch('/api/notify', { method:'POST', headers:{'Content-Type':'application/json'},
+          body: JSON.stringify({ user_id: authorId, type:'bookmark',
+            message: `${userDisplayName||'読者'}さんが「${novelTitle||'作品'}」を保存しました`, link: `/novel/${novelId}` }) })
+      }
     }
     setLoading(false)
   }
@@ -147,7 +152,7 @@ export default function NovelActions({ novelId, userId, authorId, novelTitle, is
       if (authorId && userId !== authorId) {
         fetch('/api/notify', { method:'POST', headers:{'Content-Type':'application/json'},
           body: JSON.stringify({ user_id: authorId, type:'discover',
-            message: `「${novelTitle||'作品'}」が拡散されました`, link: `/novel/${novelId}` }) })
+            message: `${userDisplayName||'読者'}さんが「${novelTitle||'作品'}」を発掘・拡散しました`, link: `/novel/${novelId}` }) })
       }
     }
   }
