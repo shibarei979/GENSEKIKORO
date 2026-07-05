@@ -102,6 +102,7 @@ export default function PostClient({ profile, userId }: Props) {
   }, [])
 
   const [mode, setMode] = useState('new' as 'new'|'existing')
+  const [modeChosen, setModeChosen] = useState(false)  // 投稿タイプを選択済みか（選択後は折りたたむ）
   const [myNovels, setMyNovels] = useState([] as any[])
   const [selectedNovelId, setSelectedNovelId] = useState('')
   const [nextEpNum, setNextEpNum] = useState(1)
@@ -616,18 +617,36 @@ export default function PostClient({ profile, userId }: Props) {
           <div style={sec}>
             <div style={sh}>投稿タイプ</div>
             <div style={sb}>
-              <div style={{display:'flex',flexDirection: isMobile ? 'column' : 'row',gap:12}}>
-                {[{v:'new' as const,l:'新連載',d:'新しい作品の第1話を投稿する'},
-                  {v:'existing' as const,l:'連載中の作品に追加',d:'既存の連載作品に新しい話を追加する'}].map(({v,l,d})=>(
-                  <button key={v} type="button" onClick={()=>setMode(v)}
-                    style={{flex:1,padding:'14px',borderRadius:10,border:'2px solid',cursor:'pointer',textAlign:'left',
-                      background:mode===v?'var(--color-brand-light)':'var(--color-bg-card)',
-                      borderColor:mode===v?'var(--color-brand)':'var(--color-brand-border)'}}>
-                    <div style={{fontSize:14,fontWeight:700,color:mode===v?'var(--color-brand)':'var(--color-text)',marginBottom:4}}>{l}</div>
-                    <div style={{fontSize:11,color:'var(--color-text-muted)'}}>{d}</div>
+              {modeChosen ? (
+                /* 選択済み：コンパクト表示＋変更ボタン */
+                <div style={{display:'flex',alignItems:'center',gap:10,flexWrap:'wrap'}}>
+                  <div style={{flex:1,minWidth:200,display:'flex',alignItems:'center',gap:8}}>
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--color-brand)" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{flexShrink:0}}>
+                      <polyline points="20 6 9 17 4 12"/>
+                    </svg>
+                    <span style={{fontSize:14,fontWeight:700,color:'var(--color-text)'}}>
+                      {mode === 'new' ? '新連載' : '連載中の作品に追加'}
+                    </span>
+                  </div>
+                  <button type="button" onClick={()=>setModeChosen(false)}
+                    style={{fontSize:12,color:'var(--color-text-muted)',background:'none',border:'1px solid var(--color-brand-border)',borderRadius:8,padding:'6px 14px',cursor:'pointer'}}>
+                    変更する
                   </button>
-                ))}
-              </div>
+                </div>
+              ) : (
+                <div style={{display:'flex',flexDirection: isMobile ? 'column' : 'row',gap:12}}>
+                  {[{v:'new' as const,l:'新連載',d:'新しい作品の第1話を投稿する'},
+                    {v:'existing' as const,l:'連載中の作品に追加',d:'既存の連載作品に新しい話を追加する'}].map(({v,l,d})=>(
+                    <button key={v} type="button" onClick={()=>{setMode(v);setModeChosen(true)}}
+                      style={{flex:1,padding:'14px',borderRadius:10,border:'2px solid',cursor:'pointer',textAlign:'left',
+                        background:mode===v?'var(--color-brand-light)':'var(--color-bg-card)',
+                        borderColor:mode===v?'var(--color-brand)':'var(--color-brand-border)'}}>
+                      <div style={{fontSize:14,fontWeight:700,color:mode===v?'var(--color-brand)':'var(--color-text)',marginBottom:4}}>{l}</div>
+                      <div style={{fontSize:11,color:'var(--color-text-muted)'}}>{d}</div>
+                    </button>
+                  ))}
+                </div>
+              )}
             </div>
           </div>
         )}

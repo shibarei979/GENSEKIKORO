@@ -537,6 +537,7 @@ export default function MypageClient({
               <div style={{flex:1,minWidth:0,cursor:'pointer'}} onClick={()=>router.push(`/novel/${novel.id}`)}>
                 <div style={{display:'flex',gap:6,marginBottom:8,flexWrap:'wrap',alignItems:'center'}}>
                   <span style={{fontSize:10,fontWeight:700,color:'#fff',background:novel.published?'var(--color-info)':'var(--color-text-faint)',padding:'2px 9px',borderRadius:4}}>{novel.published?'公開中':'下書き'}</span>
+                  <span style={{fontSize:10,fontWeight:700,color:(novel as any).is_serial?'var(--color-success)':'var(--color-text-muted)',background:(novel as any).is_serial?'#e8f5e9':'#f5f5f5',border:`1px solid ${(novel as any).is_serial?'#a5d6a7':'#e0e0e0'}`,padding:'2px 9px',borderRadius:4}}>{(novel as any).is_serial?'連載中':'完結'}</span>
                   <span style={{fontSize:10,background:'var(--color-brand-light)',color:'var(--color-brand)',border:'1px solid var(--color-tag-border)',padding:'2px 9px',borderRadius:4}}>{novel.genre}</span>
                   {(novel as any).novel_type && <span style={{fontSize:10,background:'var(--color-info-bg)',color:'var(--color-info)',border:'1px solid var(--color-info-border)',padding:'2px 9px',borderRadius:4}}>{(novel as any).novel_type}</span>}
                 </div>
@@ -627,6 +628,13 @@ export default function MypageClient({
             <div style={{flex:1}}/>
 
             <button onClick={()=>handleTogglePublish(novel.id,novel.published)} style={{fontSize:12,border:'none',padding:'7px 12px',borderRadius:8,color:novel.published?'var(--color-text-muted)':'#15803d',background:'none',cursor:'pointer'}}>{novel.published?'非公開にする':'公開する'}</button>
+            <button onClick={async()=>{
+                const next = !(novel as any).is_serial
+                await supabase.from('novels').update({is_serial:next}).eq('id',novel.id)
+                setMyNovels((prev:any[])=>prev.map((n:any)=>n.id===novel.id?{...n,is_serial:next}:n))
+              }} style={{fontSize:12,border:'none',padding:'7px 12px',borderRadius:8,color:(novel as any).is_serial?'var(--color-info)':'var(--color-text-muted)',background:'none',cursor:'pointer'}}>
+              {(novel as any).is_serial?'完結にする':'連載に戻す'}
+            </button>
             <button onClick={async()=>{
                 const next = !((novel as any).allow_comments !== false)
                 await supabase.from('novels').update({allow_comments:next}).eq('id',novel.id)
