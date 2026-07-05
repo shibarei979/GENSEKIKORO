@@ -103,6 +103,7 @@ export default function PostClient({ profile, userId }: Props) {
 
   const [mode, setMode] = useState('new' as 'new'|'existing')
   const [modeChosen, setModeChosen] = useState(false)  // 投稿タイプを選択済みか（選択後は折りたたむ）
+  const [novelChosen, setNovelChosen] = useState(false)  // 作品を選択済みか（選択後は折りたたむ）
   const [myNovels, setMyNovels] = useState([] as any[])
   const [selectedNovelId, setSelectedNovelId] = useState('')
   const [nextEpNum, setNextEpNum] = useState(1)
@@ -169,6 +170,8 @@ export default function PostClient({ profile, userId }: Props) {
     if (novelIdParam) {
       setMode('existing')
       setSelectedNovelId(novelIdParam)
+      setModeChosen(true)   // 事前選択フロー（setup）経由なので確定表示にする
+      setNovelChosen(true)  // 作品も確定表示
     }
   }, [userId])
 
@@ -900,12 +903,33 @@ export default function PostClient({ profile, userId }: Props) {
           <div style={sec}>
             <div style={sh}>作品を選択</div>
             <div style={sb}>
-              {myNovels.length === 0 ? (
+              {novelChosen && selectedNovelId ? (
+                /* 事前選択フロー経由：確定表示＋変更ボタン */
+                <div style={{display:'flex',alignItems:'center',gap:10,flexWrap:'wrap'}}>
+                  <div style={{flex:1,minWidth:200,display:'flex',alignItems:'center',gap:8}}>
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--color-brand)" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{flexShrink:0}}>
+                      <polyline points="20 6 9 17 4 12"/>
+                    </svg>
+                    <span style={{fontSize:14,fontWeight:700,color:'var(--color-text)'}}>
+                      {myNovels.find(n=>n.id===selectedNovelId)?.title || '選択中の作品'}
+                      {myNovels.find(n=>n.id===selectedNovelId)?.genre && (
+                        <span style={{fontSize:12,fontWeight:400,color:'var(--color-text-muted)',marginLeft:6}}>
+                          （{myNovels.find(n=>n.id===selectedNovelId)?.genre}）
+                        </span>
+                      )}
+                    </span>
+                  </div>
+                  <button type="button" onClick={()=>setNovelChosen(false)}
+                    style={{fontSize:12,color:'var(--color-text-muted)',background:'none',border:'1px solid var(--color-brand-border)',borderRadius:8,padding:'6px 14px',cursor:'pointer'}}>
+                    変更する
+                  </button>
+                </div>
+              ) : myNovels.length === 0 ? (
                 <div style={{textAlign:'center',padding:'20px',color:'var(--color-text-faint)',fontSize:13}}>公開中の連載作品がありません</div>
               ) : (
                 <>
                   <label style={lbl}>連載中の作品 <span style={{color:'var(--color-danger)'}}>*</span></label>
-                  <select value={selectedNovelId} onChange={e=>setSelectedNovelId(e.target.value)}
+                  <select value={selectedNovelId} onChange={e=>{setSelectedNovelId(e.target.value); if(e.target.value) setNovelChosen(true)}}
                     style={{...inp,cursor:'pointer',borderColor:errors.novel?'var(--color-danger)':'var(--color-brand-border)'}}>
                     <option value="">作品を選択してください</option>
                     {myNovels.map(n=>(
