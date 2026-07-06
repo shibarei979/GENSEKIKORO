@@ -63,11 +63,32 @@ export default async function AdminPage() {
   const chartData365  = buildChartData(makeDays(365))
   const chartData1825 = buildChartData(makeDays(365 * 5))
 
+  // ログインユーザー数（今日・直近7日）とデバイス別PV（直近7日）
+  let loginToday = 0, loginWeek = 0, deviceMobile = 0, deviceDesktop = 0
+  try {
+    const { data: loginStats } = await adminSupabase.rpc('get_login_stats')
+    if (loginStats) { loginToday = loginStats.today || 0; loginWeek = loginStats.week || 0 }
+  } catch (_) {}
+  try {
+    const weekAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString()
+    const [{ count: mCount }, { count: dCount }] = await Promise.all([
+      adminSupabase.from('page_views').select('*', { count: 'exact', head: true }).eq('device', 'mobile').gte('created_at', weekAgo),
+      adminSupabase.from('page_views').select('*', { count: 'exact', head: true }).eq('device', 'desktop').gte('created_at', weekAgo),
+    ])
+    deviceMobile = mCount || 0
+    deviceDesktop = dCount || 0
+  } catch (_) {}
+  const deviceTotal = deviceMobile + deviceDesktop
+  const mobilePct = deviceTotal > 0 ? Math.round((deviceMobile / deviceTotal) * 100) : 0
+
   const stats = [
     { label: '登録ユーザー', value: userCount?.toLocaleString() ?? '0', color: 'var(--admin-stat-blue)' },
     { label: '公開作品',     value: novelCount?.toLocaleString() ?? '0', color: 'var(--admin-stat-green)' },
     { label: '話数',         value: episodeCount?.toLocaleString() ?? '0', color: 'var(--admin-stat-amber)' },
     { label: 'コメント',     value: commentCount?.toLocaleString() ?? '0', color: 'var(--admin-stat-purple)' },
+    { label: '本日ログイン', value: loginToday.toLocaleString(), color: 'var(--admin-stat-blue)' },
+    { label: '7日ログイン',  value: loginWeek.toLocaleString(), color: 'var(--admin-stat-blue)' },
+    { label: 'モバイル比率(7日PV)', value: deviceTotal > 0 ? `${mobilePct}%` : 'データなし', color: 'var(--admin-stat-green)' },
   ]
 
   const menus = [

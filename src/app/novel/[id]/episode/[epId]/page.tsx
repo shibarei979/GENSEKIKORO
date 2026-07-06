@@ -1,4 +1,5 @@
 import { createClient } from '@/lib/supabase/server'
+import { headers } from 'next/headers'
 export const dynamic = 'force-dynamic'
 
 export async function generateMetadata({ params }: { params: { id: string; epId: string } }) {
@@ -122,6 +123,9 @@ export default async function EpisodePage({ params }: Props) {
   const nextEp = currentIdx >= 0 && currentIdx < visibleEps.length - 1 ? visibleEps[currentIdx + 1] : null
 
   try {
+    // デバイス判定（user-agentから）
+    const ua = (await headers()).get('user-agent') || ''
+    const device = /mobile|android|iphone|ipad/i.test(ua) ? 'mobile' : 'desktop'
     // 1日1人1話1PV制限：同じユーザーが同じ日に同じ話を見ていたらカウントしない
     const todayStart = new Date(); todayStart.setHours(0,0,0,0)
     if (user) {
@@ -134,11 +138,11 @@ export default async function EpisodePage({ params }: Props) {
         .limit(1)
         .maybeSingle()
       if (!existingPv) {
-        await supabase.from('page_views').insert({ episode_id: params.epId, user_id: user.id })
+        await supabase.from('page_views').insert({ episode_id: params.epId, user_id: user.id, device })
       }
     } else {
       // 未ログインは従来通り記録（IPやCookieでの制限は行わない）
-      await supabase.from('page_views').insert({ episode_id: params.epId, user_id: null })
+      await supabase.from('page_views').insert({ episode_id: params.epId, user_id: null, device })
     }
   } catch (_) {}
 
