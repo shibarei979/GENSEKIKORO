@@ -118,6 +118,14 @@ async function computeRanking(period: string, novelType: string, serial: string,
       authors2?.forEach((a:any) => { authorMap2[a.user_id] = a.display_name })
     }
     return { items: risingItems.map((n:any) => ({...n, display_name: authorMap2[n.author_id]||''})), total: risingItems.length }
+  } else if (period === 'all') {
+    // 累計：全期間のいいねを集計
+    const { data: allLikes } = await supabase.from('likes').select('novel_id')
+    allLikes?.forEach((l: any) => { likeMap[l.novel_id] = (likeMap[l.novel_id]||0)+1 })
+    likeIds = Object.entries(likeMap).sort((a,b)=>b[1]-a[1]).map(([id])=>id)
+    const { data: recentNovels } = await supabase.from('novels').select('id').eq('published',true).order('created_at',{ascending:false}).limit(100)
+    const recentIds = (recentNovels||[]).map((n:any)=>n.id)
+    likeIds = Array.from(new Set([...likeIds, ...recentIds]))
   } else if (period === 'daily') {
     const today = new Date(); today.setHours(0,0,0,0)
     const { data: dl } = await supabase.from('likes').select('novel_id').gte('created_at', today.toISOString())
@@ -293,7 +301,8 @@ export default async function RankingPage({ searchParams }: Props) {
     { value:'monthly',   label:'月間' },
     { value:'quarterly', label:'四半期' },
     { value:'yearly',    label:'年間' },
-    { value:'rising',    label:'急上昇' },
+    { value:'all',       label:'累計' },
+    { value:'rising',    label:'注目度' },
     { value:'discover_rate',  label:'発掘率' },
     { value:'read_rate',      label:'読了率' },
     { value:'bookmark_rate',  label:'保存率' },
@@ -351,10 +360,22 @@ export default async function RankingPage({ searchParams }: Props) {
               </div>
             )}
             <div style={{marginBottom:10}}>
-              <div style={{fontSize:11,color:'var(--color-text-muted)',fontWeight:600,marginBottom:5}}>期間</div>
+              <div style={{fontSize:11,color:'var(--color-text-muted)',fontWeight:600,marginBottom:5}}>総合ランキング</div>
               <div style={{overflowX:'auto',msOverflowStyle:'none',scrollbarWidth:'none'} as any}>
                 <div style={{display:'flex',gap:6,flexWrap:'nowrap'}}>
-                  {periodOptions.map(o => (
+                  {periodOptions.filter(o=>['daily','weekly','monthly','quarterly','yearly','all'].includes(o.value)).map(o => (
+                    <Link key={o.value} href={buildUrl(o.value,novelType,serial)} className={pillClass(period===o.value)} style={pill(period===o.value)}>
+                      {o.label}
+                    </Link>
+                  ))}
+                </div>
+              </div>
+            </div>
+            <div style={{marginBottom:10}}>
+              <div style={{fontSize:11,color:'var(--color-text-muted)',fontWeight:600,marginBottom:5}}>特集ランキング</div>
+              <div style={{overflowX:'auto',msOverflowStyle:'none',scrollbarWidth:'none'} as any}>
+                <div style={{display:'flex',gap:6,flexWrap:'nowrap'}}>
+                  {periodOptions.filter(o=>['rising','discover_rate','read_rate','bookmark_rate','newbie_focus'].includes(o.value)).map(o => (
                     <Link key={o.value} href={buildUrl(o.value,novelType,serial)} className={pillClass(period===o.value)} style={pill(period===o.value)}>
                       {o.label}
                     </Link>
@@ -377,7 +398,7 @@ export default async function RankingPage({ searchParams }: Props) {
               </div>
             )}
             <div style={{marginBottom:10}}>
-              <div style={{fontSize:11,color:'var(--color-text-muted)',fontWeight:600,marginBottom:5}}>ジャンル</div>
+              <div style={{fontSize:11,color:'var(--color-text-muted)',fontWeight:600,marginBottom:5}}>ジャンル別ランキング</div>
               <div style={{overflowX:'auto',msOverflowStyle:'none',scrollbarWidth:'none'} as any}>
                 <div style={{display:'flex',gap:5,flexWrap:'nowrap'}}>
                   {genres.map(g => (
