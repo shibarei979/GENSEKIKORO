@@ -453,6 +453,7 @@ export default function PostClient({ profile, userId }: Props) {
           .update({
             title: epTitle.trim(), body, preface: preface.trim()||null, afterword: afterword.trim()||null,
             illust_url: illustPreview||null,
+            updated_at: new Date().toISOString(),
             ...(publish ? { published: epPublished, scheduled_at: epScheduledAt } : {}),
           })
           .eq('id', editEpId).select('id').single()

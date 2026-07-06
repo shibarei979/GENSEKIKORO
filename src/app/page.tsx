@@ -209,6 +209,7 @@ export default async function HomePage() {
   let discoverMap: Record<string,number> = {}
   let bookmarkMap: Record<string,number> = {}
   let epCountMap: Record<string,number> = {}
+  let latestEpMap: Record<string,string> = {}  // 作品ごとの最新話投稿日時
   let viewMap: Record<string,number> = {}
   let readMap: Record<string,number> = {}
   if (allIds.length > 0) {
@@ -216,20 +217,26 @@ export default async function HomePage() {
       supabase.from('likes').select('novel_id').in('novel_id', allIds),
       supabase.from('discovers').select('novel_id').in('novel_id', allIds).eq('is_pending', false),
       supabase.from('bookmarks').select('novel_id').in('novel_id', allIds),
-      supabase.from('episodes').select('novel_id').in('novel_id', allIds).eq('published', true),
+      supabase.from('episodes').select('novel_id, created_at').in('novel_id', allIds).eq('published', true),
       supabase.from('novel_views').select('novel_id, view_count').in('novel_id', allIds),
       supabase.from('read_episodes').select('novel_id').in('novel_id', allIds),
     ])
     lData.data?.forEach((l: any) => { likeMap[l.novel_id]     = (likeMap[l.novel_id]     || 0) + 1 })
     dData.data?.forEach((d: any) => { discoverMap[d.novel_id] = (discoverMap[d.novel_id] || 0) + 1 })
     bData.data?.forEach((b: any) => { bookmarkMap[b.novel_id] = (bookmarkMap[b.novel_id] || 0) + 1 })
-    eData.data?.forEach((e: any) => { epCountMap[e.novel_id]  = (epCountMap[e.novel_id]  || 0) + 1 })
+    eData.data?.forEach((e: any) => {
+      epCountMap[e.novel_id]  = (epCountMap[e.novel_id]  || 0) + 1
+      if (!latestEpMap[e.novel_id] || e.created_at > latestEpMap[e.novel_id]) latestEpMap[e.novel_id] = e.created_at
+    })
     vData.data?.forEach((v: any) => { viewMap[v.novel_id]     = v.view_count || 0 })
     rData.data?.forEach((r: any) => { readMap[r.novel_id]     = (readMap[r.novel_id]     || 0) + 1 })
   }
+  const freshCutoff = Date.now() - 48 * 60 * 60 * 1000  // 48時間以内の更新
   const scored = allNovels.map((n: any) => {
     const epCount = epCountMap[n.id] || 0
-    const updateBoost = epCount > 0 && epCount <= 3 ? 8 : 0  // 3話目まで更新ブースト
+    const updateBoost = epCount > 0 && epCount <= 3 ? 6 : 0  // 3話目までブースト（勢い75%に調整）
+    // 新しい話が投稿された直後（48h以内）は出やすくする
+    const freshBoost = latestEpMap[n.id] && new Date(latestEpMap[n.id]).getTime() > freshCutoff ? 5 : 0
     // 質スコア（読了率20%+保存率25%+いいね率35%+独創性20%、PV正規化）を加算
     const q = calcQualityScore({
       views: viewMap[n.id] || 0,
@@ -241,7 +248,7 @@ export default async function HomePage() {
     const qualityBoost = q.score * 0.4  // 質スコア係数0.4
     return {
       ...n,
-      score: (likeMap[n.id]||0)*3 + (bookmarkMap[n.id]||0)*2 + (discoverMap[n.id]||0)*4 + Math.round((n.originality_score||0)/5) + updateBoost + qualityBoost,
+      score: (likeMap[n.id]||0)*3 + (bookmarkMap[n.id]||0)*2 + (discoverMap[n.id]||0)*4 + Math.round((n.originality_score||0)/5) + updateBoost + freshBoost + qualityBoost,
       likeCount: likeMap[n.id]||0,
       like_count: likeMap[n.id]||0,
       hideStats: hideStatsFor(n.created_at, likeMap[n.id] || 0),

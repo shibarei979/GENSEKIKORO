@@ -290,9 +290,9 @@ export default async function NovelPage({ params }: { params: { id: string } }) 
     // 投稿から48時間以内はブースト（+0.3）
     const isNew = new Date(n.created_at).getTime() > now48
     const newBoost = isNew ? 0.3 : 0
-    // 3話目まで更新ブースト（+0.15）
+    // 3話目までブースト（勢い75%に調整）
     const epCount = recEpCountMap[n.id] || 0
-    const updateBoost = epCount > 0 && epCount <= 3 ? 0.15 : 0
+    const updateBoost = epCount > 0 && epCount <= 3 ? 0.11 : 0
     // 質スコア（0-100を0-1に正規化して0.4係数）
     const q = calcQualityScore({
       views: recViewMap[n.id] || 0,
