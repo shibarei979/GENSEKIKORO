@@ -259,6 +259,7 @@ export default async function NovelPage({ params }: { params: { id: string } }) 
   const recLikeMap: Record<string, number> = {}
   const recDiscoverMap: Record<string, number> = {}
   const recEpCountMap: Record<string, number> = {}
+  const recLatestEpMap: Record<string, string> = {}
   const recBookmarkMap: Record<string, number> = {}
   const recViewMap: Record<string, number> = {}
   const recReadMap: Record<string, number> = {}
@@ -266,14 +267,17 @@ export default async function NovelPage({ params }: { params: { id: string } }) 
     const [{ data: recLikes }, { data: recDiscovers }, { data: recEpisodes }, { data: recBookmarks }, { data: recViews }, { data: recReads }] = await Promise.all([
       supabase.from('likes').select('novel_id').in('novel_id', recNovelIds),
       supabase.from('discovers').select('novel_id').eq('is_pending', false).in('novel_id', recNovelIds),
-      supabase.from('episodes').select('novel_id').in('novel_id', recNovelIds).eq('published', true),
+      supabase.from('episodes').select('novel_id, created_at').in('novel_id', recNovelIds).eq('published', true),
       supabase.from('bookmarks').select('novel_id').in('novel_id', recNovelIds),
       supabase.from('novel_views').select('novel_id, view_count').in('novel_id', recNovelIds),
       supabase.from('read_episodes').select('novel_id').in('novel_id', recNovelIds),
     ])
     recLikes?.forEach((l: any) => { recLikeMap[l.novel_id] = (recLikeMap[l.novel_id] || 0) + 1 })
     recDiscovers?.forEach((d: any) => { recDiscoverMap[d.novel_id] = (recDiscoverMap[d.novel_id] || 0) + 1 })
-    recEpisodes?.forEach((e: any) => { recEpCountMap[e.novel_id] = (recEpCountMap[e.novel_id] || 0) + 1 })
+    recEpisodes?.forEach((e: any) => {
+      recEpCountMap[e.novel_id] = (recEpCountMap[e.novel_id] || 0) + 1
+      if (!recLatestEpMap[e.novel_id] || e.created_at > recLatestEpMap[e.novel_id]) recLatestEpMap[e.novel_id] = e.created_at
+    })
     recBookmarks?.forEach((b: any) => { recBookmarkMap[b.novel_id] = (recBookmarkMap[b.novel_id] || 0) + 1 })
     recViews?.forEach((v: any) => { recViewMap[v.novel_id] = v.view_count || 0 })
     recReads?.forEach((r: any) => { recReadMap[r.novel_id] = (recReadMap[r.novel_id] || 0) + 1 })
@@ -290,9 +294,10 @@ export default async function NovelPage({ params }: { params: { id: string } }) 
     // 投稿から48時間以内はブースト（+0.3）
     const isNew = new Date(n.created_at).getTime() > now48
     const newBoost = isNew ? 0.3 : 0
-    // 3話目までブースト（勢い75%に調整）
+    // 投稿ブースト（最新話の投稿から48時間）：3話まで×1.3、4話以降×1.05
     const epCount = recEpCountMap[n.id] || 0
-    const updateBoost = epCount > 0 && epCount <= 3 ? 0.11 : 0
+    const isFresh = recLatestEpMap[n.id] && new Date(recLatestEpMap[n.id]).getTime() > now48
+    const boostMultiplier = isFresh ? (epCount <= 3 ? 1.3 : 1.05) : 1.0
     // 質スコア（0-100を0-1に正規化して0.4係数）
     const q = calcQualityScore({
       views: recViewMap[n.id] || 0,
@@ -302,7 +307,7 @@ export default async function NovelPage({ params }: { params: { id: string } }) 
       originalityScore: n.originality_score || 0,
     })
     const qualityBoost = (q.score / 100) * 0.4
-    const finalScore = originality * 0.5 + likeNorm * 0.3 + discoverNorm * 0.2 + newBoost + updateBoost + qualityBoost
+    const finalScore = (originality * 0.5 + likeNorm * 0.3 + discoverNorm * 0.2 + newBoost + qualityBoost) * boostMultiplier
     return { ...n, finalScore, isNew }
   }).sort((a: any, b: any) => b.finalScore - a.finalScore)
 

@@ -231,12 +231,12 @@ export default async function HomePage() {
     vData.data?.forEach((v: any) => { viewMap[v.novel_id]     = v.view_count || 0 })
     rData.data?.forEach((r: any) => { readMap[r.novel_id]     = (readMap[r.novel_id]     || 0) + 1 })
   }
-  const freshCutoff = Date.now() - 48 * 60 * 60 * 1000  // 48時間以内の更新
+  const freshCutoff = Date.now() - 48 * 60 * 60 * 1000  // 投稿から48時間
   const scored = allNovels.map((n: any) => {
     const epCount = epCountMap[n.id] || 0
-    const updateBoost = epCount > 0 && epCount <= 3 ? 6 : 0  // 3話目までブースト（勢い75%に調整）
-    // 新しい話が投稿された直後（48h以内）は出やすくする
-    const freshBoost = latestEpMap[n.id] && new Date(latestEpMap[n.id]).getTime() > freshCutoff ? 5 : 0
+    // 投稿ブースト（最新話の投稿から48時間）：3話まで×1.3、4話以降×1.05
+    const isFresh = latestEpMap[n.id] && new Date(latestEpMap[n.id]).getTime() > freshCutoff
+    const boostMultiplier = isFresh ? (epCount <= 3 ? 1.3 : 1.05) : 1.0
     // 質スコア（読了率20%+保存率25%+いいね率35%+独創性20%、PV正規化）を加算
     const q = calcQualityScore({
       views: viewMap[n.id] || 0,
@@ -248,7 +248,7 @@ export default async function HomePage() {
     const qualityBoost = q.score * 0.4  // 質スコア係数0.4
     return {
       ...n,
-      score: (likeMap[n.id]||0)*3 + (bookmarkMap[n.id]||0)*2 + (discoverMap[n.id]||0)*4 + Math.round((n.originality_score||0)/5) + updateBoost + freshBoost + qualityBoost,
+      score: ((likeMap[n.id]||0)*3 + (bookmarkMap[n.id]||0)*2 + (discoverMap[n.id]||0)*4 + Math.round((n.originality_score||0)/5) + qualityBoost) * boostMultiplier,
       likeCount: likeMap[n.id]||0,
       like_count: likeMap[n.id]||0,
       hideStats: hideStatsFor(n.created_at, likeMap[n.id] || 0),
