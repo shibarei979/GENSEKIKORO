@@ -53,7 +53,7 @@ export default function PostSetupPage() {
   const [genre, setGenre] = useState('')
   const [tags, setTags] = useState([] as string[])
   const [tagInput, setTagInput] = useState('')
-  const [novelType, setNovelType] = useState('長編' as '長編'|'短編')
+  const [novelType, setNovelType] = useState('長編' as '長編'|'短編'|'WEBTOON')
   const [isR18, setIsR18] = useState(false)
   const [isR15, setIsR15] = useState(false)
   const [aimsPublishing, setAimsPublishing] = useState(false)
@@ -249,11 +249,11 @@ export default function PostSetupPage() {
             <div style={fg}>
               <label style={lbl}>作品の長さ <span style={{color:'var(--color-danger)'}}>*</span></label>
               <div style={{display:'flex',gap:10}}>
-                {(['長編','短編'] as const).map(t=>(
+                {(['長編','短編','WEBTOON'] as const).map(t=>(
                   <button key={t} type="button" onClick={()=>setNovelType(t)}
                     style={{flex:1,padding:'12px',borderRadius:10,border:`2px solid ${novelType===t?'var(--color-brand)':'var(--color-brand-border)'}`,cursor:'pointer',textAlign:'center' as const,background:novelType===t?'var(--color-brand-light)':'var(--color-bg-card)'}}>
                     <div style={{fontSize:14,fontWeight:700,color:novelType===t?'var(--color-brand)':'var(--color-text)'}}>{t}</div>
-                    <div style={{fontSize:11,color:'var(--color-text-muted)',marginTop:2}}>{t==='長編'?'複数話にわたる作品':'1話完結の作品'}</div>
+                    <div style={{fontSize:11,color:'var(--color-text-muted)',marginTop:2}}>{t==='長編'?'複数話にわたる作品':t==='短編'?'1話完結の作品':'1話1万文字までの連載'}</div>
                   </button>
                 ))}
               </div>

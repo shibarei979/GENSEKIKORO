@@ -166,7 +166,7 @@ export default function PostClient({ profile, userId }: Props) {
   }, [])
 
   useEffect(() => {
-    supabase.from('novels').select('id,title,genre').eq('author_id', userId).eq('published', true)
+    supabase.from('novels').select('id,title,genre,novel_type').eq('author_id', userId).eq('published', true)
       .then(({ data }) => setMyNovels(data || []))
     if (novelIdParam) {
       setMode('existing')
@@ -340,6 +340,9 @@ export default function PostClient({ profile, userId }: Props) {
     if (prefaceLen > 20000) errs.preface = '前書きは20,000文字以内にしてください'
     if (afterLen > 20000)   errs.afterword = 'あとがきは20,000文字以内にしてください'
     if (bodyLen > 100000)   errs.body = '本文は100,000文字以内にしてください'
+    // WEBTOON作品は1話1万文字まで
+    const targetType = mode === 'existing' ? (myNovels.find(n=>n.id===selectedNovelId) as any)?.novel_type : null
+    if (targetType === 'WEBTOON' && bodyLen > 10000) errs.body = `WEBTOON作品は1話10,000文字以内です（現在${bodyLen.toLocaleString()}文字）`
     if (publish && bodyLen < 500) errs.body = `公開には本文500文字以上必要です（現在${bodyLen}文字）`
     if (publish && useSchedule) {
       if (!scheduleValue) {
