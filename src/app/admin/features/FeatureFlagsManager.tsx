@@ -7,6 +7,7 @@ interface Feature {
   label: string
   desc: string
   status: Status
+  link?: string
 }
 
 const STATUS_OPTIONS: { value: Status; label: string; color: string; bg: string }[] = [
@@ -60,7 +61,14 @@ export default function FeatureFlagsManager({ features: initial }: { features: F
                 {cur.label}中
               </span>
             </div>
-            <div style={{ fontSize: 12, color: '#64748b', marginBottom: 14, lineHeight: 1.6 }}>{f.desc}</div>
+            <div style={{ fontSize: 12, color: '#64748b', marginBottom: 10, lineHeight: 1.6 }}>{f.desc}</div>
+            {f.link && f.status !== 'off' && (
+              <a href={f.link} target="_blank" rel="noopener noreferrer"
+                style={{ display: 'inline-flex', alignItems: 'center', gap: 4, fontSize: 12, fontWeight: 600, color: '#2563eb', textDecoration: 'none', marginBottom: 12 }}>
+                ページを確認する
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+              </a>
+            )}
             <div style={{ display: 'flex', gap: 8 }}>
               {STATUS_OPTIONS.map(opt => (
                 <button key={opt.value} onClick={() => updateStatus(f.key, f.label, opt.value)} disabled={saving === f.key}

@@ -7,7 +7,7 @@ export const dynamic = 'force-dynamic'
 
 // 管理対象の機能一覧（新機能を追加したらここに登録）
 const MANAGED_FEATURES = [
-  { key: 'projects', label: 'お題企画', desc: 'ユーザー主催のテーマ企画（一覧・作成・参加）' },
+  { key: 'projects', label: 'お題企画', desc: 'ユーザー主催のテーマ企画（一覧・作成・参加）。コンテストページ内に表示', link: '/contests' },
   // 今後の新機能はここに追加していく
 ]
 
