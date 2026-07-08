@@ -1,4 +1,5 @@
 import { createClient } from '@/lib/supabase/server'
+import { getFeatureFlags, isFeatureVisible } from '@/lib/featureFlags'
 export const revalidate = 10
 import Link from 'next/link'
 import Header from '@/components/layout/Header'
@@ -30,6 +31,19 @@ export default async function ContestsPage() {
   if (user) {
     const { data } = await supabase.from('profiles').select('*').eq('user_id', user.id).single()
     profile = data
+  }
+
+  // お題企画（フィーチャーフラグ：off=非表示 / preview=アドミンのみ / on=全員）
+  const flags = await getFeatureFlags()
+  const showProjects = isFeatureVisible(flags['projects'], profile?.is_admin || false)
+  let recentProjects: any[] = []
+  if (showProjects) {
+    const { data: pj } = await supabase
+      .from('projects')
+      .select('id, title, theme, deadline')
+      .order('created_at', { ascending: false })
+      .limit(6)
+    recentProjects = pj || []
   }
 
   const { data: contests } = await supabase
@@ -162,6 +176,47 @@ export default async function ContestsPage() {
           {(!contests || contests.length === 0) && (
             <div style={{background:'var(--color-bg-card)',border:'1px solid var(--color-brand-border)',borderRadius:12,padding:'60px',textAlign:'center',color:'var(--color-text-faint)',fontSize:14}}>
               現在開催中のコンテストはありません
+            </div>
+          )}
+
+          {/* お題企画（ユーザー主催）：フィーチャーフラグで公開制御 */}
+          {showProjects && (
+            <div style={{marginTop:32}}>
+              <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',marginBottom:12,flexWrap:'wrap',gap:8}}>
+                <div style={{display:'flex',alignItems:'center',gap:8}}>
+                  <h2 style={{fontSize:16,fontWeight:700,color:'var(--color-text)'}}>みんなのお題企画</h2>
+                  {flags['projects'] === 'preview' && (
+                    <span style={{fontSize:10,fontWeight:700,color:'#b45309',background:'#fef3c7',padding:'2px 10px',borderRadius:12}}>プレビュー中（アドミンのみ表示）</span>
+                  )}
+                </div>
+                <div style={{display:'flex',gap:8}}>
+                  <Link href="/projects" style={{fontSize:12,color:'var(--color-brand)',textDecoration:'none',border:'1px solid var(--color-brand-border)',borderRadius:14,padding:'5px 14px'}}>一覧を見る</Link>
+                  <Link href="/projects/new" style={{fontSize:12,fontWeight:700,color:'#fff',background:'var(--color-brand)',textDecoration:'none',borderRadius:14,padding:'5px 14px'}}>企画を作る</Link>
+                </div>
+              </div>
+              <div style={{fontSize:12,color:'var(--color-text-muted)',marginBottom:12,lineHeight:1.7}}>
+                ユーザーが主催するテーマ企画です。お題に沿った作品を投稿して参加できます。
+              </div>
+              {recentProjects.length === 0 ? (
+                <div style={{background:'var(--color-bg-card)',border:'1px solid var(--color-brand-border)',borderRadius:12,padding:'32px',textAlign:'center',color:'var(--color-text-faint)',fontSize:13}}>
+                  まだ企画がありません。最初の企画を立ててみませんか？
+                </div>
+              ) : (
+                <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fill, minmax(220px, 1fr))',gap:10}}>
+                  {recentProjects.map((p:any) => {
+                    const isOpen = !p.deadline || new Date(p.deadline) > new Date()
+                    return (
+                      <Link key={p.id} href={`/projects/${p.id}`} style={{background:'var(--color-bg-card)',border:'1px solid var(--color-brand-border)',borderRadius:12,padding:'14px 16px',textDecoration:'none',display:'block'}}>
+                        <div style={{display:'flex',alignItems:'center',gap:6,marginBottom:6}}>
+                          <span style={{fontSize:10,fontWeight:700,color:isOpen?'#15803d':'#94a3b8',background:isOpen?'#dcfce7':'#f1f5f9',padding:'2px 8px',borderRadius:10}}>{isOpen?'募集中':'締切'}</span>
+                          {p.theme && <span style={{fontSize:10,color:'var(--color-brand)',background:'var(--color-brand-light)',padding:'2px 8px',borderRadius:10}}>お題：{p.theme.slice(0,12)}{p.theme.length>12?'…':''}</span>}
+                        </div>
+                        <div style={{fontSize:13.5,fontWeight:700,color:'var(--color-text)',lineHeight:1.5}}>{p.title}</div>
+                      </Link>
+                    )
+                  })}
+                </div>
+              )}
             </div>
           )}
 

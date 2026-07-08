@@ -1,4 +1,6 @@
 import { createClient } from '@/lib/supabase/server'
+import { checkFeature } from '@/lib/featureFlags'
+import { notFound } from 'next/navigation'
 import Link from 'next/link'
 import Header from '@/components/layout/Header'
 import Footer from '@/components/layout/Footer'
@@ -13,6 +15,10 @@ export default async function ProjectsPage() {
     const { data } = await supabase.from('profiles').select('*').eq('user_id', user.id).single()
     profile = data
   }
+
+  // フィーチャーフラグ：off=非表示 / preview=アドミンのみ / on=全員
+  const visible = await checkFeature('projects', profile?.is_admin || false)
+  if (!visible) notFound()
 
   const { data: projects } = await supabase
     .from('projects')

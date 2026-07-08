@@ -15,8 +15,16 @@ export default function NewProjectPage() {
   const [error, setError] = useState('')
 
   useEffect(() => {
-    supabase.auth.getUser().then(({ data }) => {
+    supabase.auth.getUser().then(async ({ data }) => {
       if (!data.user) { router.push('/auth/login'); return }
+      // フィーチャーフラグ確認：off=不可 / preview=アドミンのみ / on=全員
+      const [{ data: flag }, { data: prof }] = await Promise.all([
+        supabase.from('feature_flags').select('status').eq('key', 'projects').maybeSingle(),
+        supabase.from('profiles').select('is_admin').eq('user_id', data.user.id).single(),
+      ])
+      const status = flag?.status || 'off'
+      const ok = status === 'on' || (status === 'preview' && prof?.is_admin)
+      if (!ok) { router.push('/'); return }
       setUserId(data.user.id)
     })
   }, [])
