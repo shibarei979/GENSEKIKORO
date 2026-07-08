@@ -111,9 +111,15 @@ export default async function AdminPage() {
       <Header profile={profile} user={user} />
       <div style={{maxWidth:1100,margin:'0 auto',padding:'32px'}}>
         <div style={{marginBottom:28}}>
-          <div style={{display:'flex',alignItems:'center',gap:10,marginBottom:4}}>
-            <span style={{fontSize:22,fontWeight:800,color:'var(--admin-text)'}}>運営管理画面</span>
-            <span style={{fontSize:11,background:'var(--color-brand)',color:'var(--color-bg-card)',padding:'2px 8px',borderRadius:10,fontWeight:700}}>ADMIN</span>
+          <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',flexWrap:'wrap',gap:10,marginBottom:4}}>
+            <div style={{display:'flex',alignItems:'center',gap:10}}>
+              <span style={{fontSize:22,fontWeight:800,color:'var(--admin-text)'}}>運営管理画面</span>
+              <span style={{fontSize:11,background:'var(--color-brand)',color:'var(--color-bg-card)',padding:'2px 8px',borderRadius:10,fontWeight:700}}>ADMIN</span>
+            </div>
+            <Link href="/" style={{display:'inline-flex',alignItems:'center',gap:6,fontSize:13,fontWeight:600,color:'var(--color-brand)',textDecoration:'none',border:'1px solid var(--admin-border)',borderRadius:10,padding:'7px 16px',background:'var(--admin-bg-card)'}}>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+              サイトへ戻る
+            </Link>
           </div>
           <div style={{fontSize:13,color:'var(--admin-text-muted)'}}>原石航路 管理者専用ページ</div>
         </div>

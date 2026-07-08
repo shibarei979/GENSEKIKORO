@@ -33,7 +33,10 @@ export default async function AdminFeaturesPage() {
   return (
     <div style={{ minHeight: '100vh', background: 'var(--admin-bg, #f8fafc)' }}>
       <div style={{ maxWidth: 720, margin: '0 auto', padding: '32px 20px' }}>
-        <h1 style={{ fontSize: 22, fontWeight: 700, color: '#1e293b', marginBottom: 6 }}>機能の公開管理</h1>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 8, marginBottom: 6 }}>
+          <h1 style={{ fontSize: 22, fontWeight: 700, color: '#1e293b' }}>機能の公開管理</h1>
+          <a href="/admin" style={{ fontSize: 13, fontWeight: 600, color: '#2563eb', textDecoration: 'none', border: '1px solid #e2e8f0', borderRadius: 10, padding: '6px 14px', background: '#fff' }}>← 管理画面トップ</a>
+        </div>
         <p style={{ fontSize: 13, color: '#64748b', marginBottom: 24, lineHeight: 1.7 }}>
           新機能は「プレビュー」でまず自分だけ確認し、問題なければ「公開」に切り替えます。「オフ」にすると誰にも表示されません。
         </p>
