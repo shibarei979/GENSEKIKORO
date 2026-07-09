@@ -412,7 +412,7 @@ export default function SearchForm({
               </div>
             </div>
             <div>
-              <div style={{fontSize:11,color:'var(--color-text-muted)',fontWeight:600,marginBottom:6}}>ポイント（☆＋いいね×2＋保存×3）</div>
+              <div style={{fontSize:11,color:'var(--color-text-muted)',fontWeight:600,marginBottom:6}}>ポイント</div>
               <div style={{display:'flex',alignItems:'center',gap:6,flexWrap:'wrap'}}>
                 <input type="number" min="0" value={ptMin} onChange={e=>setPtMin(e.target.value)} placeholder="下限なし" style={{width:110,padding:'7px 10px',borderRadius:8,border:'1px solid var(--color-brand-border)',background:'var(--color-bg-card)',color:'var(--color-text)',fontSize:13,outline:'none'}}/>
                 <span style={{fontSize:12,color:'var(--color-text-muted)'}}>〜</span>
