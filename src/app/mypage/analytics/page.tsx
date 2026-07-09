@@ -105,10 +105,12 @@ export default async function AnalyticsPage() {
       if (t >= weekStart) st.viewsWeek++
       if (t >= monthStart) st.viewsMonth++
       const day = (pv.created_at || '').slice(0, 10)
-      if (t >= weekStart) st.daily7[day] = (st.daily7[day] || 0) + 1
-      if (t >= monthStart) st.daily30[day] = (st.daily30[day] || 0) + 1
+      // 分類：未ログイン(a) / スマホ(m) / PC(d)
+      const seg = !pv.user_id ? 'a' : (pv.device === 'mobile' ? 'm' : 'd')
+      if (t >= weekStart) { if (!st.daily7[day]) st.daily7[day] = { v: 0, m: 0, d: 0, a: 0 }; st.daily7[day].v++; st.daily7[day][seg]++ }
+      if (t >= monthStart) { if (!st.daily30[day]) st.daily30[day] = { v: 0, m: 0, d: 0, a: 0 }; st.daily30[day].v++; st.daily30[day][seg]++ }
       const month = (pv.created_at || '').slice(0, 7)
-      if (month) st.monthly[month] = (st.monthly[month] || 0) + 1
+      if (month) { if (!st.monthly[month]) st.monthly[month] = { v: 0, m: 0, d: 0, a: 0 }; st.monthly[month].v++; st.monthly[month][seg]++ }
     })
 
     ;(likes || []).forEach((l: any) => { if (statsMap[l.novel_id]) statsMap[l.novel_id].likes++ })
@@ -164,15 +166,16 @@ export default async function AnalyticsPage() {
     for (let i = 6; i >= 0; i--) {
       const d = new Date(Date.now() - i * 24 * 60 * 60 * 1000)
       const key = d.toISOString().slice(0, 10)
-      daily7.push({ date: key.slice(5), views: st.daily7[key] || 0 })
+      const o7 = st.daily7[key] || { v: 0, m: 0, d: 0, a: 0 }
+      daily7.push({ date: key.slice(5), views: o7.v, m: o7.m, d: o7.d, a: o7.a })
     }
     // 日別上位（直近30日）
     const dailyTop = Object.entries(st.daily30)
-      .map(([date, views]) => ({ date, views: views as number }))
+      .map(([date, o]: any) => ({ date, views: o.v, m: o.m, d: o.d, a: o.a }))
       .sort((a, b) => b.views - a.views).slice(0, 5)
     // 月別上位
     const monthlyTop = Object.entries(st.monthly)
-      .map(([month, views]) => ({ month, views: views as number }))
+      .map(([month, o]: any) => ({ month, views: o.v, m: o.m, d: o.d, a: o.a }))
       .sort((a, b) => b.views - a.views).slice(0, 5)
 
     return {

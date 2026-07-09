@@ -25,9 +25,9 @@ interface NovelStat {
   uniqueCount: number
   hourlyToday: number[]
   hourlyYesterday: number[]
-  daily7: { date: string; views: number }[]
-  dailyTop: { date: string; views: number }[]
-  monthlyTop: { month: string; views: number }[]
+  daily7: { date: string; views: number; m?: number; d?: number; a?: number }[]
+  dailyTop: { date: string; views: number; m?: number; d?: number; a?: number }[]
+  monthlyTop: { month: string; views: number; m?: number; d?: number; a?: number }[]
   episodeRows: EpisodeRow[]
   commentList: { body: string; author: string; created_at: string; episode_title: string; rating?: number | null }[]
 }
@@ -124,9 +124,18 @@ export default function AnalyticsCharts({ novels }: { novels: NovelStat[] }) {
             {selected.dailyTop.length === 0 ? (
               <div style={{fontSize:12,color:'var(--color-text-faint)'}}>データがありません</div>
             ) : selected.dailyTop.map((d, i) => (
-              <div key={d.date} style={{display:'flex',alignItems:'center',justifyContent:'space-between',padding:'6px 0',borderBottom:i<selected.dailyTop.length-1?'1px solid var(--color-brand-light)':'none'}}>
-                <span style={{fontSize:12,color:'var(--color-text-muted)'}}>{i+1}. {d.date}</span>
-                <span style={{fontSize:13,fontWeight:700,color:'var(--color-text)'}}>{d.views} PV</span>
+              <div key={d.date} style={{padding:'6px 0',borderBottom:i<selected.dailyTop.length-1?'1px solid var(--color-brand-light)':'none'}}>
+                <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',marginBottom:3}}>
+                  <span style={{fontSize:12,color:'var(--color-text-muted)'}}>{i+1}. {d.date}</span>
+                  <span style={{fontSize:13,fontWeight:700,color:'var(--color-text)'}}>{d.views} PV</span>
+                </div>
+                {(d.m||d.d||d.a) ? (
+                  <div style={{display:'flex',height:5,borderRadius:3,overflow:'hidden',background:'var(--color-bg)'}}>
+                    {(d.m||0)>0 && <div style={{flex:d.m,background:'var(--color-brand)'}}/>}
+                    {(d.d||0)>0 && <div style={{flex:d.d,background:'var(--color-info)'}}/>}
+                    {(d.a||0)>0 && <div style={{flex:d.a,background:'#cbd5e1'}}/>}
+                  </div>
+                ) : null}
               </div>
             ))}
           </div>
@@ -137,9 +146,18 @@ export default function AnalyticsCharts({ novels }: { novels: NovelStat[] }) {
             {selected.monthlyTop.length === 0 ? (
               <div style={{fontSize:12,color:'var(--color-text-faint)'}}>データがありません</div>
             ) : selected.monthlyTop.map((m, i) => (
-              <div key={m.month} style={{display:'flex',alignItems:'center',justifyContent:'space-between',padding:'6px 0',borderBottom:i<selected.monthlyTop.length-1?'1px solid var(--color-brand-light)':'none'}}>
-                <span style={{fontSize:12,color:'var(--color-text-muted)'}}>{i+1}. {m.month}</span>
-                <span style={{fontSize:13,fontWeight:700,color:'var(--color-text)'}}>{m.views} PV</span>
+              <div key={m.month} style={{padding:'6px 0',borderBottom:i<selected.monthlyTop.length-1?'1px solid var(--color-brand-light)':'none'}}>
+                <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',marginBottom:3}}>
+                  <span style={{fontSize:12,color:'var(--color-text-muted)'}}>{i+1}. {m.month}</span>
+                  <span style={{fontSize:13,fontWeight:700,color:'var(--color-text)'}}>{m.views} PV</span>
+                </div>
+                {(m.m||m.d||m.a) ? (
+                  <div style={{display:'flex',height:5,borderRadius:3,overflow:'hidden',background:'var(--color-bg)'}}>
+                    {(m.m||0)>0 && <div style={{flex:m.m,background:'var(--color-brand)'}}/>}
+                    {(m.d||0)>0 && <div style={{flex:m.d,background:'var(--color-info)'}}/>}
+                    {(m.a||0)>0 && <div style={{flex:m.a,background:'#cbd5e1'}}/>}
+                  </div>
+                ) : null}
               </div>
             ))}
           </div>
@@ -234,16 +252,30 @@ function HourlyChart({ data }: { data: number[] }) {
 }
 
 // 日別
-function DayChart({ data }: { data: { date: string; views: number }[] }) {
+function DayChart({ data }: { data: { date: string; views: number; m?: number; d?: number; a?: number }[] }) {
   const max = Math.max(1, ...data.map(d => d.views))
   return (
     <div>
+      <div style={{display:'flex',gap:12,marginBottom:8,fontSize:10.5,color:'var(--color-text-muted)',flexWrap:'wrap'}}>
+        <span><span style={{display:'inline-block',width:9,height:9,borderRadius:2,background:'var(--color-brand)',marginRight:4}}/>スマホ</span>
+        <span><span style={{display:'inline-block',width:9,height:9,borderRadius:2,background:'var(--color-info)',marginRight:4}}/>PC</span>
+        <span><span style={{display:'inline-block',width:9,height:9,borderRadius:2,background:'#cbd5e1',marginRight:4}}/>未ログイン</span>
+      </div>
       <div style={{display:'flex',alignItems:'flex-end',gap:8,height:120,borderBottom:'1px solid var(--color-brand-border)'}}>
-        {data.map((d, i) => (
-          <div key={i} style={{flex:1,display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'flex-end',height:'100%'}} title={`${d.date}: ${d.views}PV`}>
-            <div style={{width:'100%',maxWidth:40,height:`${(d.views/max)*100}%`,minHeight:d.views>0?3:0,background:'linear-gradient(180deg, var(--color-brand), #ff9d5c)',borderRadius:'3px 3px 0 0',margin:'0 auto'}}/>
-          </div>
-        ))}
+        {data.map((d, i) => {
+          const mm = d.m || 0, dd = d.d || 0, aa = d.a || 0
+          const legacy = Math.max(0, d.views - mm - dd - aa)  // 分類前の旧データ
+          return (
+            <div key={i} style={{flex:1,display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'flex-end',height:'100%'}} title={`${d.date}: ${d.views}PV（スマホ${mm}・PC${dd}・未ログイン${aa}${legacy>0?`・不明${legacy}`:''}）`}>
+              <div style={{width:'100%',maxWidth:40,height:`${(d.views/max)*100}%`,minHeight:d.views>0?3:0,display:'flex',flexDirection:'column',borderRadius:'3px 3px 0 0',overflow:'hidden',margin:'0 auto'}}>
+                {mm>0 && <div style={{flex:mm,background:'var(--color-brand)'}}/>}
+                {dd>0 && <div style={{flex:dd,background:'var(--color-info)'}}/>}
+                {aa>0 && <div style={{flex:aa,background:'#cbd5e1'}}/>}
+                {legacy>0 && <div style={{flex:legacy,background:'#ffd9bd'}}/>}
+              </div>
+            </div>
+          )
+        })}
       </div>
       <div style={{display:'flex',gap:8,marginTop:5}}>
         {data.map((d, i) => (
