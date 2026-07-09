@@ -6,7 +6,7 @@ import { createClient } from '@/lib/supabase/client'
 import Link from 'next/link'
 import Header from '@/components/layout/Header'
 
-const GENRES = ['異世界','ファンタジー','SF','恋愛','学園','ミステリー','ホラー','歴史・時代','日常','アクション','コメディ','官能','その他']
+const GENRES = ['オールジャンル','異世界','ファンタジー','SF','恋愛','学園','ミステリー','ホラー','歴史・時代','日常','アクション','コメディ','官能','その他']
 
 const TAG_EXAMPLES: string[] = [
   '異世界転生','現代ファンタジー','魔法','ドラゴン','剣と魔法','近未来','宇宙','学園','王宮','戦国時代',
@@ -50,7 +50,10 @@ export default function PostSetupPage() {
   const [title, setTitle] = useState('')
   const [summary, setSummary] = useState('')
   const [catchcopy, setCatchcopy] = useState('')
-  const [genre, setGenre] = useState('')
+  const [selectedGenres, setSelectedGenres] = useState([] as string[])  // 複数選択可・最初が主ジャンル
+  const genre = selectedGenres[0] || ''
+  const [coverUrl, setCoverUrl] = useState('')
+  const [coverUploading, setCoverUploading] = useState(false)
   const [tags, setTags] = useState([] as string[])
   const [tagInput, setTagInput] = useState('')
   const [novelType, setNovelType] = useState('長編' as '長編'|'短編'|'WEBTOON')
@@ -114,6 +117,8 @@ export default function PostSetupPage() {
       genre, tags,
       novel_type: novelType,
       ai_usage: aiUsage,
+      cover_url: coverUrl || null,
+      genres: selectedGenres.length > 0 ? selectedGenres : null,
       is_r18: isR18, is_r15: isR15,
       aims_publishing: aimsPublishing,
       is_serial: true,
@@ -280,18 +285,56 @@ export default function PostSetupPage() {
               </div>
             </div>
 
-            {/* ジャンル */}
+            {/* ジャンル（複数選択可・最初に選んだものが主ジャンル） */}
             <div style={fg}>
               <label style={lbl}>ジャンル <span style={{color:'var(--color-danger)'}}>*</span></label>
+              <div style={{fontSize:11,color:'var(--color-text-muted)',marginBottom:8}}>複数選択できます。最初に選んだジャンルが主ジャンル（ランキング等の分類）になります。</div>
               <div style={{display:'flex',flexWrap:'wrap',gap:6}}>
-                {GENRES.map(g=>(
-                  <button key={g} type="button" onClick={()=>setGenre(g)}
-                    style={{padding:'5px 14px',borderRadius:16,fontSize:12,border:`1.5px solid ${genre===g?'var(--color-brand)':'var(--color-brand-border)'}`,cursor:'pointer',background:genre===g?'var(--color-brand)':'var(--color-bg-card)',color:genre===g?'#fff':'var(--color-text-muted)'}}>
-                    {g}
-                  </button>
-                ))}
+                {GENRES.map(g=>{
+                  const idx = selectedGenres.indexOf(g)
+                  const on = idx !== -1
+                  return (
+                    <button key={g} type="button"
+                      onClick={()=>setSelectedGenres(prev=>on?prev.filter(x=>x!==g):[...prev,g])}
+                      style={{position:'relative',padding:'5px 14px',borderRadius:16,fontSize:12,border:`1.5px solid ${on?'var(--color-brand)':'var(--color-brand-border)'}`,cursor:'pointer',background:on?'var(--color-brand)':'var(--color-bg-card)',color:on?'#fff':'var(--color-text-muted)'}}>
+                      {g}{idx===0 && <span style={{marginLeft:5,fontSize:9,background:'#fff',color:'var(--color-brand)',padding:'1px 5px',borderRadius:8,fontWeight:700}}>主</span>}
+                    </button>
+                  )
+                })}
               </div>
               {errors.genre && <div style={er}>{errors.genre}</div>}
+            </div>
+
+            {/* 表紙画像 */}
+            <div style={fg}>
+              <label style={lbl}>表紙画像（任意・あらすじの上に表示）</label>
+              <div style={{fontSize:11,color:'#b45309',background:'#fef3c7',border:'1px solid #fde68a',borderRadius:8,padding:'8px 12px',marginBottom:8,lineHeight:1.6}}>
+                ⚠ 表紙にAI生成画像は使用しないでください。ご自身で描いた絵、または権利上問題のない画像のみアップロードできます。
+              </div>
+              {coverUrl ? (
+                <div style={{display:'flex',alignItems:'center',gap:12,flexWrap:'wrap'}}>
+                  <img src={coverUrl} alt="表紙" style={{width:120,height:160,objectFit:'cover',borderRadius:8,border:'1px solid var(--color-brand-border)'}}/>
+                  <button type="button" onClick={()=>setCoverUrl('')} style={{fontSize:12,color:'var(--color-text-muted)',background:'none',border:'1px solid var(--color-brand-border)',borderRadius:8,padding:'6px 14px',cursor:'pointer'}}>削除</button>
+                </div>
+              ) : (
+                <label style={{display:'inline-block',fontSize:12,fontWeight:600,color:'var(--color-brand)',border:'1.5px dashed var(--color-brand-border)',borderRadius:10,padding:'14px 24px',cursor:'pointer',background:'var(--color-bg-card)'}}>
+                  {coverUploading ? 'アップロード中...' : '＋ 画像を選択'}
+                  <input type="file" accept="image/*" style={{display:'none'}} disabled={coverUploading}
+                    onChange={async e=>{
+                      const file = e.target.files?.[0]
+                      if (!file || !userId) return
+                      setCoverUploading(true)
+                      const ext = file.name.split('.').pop()
+                      const path = `covers/${userId}/${Date.now()}.${ext}`
+                      const { error } = await supabase.storage.from('illustrations').upload(path, file, { upsert: true })
+                      if (!error) {
+                        const { data } = supabase.storage.from('illustrations').getPublicUrl(path)
+                        setCoverUrl(data.publicUrl)
+                      }
+                      setCoverUploading(false)
+                    }}/>
+                </label>
+              )}
             </div>
 
             {/* タグ */}

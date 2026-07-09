@@ -31,7 +31,7 @@ export default async function NovelPage({ params }: { params: { id: string } }) 
   const [profileRes, novelRes] = await Promise.all([
     user ? supabase.from('profiles').select('*').eq('user_id', user.id).single() : Promise.resolve({ data: null }),
     supabase.from('novels')
-      .select('id, title, summary, genre, tags, is_serial, published, views, author_id, created_at, novel_type, official_tags, ai_usage')
+      .select('id, title, summary, genre, tags, is_serial, published, views, author_id, created_at, novel_type, official_tags, ai_usage, cover_url')
       .eq('id', params.id).maybeSingle(),
   ])
   const profile = profileRes.data
@@ -428,6 +428,12 @@ export default async function NovelPage({ params }: { params: { id: string } }) 
                 <span style={{fontSize:11,color:'var(--color-text-faint)'}}>フォロワー {followerCount}</span>
               )}
             </div>
+            {novel.cover_url && (
+              <div style={{marginBottom:14,textAlign:'center'}}>
+                <img src={novel.cover_url} alt={`${novel.title} 表紙`}
+                  style={{maxWidth:'100%',maxHeight:320,borderRadius:10,border:'1px solid var(--color-brand-border)',objectFit:'contain'}}/>
+              </div>
+            )}
             {novel.summary && (
               <div style={{fontSize:13,color:'var(--color-text)',lineHeight:1.85,padding:'10px 12px',background:'var(--color-bg)',borderRadius:8,borderLeft:'3px solid #f5a060',marginBottom:14,whiteSpace:'pre-wrap'}}>
                 {novel.summary}
