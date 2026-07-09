@@ -25,6 +25,7 @@ export default async function AnalyticsPage() {
   let allEpisodes: any[] = []
   const statsMap: Record<string, any> = {}
 
+  let deviceStats = { mobilePv: 0, desktopPv: 0, mobileUsers: 0, desktopUsers: 0 }
   if (novelIds.length > 0) {
     const { data: episodes } = await supabase
       .from('episodes')
@@ -38,13 +39,22 @@ export default async function AnalyticsPage() {
     allEpisodes.forEach((e: any) => { epToNovel[e.id] = e.novel_id })
 
     const [{ data: pageViews }, { data: likes }, { data: bookmarks }, { data: comments }, { data: epLikes }, { data: epComments }] = await Promise.all([
-      epIds.length > 0 ? supabase.from('page_views').select('episode_id, user_id, created_at').in('episode_id', epIds) : Promise.resolve({ data: [] }),
+      epIds.length > 0 ? supabase.from('page_views').select('episode_id, user_id, created_at, device').in('episode_id', epIds) : Promise.resolve({ data: [] }),
       supabase.from('likes').select('novel_id').in('novel_id', novelIds),
       supabase.from('bookmarks').select('novel_id').in('novel_id', novelIds),
       supabase.from('comments').select('novel_id, episode_id, body, user_id, created_at, rating').in('novel_id', novelIds).neq('user_id', user.id).order('created_at', { ascending: false }),
       epIds.length > 0 ? supabase.from('episode_likes').select('episode_id').in('episode_id', epIds) : Promise.resolve({ data: [] }),
       Promise.resolve({ data: [] }),
     ])
+
+    // デバイス別の読者集計（device記録開始以降のデータ）
+    const mobileUsers = new Set<string>(); const desktopUsers = new Set<string>()
+    let mobilePv = 0, desktopPv = 0
+    ;(pageViews || []).forEach((pv: any) => {
+      if (pv.device === 'mobile') { mobilePv++; if (pv.user_id) mobileUsers.add(pv.user_id) }
+      else if (pv.device === 'desktop') { desktopPv++; if (pv.user_id) desktopUsers.add(pv.user_id) }
+    })
+    deviceStats = { mobilePv, desktopPv, mobileUsers: mobileUsers.size, desktopUsers: desktopUsers.size }
 
     // コメント投稿者名を取得
     const commentUserIds = Array.from(new Set((comments || []).map((c: any) => c.user_id).filter(Boolean)))
@@ -197,6 +207,20 @@ export default async function AnalyticsPage() {
           <h1 style={{fontSize:20,fontWeight:700,color:'var(--color-text)'}}>ダッシュボード</h1>
           <Link href="/mypage?tab=works" style={{fontSize:13,color:'var(--color-brand)',textDecoration:'none'}}>← 作品管理に戻る</Link>
         </div>
+        {(deviceStats.mobilePv + deviceStats.desktopPv) > 0 && (
+          <div style={{background:'var(--color-bg-card)',border:'1px solid var(--color-brand-border)',borderRadius:12,padding:'14px 18px',marginBottom:16}}>
+            <div style={{fontSize:13,fontWeight:700,color:'var(--color-text)',marginBottom:10}}>読者のデバイス</div>
+            <div style={{display:'flex',gap:20,flexWrap:'wrap',marginBottom:10}}>
+              <div style={{fontSize:13,color:'var(--color-text)'}}>📱 スマホ：<b>{deviceStats.mobileUsers}</b>人（{deviceStats.mobilePv.toLocaleString()} PV）</div>
+              <div style={{fontSize:13,color:'var(--color-text)'}}>💻 PC：<b>{deviceStats.desktopUsers}</b>人（{deviceStats.desktopPv.toLocaleString()} PV）</div>
+            </div>
+            <div style={{display:'flex',height:8,borderRadius:4,overflow:'hidden',background:'var(--color-bg)'}}>
+              <div style={{width:`${Math.round(deviceStats.mobilePv/(deviceStats.mobilePv+deviceStats.desktopPv)*100)}%`,background:'var(--color-brand)'}}/>
+              <div style={{flex:1,background:'var(--color-info)'}}/>
+            </div>
+            <div style={{fontSize:10.5,color:'var(--color-text-faint)',marginTop:6}}>※ デバイス情報は記録開始日以降のPVが対象です。人数はログイン読者のみ。</div>
+          </div>
+        )}
         {novelStats.length === 0 ? (
           <div style={{textAlign:'center',padding:'60px 20px',color:'var(--color-text-muted)'}}>まだ作品がありません</div>
         ) : (
