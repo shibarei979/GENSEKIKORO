@@ -24,16 +24,21 @@ export default async function NovelManagePage({ params }: { params: { id: string
   if (!novel) notFound()
   if (novel.author_id !== user.id) redirect('/mypage')  // 自分の作品のみ
 
-  // 話一覧と統計を並列取得
-  const [epsRes, likeRes, bookmarkRes, discoverRes, commentRes, viewRes] = await Promise.all([
-    supabase.from('episodes').select('id, ep_number, title, body, published, scheduled_at, created_at, updated_at').eq('novel_id', params.id).order('ep_number', { ascending: true }),
+  // 話一覧を先に取得（PV集計に話IDが必要）
+  const { data: epsData } = await supabase.from('episodes').select('id, ep_number, title, body, published, scheduled_at, created_at, updated_at').eq('novel_id', params.id).order('ep_number', { ascending: true })
+  const episodes = epsData || []
+  const epIds = episodes.map((e: any) => e.id)
+
+  // 統計を並列取得（PVはpage_viewsから集計）
+  const [likeRes, bookmarkRes, discoverRes, commentRes, pvRes] = await Promise.all([
     supabase.from('likes').select('*', { count: 'exact', head: true }).eq('novel_id', params.id),
     supabase.from('bookmarks').select('*', { count: 'exact', head: true }).eq('novel_id', params.id),
     supabase.from('discovers').select('*', { count: 'exact', head: true }).eq('novel_id', params.id).eq('is_pending', false),
     supabase.from('comments').select('*', { count: 'exact', head: true }).eq('novel_id', params.id).neq('user_id', user.id),
-    supabase.from('novel_views').select('view_count').eq('novel_id', params.id).maybeSingle(),
+    epIds.length > 0
+      ? supabase.from('page_views').select('*', { count: 'exact', head: true }).in('episode_id', epIds)
+      : Promise.resolve({ count: 0 } as any),
   ])
-  const episodes = epsRes.data || []
   const totalChars = episodes.reduce((s: number, e: any) => s + (e.body?.length || 0), 0)
   const publishedEps = episodes.filter((e: any) => e.published !== false)
   const firstDate = publishedEps[0]?.created_at
@@ -88,7 +93,7 @@ export default async function NovelManagePage({ params }: { params: { id: string
           </div>
           <div style={{ ...secStyle, marginBottom: 0 }}>
             <div style={secHead}>読者の反応</div>
-            <div style={row}><span style={rowLabel}>PV</span><span style={{ ...rowValue, fontWeight: 700 }}>{(viewRes.data?.view_count || 0).toLocaleString()}</span></div>
+            <div style={row}><span style={rowLabel}>PV</span><span style={{ ...rowValue, fontWeight: 700 }}>{(pvRes.count || 0).toLocaleString()}</span></div>
             <div style={row}><span style={rowLabel}>いいね</span><span style={rowValue}>{(likeRes.count || 0).toLocaleString()}</span></div>
             <div style={row}><span style={rowLabel}>保存</span><span style={rowValue}>{(bookmarkRes.count || 0).toLocaleString()}</span></div>
             <div style={row}><span style={rowLabel}>発掘・拡散</span><span style={rowValue}>{(discoverRes.count || 0).toLocaleString()}</span></div>
@@ -111,7 +116,7 @@ export default async function NovelManagePage({ params }: { params: { id: string
         </div>
 
         {/* 公開・状態設定（その場で切替） */}
-        <NovelManageActions novelId={novel.id} initialPublished={!!novel.published} initialIsSerial={!!novel.is_serial} />
+        <NovelManageActions novelId={novel.id} novelTitle={novel.title} initialPublished={!!novel.published} initialIsSerial={!!novel.is_serial} initialAllowComments={novel.allow_comments !== false} />
 
         {/* エピソード一覧 */}
         <div style={secStyle}>

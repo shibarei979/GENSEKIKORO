@@ -598,57 +598,17 @@ export default function MypageClient({
             </div>
           )}
 
-          {/* 操作ボタン部分 */}
-          <div style={{padding:'12px 18px',background:'var(--color-bg)',display:'flex',gap:6,flexWrap:'wrap',alignItems:'center'}}>
-            {/* 編集（2択メニュー） */}
-            <div style={{position:'relative'}}>
-              <button onClick={()=>setEditMenuOpen(editMenuOpen===novel.id?null:novel.id)}
-                style={{display:'inline-flex',alignItems:'center',gap:4,fontSize:12,fontWeight:600,border:'none',padding:'7px 14px',borderRadius:8,color:'#fff',background:'var(--color-brand)',cursor:'pointer'}}>
-                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
-                編集
-                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><polyline points="6 9 12 15 18 9"/></svg>
-              </button>
-              {editMenuOpen===novel.id && (
-                <>
-                  <div style={{position:'fixed',inset:0,zIndex:98}} onClick={()=>setEditMenuOpen(null)}/>
-                  <div style={{position:'absolute',bottom:'calc(100% + 4px)',left:0,background:'var(--color-bg-card)',border:'1px solid var(--color-brand-border)',borderRadius:10,boxShadow:'0 4px 16px rgba(0,0,0,0.15)',zIndex:99,minWidth:180,overflow:'hidden'}}>
-                    <button onClick={()=>{setEditMenuOpen(null);handleOpenEpManage(novel)}}
-                      style={{display:'block',width:'100%',textAlign:'left',padding:'11px 16px',fontSize:13,color:'var(--color-text)',background:'none',border:'none',borderBottom:'1px solid var(--color-brand-light)',cursor:'pointer'}}>
-                      既存の話を編集
-                    </button>
-                    <button onClick={()=>{setEditMenuOpen(null);router.push(`/post?edit=${novel.id}`)}}
-                      style={{display:'block',width:'100%',textAlign:'left',padding:'11px 16px',fontSize:13,color:'var(--color-text)',background:'none',border:'none',cursor:'pointer'}}>
-                      作品情報を編集
-                    </button>
-                  </div>
-                </>
-              )}
-            </div>
-            <button onClick={()=>setChapterTarget({id:novel.id,title:novel.title})} style={{fontSize:12,fontWeight:600,border:'1px solid var(--color-brand-border)',padding:'7px 14px',borderRadius:8,color:'var(--color-text-muted)',background:'var(--color-bg-card)',cursor:'pointer'}}>
-              章の編集
+          {/* 操作ボタン部分（機能は個々の作品管理ページに集約） */}
+          <div style={{padding:'12px 18px',background:'var(--color-bg)',display:'flex',gap:8,flexWrap:'wrap',alignItems:'center',justifyContent:'space-between'}}>
+            <button onClick={()=>router.push(`/mypage/novel/${novel.id}`)}
+              style={{display:'inline-flex',alignItems:'center',gap:5,fontSize:12,fontWeight:700,border:'none',padding:'8px 16px',borderRadius:8,color:'#fff',background:'var(--color-brand)',cursor:'pointer'}}>
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/></svg>
+              作品を管理する
             </button>
-
-            <div style={{flex:1}}/>
-
-            <button onClick={()=>handleTogglePublish(novel.id,novel.published)} style={{fontSize:12,border:'none',padding:'7px 12px',borderRadius:8,color:novel.published?'var(--color-text-muted)':'#15803d',background:'none',cursor:'pointer'}}>{novel.published?'非公開にする':'公開する'}</button>
-            <button onClick={async()=>{
-                const next = !(novel as any).is_serial
-                await supabase.from('novels').update({is_serial:next}).eq('id',novel.id)
-                setMyNovels((prev:any[])=>prev.map((n:any)=>n.id===novel.id?{...n,is_serial:next}:n))
-              }} style={{fontSize:12,border:'none',padding:'7px 12px',borderRadius:8,color:(novel as any).is_serial?'var(--color-info)':'var(--color-text-muted)',background:'none',cursor:'pointer'}}>
-              {(novel as any).is_serial?'完結にする':'連載に戻す'}
-            </button>
-            <button onClick={async()=>{
-                const next = !((novel as any).allow_comments !== false)
-                await supabase.from('novels').update({allow_comments:next}).eq('id',novel.id)
-                setMyNovels((prev:any[])=>prev.map((n:any)=>n.id===novel.id?{...n,allow_comments:next}:n))
-              }} style={{fontSize:12,border:'none',padding:'7px 12px',borderRadius:8,color:(novel as any).allow_comments===false?'var(--color-danger)':'var(--color-text-muted)',background:'none',cursor:'pointer'}}>
-              {(novel as any).allow_comments===false?'コメント不可':'コメント許可'}
-            </button>
-            <button onClick={async()=>{
-                const{data:eps}=await supabase.from('episodes').select('id,title,ep_number').eq('novel_id',novel.id).order('ep_number',{ascending:true})
-                setDeleteTarget({id:novel.id,title:novel.title,episodes:eps||[]});setDeleteMode(null);setDeleteEpId('')
-              }} style={{fontSize:12,border:'none',padding:'7px 12px',borderRadius:8,color:'var(--color-danger)',background:'none',cursor:'pointer'}}>削除</button>
+            <Link href={`/novel/${novel.id}`}
+              style={{display:'inline-flex',alignItems:'center',gap:5,fontSize:12,fontWeight:600,border:'1px solid var(--color-brand-border)',padding:'8px 16px',borderRadius:8,color:'var(--color-brand)',background:'var(--color-bg-card)',textDecoration:'none'}}>
+              作品ページへ →
+            </Link>
           </div>
         </div>
       ))}
