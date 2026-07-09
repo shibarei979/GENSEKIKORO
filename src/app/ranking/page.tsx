@@ -1,6 +1,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { createClient as createSbClient } from '@supabase/supabase-js'
 import { unstable_cache } from 'next/cache'
+import RankingSelects from './RankingSelects'
 import Header from '@/components/layout/Header'
 import Footer from '@/components/layout/Footer'
 import AdBanner from '@/components/layout/AdBanner'
@@ -346,19 +347,6 @@ export default async function RankingPage({ searchParams }: Props) {
           </div>
 
           <div className="ranking-filter" style={{background:'var(--color-bg)',border:'1px solid var(--color-brand-border)',borderRadius:12,padding:'10px 16px',marginBottom:16}}>
-            {profile?.show_ai_works !== false && (
-              <div style={{display:'flex',alignItems:'flex-start',gap:10,marginBottom:7}}>
-                <div style={{fontSize:11,color:'var(--color-text-muted)',fontWeight:600,minWidth:92,flexShrink:0,paddingTop:5,lineHeight:1.3}}>作品区分</div>
-                <div style={{display:'flex',gap:6,flexWrap:'nowrap'}}>
-                  <Link href={buildUrl(period,novelType,serial,1,'human')} className={pillClass(aiMode==='human')} style={pill(aiMode==='human')}>
-                    通常作品
-                  </Link>
-                  <Link href={buildUrl(period,novelType,serial,1,'ai')} className={pillClass(aiMode==='ai')} style={pill(aiMode==='ai')}>
-                    AI作品
-                  </Link>
-                </div>
-              </div>
-            )}
             <div style={{display:'flex',alignItems:'flex-start',gap:10,marginBottom:7}}>
               <div style={{fontSize:11,color:'var(--color-text-muted)',fontWeight:600,minWidth:92,flexShrink:0,paddingTop:5,lineHeight:1.3}}>総合</div>
               <div style={{overflowX:'auto',msOverflowStyle:'none',scrollbarWidth:'none',flex:1,minWidth:0} as any}>
@@ -384,44 +372,10 @@ export default async function RankingPage({ searchParams }: Props) {
               </div>
             </div>
             {!isGrowthRanking && (
-              <div style={{display:'flex',alignItems:'flex-start',gap:10,marginBottom:7}}>
-                <div style={{fontSize:11,color:'var(--color-text-muted)',fontWeight:600,minWidth:92,flexShrink:0,paddingTop:5,lineHeight:1.3}}>作品の長さ</div>
-                <div style={{overflowX:'auto',msOverflowStyle:'none',scrollbarWidth:'none',flex:1,minWidth:0} as any}>
-                  <div style={{display:'flex',gap:6,flexWrap:'nowrap'}}>
-                    {typeOptions.map(o => (
-                      <Link key={o.value} href={buildUrl(period,o.value,serial)} className={pillClass(novelType===o.value)} style={pill(novelType===o.value)}>
-                        {o.label}
-                      </Link>
-                    ))}
-                  </div>
-                </div>
-              </div>
-            )}
-            <div style={{display:'flex',alignItems:'flex-start',gap:10,marginBottom:7}}>
-              <div style={{fontSize:11,color:'var(--color-text-muted)',fontWeight:600,minWidth:92,flexShrink:0,paddingTop:5,lineHeight:1.3}}>ジャンル別</div>
-              <div style={{overflowX:'auto',msOverflowStyle:'none',scrollbarWidth:'none',flex:1,minWidth:0} as any}>
-                <div style={{display:'flex',gap:5,flexWrap:'nowrap'}}>
-                  {genres.map(g => (
-                    <Link key={g} href={`/ranking?period=${period}&type=${encodeURIComponent(novelType)}&serial=${serial}&genre=${encodeURIComponent(g)}&page=1`}
-                      className={pillClass(genre===g)} style={pill(genre===g, true)}>
-                      {g}
-                    </Link>
-                  ))}
-                </div>
-              </div>
-            </div>
-            {!isGrowthRanking && (
               <div style={{display:'flex',alignItems:'flex-start',gap:10}}>
-                <div style={{fontSize:11,color:'var(--color-text-muted)',fontWeight:600,minWidth:92,flexShrink:0,paddingTop:5,lineHeight:1.3}}>絞り込み</div>
-                <div style={{overflowX:'auto',msOverflowStyle:'none',scrollbarWidth:'none',flex:1,minWidth:0} as any}>
-                  <div style={{display:'flex',gap:6,flexWrap:'nowrap'}}>
-                    {serialOptions.map(o => (
-                      <Link key={o.value} href={buildUrl(period,novelType,o.value)} className={pillClass(serial===o.value)} style={pill(serial===o.value)}>
-                        {o.label}
-                      </Link>
-                    ))}
-                  </div>
-                </div>
+                <div style={{fontSize:11,color:'var(--color-text-muted)',fontWeight:600,minWidth:92,flexShrink:0,paddingTop:8,lineHeight:1.3}}>絞り込み</div>
+                <RankingSelects period={period} novelType={novelType} serial={serial} genre={genre} aiMode={aiMode}
+                  showAiTab={profile?.show_ai_works !== false} genres={genres.filter(g=>g!=='全て')}/>
               </div>
             )}
             {isGrowthRanking && (
