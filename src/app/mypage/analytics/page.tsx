@@ -162,7 +162,7 @@ export default async function AnalyticsPage() {
     }))
 
     // 直近7日の日別配列
-    const daily7: { date: string; views: number }[] = []
+    const daily7: { date: string; views: number; m: number; d: number; a: number }[] = []
     for (let i = 6; i >= 0; i--) {
       const d = new Date(Date.now() - i * 24 * 60 * 60 * 1000)
       const key = d.toISOString().slice(0, 10)
