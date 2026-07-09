@@ -61,6 +61,7 @@ interface Props {
   defaultType?: string; defaultSerial?: string; defaultTag?: string
   defaultSort?: string; ageVerified?: boolean; defaultDiscover?: boolean
   defaultAuthor?: string; defaultLikeMin?: string; defaultLikeMax?: string
+  defaultCharMin?: string; defaultCharMax?: string; defaultPtMin?: string; defaultPtMax?: string
   defaultContest?: string
   contests?: { id: string; title: string }[]
 }
@@ -69,6 +70,7 @@ export default function SearchForm({
   defaultQ='', defaultExclude='', defaultGenre='', defaultType='',
   defaultSerial='', defaultTag='', defaultSort='new', ageVerified=false, defaultDiscover=false,
   defaultAuthor='', defaultLikeMin='', defaultLikeMax='',
+  defaultCharMin='', defaultCharMax='', defaultPtMin='', defaultPtMax='',
   defaultContest='', contests=[]
 }: Props) {
   const router = useRouter()
@@ -84,7 +86,11 @@ export default function SearchForm({
   const [sort,               setSort]               = useState(defaultSort)
   const [discoverMode,       setDiscoverMode]       = useState(defaultDiscover)
   const [contestId,          setContestId]          = useState(defaultContest)
-  const [showDetail,         setShowDetail]         = useState(!!(defaultGenre||defaultType||defaultSerial||defaultTag||defaultContest))
+  const [charMin,            setCharMin]            = useState(defaultCharMin)
+  const [charMax,            setCharMax]            = useState(defaultCharMax)
+  const [ptMin,              setPtMin]              = useState(defaultPtMin)
+  const [ptMax,              setPtMax]              = useState(defaultPtMax)
+  const [showDetail,         setShowDetail]         = useState(!!(defaultGenre||defaultType||defaultSerial||defaultTag||defaultContest||defaultCharMin||defaultCharMax||defaultPtMin||defaultPtMax))
   const [showSearchExamples, setShowSearchExamples] = useState(false)
   const [showExcludeExamples,setShowExcludeExamples]= useState(false)
   const [history,            setHistory]            = useState<string[]>([])
@@ -132,6 +138,10 @@ export default function SearchForm({
     if (type)            params.set('type',    type)
     if (serial)          params.set('serial',  serial)
     if (contestId)       params.set('contest', contestId)
+    if (charMin)         params.set('charMin', charMin)
+    if (charMax)         params.set('charMax', charMax)
+    if (ptMin)           params.set('ptMin',   ptMin)
+    if (ptMax)           params.set('ptMax',   ptMax)
     const allTags = Array.from(new Set([...tags, ...moodTags]))
     if (allTags.length > 0) params.set('tag', allTags.join(','))
     if (discoverMode)    params.set('sort',    'discover')
@@ -390,6 +400,24 @@ export default function SearchForm({
                 <button onClick={()=>setType(type==='長編'?'':'長編')} className={pillCls(type==='長編')} style={pill(type==='長編')}>長編</button>
                 <button onClick={()=>setType(type==='短編'?'':'短編')} className={pillCls(type==='短編')} style={pill(type==='短編')}>短編</button>
                 <button onClick={()=>setType(type==='WEBTOON'?'':'WEBTOON')} className={pillCls(type==='WEBTOON')} style={pill(type==='WEBTOON')}>WEBTOON</button>
+              </div>
+            </div>
+            <div>
+              <div style={{fontSize:11,color:'var(--color-text-muted)',fontWeight:600,marginBottom:6}}>文字数</div>
+              <div style={{display:'flex',alignItems:'center',gap:6,flexWrap:'wrap'}}>
+                <input type="number" min="0" value={charMin} onChange={e=>setCharMin(e.target.value)} placeholder="下限なし" style={{width:110,padding:'7px 10px',borderRadius:8,border:'1px solid var(--color-brand-border)',background:'var(--color-bg-card)',color:'var(--color-text)',fontSize:13,outline:'none'}}/>
+                <span style={{fontSize:12,color:'var(--color-text-muted)'}}>〜</span>
+                <input type="number" min="0" value={charMax} onChange={e=>setCharMax(e.target.value)} placeholder="上限なし" style={{width:110,padding:'7px 10px',borderRadius:8,border:'1px solid var(--color-brand-border)',background:'var(--color-bg-card)',color:'var(--color-text)',fontSize:13,outline:'none'}}/>
+                <span style={{fontSize:11,color:'var(--color-text-faint)'}}>文字</span>
+              </div>
+            </div>
+            <div>
+              <div style={{fontSize:11,color:'var(--color-text-muted)',fontWeight:600,marginBottom:6}}>ポイント（☆＋いいね×2＋保存×3）</div>
+              <div style={{display:'flex',alignItems:'center',gap:6,flexWrap:'wrap'}}>
+                <input type="number" min="0" value={ptMin} onChange={e=>setPtMin(e.target.value)} placeholder="下限なし" style={{width:110,padding:'7px 10px',borderRadius:8,border:'1px solid var(--color-brand-border)',background:'var(--color-bg-card)',color:'var(--color-text)',fontSize:13,outline:'none'}}/>
+                <span style={{fontSize:12,color:'var(--color-text-muted)'}}>〜</span>
+                <input type="number" min="0" value={ptMax} onChange={e=>setPtMax(e.target.value)} placeholder="上限なし" style={{width:110,padding:'7px 10px',borderRadius:8,border:'1px solid var(--color-brand-border)',background:'var(--color-bg-card)',color:'var(--color-text)',fontSize:13,outline:'none'}}/>
+                <span style={{fontSize:11,color:'var(--color-text-faint)'}}>pt</span>
               </div>
             </div>
             <div>

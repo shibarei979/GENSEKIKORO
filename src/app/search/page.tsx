@@ -14,6 +14,7 @@ interface Props {
     q?: string; exclude?: string; genre?: string; type?: string
     serial?: string; tag?: string; sort?: string; page?: string
     author?: string; contest?: string
+    charMin?: string; charMax?: string; ptMin?: string; ptMax?: string
   }
 }
 
@@ -38,7 +39,12 @@ export default async function SearchPage({ searchParams }: Props) {
   const tags     = tagParam ? tagParam.split(',').filter(Boolean) : []
   const authorQ  = searchParams.author  || ''
   const contestId = searchParams.contest || ''
-  const hasSearch = !!(q || exclude || genre || type || serial || tags.length > 0 || authorQ || contestId)
+  const charMin = Number(searchParams.charMin) || 0
+  const charMax = Number(searchParams.charMax) || 0
+  const ptMin = Number(searchParams.ptMin) || 0
+  const ptMax = Number(searchParams.ptMax) || 0
+  const hasMetaFilter = !!(charMin || charMax || ptMin || ptMax)
+  const hasSearch = !!(q || exclude || genre || type || serial || tags.length > 0 || authorQ || contestId || hasMetaFilter)
 
   const isAgeVerified = profile?.age_verified || false
 
@@ -135,12 +141,35 @@ export default async function SearchPage({ searchParams }: Props) {
     count = c2 || 0
   }
 
-  const novelIds = results.map((n: any) => n.id)
+  let novelIds = results.map((n: any) => n.id)
 
-  // 文字数
+  // 文字数・ポイント（RPCで一括集計：本文転送なしで軽量）
   const charCountMap: Record<string, number> = {}
+  const pointsMap: Record<string, number> = {}
   if (novelIds.length > 0) {
-    const { data: epData } = await supabase.from('episodes').select('novel_id, body').in('novel_id', novelIds)
+    const { data: metaData } = await supabase.rpc('get_novel_search_meta', { ids: novelIds })
+    metaData?.forEach((m: any) => {
+      charCountMap[m.novel_id] = Number(m.char_count) || 0
+      pointsMap[m.novel_id] = Number(m.points) || 0
+    })
+  }
+  // 文字数・Pt範囲フィルタ
+  if (hasMetaFilter) {
+    results = results.filter((n: any) => {
+      const ch = charCountMap[n.id] || 0
+      const pt = pointsMap[n.id] || 0
+      if (charMin && ch < charMin) return false
+      if (charMax && ch > charMax) return false
+      if (ptMin && pt < ptMin) return false
+      if (ptMax && pt > ptMax) return false
+      return true
+    })
+    count = results.length
+    novelIds = results.map((n: any) => n.id)
+  }
+  // （旧集計コードの残骸吸収）
+  if (false) {
+    const epData: any[] = []
     epData?.forEach((ep: any) => {
       charCountMap[ep.novel_id] = (charCountMap[ep.novel_id] || 0) + (ep.body?.length || 0)
     })
@@ -310,6 +339,8 @@ export default async function SearchPage({ searchParams }: Props) {
             defaultType={type} defaultSerial={serial} defaultTag={tagParam}
             defaultSort={sort} ageVerified={isAgeVerified}
             defaultContest={contestId} contests={searchContests || []}
+            defaultCharMin={searchParams.charMin || ''} defaultCharMax={searchParams.charMax || ''}
+            defaultPtMin={searchParams.ptMin || ''} defaultPtMax={searchParams.ptMax || ''}
           />
 
           <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',marginBottom:10,fontSize:13,color:'var(--color-text-muted)'}}>
