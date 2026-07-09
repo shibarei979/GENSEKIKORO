@@ -29,6 +29,7 @@ import EpisodeLikeButton from './EpisodeLikeButton'
 import ReadButton from './ReadButton'
 import EpisodeBody from './EpisodeBody'
 import TypoReportButton from './TypoReportButton'
+import ValidReadTracker from './ValidReadTracker'
 import { QuoteProvider } from './QuoteContext'
 
 interface Props { params: { id: string; epId: string } }
@@ -207,6 +208,7 @@ export default async function EpisodePage({ params }: Props) {
               シェア
             </a>
           </div>
+          <ValidReadTracker episodeId={params.epId} enabled={!!user && user.id !== novel.author_id}/>
           <div style={{textAlign:'center',marginBottom:16}}>
             <TypoReportButton novelId={params.id} episodeId={params.epId} authorId={novel.author_id} userId={user?.id||null} userName={profile?.display_name||null} novelTitle={novel.title} episodeTitle={episode.title}/>
           </div>

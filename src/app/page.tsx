@@ -1,4 +1,5 @@
 import { createClient } from '@/lib/supabase/server'
+import { getCachedRecommendScores, buildRecommendation } from '@/lib/recommend'
 export const revalidate = 30
 import Link from 'next/link'
 import HomeSidebar from './HomeSidebar'
@@ -254,7 +255,24 @@ export default async function HomePage() {
       hideStats: hideStatsFor(n.created_at, likeMap[n.id] || 0),
     }
   })
-  const recommended = [...scored.sort((a: any,b: any)=>b.score-a.score).slice(0,20)].sort(()=>Math.random()-0.5).slice(0,8)
+  // ===== おすすめ（新アルゴリズム：有効読者・最低読者保証・重み付きランダム・ジャンル50:50） =====
+  const scoredAll = await getCachedRecommendScores()
+  // ユーザーがよく読むジャンル（読了履歴の上位2ジャンル）
+  let favoriteGenres: string[] = []
+  if (user) {
+    const { data: myReads } = await supabase.from('read_episodes').select('novel_id').eq('user_id', user.id).limit(100)
+    const readNovelIds = Array.from(new Set((myReads || []).map((r: any) => r.novel_id)))
+    if (readNovelIds.length > 0) {
+      const { data: readNovels } = await supabase.from('novels').select('genre').in('id', readNovelIds)
+      const gc: Record<string, number> = {}
+      readNovels?.forEach((n: any) => { gc[n.genre] = (gc[n.genre] || 0) + 1 })
+      favoriteGenres = Object.entries(gc).sort((a, b) => b[1] - a[1]).slice(0, 2).map(([g]) => g)
+    }
+  }
+  const recPicked = buildRecommendation(scoredAll, 8, favoriteGenres, user?.id, hideAi)
+  const recommended = recPicked.length > 0
+    ? await addAuthorNames(supabase, recPicked)
+    : [...scored.sort((a: any,b: any)=>b.score-a.score).slice(0,20)].sort(()=>Math.random()-0.5).slice(0,8)  // フォールバック（データ不足時）
 
   const novelIds4Gem = allNovels.map((n: any) => n.id)
   let commentCountMap: Record<string,number> = {}
