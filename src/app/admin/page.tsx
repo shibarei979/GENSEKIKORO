@@ -104,6 +104,7 @@ export default async function AdminPage() {
     { href: '/admin/analytics',     label: '詳細分析',        desc: 'ジャンル・時間帯・作品ランキングなど' },
     { href: '/admin/ai-review',     label: 'AI審査',          desc: 'AI疑い作品の確認・削除', badge: aiReviewCount ?? 0 },
     { href: '/admin/features',      label: '機能の公開管理',  desc: '新機能のプレビュー・公開の切り替え' },
+    { href: '/admin/award-boosts',  label: '受賞ブースト',    desc: '受賞作品のおすすめブースト付与' },
   ]
 
   return (
