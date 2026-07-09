@@ -444,6 +444,7 @@ export default function MypageClient({
           <div style={{display:'flex',gap:8,flexWrap:'wrap'}}>
             <button onClick={()=>setEditingName(true)} style={{fontSize:12,border:'1px solid var(--color-brand-border)',padding:'5px 12px',borderRadius:8,background:'none',color:'var(--color-text-muted)',cursor:'pointer'}}>名前を変更</button>
             <button onClick={()=>setShowBioModal(true)} style={{fontSize:12,border:'1px solid var(--color-brand-border)',padding:'5px 12px',borderRadius:8,background:'none',color:'var(--color-text-muted)',cursor:'pointer'}}>自己紹介を編集</button>
+            <Link href={`/author/${profile.user_id}`} style={{fontSize:12,border:'1px solid var(--color-brand-border)',padding:'5px 12px',borderRadius:8,background:'none',color:'var(--color-brand)',textDecoration:'none',fontWeight:600}}>公開ページを見る →</Link>
           </div>
         </div>
       </div>
@@ -536,7 +537,7 @@ export default function MypageClient({
           {/* 作品ヘッダー部分 */}
           <div style={{padding:'16px 18px',borderBottom:'1px solid var(--color-brand-light)'}}>
             <div style={{display:'flex',alignItems:'flex-start',gap:10}}>
-              <div style={{flex:1,minWidth:0,cursor:'pointer'}} onClick={()=>router.push(`/novel/${novel.id}`)}>
+              <div style={{flex:1,minWidth:0,cursor:'pointer'}} onClick={()=>router.push(`/mypage/novel/${novel.id}`)}>
                 <div style={{display:'flex',gap:6,marginBottom:8,flexWrap:'wrap',alignItems:'center'}}>
                   <span style={{fontSize:10,fontWeight:700,color:'#fff',background:novel.published?'var(--color-info)':'var(--color-text-faint)',padding:'2px 9px',borderRadius:4}}>{novel.published?'公開中':'下書き'}</span>
                   <span style={{fontSize:10,fontWeight:700,color:(novel as any).is_serial?'var(--color-success)':'var(--color-text-muted)',background:(novel as any).is_serial?'#e8f5e9':'#f5f5f5',border:`1px solid ${(novel as any).is_serial?'#a5d6a7':'#e0e0e0'}`,padding:'2px 9px',borderRadius:4}}>{(novel as any).is_serial?'連載中':'完結'}</span>
