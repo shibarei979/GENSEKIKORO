@@ -212,16 +212,32 @@ export default async function AnalyticsPage() {
         </div>
         {(deviceStats.mobilePv + deviceStats.desktopPv) > 0 && (
           <div style={{background:'var(--color-bg-card)',border:'1px solid var(--color-brand-border)',borderRadius:12,padding:'14px 18px',marginBottom:16}}>
-            <div style={{fontSize:13,fontWeight:700,color:'var(--color-text)',marginBottom:10}}>読者のデバイス</div>
-            <div style={{display:'flex',gap:20,flexWrap:'wrap',marginBottom:10}}>
-              <div style={{fontSize:13,color:'var(--color-text)'}}>📱 スマホ：<b>{deviceStats.mobileUsers}</b>人（{deviceStats.mobilePv.toLocaleString()} PV）</div>
-              <div style={{fontSize:13,color:'var(--color-text)'}}>💻 PC：<b>{deviceStats.desktopUsers}</b>人（{deviceStats.desktopPv.toLocaleString()} PV）</div>
-            </div>
-            <div style={{display:'flex',height:8,borderRadius:4,overflow:'hidden',background:'var(--color-bg)'}}>
-              <div style={{width:`${Math.round(deviceStats.mobilePv/(deviceStats.mobilePv+deviceStats.desktopPv)*100)}%`,background:'var(--color-brand)'}}/>
-              <div style={{flex:1,background:'var(--color-info)'}}/>
-            </div>
-            <div style={{fontSize:10.5,color:'var(--color-text-faint)',marginTop:6}}>※ デバイス情報は記録開始日以降のPVが対象です。人数はログイン読者のみ。</div>
+            <div style={{fontSize:13,fontWeight:700,color:'var(--color-text)',marginBottom:10}}>デバイス別アクセス</div>
+            <table style={{width:'100%',borderCollapse:'collapse',fontSize:13}}>
+              <thead>
+                <tr style={{background:'var(--color-bg)'}}>
+                  <th style={{padding:'8px 10px',border:'1px solid var(--color-brand-light)',fontSize:11,color:'var(--color-text-muted)',fontWeight:600,textAlign:'left'}}></th>
+                  <th style={{padding:'8px 10px',border:'1px solid var(--color-brand-light)',fontSize:11,color:'var(--color-text-muted)',fontWeight:600}}>💻 PC</th>
+                  <th style={{padding:'8px 10px',border:'1px solid var(--color-brand-light)',fontSize:11,color:'var(--color-text-muted)',fontWeight:600}}>📱 スマホ</th>
+                  <th style={{padding:'8px 10px',border:'1px solid var(--color-brand-light)',fontSize:11,color:'var(--color-text-muted)',fontWeight:600}}>合計</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style={{padding:'8px 10px',border:'1px solid var(--color-brand-light)',fontSize:11,color:'var(--color-text-muted)'}}>ユーザー数</td>
+                  <td style={{padding:'8px 10px',border:'1px solid var(--color-brand-light)',textAlign:'center',fontWeight:700,color:'var(--color-text)'}}>{deviceStats.desktopUsers.toLocaleString()}人</td>
+                  <td style={{padding:'8px 10px',border:'1px solid var(--color-brand-light)',textAlign:'center',fontWeight:700,color:'var(--color-text)'}}>{deviceStats.mobileUsers.toLocaleString()}人</td>
+                  <td style={{padding:'8px 10px',border:'1px solid var(--color-brand-light)',textAlign:'center',fontWeight:700,color:'var(--color-brand)'}}>{(deviceStats.desktopUsers+deviceStats.mobileUsers).toLocaleString()}人</td>
+                </tr>
+                <tr>
+                  <td style={{padding:'8px 10px',border:'1px solid var(--color-brand-light)',fontSize:11,color:'var(--color-text-muted)'}}>PV</td>
+                  <td style={{padding:'8px 10px',border:'1px solid var(--color-brand-light)',textAlign:'center',fontWeight:700,color:'var(--color-text)'}}>{deviceStats.desktopPv.toLocaleString()}</td>
+                  <td style={{padding:'8px 10px',border:'1px solid var(--color-brand-light)',textAlign:'center',fontWeight:700,color:'var(--color-text)'}}>{deviceStats.mobilePv.toLocaleString()}</td>
+                  <td style={{padding:'8px 10px',border:'1px solid var(--color-brand-light)',textAlign:'center',fontWeight:700,color:'var(--color-brand)'}}>{(deviceStats.desktopPv+deviceStats.mobilePv).toLocaleString()}</td>
+                </tr>
+              </tbody>
+            </table>
+            <div style={{fontSize:10.5,color:'var(--color-text-faint)',marginTop:8}}>※ ユーザー数はログイン読者のユニーク数。PVは未ログイン含む。デバイス記録開始日以降のデータです。</div>
           </div>
         )}
         {novelStats.length === 0 ? (
