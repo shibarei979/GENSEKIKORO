@@ -86,6 +86,7 @@ export default function PostClient({ profile, userId }: Props) {
   const [importing, setImporting] = useState(false)
   const illustRef   = useRef(null as HTMLInputElement | null)
   const [illustFile, setIllustFile] = useState(null as File | null)
+  const [publishedInfo, setPublishedInfo] = useState(null as { novelId: string; title: string } | null)
   const [illustPreview, setIllustPreview] = useState('' as string)
   const [illustUploading, setIllustUploading] = useState(false)
   const [isMobile, setIsMobile] = useState(false)
@@ -535,7 +536,13 @@ export default function PostClient({ profile, userId }: Props) {
           await supabase.from('contest_entries').upsert(entries, { onConflict: 'contest_id,novel_id' })
         }
 
-        setTimeout(() => router.push(`/novel/${novelId}`), 1500)
+        if (editMode) {
+          setTimeout(() => router.push(`/novel/${novelId}`), 1500)
+        } else {
+          const novelTitle2 = mode === 'existing' ? (myNovels.find(n => n.id === selectedNovelId)?.title || '') : title
+          setLoading(false)
+          setPublishedInfo({ novelId: novelId as string, title: novelTitle2 || epTitle.trim() })
+        }
       } else {
         setDraftSaved(true)
         setToast('下書き保存しました！反映まで1分前後かかります')
@@ -1093,6 +1100,9 @@ export default function PostClient({ profile, userId }: Props) {
 
               <div style={fg}>
                 <label style={lbl}>挿絵（本文の上に表示）</label>
+                <div style={{fontSize:11,color:'#b45309',background:'#fef3c7',border:'1px solid #fde68a',borderRadius:8,padding:'8px 12px',marginBottom:8,lineHeight:1.6}}>
+                  ⚠ 挿絵にAI生成画像は使用しないでください。ご自身で描いた絵、または権利上問題のない画像のみアップロードできます。
+                </div>
                 <div style={{border:'2px dashed var(--color-brand-border)',borderRadius:10,padding:'16px',textAlign:'center',background:'var(--color-bg)',cursor:'pointer'}}
                   onClick={()=>illustRef.current?.click()}
                   onDragOver={e=>{e.preventDefault();e.currentTarget.style.borderColor='var(--color-brand)'}}
@@ -1380,6 +1390,27 @@ export default function PostClient({ profile, userId }: Props) {
       {toast && (
         <div style={{position:'fixed',bottom: isMobile ? 80 : 24,right:24,background:'var(--color-brand)',color:'var(--color-bg-card)',padding:'12px 20px',borderRadius:12,fontSize:14,fontWeight:600,zIndex:9999,boxShadow:'0 4px 16px rgba(242,106,33,.35)'}}>
           {toast}
+        </div>
+      )}
+      {publishedInfo && (
+        <div style={{position:'fixed',inset:0,background:'rgba(0,0,0,0.5)',zIndex:10000,display:'flex',alignItems:'center',justifyContent:'center',padding:16}}>
+          <div style={{background:'var(--color-bg-card)',borderRadius:16,padding:'28px 24px',maxWidth:420,width:'100%',textAlign:'center'}}>
+            <div style={{fontSize:40,marginBottom:10}}>🎉</div>
+            <div style={{fontSize:17,fontWeight:700,color:'var(--color-text)',marginBottom:6}}>投稿しました！</div>
+            <div style={{fontSize:13,color:'var(--color-text-muted)',marginBottom:20,lineHeight:1.6}}>Xでシェアすると、より多くの読者に届きます</div>
+            <button onClick={()=>{
+                const url = `${window.location.origin}/novel/${publishedInfo.novelId}`
+                const text = `「${publishedInfo.title}」を投稿しました！\n#原石航路\n`
+                window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(url)}`,'_blank','noopener,noreferrer')
+              }}
+              style={{display:'block',width:'100%',fontSize:14,fontWeight:700,color:'#fff',background:'#000',border:'none',borderRadius:10,padding:'12px',cursor:'pointer',marginBottom:10}}>
+              𝕏 でポストする
+            </button>
+            <button onClick={()=>router.push(`/novel/${publishedInfo.novelId}`)}
+              style={{display:'block',width:'100%',fontSize:13,fontWeight:600,color:'var(--color-brand)',background:'none',border:'1px solid var(--color-brand-border)',borderRadius:10,padding:'11px',cursor:'pointer'}}>
+              作品ページを見る
+            </button>
+          </div>
         </div>
       )}
     </div>
