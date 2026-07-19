@@ -311,7 +311,6 @@ export default async function RankingPage({ searchParams }: Props) {
   const genres = ['全て','異世界','ファンタジー','SF','恋愛','学園','ミステリー','ホラー','歴史・時代','日常','アクション','コメディ','その他']
   const typeOptions   = [{ value:'全て',label:'全て' },{ value:'長編',label:'長編' },{ value:'短編',label:'短編' }]
   const serialOptions = [{ value:'all',label:'すべて' },{ value:'serial',label:'連載中' },{ value:'complete',label:'完結' },{ value:'new',label:'新作（1ヶ月以内）' }]
-  const genreEmojis: Record<string,string> = { '全て':'📚','異世界':'🌍','ファンタジー':'⚔️','SF':'🚀','恋愛':'💕','学園':'🏫','ミステリー':'🔍','ホラー':'👻','歴史・時代':'🏯','日常':'☕','アクション':'💥','コメディ':'😆','その他':'📖' }
 
   function buildUrl(p: string, t: string, s: string, pg = 1, ai = aiMode, g = genre) {
     return `/ranking?period=${p}&type=${encodeURIComponent(t)}&serial=${s}&genre=${encodeURIComponent(g)}&ai=${ai}&page=${pg}`
@@ -364,12 +363,13 @@ export default async function RankingPage({ searchParams }: Props) {
             <div style={{display:'flex',alignItems:'flex-start',gap:10,marginBottom:10,flexWrap:'wrap'}}>
               <div style={{fontSize:11,color:'var(--color-text-muted)',fontWeight:600,minWidth:60,flexShrink:0,paddingTop:5,lineHeight:1.3}}>特集</div>
               <div style={{display:'flex',gap:6,flexWrap:'wrap',alignItems:'center',flex:1,minWidth:0}}>
-                <Link href={buildUrl(period==='rising'?'weekly':period,novelType,serial)} className={pillClass(period!=='rising')} style={pill(period!=='rising')}>総合</Link>
+                <Link href={buildUrl(['rising','newbie_focus'].includes(period)?'weekly':period,novelType,serial)} className={pillClass(!['rising','newbie_focus'].includes(period))} style={pill(!['rising','newbie_focus'].includes(period))}>総合</Link>
                 <Link href={buildUrl('rising',novelType,serial)} className={pillClass(period==='rising')} style={pill(period==='rising')}>注目度</Link>
+                <Link href={buildUrl('newbie_focus',novelType,serial)} className={pillClass(period==='newbie_focus')} style={pill(period==='newbie_focus')}>新人注目</Link>
                 <span style={{width:1,height:18,background:'var(--color-brand-border)',margin:'0 4px',flexShrink:0}}/>
                 {typeOptions.map(o => (
                   <Link key={o.value} href={buildUrl(period,o.value,serial)} className={pillClass(novelType===o.value)} style={pill(novelType===o.value,true)}>
-                    {o.value==='全て'?'長さ:全て':o.label}
+                    {o.label}
                   </Link>
                 ))}
                 {profile?.show_ai_works !== false && (
@@ -384,19 +384,21 @@ export default async function RankingPage({ searchParams }: Props) {
             {/* ジャンル：気分で探す風のボタン */}
             <div style={{display:'flex',alignItems:'flex-start',gap:10,marginBottom:10}}>
               <div style={{fontSize:11,color:'var(--color-text-muted)',fontWeight:600,minWidth:60,flexShrink:0,paddingTop:8,lineHeight:1.3}}>ジャンル</div>
-              <div style={{display:'flex',gap:6,flexWrap:'wrap',flex:1,minWidth:0}}>
+              <div style={{overflowX:'auto',msOverflowStyle:'none',scrollbarWidth:'none',flex:1,minWidth:0} as any}>
+                <div style={{display:'flex',gap:6,flexWrap:'nowrap'}}>
                 {genres.map(g => (
                   <Link key={g} href={buildUrl(period,novelType,serial,1,aiMode,g)}
                     style={{
-                      display:'inline-flex',alignItems:'center',gap:4,
+                      display:'inline-flex',alignItems:'center',gap:4,flexShrink:0,whiteSpace:'nowrap',
                       padding:'6px 12px',borderRadius:10,fontSize:12,fontWeight:600,textDecoration:'none',
                       background: genre===g ? 'var(--color-brand)' : 'var(--color-bg-card)',
                       color: genre===g ? 'var(--color-bg-card)' : 'var(--color-text)',
                       border: `1.5px solid ${genre===g ? 'var(--color-brand)' : 'var(--color-brand-border)'}`,
                     }}>
-                    <span style={{fontSize:13}}>{genreEmojis[g]||'📖'}</span>{g}
+                    {g}
                   </Link>
                 ))}
+                </div>
               </div>
             </div>
             {/* 絞り込み */}
