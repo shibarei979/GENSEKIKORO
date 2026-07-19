@@ -78,26 +78,12 @@ export default function FirstCelebration({ userId, celebratedLike, celebratedDis
           boxShadow: isDiscover ? '0 8px 40px rgba(242,106,33,0.35)' : '0 8px 30px rgba(0,0,0,0.15)',
           transform: closing ? 'scale(0.95)' : 'scale(1)', transition: 'transform .25s',
         }}>
-        <div style={{ fontSize: 46, marginBottom: 8, lineHeight: 1 }}>{isDiscover ? '💎✨' : '🎉'}</div>
-        <div style={{ fontSize: 17, fontWeight: 800, color: isDiscover ? 'var(--color-brand)' : 'var(--color-text)', marginBottom: 8, lineHeight: 1.5 }}>
-          {isDiscover ? 'あなたの作品が発掘されました！' : 'はじめての いいね が届きました！'}
-        </div>
-        <div style={{ fontSize: 13, color: 'var(--color-text-muted)', lineHeight: 1.8, marginBottom: 18 }}>
-          {isDiscover ? (
-            <>
-              {celebration.fromName ? `${celebration.fromName}さんが、` : '読者が、'}あなたの作品を「原石」として見つけ、
-              推薦してくれました。<br/>物語が、誰かの心に届いた証です。
-            </>
-          ) : (
-            <>
-              {celebration.fromName ? `${celebration.fromName}さんから、` : ''}最初のいいねが届きました。<br/>
-              あなたの物語を読んだ人が、確かにいます。
-            </>
-          )}
+        <div style={{ fontSize: 17, fontWeight: 800, color: isDiscover ? 'var(--color-brand)' : 'var(--color-text)', marginBottom: 18, lineHeight: 1.5 }}>
+          {isDiscover ? 'あなたの作品が拡散されました！' : 'はじめての いいね が届きました！'}
         </div>
         <button onClick={close}
-          style={{ fontSize: 13, fontWeight: 700, color: '#fff', background: 'var(--color-brand)', border: 'none', borderRadius: 12, padding: '11px 32px', cursor: 'pointer' }}>
-          {isDiscover ? 'これからも書き続ける' : 'うれしい！'}
+          style={{ fontSize: 13, fontWeight: 700, color: '#fff', background: 'var(--color-brand)', border: 'none', borderRadius: 12, padding: '10px 32px', cursor: 'pointer' }}>
+          閉じる
         </button>
       </div>
     </div>
