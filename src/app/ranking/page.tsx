@@ -387,14 +387,7 @@ export default async function RankingPage({ searchParams }: Props) {
               <div style={{overflowX:'auto',msOverflowStyle:'none',scrollbarWidth:'none',flex:1,minWidth:0} as any}>
                 <div style={{display:'flex',gap:6,flexWrap:'nowrap'}}>
                 {genres.map(g => (
-                  <Link key={g} href={buildUrl(period,novelType,serial,1,aiMode,g)}
-                    style={{
-                      display:'inline-flex',alignItems:'center',gap:4,flexShrink:0,whiteSpace:'nowrap',
-                      padding:'6px 12px',borderRadius:10,fontSize:12,fontWeight:600,textDecoration:'none',
-                      background: genre===g ? 'var(--color-brand)' : 'var(--color-bg-card)',
-                      color: genre===g ? 'var(--color-bg-card)' : 'var(--color-text)',
-                      border: `1.5px solid ${genre===g ? 'var(--color-brand)' : 'var(--color-brand-border)'}`,
-                    }}>
+                  <Link key={g} href={buildUrl(period,novelType,serial,1,aiMode,g)} className={pillClass(genre===g)} style={pill(genre===g)}>
                     {g}
                   </Link>
                 ))}
