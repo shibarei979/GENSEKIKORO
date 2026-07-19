@@ -17,6 +17,8 @@ interface Entry { contest_id: string; novel_id: string }
 interface MissionStats {
   readCount?: number
   hasBio?: boolean
+  tweetCount?: number
+  seriesCount?: number
   likeCount: number; discoverCount: number; commentCount: number
   bookmarkCount: number; novelCount: number; episodeCount: number; followCount: number
 }
@@ -225,8 +227,9 @@ export default function MypageClient({
   const perPage    = isMobile ? 12 : 24
   const totalPages = Math.ceil(ALL_BADGES.length / perPage)
   const claimedSet = new Set(claimedMissionIds)
-  // 全15ミッション達成でミッションタブは卒業（非表示）
-  const allMissionsDone = claimedMissionIds.length >= 15
+  // 全ミッション達成でミッションタブは卒業（非表示）：書き手15・読み手10
+  const isWriterRole = (profile as any)?.user_role === 'writer' || missionStats.novelCount > 0
+  const allMissionsDone = claimedMissionIds.length >= (isWriterRole ? 15 : 10)
   const visibleTabs = TABS.filter(t => t.id !== 'mission' || !allMissionsDone)
   const published  = myNovels.filter(n => n.published)
   const drafts     = myNovels.filter(n => !n.published)
@@ -806,7 +809,7 @@ export default function MypageClient({
   // ===== ミッションタブ =====
   const MissionTab = () => (
     <div>
-      <MissionClient user={true} stats={missionStats} initialClaimedIds={claimedMissionIds}/>
+      <MissionClient user={true} stats={missionStats} initialClaimedIds={claimedMissionIds} isWriter={isWriterRole}/>
     </div>
   )
 

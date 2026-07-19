@@ -12,20 +12,22 @@ export interface MissionStats {
   followCount: number
   readCount?: number
   hasBio?: boolean
+  tweetCount?: number
+  seriesCount?: number
 }
 
 interface Props {
   user: boolean
   stats: MissionStats
   initialClaimedIds: string[]
+  isWriter: boolean
 }
 
-// 初回15ミッション：サイト全体をめぐる構成。全達成でタブごと非公開になる
-export const MISSIONS = [
-  // 読み手の旅
+// 読み手10・書き手はさらに5個（計15）。全達成でタブごと非公開になる
+export const READER_MISSIONS = [
   { id: 'first-read',     label: 'はじめての読了',       desc: '作品を1話、最後まで読む',        goal: (s: MissionStats) => (s.readCount || 0) >= 1 },
-  { id: 'read-5',         label: '読書の habit',         desc: '5話読了する',                    goal: (s: MissionStats) => (s.readCount || 0) >= 5 },
-  { id: 'read-20',        label: '航海の常連',           desc: '20話読了する',                   goal: (s: MissionStats) => (s.readCount || 0) >= 20 },
+  { id: 'read-5',         label: '読書の習慣',           desc: '5話読了する',                    goal: (s: MissionStats) => (s.readCount || 0) >= 5 },
+  { id: 'first-follow',   label: '作家をフォロー',       desc: '気になる作家をフォローする',     goal: (s: MissionStats) => s.followCount >= 1 },
   { id: 'first-like',     label: 'はじめてのいいね',     desc: '作品にいいねを送る',             goal: (s: MissionStats) => s.likeCount >= 1 },
   { id: 'like-10',        label: '応援の達人',           desc: 'いいねを10回送る',               goal: (s: MissionStats) => s.likeCount >= 10 },
   { id: 'first-bookmark', label: 'はじめての保存',       desc: '気になる作品を保存する',         goal: (s: MissionStats) => s.bookmarkCount >= 1 },
@@ -33,15 +35,17 @@ export const MISSIONS = [
   { id: 'comment-5',      label: '感想の語り部',         desc: 'コメントを5件書く',              goal: (s: MissionStats) => s.commentCount >= 5 },
   { id: 'first-discover', label: 'はじめての発掘',       desc: '作品を発掘・拡散する',           goal: (s: MissionStats) => s.discoverCount >= 1 },
   { id: 'discover-3',     label: '原石ハンター',         desc: '3作品を発掘する',                goal: (s: MissionStats) => s.discoverCount >= 3 },
-  // 書き手の旅
+]
+export const WRITER_MISSIONS = [
   { id: 'profile-setup',  label: '自己紹介を書く',       desc: 'プロフィールに自己紹介を設定',   goal: (s: MissionStats) => !!s.hasBio },
-  { id: 'first-novel',    label: 'はじめての作品',       desc: '最初の作品を作る',               goal: (s: MissionStats) => s.novelCount >= 1 },
-  { id: 'first-episode',  label: 'はじめての投稿',       desc: '最初の話を投稿する',             goal: (s: MissionStats) => s.episodeCount >= 1 },
-  { id: 'episode-5',      label: '連載の一歩',           desc: '5話投稿する',                    goal: (s: MissionStats) => s.episodeCount >= 5 },
-  { id: 'episode-10',     label: '物語を紡ぐ人',         desc: '10話投稿する',                   goal: (s: MissionStats) => s.episodeCount >= 10 },
+  { id: 'first-episode',  label: '投稿する',             desc: '最初の話を投稿する',             goal: (s: MissionStats) => s.episodeCount >= 1 },
+  { id: 'episode-5',      label: '5回投稿する',          desc: '話を5回投稿する',                goal: (s: MissionStats) => s.episodeCount >= 5 },
+  { id: 'first-tweet',    label: 'つぶやく',             desc: 'つぶやきを投稿する',             goal: (s: MissionStats) => (s.tweetCount || 0) >= 1 },
+  { id: 'first-series',   label: 'シリーズを作る',       desc: '作品をまとめるシリーズを作成',   goal: (s: MissionStats) => (s.seriesCount || 0) >= 1 },
 ]
 
-export default function MissionClient({ user, stats, initialClaimedIds }: Props) {
+export default function MissionClient({ user, stats, initialClaimedIds, isWriter }: Props) {
+  const MISSIONS = isWriter ? [...READER_MISSIONS, ...WRITER_MISSIONS] : READER_MISSIONS
   const supabase = createClient()
   const [claimed, setClaimed] = useState(new Set(initialClaimedIds))
   const [claiming, setClaiming] = useState('')
