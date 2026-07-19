@@ -151,14 +151,15 @@ export default async function MypagePage() {
   }
 
   // ミッション用stats
-  let missionStats = { likeCount:0, discoverCount:0, commentCount:0, bookmarkCount:0, novelCount:0, episodeCount:0, followCount:0 }
-  const [likesM, discoversM, commentsM, bookmarksM, novelsCountM, followsCountM] = await Promise.all([
+  let missionStats = { likeCount:0, discoverCount:0, commentCount:0, bookmarkCount:0, novelCount:0, episodeCount:0, followCount:0, readCount:0, hasBio:false }
+  const [likesM, discoversM, commentsM, bookmarksM, novelsCountM, followsCountM, readsM] = await Promise.all([
     supabase.from('likes').select('*',{count:'exact',head:true}).eq('user_id',user.id),
     supabase.from('discovers').select('*',{count:'exact',head:true}).eq('user_id',user.id),
     supabase.from('comments').select('*',{count:'exact',head:true}).eq('user_id',user.id),
     supabase.from('bookmarks').select('*',{count:'exact',head:true}).eq('user_id',user.id),
     supabase.from('novels').select('*',{count:'exact',head:true}).eq('author_id',user.id).eq('published',true),
     supabase.from('follows').select('*',{count:'exact',head:true}).eq('follower_id',user.id),
+    supabase.from('read_episodes').select('*',{count:'exact',head:true}).eq('user_id',user.id),
   ])
   const myNovelIds2 = (await supabase.from('novels').select('id').eq('author_id',user.id)).data?.map((n:any)=>n.id)||[]
   let episodeCount2 = 0
@@ -171,6 +172,8 @@ export default async function MypagePage() {
     commentCount: commentsM.count||0, bookmarkCount: bookmarksM.count||0,
     novelCount: novelsCountM.count||0, episodeCount: episodeCount2,
     followCount: followsCountM.count||0,
+    readCount: readsM.count||0,
+    hasBio: !!(profile?.bio && profile.bio.trim().length > 0),
   }
 
   const defaultProfile = {

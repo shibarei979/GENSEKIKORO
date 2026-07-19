@@ -15,6 +15,8 @@ import ChapterEditModal from './ChapterEditModal'
 interface Contest { id: string; title: string; deadline: string | null; is_site_contest: boolean }
 interface Entry { contest_id: string; novel_id: string }
 interface MissionStats {
+  readCount?: number
+  hasBio?: boolean
   likeCount: number; discoverCount: number; commentCount: number
   bookmarkCount: number; novelCount: number; episodeCount: number; followCount: number
 }
@@ -223,6 +225,9 @@ export default function MypageClient({
   const perPage    = isMobile ? 12 : 24
   const totalPages = Math.ceil(ALL_BADGES.length / perPage)
   const claimedSet = new Set(claimedMissionIds)
+  // 全15ミッション達成でミッションタブは卒業（非表示）
+  const allMissionsDone = claimedMissionIds.length >= 15
+  const visibleTabs = TABS.filter(t => t.id !== 'mission' || !allMissionsDone)
   const published  = myNovels.filter(n => n.published)
   const drafts     = myNovels.filter(n => !n.published)
   const initial    = profile.display_name.slice(0,1)
@@ -1014,7 +1019,7 @@ export default function MypageClient({
           <>
             <div style={{background:'var(--color-bg-card)',borderBottom:'1px solid var(--color-brand-border)',overflowX:'auto',scrollbarWidth:'none' as any,position:'sticky',top:54,zIndex:10}}>
               <div style={{display:'flex',minWidth:'max-content'}}>
-                {TABS.map(tab => (
+                {visibleTabs.map(tab => (
                   <button key={tab.id} onClick={()=>handleTabChange(tab.id as Tab)}
                     style={{padding:'10px 14px',fontSize:12,fontWeight:activeTab===tab.id?700:400,color:activeTab===tab.id?'var(--color-brand)':'var(--color-text-muted)',background:'none',border:'none',cursor:'pointer',borderBottom:activeTab===tab.id?'2px solid var(--color-brand)':'2px solid transparent',whiteSpace:'nowrap' as const}}>
                     {tab.label}
@@ -1037,7 +1042,7 @@ export default function MypageClient({
           <div style={{display:'flex',minHeight:'calc(100vh - 60px)'}}>
             {/* 左サイドナビ */}
             <div style={{width:180,flexShrink:0,borderRight:'1px solid var(--color-brand-border)',padding:'24px 0',position:'sticky',top:60,height:'calc(100vh - 60px)',background:'var(--color-bg-card)'}}>
-              {TABS.map(tab => (
+              {visibleTabs.map(tab => (
                 <button key={tab.id} onClick={()=>handleTabChange(tab.id as Tab)}
                   style={{width:'100%',padding:'11px 24px',textAlign:'left' as const,fontSize:13,fontWeight:activeTab===tab.id?700:400,color:activeTab===tab.id?'var(--color-brand)':'var(--color-text-muted)',background:'none',border:'none',borderLeft:activeTab===tab.id?'3px solid var(--color-brand)':'3px solid transparent',cursor:'pointer',display:'block',marginBottom:2,transition:'all .12s'}}>
                   {tab.label}
