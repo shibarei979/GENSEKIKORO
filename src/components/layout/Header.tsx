@@ -7,6 +7,8 @@ import { createClient } from '@/lib/supabase/client'
 import SettingsModal from '@/components/SettingsModal'
 import FloatingMemo from '@/components/FloatingMemo'
 
+import FirstCelebration from '@/components/FirstCelebration'
+
 interface Props {
   profile?: { display_name: string; user_number?: number; icon_url?: string | null } | null
   user?: any
@@ -155,6 +157,7 @@ export default function Header({ profile, user, activeGenre }: Props) {
 
   return (
     <>
+      <FirstCelebration userId={user?.id || null} celebratedLike={!!(profile as any)?.celebrated_first_like} celebratedDiscover={!!(profile as any)?.celebrated_first_discover} />
       <header style={{
         background: scrolled ? 'rgba(255,255,255,0.88)' : 'var(--color-bg-card)',
         backdropFilter: scrolled ? 'blur(10px)' : 'none',
