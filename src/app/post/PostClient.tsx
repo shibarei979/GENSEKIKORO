@@ -591,6 +591,16 @@ export default function PostClient({ profile, userId }: Props) {
 
         {/* 編集：話選択 */}
         {editMode && (
+          <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',gap:10,flexWrap:'wrap',marginBottom:14,background:'var(--color-brand-light)',border:'1px solid var(--color-brand-border)',borderRadius:10,padding:'10px 14px'}}>
+            <div style={{fontSize:12.5,color:'var(--color-text)',fontWeight:600}}>作品情報・話の編集モード</div>
+            <button type="button" onClick={()=>{window.location.href=`/post?novel=${editNovelId}`}}
+              style={{fontSize:12.5,fontWeight:700,color:'#fff',background:'var(--color-brand)',border:'none',borderRadius:8,padding:'8px 16px',cursor:'pointer',display:'inline-flex',alignItems:'center',gap:6}}>
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+              作品設定を完了して話を書く
+            </button>
+          </div>
+        )}
+        {editMode && (
           <div style={sec}>
             <div style={sh}>編集する話を選択</div>
             <div style={{padding:'14px 18px'}}>
@@ -612,6 +622,12 @@ export default function PostClient({ profile, userId }: Props) {
                   </button>
                 ))}
                 {editEpisodes.length === 0 && <div style={{fontSize:12,color:'var(--color-text-faint)'}}>話がありません</div>}
+                <button type="button" onClick={()=>{window.location.href=`/post?novel=${editNovelId}`}}
+                  style={{padding:'10px 14px',borderRadius:8,textAlign:'center',cursor:'pointer',
+                    border:'1.5px dashed var(--color-brand)',background:'var(--color-bg-card)',
+                    fontSize:13,fontWeight:700,color:'var(--color-brand)'}}>
+                  ＋ 新しい話を書く
+                </button>
               </div>
             </div>
           </div>
