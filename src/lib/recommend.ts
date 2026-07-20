@@ -181,8 +181,8 @@ async function computeRecommendScores(): Promise<ScoredNovel[]> {
     // PV勢いブースト：直近72時間のPVが多いほど上昇（PV10≈×1.10 / PV100≈×1.20 / PV1000≈×1.30、上限1.35）
     const momentum = Math.min(1.35, 1 + Math.log10((recentPvMap[n.id] || 0) + 1) * 0.1)
 
-    // 完結ブースト：完結作品を大きく押し上げ（×1.6）
-    const completeBoost = n.is_serial === false ? 1.6 : 1.0
+    // 完結ブースト：完結作品を押し上げ（×1.21）
+    const completeBoost = n.is_serial === false ? 1.21 : 1.0
 
     const finalScore = score * freshness * trust * origBoost * awardBoost * momentum * completeBoost
 
