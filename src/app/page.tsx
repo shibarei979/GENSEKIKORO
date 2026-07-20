@@ -304,7 +304,7 @@ export default async function HomePage() {
     if (gemNovels.length >= 50) break
   }
   const gemIds = gemNovels.map((n: any) => n.id)
-  const discoverCommentMap: Record<string,{comment:string;display_name:string}[]> = {}
+  const discoverCommentMap: Record<string,{comment:string;display_name:string;obi?:any}[]> = {}
   if (gemIds.length > 0) {
     const { data: gemDiscovers } = await supabase
       .from('discovers').select('novel_id, comment, display_name')
@@ -313,6 +313,18 @@ export default async function HomePage() {
       if (!discoverCommentMap[d.novel_id]) discoverCommentMap[d.novel_id] = []
       if (discoverCommentMap[d.novel_id].length < 2)
         discoverCommentMap[d.novel_id].push({ comment: d.comment, display_name: d.display_name })
+    })
+
+    // 承認済みのドット絵帯（コメント欄表示ON）をテキスト推薦文と確率で混在させる
+    const { data: obiRows } = await supabase
+      .from('obi_dots').select('novel_id, dots')
+      .in('novel_id', gemIds).eq('approved', true).eq('show_in_comments', true)
+    obiRows?.forEach((o: any) => {
+      if (!discoverCommentMap[o.novel_id]) discoverCommentMap[o.novel_id] = []
+      const item = { comment: '', display_name: '', obi: o.dots }
+      // 50%で先頭（＝表示される）、50%で後ろ（＝テキストが表示される）
+      if (Math.random() < 0.5) discoverCommentMap[o.novel_id].unshift(item)
+      else discoverCommentMap[o.novel_id].push(item)
     })
   }
 

@@ -6,7 +6,7 @@ import { createClient } from '@/lib/supabase/client'
 export const OBI_SIZES = [
   { label: 'あらい', w: 24, h: 6 },
   { label: 'ふつう', w: 48, h: 12 },
-  { label: 'こまかい', w: 72, h: 18 },
+  { label: 'こまかい', w: 96, h: 24 },
 ]
 export const OBI_PALETTE = [
   '#ffffff', '#000000', '#f26a21', '#ffd166', '#ef476f', '#06d6a0', '#118ab2', '#073b4c',
