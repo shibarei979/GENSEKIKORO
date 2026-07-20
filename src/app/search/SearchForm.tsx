@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import RandomVoyageButton from '@/components/RandomVoyageButton'
 
-const GENRES_BASE = ['異世界','ファンタジー','SF','恋愛','学園','ミステリー','ホラー','歴史・時代','日常','アクション','コメディ','その他']
+const GENRES_BASE = ['オールジャンル', '異世界','ファンタジー','SF','恋愛','学園','ミステリー','ホラー','歴史・時代','日常','アクション','コメディ','その他']
 
 const MOODS = [
   { emoji: '💘', label: '胸きゅんしたい',      tags: ['恋愛','ときめき','胸キュン','片思い','ラブコメ'] },

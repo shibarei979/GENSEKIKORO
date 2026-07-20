@@ -428,12 +428,16 @@ export default async function NovelPage({ params }: { params: { id: string } }) 
                 <span style={{fontSize:11,color:'var(--color-text-faint)'}}>フォロワー {followerCount}</span>
               )}
             </div>
-            {novel.cover_url && (
-              <div style={{marginBottom:14,textAlign:'center'}}>
-                <img src={novel.cover_url} alt={`${novel.title} 表紙`}
-                  style={{maxWidth:'100%',maxHeight:320,borderRadius:10,border:'1px solid var(--color-brand-border)',objectFit:'contain'}}/>
-              </div>
-            )}
+            {(() => {
+              // 表紙が無い場合は1話目の挿絵をフォールバック表示
+              const coverImg = novel.cover_url || (episodesRes.data || []).find((e: any) => e.published !== false && e.illust_url)?.illust_url
+              return coverImg ? (
+                <div style={{marginBottom:14,textAlign:'center'}}>
+                  <img src={coverImg} alt={`${novel.title} 表紙`}
+                    style={{maxWidth:'100%',maxHeight:320,borderRadius:10,border:'1px solid var(--color-brand-border)',objectFit:'contain'}}/>
+                </div>
+              ) : null
+            })()}
             {novel.summary && (
               <div style={{fontSize:13,color:'var(--color-text)',lineHeight:1.85,padding:'10px 12px',background:'var(--color-bg)',borderRadius:8,borderLeft:'3px solid #f5a060',marginBottom:14,whiteSpace:'pre-wrap'}}>
                 {novel.summary}
