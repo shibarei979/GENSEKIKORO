@@ -925,6 +925,10 @@ export default function PostClient({ profile, userId }: Props) {
                     style={{fontSize:12,color:'var(--color-text-muted)',background:'none',border:'1px solid var(--color-brand-border)',borderRadius:8,padding:'6px 14px',cursor:'pointer'}}>
                     変更する
                   </button>
+                  <button type="button" onClick={()=>router.push(`/post?edit=${selectedNovelId}`)}
+                    style={{fontSize:12,color:'var(--color-brand)',background:'none',border:'1px solid var(--color-brand-border)',borderRadius:8,padding:'6px 14px',cursor:'pointer',fontWeight:600}}>
+                    タグ・作品設定を変更
+                  </button>
                 </div>
               ) : myNovels.length === 0 ? (
                 <div style={{textAlign:'center',padding:'20px',color:'var(--color-text-faint)',fontSize:13}}>公開中の連載作品がありません</div>

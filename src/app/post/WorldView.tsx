@@ -14,6 +14,7 @@ export default function WorldView({ novelId, userId }: Props) {
   const [editTitle, setEditTitle] = useState('')
   const [editBody, setEditBody] = useState('')
   const [saving, setSaving] = useState(false)
+  const [imgUploading, setImgUploading] = useState(false)
   const timer = useRef<NodeJS.Timeout | null>(null)
 
   useEffect(() => {
@@ -44,6 +45,31 @@ export default function WorldView({ novelId, userId }: Props) {
     await supabase.from('novel_memos').delete().eq('id', id)
     setItems(prev => prev.filter(i => i.id !== id))
     if (selected?.id === id) setSelected(null)
+  }
+
+  async function handleImageUpload(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0]
+    if (!file || !selected) return
+    if (file.size > 5 * 1024 * 1024) { alert('画像は5MB以内にしてください'); return }
+    setImgUploading(true)
+    const ext = file.name.split('.').pop() || 'jpg'
+    const path = `world/${novelId}/${Date.now()}.${ext}`
+    const { error } = await supabase.storage.from('illustrations').upload(path, file, { upsert: true })
+    if (!error) {
+      const { data } = supabase.storage.from('illustrations').getPublicUrl(path)
+      await supabase.from('novel_memos').update({ image_url: data.publicUrl }).eq('id', selected.id)
+      setSelected({ ...selected, image_url: data.publicUrl } as any)
+      setItems(prev => prev.map(it => it.id === selected.id ? { ...it, image_url: data.publicUrl } : it))
+    }
+    setImgUploading(false)
+    e.target.value = ''
+  }
+
+  async function handleImageRemove() {
+    if (!selected) return
+    await supabase.from('novel_memos').update({ image_url: null }).eq('id', selected.id)
+    setSelected({ ...selected, image_url: null } as any)
+    setItems(prev => prev.map(it => it.id === selected.id ? { ...it, image_url: null } : it))
   }
 
   return (
@@ -84,6 +110,21 @@ export default function WorldView({ novelId, userId }: Props) {
               style={{ flex: 1, border: 'none', fontSize: 15, fontWeight: 700, color: 'var(--color-text)', background: 'none', outline: 'none' }}/>
             <span style={{ fontSize: 10, color: saving ? 'var(--color-brand)' : 'var(--color-text-faint)' }}>{saving ? '保存中…' : '自動保存'}</span>
             <button onClick={() => handleDelete(selected.id)} style={{ background: 'none', border: 'none', color: 'var(--color-danger)', fontSize: 11, cursor: 'pointer' }}>削除</button>
+          </div>
+          <div style={{ padding: '10px 16px', borderBottom: '1px solid var(--color-brand-light)', flexShrink: 0 }}>
+            {(selected as any).image_url ? (
+              <div style={{ position: 'relative', display: 'inline-block' }}>
+                <img src={(selected as any).image_url} alt="" style={{ maxWidth: 220, maxHeight: 140, borderRadius: 8, border: '1px solid var(--color-brand-border)', display: 'block' }}/>
+                <button onClick={handleImageRemove}
+                  style={{ position: 'absolute', top: 4, right: 4, width: 20, height: 20, borderRadius: '50%', background: 'rgba(0,0,0,0.6)', color: '#fff', border: 'none', cursor: 'pointer', fontSize: 11, lineHeight: 1 }}>×</button>
+              </div>
+            ) : (
+              <label style={{ display: 'inline-flex', alignItems: 'center', gap: 5, fontSize: 11.5, color: 'var(--color-text-muted)', border: '1px dashed var(--color-brand-border)', borderRadius: 8, padding: '7px 14px', cursor: 'pointer' }}>
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+                {imgUploading ? 'アップロード中…' : '画像を追加（地図・資料など）'}
+                <input type="file" accept="image/*" onChange={handleImageUpload} style={{ display: 'none' }} disabled={imgUploading}/>
+              </label>
+            )}
           </div>
           <textarea value={editBody} onChange={e => { setEditBody(e.target.value); autoSave(editTitle, e.target.value) }}
             placeholder="世界観の設定を自由に記述..."
