@@ -18,6 +18,7 @@ import Header from '@/components/layout/Header'
 import Footer from '@/components/layout/Footer'
 import AdBanner from '@/components/layout/AdBanner'
 import NovelActions from './NovelActions'
+import ObiBelt from './ObiBelt'
 import ExportButton from './ExportButton'
 import { calcQualityScore } from '@/lib/qualityScore'
 import FollowButton from '@/components/FollowButton'
@@ -120,6 +121,14 @@ export default async function NovelPage({ params }: { params: { id: string } }) 
   const discoverCount = discoverCountRes.count
   const bookmarkCount = bookmarkCountRes.count
 
+  // ドット絵帯：承認済み・自分の帯・（作者なら）承認待ち
+  const isAuthorViewing = !!user && user.id === novel.author_id
+  const [obiApprovedRes, obiMineRes, obiPendingRes] = await Promise.all([
+    supabase.from('obi_dots').select('id, creator_id, creator_name, dots, show_in_comments, approved').eq('novel_id', params.id).eq('approved', true).limit(30),
+    user ? supabase.from('obi_dots').select('id, creator_id, creator_name, dots, show_in_comments, approved').eq('novel_id', params.id).eq('creator_id', user.id).maybeSingle() : Promise.resolve({ data: null } as any),
+    isAuthorViewing ? supabase.from('obi_dots').select('id, creator_id, creator_name, dots, show_in_comments, approved').eq('novel_id', params.id).eq('approved', false).limit(30) : Promise.resolve({ data: [] } as any),
+  ])
+
   let liked = false, discovered = false, bookmarked = false
   if (user) {
     const [l, d, b] = await Promise.all([
@@ -131,6 +140,14 @@ export default async function NovelPage({ params }: { params: { id: string } }) 
     discovered = !!d.data
     bookmarked = !!b.data
   }
+
+  // ドット絵帯：承認済み・自分の帯・（作者なら）承認待ち
+  const isAuthorViewing = !!user && user.id === novel.author_id
+  const [obiApprovedRes, obiMineRes, obiPendingRes] = await Promise.all([
+    supabase.from('obi_dots').select('id, creator_id, creator_name, dots, show_in_comments, approved').eq('novel_id', params.id).eq('approved', true).limit(30),
+    user ? supabase.from('obi_dots').select('id, creator_id, creator_name, dots, show_in_comments, approved').eq('novel_id', params.id).eq('creator_id', user.id).maybeSingle() : Promise.resolve({ data: null } as any),
+    isAuthorViewing ? supabase.from('obi_dots').select('id, creator_id, creator_name, dots, show_in_comments, approved').eq('novel_id', params.id).eq('approved', false) : Promise.resolve({ data: [] } as any),
+  ])
 
   const author = authorProfile as any
 
@@ -438,6 +455,27 @@ export default async function NovelPage({ params }: { params: { id: string } }) 
                 </div>
               ) : null
             })()}
+            <ObiBelt
+              novelId={params.id}
+              userId={user?.id || null}
+              isAuthor={isAuthorViewing}
+              hasDiscovered={discovered}
+              myName={profile?.display_name || null}
+              approvedObis={(obiApprovedRes.data || []) as any}
+              myObi={(obiMineRes.data || null) as any}
+              pendingObis={(obiPendingRes.data || []) as any}
+            />
+            <ObiBelt
+              novelId={params.id}
+              novelTitle={novel.title}
+              userId={user?.id || null}
+              userName={(profile as any)?.display_name || ''}
+              isAuthor={isAuthorViewing}
+              hasDiscovered={discovered}
+              approvedObis={(obiApprovedRes.data || []) as any}
+              myObi={(obiMineRes.data || null) as any}
+              pendingObis={(obiPendingRes.data || []) as any}
+            />
             {novel.summary && (
               <div style={{fontSize:13,color:'var(--color-text)',lineHeight:1.85,padding:'10px 12px',background:'var(--color-bg)',borderRadius:8,borderLeft:'3px solid #f5a060',marginBottom:14,whiteSpace:'pre-wrap'}}>
                 {novel.summary}
