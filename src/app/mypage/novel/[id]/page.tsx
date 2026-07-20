@@ -29,6 +29,15 @@ export default async function NovelManagePage({ params }: { params: { id: string
   const episodes = epsData || []
   const epIds = episodes.map((e: any) => e.id)
 
+  // ランキング記録：最高順位と現在の順位
+  const [bestRankRes, currentRankRes] = await Promise.all([
+    supabase.from('ranking_history').select('period, rank').eq('novel_id', params.id).order('rank', { ascending: true }).limit(1),
+    supabase.from('ranking_history').select('period, rank').eq('novel_id', params.id).gt('to_time', new Date().toISOString()).order('rank', { ascending: true }).limit(1),
+  ])
+  const PERIOD_LABEL: Record<string, string> = { daily: '日間', weekly: '週間', monthly: '月間', quarterly: '四半期', yearly: '年間', all: '累計' }
+  const bestRank = bestRankRes.data?.[0] || null
+  const currentRank = currentRankRes.data?.[0] || null
+
   // 統計を並列取得（PVはpage_viewsから集計）
   const [likeRes, bookmarkRes, discoverRes, commentRes, pvRes] = await Promise.all([
     supabase.from('likes').select('*', { count: 'exact', head: true }).eq('novel_id', params.id),
