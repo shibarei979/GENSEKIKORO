@@ -3,12 +3,13 @@ import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import Header from '@/components/layout/Header'
 import Footer from '@/components/layout/Footer'
+import FeedbackReplyBox from './FeedbackReplyBox'
 
 export const dynamic = 'force-dynamic'
 
 // 感想・コメントページ：自作品へのコメント＋拡散（推薦文）を時系列で一覧
 // 既読管理：前回このページを開いた時刻（last_seen_comments_at）より新しいもの＝未読
-export default async function MyCommentsPage({ searchParams }: { searchParams: { tab?: string; kind?: string } }) {
+export default async function MyCommentsPage({ searchParams }: { searchParams: { tab?: string; kind?: string; seen?: string } }) {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/auth/login')
@@ -17,8 +18,11 @@ export default async function MyCommentsPage({ searchParams }: { searchParams: {
   const tab = searchParams.tab === 'read' ? 'read' : 'unread'
   const kind = ['comment', 'discover'].includes(searchParams.kind || '') ? searchParams.kind : 'all'
 
-  // 前回見た時刻（これ以降＝未読）。表示に使ってから現在時刻に更新する
-  const prevSeen = profile?.last_seen_comments_at || new Date(0).toISOString()
+  // 前回見た時刻（これ以降＝未読）。
+  // 初回アクセス時にDBを既読更新し、以降のタブ・絞り込み操作では ?seen= で基準時刻を引き継ぐ
+  // （＝開いたときの未読は、絞り込みを切り替えても未読のまま見え続け、次の訪問から既読になる）
+  const seenParam = searchParams.seen || ''
+  const prevSeen = seenParam || profile?.last_seen_comments_at || new Date(0).toISOString()
 
   // 自分の作品
   const { data: myNovels } = await supabase.from('novels').select('id, title').eq('author_id', user.id)
@@ -51,6 +55,7 @@ export default async function MyCommentsPage({ searchParams }: { searchParams: {
       key: `c-${c.id}`,
       novelId: c.novel_id,
       episodeId: c.episode_id,
+      fromUserId: c.user_id,
       name: nameMap[c.user_id] || '読者',
       body: c.body,
       rating: c.rating,
@@ -62,6 +67,7 @@ export default async function MyCommentsPage({ searchParams }: { searchParams: {
       key: `d-${d.novel_id}-${d.created_at}-${i}`,
       novelId: d.novel_id,
       episodeId: null,
+      fromUserId: d.user_id,
       name: d.display_name || '読者',
       body: d.comment || '',
       rating: null,
@@ -82,8 +88,11 @@ export default async function MyCommentsPage({ searchParams }: { searchParams: {
   })
   const unreadCount = items.filter(it => it.created_at > prevSeen).length
 
-  // このページを開いたので既読時刻を更新（今回の未読は次回から既読になる）
-  await supabase.from('profiles').update({ last_seen_comments_at: new Date().toISOString() }).eq('user_id', user.id)
+  // 初回アクセス時のみ既読時刻を更新（今回の未読は次回の訪問から既読になる）
+  if (!seenParam) {
+    await supabase.from('profiles').update({ last_seen_comments_at: new Date().toISOString() }).eq('user_id', user.id)
+  }
+  const seenQ = `&seen=${encodeURIComponent(prevSeen)}`
 
   const fmt = (s: string) => {
     const d = new Date(s)
@@ -108,14 +117,14 @@ export default async function MyCommentsPage({ searchParams }: { searchParams: {
 
         {/* 未読/既読タブ */}
         <div style={{ display: 'flex', gap: 6, marginBottom: 10 }}>
-          <Link href={`/mypage/comments?tab=unread&kind=${kind}`} style={pill(tab === 'unread')}>未読{unreadCount > 0 ? `（${unreadCount}）` : ''}</Link>
-          <Link href={`/mypage/comments?tab=read&kind=${kind}`} style={pill(tab === 'read')}>既読</Link>
+          <Link href={`/mypage/comments?tab=unread&kind=${kind}${seenQ}`} style={pill(tab === 'unread')}>未読{unreadCount > 0 ? `（${unreadCount}）` : ''}</Link>
+          <Link href={`/mypage/comments?tab=read&kind=${kind}${seenQ}`} style={pill(tab === 'read')}>既読</Link>
         </div>
         {/* 種類絞り込み */}
         <div style={{ display: 'flex', gap: 6, marginBottom: 18 }}>
-          <Link href={`/mypage/comments?tab=${tab}&kind=all`} style={pill(kind === 'all')}>すべて</Link>
-          <Link href={`/mypage/comments?tab=${tab}&kind=comment`} style={pill(kind === 'comment')}>コメント</Link>
-          <Link href={`/mypage/comments?tab=${tab}&kind=discover`} style={pill(kind === 'discover')}>拡散</Link>
+          <Link href={`/mypage/comments?tab=${tab}&kind=all${seenQ}`} style={pill(kind === 'all')}>すべて</Link>
+          <Link href={`/mypage/comments?tab=${tab}&kind=comment${seenQ}`} style={pill(kind === 'comment')}>コメント</Link>
+          <Link href={`/mypage/comments?tab=${tab}&kind=discover${seenQ}`} style={pill(kind === 'discover')}>拡散</Link>
         </div>
 
         {filtered.length === 0 ? (
@@ -149,6 +158,17 @@ export default async function MyCommentsPage({ searchParams }: { searchParams: {
               )}
               {it.body && (
                 <div style={{ fontSize: 13.5, color: 'var(--color-text)', lineHeight: 1.7, whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}>{it.body}</div>
+              )}
+              {it.type === 'comment' && (
+                <FeedbackReplyBox
+                  parentCommentId={it.key.slice(2)}
+                  novelId={it.novelId}
+                  episodeId={it.episodeId}
+                  targetUserId={it.fromUserId || ''}
+                  targetName={it.name}
+                  myUserId={user.id}
+                  myName={profile?.display_name || ''}
+                />
               )}
             </div>
           ))
