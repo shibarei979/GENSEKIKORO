@@ -26,7 +26,7 @@ async function computeRecommendScores(): Promise<ScoredNovel[]> {
   // 候補作品（公開・全年齢・直近300件）
   const { data: novels } = await supabase
     .from('novels')
-    .select('id, title, genre, novel_type, author_id, summary, catchcopy, tags, created_at, originality_score, ai_usage')
+    .select('id, title, genre, novel_type, author_id, summary, catchcopy, tags, created_at, originality_score, ai_usage, is_serial')
     .eq('published', true).eq('is_r18', false).neq('genre', '官能')
     .order('created_at', { ascending: false }).limit(300)
   if (!novels || novels.length === 0) return []
@@ -64,6 +64,17 @@ async function computeRecommendScores(): Promise<ScoredNovel[]> {
       if (data) validRows = validRows.concat(data)
     }
   }
+  // 直近72時間のPV（勢い＝途中でPVが伸びた作品を押し上げる）
+  const recentPvMap: Record<string, number> = {}
+  const pvSince = new Date(now - 72 * 3600 * 1000).toISOString()
+  if (allEpIds.length > 0) {
+    for (let i = 0; i < allEpIds.length; i += 500) {
+      const chunk = allEpIds.slice(i, i + 500)
+      const { data } = await supabase.from('page_views').select('episode_id').in('episode_id', chunk).gt('created_at', pvSince)
+      data?.forEach((r: any) => { const nid = epToNovel[r.episode_id]; if (nid) recentPvMap[nid] = (recentPvMap[nid] || 0) + 1 })
+    }
+  }
+
   // 作品ごとの有効読者（distinct user）・最新話の有効読者・2話以上読んだ人
   const validUsers: Record<string, Set<string>> = {}
   const latestEpValid: Record<string, Set<string>> = {}
@@ -167,7 +178,13 @@ async function computeRecommendScores(): Promise<ScoredNovel[]> {
     // 受賞ブースト
     const awardBoost = boostMap[n.id] || 1.0
 
-    const finalScore = score * freshness * trust * origBoost * awardBoost
+    // PV勢いブースト：直近72時間のPVが多いほど上昇（PV10≈×1.10 / PV100≈×1.20 / PV1000≈×1.30、上限1.35）
+    const momentum = Math.min(1.35, 1 + Math.log10((recentPvMap[n.id] || 0) + 1) * 0.1)
+
+    // 完結ブースト：完結作品は安心して読めるため少し押し上げ
+    const completeBoost = n.is_serial === false ? 1.1 : 1.0
+
+    const finalScore = score * freshness * trust * origBoost * awardBoost * momentum * completeBoost
 
     // 最低読者保証：1〜3話=有効200人まで（最大7日）／4話〜=最新話が有効100人まで（最大5日）
     let inGuarantee = false

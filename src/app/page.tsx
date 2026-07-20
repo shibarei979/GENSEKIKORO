@@ -285,7 +285,7 @@ export default async function HomePage() {
     const gemUpdateBoost = epCount > 0 && epCount <= 3 ? 6 : 0
     return {
       ...n,
-      gemScore: (discoverMap[n.id]||0)*4 + (likeMap[n.id]||0)*1 + (commentCountMap[n.id]||0)*2 + Math.round((n.originality_score||0)/10) + gemUpdateBoost,
+      gemScore: (discoverMap[n.id]||0)*4 + (likeMap[n.id]||0)*1 + (commentCountMap[n.id]||0)*2 + Math.round((n.originality_score||0)/10) + gemUpdateBoost + (scoredAll.find(s=>s.id===n.id)?.finalScore||0)*20,
       discoverCount: discoverMap[n.id]||0,
       likeCount2: likeMap[n.id]||0,
       hideStats: hideStatsFor(n.created_at, likeMap[n.id] || 0),

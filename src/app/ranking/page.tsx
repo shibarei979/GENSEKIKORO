@@ -199,8 +199,26 @@ async function computeRanking(period: string, novelType: string, serial: string,
       starSumMap[nId] = (starSumMap[nId] || 0) + (val as number)
     })
 
+    // 期間内PVの集計（PVもランキングに貢献させる）
+    const periodHours: Record<string, number> = { daily: 24, weekly: 168, monthly: 720, quarterly: 2160, yearly: 8760 }
+    const pvCntMap: Record<string, number> = {}
+    {
+      const { data: candEps } = await supabase.from('episodes').select('id, novel_id').in('novel_id', candidateIds)
+      const epToNovelPv: Record<string, string> = {}
+      const candEpIds = (candEps || []).map((e: any) => { epToNovelPv[e.id] = e.novel_id; return e.id })
+      const hours = periodHours[period]
+      const pvSince = hours ? new Date(Date.now() - hours * 3600 * 1000).toISOString() : null
+      for (let i = 0; i < candEpIds.length; i += 500) {
+        const chunk = candEpIds.slice(i, i + 500)
+        let q: any = supabase.from('page_views').select('episode_id').in('episode_id', chunk)
+        if (pvSince) q = q.gt('created_at', pvSince)
+        const { data: pvRows } = await q
+        pvRows?.forEach((r: any) => { const nid = epToNovelPv[r.episode_id]; if (nid) pvCntMap[nid] = (pvCntMap[nid] || 0) + 1 })
+      }
+    }
+
     candidateIds.forEach((id: string) => {
-      pointMap[id] = (starSumMap[id]||0) * 1 + (likeCntMap[id]||0) * 2 + (bookmarkCntMap[id]||0) * 3
+      pointMap[id] = (starSumMap[id]||0) * 1 + (likeCntMap[id]||0) * 2 + (bookmarkCntMap[id]||0) * 3 + Math.round((pvCntMap[id]||0) * 0.2)
     })
   }
 
