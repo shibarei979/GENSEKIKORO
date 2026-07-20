@@ -89,7 +89,9 @@ export default async function NovelManagePage({ params }: { params: { id: string
             <div style={row}><span style={rowLabel}>話数</span><span style={rowValue}>{publishedEps.length}話{episodes.length !== publishedEps.length ? `（下書き${episodes.length - publishedEps.length}話）` : ''}</span></div>
             <div style={row}><span style={rowLabel}>投稿文字数</span><span style={rowValue}>{totalChars.toLocaleString()}文字</span></div>
             <div style={row}><span style={rowLabel}>初回掲載日</span><span style={rowValue}>{fmt(firstDate)}</span></div>
-            <div style={{ ...row, borderBottom: 'none' }}><span style={rowLabel}>最新掲載日</span><span style={rowValue}>{fmt(lastDate)}</span></div>
+            <div style={row}><span style={rowLabel}>最新掲載日</span><span style={rowValue}>{fmt(lastDate)}</span></div>
+            <div style={row}><span style={rowLabel}>現在の順位</span><span style={{ ...rowValue, fontWeight: currentRank ? 700 : 400, color: currentRank ? 'var(--color-brand)' : 'var(--color-text-muted)' }}>{currentRank ? `${currentRank.rank}位（総合・${PERIOD_LABEL[currentRank.period] || currentRank.period}）` : '圏外'}</span></div>
+            <div style={{ ...row, borderBottom: 'none' }}><span style={rowLabel}>最高順位</span><span style={rowValue}>{bestRank ? `${bestRank.rank}位（総合・${PERIOD_LABEL[bestRank.period] || bestRank.period}）` : '—'}</span></div>
           </div>
           <div style={{ ...secStyle, marginBottom: 0 }}>
             <div style={secHead}>読者の反応</div>

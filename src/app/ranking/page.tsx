@@ -230,7 +230,7 @@ async function computeRanking(period: string, novelType: string, serial: string,
       const admin: any = createSbClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.SUPABASE_SERVICE_ROLE_KEY)
       const now = new Date()
       const until = new Date(now.getTime() + 3 * 60 * 60 * 1000)
-      const rows = sorted.slice(0, 20).map((n: any, i: number) => ({
+      const rows = sorted.slice(0, 100).map((n: any, i: number) => ({
         novel_id: n.id,
         author_id: n.author_id,
         period,
