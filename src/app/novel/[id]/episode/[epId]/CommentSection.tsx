@@ -301,7 +301,7 @@ export default function CommentSection({ novelId, episodeId, userId, userName, u
         </div>
       ) : (
         sortedComments.map((c, i) => (
-          <div key={c.id} style={{ padding: '14px 16px', borderBottom: i < sortedComments.length - 1 ? '1px solid var(--color-brand-light)' : 'none', background: c.is_pinned ? 'var(--color-brand-light)' : 'transparent' }}>
+          <div key={c.id} style={{ padding: '14px 16px', margin: '0 12px 10px', border: `1px solid ${c.is_pinned ? 'var(--color-brand)' : 'var(--color-brand-border)'}`, borderRadius: 12, background: c.is_pinned ? 'var(--color-brand-light)' : 'var(--color-bg-card)' }}>
             <div style={{ display: 'flex', gap: 10 }}>
               {c.icon_url ? (
                 <img src={c.icon_url} alt="" style={{ width: 36, height: 36, borderRadius: '50%', objectFit: 'cover', flexShrink: 0 }} />
@@ -315,9 +315,15 @@ export default function CommentSection({ novelId, episodeId, userId, userName, u
                   <Link href={`/author/${c.user_id}`} style={{ fontSize: 13, fontWeight: 700, color: 'var(--color-text)', textDecoration: 'none' }}>{c.display_name}</Link>
                   {c.user_id === authorId && <span style={{ fontSize: 10, background: 'var(--color-brand)', color: '#fff', padding: '1px 6px', borderRadius: 3, fontWeight: 700 }}>作者</span>}
                   {c.is_pinned && <span style={{ fontSize: 10, background: 'var(--color-info-bg)', color: 'var(--color-info)', padding: '1px 6px', borderRadius: 3 }}>ピン留め</span>}
-                  <StarDisplay rating={c.rating} />
                   <span style={{ fontSize: 11, color: 'var(--color-text-faint)', marginLeft: 'auto' }}>{fmtDate(c.created_at)}</span>
                 </div>
+                {c.rating && c.rating >= 1 ? (
+                  <div style={{ marginBottom: 5 }}>
+                    {[1,2,3,4,5].map(s => (
+                      <span key={s} style={{ fontSize: 15, color: s <= (c.rating||0) ? '#f5a623' : 'var(--color-brand-border)', letterSpacing: 1 }}>★</span>
+                    ))}
+                  </div>
+                ) : null}
                 {c.quoted_text && (
                   <div style={{ fontSize: 12, color: '#8a5a3a', background: '#FFF6EC', border: '1px solid #f0d9c0', borderLeft: '3px solid var(--color-brand)', borderRadius: '2px 6px 6px 2px', padding: '6px 10px', lineHeight: 1.6, marginBottom: 6, whiteSpace: 'pre-wrap' }}>
                     <span style={{ fontSize: 10, color: 'var(--color-brand)', fontWeight: 700, marginRight: 4 }}>引用</span>
