@@ -449,16 +449,6 @@ export default async function NovelPage({ params }: { params: { id: string } }) 
             })()}
             <ObiBelt
               novelId={params.id}
-              userId={user?.id || null}
-              isAuthor={isAuthorViewing}
-              hasDiscovered={discovered}
-              myName={profile?.display_name || null}
-              approvedObis={(obiApprovedRes.data || []) as any}
-              myObi={(obiMineRes.data || null) as any}
-              pendingObis={(obiPendingRes.data || []) as any}
-            />
-            <ObiBelt
-              novelId={params.id}
               novelTitle={novel.title}
               userId={user?.id || null}
               userName={(profile as any)?.display_name || ''}
