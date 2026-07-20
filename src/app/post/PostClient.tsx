@@ -8,14 +8,9 @@ import Link from 'next/link'
 import Header from '@/components/layout/Header'
 import Footer from '@/components/layout/Footer'
 import MemoSidebar, { type View } from './MemoSidebar'
-import PlanView from './PlanView'
-import PlotView from './PlotView'
-import PlotMakerView from './PlotMakerView'
-import TimelineView from './TimelineView'
-import CharacterView from './CharacterView'
-import RelationView from './RelationView'
-import WorldView from './WorldView'
-import MemoView from './MemoView'
+import NoteCharacter from './NoteCharacter'
+import NotePlot from './NotePlot'
+import NoteWorld from './NoteWorld'
 
 
 const GENRES = ['異世界','ファンタジー','SF','恋愛','学園','ミステリー','ホラー','歴史・時代','日常','アクション','コメディ','官能','その他']
@@ -581,14 +576,9 @@ export default function PostClient({ profile, userId }: Props) {
         <div style={{flex:1,minWidth:0,overflowY:'auto',height:'calc(100vh - 60px)'}}>
 
         {/* ビュー切り替え */}
-        {currentView === 'plan' && currentNovelId && <PlanView novelId={currentNovelId} userId={userId||''}/>}
-        {currentView === 'plot' && currentNovelId && <PlotView novelId={currentNovelId} userId={userId||''}/>}
-        {currentView === 'plotmaker' && currentNovelId && <PlotMakerView novelId={currentNovelId} userId={userId||''}/>}
-        {currentView === 'timeline' && currentNovelId && <TimelineView novelId={currentNovelId} userId={userId||''}/>}
-        {currentView === 'character' && currentNovelId && <CharacterView novelId={currentNovelId} userId={userId||''}/>}
-        {currentView === 'relation' && currentNovelId && <RelationView novelId={currentNovelId} userId={userId||''}/>}
-        {currentView === 'world' && currentNovelId && <WorldView novelId={currentNovelId} userId={userId||''}/>}
-        {currentView === 'memo' && currentNovelId && <MemoView novelId={currentNovelId} userId={userId||''}/>}
+        {currentView === 'character' && currentNovelId && <NoteCharacter novelId={currentNovelId} userId={userId||''}/>}
+        {currentView === 'plot' && currentNovelId && <NotePlot novelId={currentNovelId} userId={userId||''}/>}
+        {currentView === 'world' && currentNovelId && <NoteWorld novelId={currentNovelId} userId={userId||''}/>}
         {(currentView !== 'writing' && !currentNovelId) && (
           <div style={{display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',height:'60vh',color:'var(--color-text-faint)',fontSize:14,gap:12}}>
             <div style={{fontSize:32}}></div>

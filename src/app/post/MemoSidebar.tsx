@@ -1,7 +1,7 @@
 'use client'
 import { useState } from 'react'
 
-export type View = 'writing' | 'plan' | 'plot' | 'timeline' | 'character' | 'relation' | 'world' | 'memo' | 'plotmaker'
+export type View = 'writing' | 'character' | 'plot' | 'world'
 
 interface Props {
   currentView: View
@@ -10,18 +10,13 @@ interface Props {
 }
 
 const MENU: { id: View; label: string; section: string; icon: string }[] = [
-  { id: 'plan',       label: '企画',         section: '企画',   icon: '' },
-  { id: 'plot',       label: 'プロット',     section: '構成',   icon: '' },
-  { id: 'plotmaker',  label: 'プロットメーカー', section: '構成', icon: '' },
-  { id: 'timeline',   label: '時系列',       section: '構成',   icon: '' },
-  { id: 'character',  label: '登場人物',     section: '資料',   icon: '' },
-  { id: 'relation',   label: '相関関係',     section: '資料',   icon: '' },
-  { id: 'world',      label: '世界観',       section: '資料',   icon: '' },
-  { id: 'memo',       label: 'メモ',         section: '資料',   icon: '' },
-  { id: 'writing',    label: '執筆',         section: '執筆',   icon: '' },
+  { id: 'writing',    label: '執筆',           section: '執筆',       icon: '' },
+  { id: 'character',  label: 'キャラクター',   section: '創作ノート', icon: '' },
+  { id: 'plot',       label: 'プロット',       section: '創作ノート', icon: '' },
+  { id: 'world',      label: '世界観・メモ',   section: '創作ノート', icon: '' },
 ]
 
-const SECTIONS = ['企画', '構成', '資料', '執筆']
+const SECTIONS = ['執筆', '創作ノート']
 
 export default function MemoSidebar({ currentView, onViewChange, novelTitle }: Props) {
   const [open, setOpen] = useState(true)
