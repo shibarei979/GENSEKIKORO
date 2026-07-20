@@ -73,7 +73,7 @@ const ALL_BADGES = [
   { id:'_slot2',      name:'？？？',                  color:'#94a3b8' },
 ]
 
-type Tab = 'mypage' | 'works' | 'bookmarks' | 'history' | 'tweet' | 'mission' | 'settings' | 'blockmute' | 'series'
+type Tab = 'mypage' | 'works' | 'bookmarks' | 'history' | 'tweet' | 'mission' | 'settings' | 'series'
 const TABS: { id: Tab; label: string }[] = [
   { id:'mypage',    label:'マイページ' },
   { id:'works',     label:'作品管理' },
@@ -83,7 +83,6 @@ const TABS: { id: Tab; label: string }[] = [
   { id:'tweet',     label:'つぶやき' },
   { id:'mission',   label:'ミッション' },
   { id:'settings',  label:'設定' },
-  { id:'blockmute', label:'ブロック・ミュート' },
 ]
 
 function FolderCreateModal({ onClose, onCreate, saving }: { onClose:()=>void; onCreate:(name:string)=>void; saving:boolean }) {
@@ -128,7 +127,7 @@ export default function MypageClient({
   const [activeTab, setActiveTab] = useState<Tab>(() => {
     if (typeof window !== 'undefined') {
       const hash = window.location.hash.replace('#', '') as Tab
-      const valid: Tab[] = ['mypage','works','bookmarks','history','tweet','mission','settings','blockmute','series']
+      const valid: Tab[] = ['mypage','works','bookmarks','history','tweet','mission','settings','series']
       if (valid.includes(hash)) return hash
     }
     return 'mypage'
@@ -1006,11 +1005,17 @@ export default function MypageClient({
           退会する
         </button>
       </div>
+
+      {/* ブロック・ミュート（設定内に統合） */}
+      <div style={{marginTop:24,background:'var(--color-bg)',border:'1px solid var(--color-brand-border)',borderRadius:12,padding:'16px'}}>
+        <div style={{fontSize:12,fontWeight:700,color:'var(--color-text-muted)',letterSpacing:'.05em',marginBottom:12}}>ブロック・ミュート</div>
+        <BlockMuteTab/>
+      </div>
     </div>
   )
 
   const tabContent: Record<Tab, React.ReactNode> = {
-    mypage:'', works:'', bookmarks:'', history:'', tweet:'', mission:'', settings:'', blockmute:'', series:'',
+    mypage:'', works:'', bookmarks:'', history:'', tweet:'', mission:'', settings:'', series:'',
   }
 
   return (
