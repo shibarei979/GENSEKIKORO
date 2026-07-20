@@ -223,6 +223,25 @@ async function computeRanking(period: string, novelType: string, serial: string,
       if (!lastUpdateMap[ep.novel_id] || ep.created_at > lastUpdateMap[ep.novel_id]) lastUpdateMap[ep.novel_id] = ep.created_at
     })
   }
+  // ランキング履歴の記録：総合（全フィルタ既定・1ページ目）のみ、上位20位を保存
+  // 3時間キャッシュのため、この計算は3時間に1回だけ走る
+  if (offset === 0 && genre === '全て' && novelType === '全て' && serial === 'all' && aiMode === 'human' && process.env.SUPABASE_SERVICE_ROLE_KEY) {
+    try {
+      const admin: any = createSbClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.SUPABASE_SERVICE_ROLE_KEY)
+      const now = new Date()
+      const until = new Date(now.getTime() + 3 * 60 * 60 * 1000)
+      const rows = sorted.slice(0, 20).map((n: any, i: number) => ({
+        novel_id: n.id,
+        author_id: n.author_id,
+        period,
+        rank: i + 1,
+        from_time: now.toISOString(),
+        to_time: until.toISOString(),
+      }))
+      if (rows.length > 0) await admin.from('ranking_history').insert(rows)
+    } catch (_) { /* 記録失敗はランキング表示に影響させない */ }
+  }
+
   const sevenDaysAgo = Date.now() - 7*24*60*60*1000
   return {
     total,

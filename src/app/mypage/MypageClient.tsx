@@ -33,6 +33,8 @@ interface Props {
   contests?: Contest[]
   initialEntries?: Entry[]
   claimedMissionIds?: string[]
+  unreadFeedback?: number
+  unreadRanking?: number
   historyItems?: any[]
   firstEpMap?: Record<string,string>
   charCountMap?: Record<string,number>
@@ -116,7 +118,7 @@ function FolderCreateModal({ onClose, onCreate, saving }: { onClose:()=>void; on
 export default function MypageClient({
   profile, novels: initialNovels, bookmarkedNovels,
   followingAuthors=[], followerCount=0, followingCount=0,
-  contests=[], initialEntries=[], claimedMissionIds=[],
+  contests=[], initialEntries=[], claimedMissionIds=[], unreadFeedback=0, unreadRanking=0,
   historyItems=[], firstEpMap={}, charCountMap={}, likeMap={},
   missionStats={ likeCount:0, discoverCount:0, commentCount:0, bookmarkCount:0, novelCount:0, episodeCount:0, followCount:0 },
   novelLikeMap={}, novelCommentMap={}, novelViewMap={}, novelEpCountMap={}, bmAuthorMap={},
@@ -532,6 +534,25 @@ export default function MypageClient({
             ダッシュボード
           </Link>
           <Link href="/post" style={{background:'var(--color-brand)',color:'#fff',fontSize:12,fontWeight:700,padding:'7px 16px',borderRadius:16,textDecoration:'none'}}>＋ 新しく投稿する</Link>
+        </div>
+        {/* 感想・ランキングの通知リンク */}
+        <div style={{display:'flex',flexDirection:'column',gap:8,margin:'14px 0 4px'}}>
+          <Link href="/mypage/comments" style={{display:'flex',alignItems:'center',justifyContent:'space-between',gap:8,background:'var(--color-bg-card)',border:`1px solid ${unreadFeedback>0?'#fecaca':'var(--color-brand-border)'}`,borderRadius:10,padding:'11px 16px',textDecoration:'none'}}>
+            <span style={{fontSize:13,fontWeight:600,color:'var(--color-text)'}}>感想・コメント</span>
+            {unreadFeedback>0 ? (
+              <span style={{fontSize:12,fontWeight:700,color:'#dc2626'}}>新しい感想が届いています（{unreadFeedback}）</span>
+            ) : (
+              <span style={{fontSize:12,color:'var(--color-text-faint)'}}>→</span>
+            )}
+          </Link>
+          <Link href="/mypage/ranking-history" style={{display:'flex',alignItems:'center',justifyContent:'space-between',gap:8,background:'var(--color-bg-card)',border:`1px solid ${unreadRanking>0?'#fecaca':'var(--color-brand-border)'}`,borderRadius:10,padding:'11px 16px',textDecoration:'none'}}>
+            <span style={{fontSize:13,fontWeight:600,color:'var(--color-text)'}}>ランキング履歴</span>
+            {unreadRanking>0 ? (
+              <span style={{fontSize:12,fontWeight:700,color:'#dc2626'}}>ランクインしました！（{unreadRanking}）</span>
+            ) : (
+              <span style={{fontSize:12,color:'var(--color-text-faint)'}}>→</span>
+            )}
+          </Link>
         </div>
       </div>
       {myNovels.length === 0 ? (
