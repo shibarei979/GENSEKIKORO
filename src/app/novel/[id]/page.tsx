@@ -141,14 +141,6 @@ export default async function NovelPage({ params }: { params: { id: string } }) 
     bookmarked = !!b.data
   }
 
-  // ドット絵帯：承認済み・自分の帯・（作者なら）承認待ち
-  const isAuthorViewing = !!user && user.id === novel.author_id
-  const [obiApprovedRes, obiMineRes, obiPendingRes] = await Promise.all([
-    supabase.from('obi_dots').select('id, creator_id, creator_name, dots, show_in_comments, approved').eq('novel_id', params.id).eq('approved', true).limit(30),
-    user ? supabase.from('obi_dots').select('id, creator_id, creator_name, dots, show_in_comments, approved').eq('novel_id', params.id).eq('creator_id', user.id).maybeSingle() : Promise.resolve({ data: null } as any),
-    isAuthorViewing ? supabase.from('obi_dots').select('id, creator_id, creator_name, dots, show_in_comments, approved').eq('novel_id', params.id).eq('approved', false) : Promise.resolve({ data: [] } as any),
-  ])
-
   const author = authorProfile as any
 
   let isFollowing = false
