@@ -1,5 +1,5 @@
 'use client'
-import { useState, useRef } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import { createClient } from '@/lib/supabase/client'
 
 // ドット絵帯：発掘者がドット絵で「推し帯」を作り、作者の承認後、ホームの読者の声に表示される
@@ -105,11 +105,18 @@ export default function ObiBelt({ novelId, novelTitle, userId, userName, isAutho
     setPending(prev => prev.filter(o => o.id !== id))
   }
 
-  const hasAny = (isAuthor && pending.length > 0) || (hasDiscovered && userId && !isAuthor)
-  if (!hasAny) return null
+  // 拡散モーダルの「ドット絵の帯で推薦する」から開かれる
+  useEffect(() => {
+    function onOpen() { if (userId && !isAuthor) setShowEditor(true) }
+    window.addEventListener('open-obi-editor', onOpen)
+    return () => window.removeEventListener('open-obi-editor', onOpen)
+  }, [userId, isAuthor])
+
+  const hasButtons = (isAuthor && pending.length > 0) || (hasDiscovered && userId && !isAuthor)
+  if (!hasButtons && !userId) return null
 
   return (
-    <div style={{ marginBottom: 14 }}>
+    <div style={{ marginBottom: hasButtons ? 14 : 0 }}>
       <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
         {/* 発掘者：帯を作る */}
         {hasDiscovered && userId && !isAuthor && (

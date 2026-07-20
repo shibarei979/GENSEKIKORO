@@ -157,6 +157,36 @@ export default function NovelActions({ novelId, userId, authorId, novelTitle, is
     }
   }
 
+  // ドット絵の帯で推薦：推薦文なしで拡散を確定し、帯エディタを開く
+  async function submitObiDiscover() {
+    if (!userId || submitting) return
+    const today = new Date().toISOString().slice(0, 10)
+    const { count } = await supabase.from('novel_shares').select('id', { count: 'exact', head: true })
+      .eq('user_id', userId).eq('shared_at', today)
+    if ((count || 0) >= DAILY_LIMIT) {
+      alert(`拡散は1日${DAILY_LIMIT}回までです。明日またご利用ください。`)
+      setShowComment(false); setComment('')
+      return
+    }
+    setSubmitting(true)
+    await supabase.from('discovers').insert({
+      novel_id: novelId, user_id: userId, comment: null,
+      display_name: userDisplayName || '', is_pending: false,
+    })
+    await supabase.from('novel_shares').insert({ novel_id: novelId, user_id: userId })
+    setTodayShares(c => c + 1)
+    setDiscovered(true)
+    setDiscovers(c => c + 1)
+    setShowComment(false); setComment(''); setSubmitting(false)
+    if (authorId && userId !== authorId) {
+      fetch('/api/notify', { method:'POST', headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({ user_id: authorId, type:'discover',
+          message: `${userDisplayName||'読者'}さんが「${novelTitle||'作品'}」を発掘・拡散しました`, link: `/novel/${novelId}` }) })
+    }
+    // 帯エディタを開く（ObiBeltが受け取る）
+    window.dispatchEvent(new CustomEvent('open-obi-editor'))
+  }
+
   function handleXShare() {
     const url = `${window.location.origin}/novel/${novelId}`
     const text = `「${novelTitle||'作品'}」\n#原石航路 #ライトノベル\n`
@@ -229,6 +259,11 @@ export default function NovelActions({ novelId, userId, authorId, novelTitle, is
             style={{width:'100%',padding:'10px 12px',border:'1.5px solid #c4b5fd',borderRadius:8,
               fontSize:13,resize:'none',outline:'none',fontFamily:'inherit',boxSizing:'border-box',
               background:'var(--color-bg-card)',lineHeight:1.7}}/>
+          <button onClick={submitObiDiscover} disabled={submitting}
+            style={{width:'100%',marginTop:8,padding:'9px 12px',border:'1.5px dashed var(--color-brand)',borderRadius:10,
+              background:'var(--color-bg-card)',color:'var(--color-brand)',fontSize:12,fontWeight:700,cursor:'pointer',opacity:submitting?0.5:1}}>
+            文字のかわりに、ドット絵の帯で推薦する
+          </button>
           <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginTop:8,flexWrap:'wrap',gap:8}}>
             <span style={{fontSize:11,color:'var(--color-text-muted)'}}>{comment.length}/200文字</span>
             <div style={{display:'flex',gap:8}}>
