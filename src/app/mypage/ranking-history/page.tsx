@@ -3,6 +3,7 @@ import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import Header from '@/components/layout/Header'
 import Footer from '@/components/layout/Footer'
+import MarkReadButton from '../comments/MarkReadButton'
 
 export const dynamic = 'force-dynamic'
 
@@ -17,7 +18,8 @@ export default async function RankingHistoryPage() {
   if (!user) redirect('/auth/login')
 
   const { data: profile } = await supabase.from('profiles').select('*').eq('user_id', user.id).single()
-  const prevSeen = profile?.last_seen_ranking_at || new Date(0).toISOString()
+  const { data: readRows } = await supabase.from('read_feedbacks').select('item_key').eq('user_id', user.id).limit(2000)
+  const readSet = new Set((readRows || []).map((r: any) => r.item_key))
 
   const { data: history } = await supabase
     .from('ranking_history')
@@ -34,8 +36,6 @@ export default async function RankingHistoryPage() {
     novels?.forEach((n: any) => { titleMap[n.id] = n.title })
   }
 
-  // 既読時刻を更新
-  await supabase.from('profiles').update({ last_seen_ranking_at: new Date().toISOString() }).eq('user_id', user.id)
 
   const fmtRange = (from: string, to: string) => {
     const f = new Date(from), t = new Date(to)
@@ -60,7 +60,8 @@ export default async function RankingHistoryPage() {
           </div>
         ) : (
           history.map((h: any) => {
-            const isNew = h.created_at > prevSeen
+            const itemKey = `r-${h.id}`
+            const isNew = !readSet.has(itemKey)
             return (
               <div key={h.id} style={{ display: 'flex', alignItems: 'center', gap: 12, background: 'var(--color-bg-card)', border: `1px solid ${isNew ? 'var(--color-brand)' : 'var(--color-brand-border)'}`, borderRadius: 12, padding: '12px 16px', marginBottom: 9 }}>
                 <div style={{ flexShrink: 0, width: 52, textAlign: 'center' }}>
@@ -77,6 +78,7 @@ export default async function RankingHistoryPage() {
                     {fmtRange(h.from_time, h.to_time)}　{h.rank}位（総合・{PERIOD_LABEL[h.period] || h.period}）
                   </div>
                 </div>
+                <MarkReadButton itemKey={itemKey} alreadyRead={readSet.has(itemKey)} />
               </div>
             )
           })

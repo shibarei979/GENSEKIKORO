@@ -88,18 +88,22 @@ export default async function MypagePage() {
 
   const { data: entries } = await supabase.from('contest_entries').select('contest_id, novel_id').eq('user_id', user.id)
 
-  // 未読の感想（コメント＋拡散）・未読ランクイン
-  const seenCm = profile?.last_seen_comments_at || new Date(0).toISOString()
-  const seenRk = profile?.last_seen_ranking_at || new Date(0).toISOString()
+  // 未読の感想（コメント＋拡散）・未読ランクイン：read_feedbacksに無いもの＝未読
   let unreadFeedback = 0, unreadRanking = 0
   {
-    const [ucm, udc, urk] = await Promise.all([
-      novelIds.length > 0 ? supabase.from('comments').select('*',{count:'exact',head:true}).in('novel_id',novelIds).neq('user_id',user.id).gt('created_at',seenCm) : Promise.resolve({count:0} as any),
-      novelIds.length > 0 ? supabase.from('discovers').select('*',{count:'exact',head:true}).in('novel_id',novelIds).eq('is_pending',false).neq('user_id',user.id).gt('created_at',seenCm) : Promise.resolve({count:0} as any),
-      supabase.from('ranking_history').select('*',{count:'exact',head:true}).eq('author_id',user.id).gt('created_at',seenRk),
+    const [cmRes, dcRes, rkRes, readRes] = await Promise.all([
+      novelIds.length > 0 ? supabase.from('comments').select('id').in('novel_id',novelIds).neq('user_id',user.id).limit(500) : Promise.resolve({ data: [] } as any),
+      novelIds.length > 0 ? supabase.from('discovers').select('novel_id, user_id, created_at').in('novel_id',novelIds).eq('is_pending',false).neq('user_id',user.id).limit(500) : Promise.resolve({ data: [] } as any),
+      supabase.from('ranking_history').select('id').eq('author_id',user.id).limit(500),
+      supabase.from('read_feedbacks').select('item_key').eq('user_id',user.id).limit(2000),
     ])
-    unreadFeedback = (ucm.count||0) + (udc.count||0)
-    unreadRanking = urk.count||0
+    const readSet = new Set((readRes.data || []).map((r: any) => r.item_key))
+    const fbKeys = [
+      ...(cmRes.data || []).map((c: any) => `c-${c.id}`),
+      ...(dcRes.data || []).map((d: any) => `d-${d.novel_id}-${d.user_id}-${d.created_at}`),
+    ]
+    unreadFeedback = fbKeys.filter(k => !readSet.has(k)).length
+    unreadRanking = (rkRes.data || []).map((r: any) => `r-${r.id}`).filter(k => !readSet.has(k)).length
   }
 
   const { data: claimedMissions } = await supabase.from('user_missions').select('mission_id').eq('user_id', user.id)

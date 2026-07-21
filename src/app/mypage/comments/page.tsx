@@ -4,6 +4,7 @@ import Link from 'next/link'
 import Header from '@/components/layout/Header'
 import Footer from '@/components/layout/Footer'
 import FeedbackReplyBox from './FeedbackReplyBox'
+import MarkReadButton from './MarkReadButton'
 
 export const dynamic = 'force-dynamic'
 
@@ -18,11 +19,9 @@ export default async function MyCommentsPage({ searchParams }: { searchParams: {
   const tab = searchParams.tab === 'read' ? 'read' : 'unread'
   const kind = ['comment', 'discover'].includes(searchParams.kind || '') ? searchParams.kind : 'all'
 
-  // 前回見た時刻（これ以降＝未読）。
-  // 初回アクセス時にDBを既読更新し、以降のタブ・絞り込み操作では ?seen= で基準時刻を引き継ぐ
-  // （＝開いたときの未読は、絞り込みを切り替えても未読のまま見え続け、次の訪問から既読になる）
-  const seenParam = searchParams.seen || ''
-  const prevSeen = seenParam || profile?.last_seen_comments_at || new Date(0).toISOString()
+  // 既読は read_feedbacks に item_key があるかで1件ずつ判定する
+  const { data: readRows } = await supabase.from('read_feedbacks').select('item_key').eq('user_id', user.id).limit(2000)
+  const readSet = new Set((readRows || []).map((r: any) => r.item_key))
 
   // 自分の作品
   const { data: myNovels } = await supabase.from('novels').select('id, title').eq('author_id', user.id)
@@ -64,7 +63,7 @@ export default async function MyCommentsPage({ searchParams }: { searchParams: {
     }))
     const discovers = (dcRes.data || []).map((d: any, i: number) => ({
       type: 'discover' as const,
-      key: `d-${d.novel_id}-${d.created_at}-${i}`,
+      key: `d-${d.novel_id}-${d.user_id}-${d.created_at}`,
       novelId: d.novel_id,
       episodeId: null,
       fromUserId: d.user_id,
@@ -79,20 +78,16 @@ export default async function MyCommentsPage({ searchParams }: { searchParams: {
 
   // 未読/既読・種類で絞り込み
   const filtered = items.filter(it => {
-    const isUnread = it.created_at > prevSeen
+    const isUnread = !readSet.has(it.key)
     if (tab === 'unread' && !isUnread) return false
     if (tab === 'read' && isUnread) return false
     if (kind === 'comment' && it.type !== 'comment') return false
     if (kind === 'discover' && it.type !== 'discover') return false
     return true
   })
-  const unreadCount = items.filter(it => it.created_at > prevSeen).length
+  const unreadCount = items.filter(it => !readSet.has(it.key)).length
 
-  // 初回アクセス時のみ既読時刻を更新（今回の未読は次回の訪問から既読になる）
-  if (!seenParam) {
-    await supabase.from('profiles').update({ last_seen_comments_at: new Date().toISOString() }).eq('user_id', user.id)
-  }
-  const seenQ = `&seen=${encodeURIComponent(prevSeen)}`
+  const seenQ = ''
 
   const fmt = (s: string) => {
     const d = new Date(s)
@@ -159,17 +154,20 @@ export default async function MyCommentsPage({ searchParams }: { searchParams: {
               {it.body && (
                 <div style={{ fontSize: 13.5, color: 'var(--color-text)', lineHeight: 1.7, whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}>{it.body}</div>
               )}
-              {it.type === 'comment' && (
-                <FeedbackReplyBox
-                  parentCommentId={it.key.slice(2)}
-                  novelId={it.novelId}
-                  episodeId={it.episodeId}
-                  targetUserId={it.fromUserId || ''}
-                  targetName={it.name}
-                  myUserId={user.id}
-                  myName={profile?.display_name || ''}
-                />
-              )}
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8, marginTop: 8 }}>
+                {it.type === 'comment' ? (
+                  <FeedbackReplyBox
+                    parentCommentId={it.key.slice(2)}
+                    novelId={it.novelId}
+                    episodeId={it.episodeId}
+                    targetUserId={it.fromUserId || ''}
+                    targetName={it.name}
+                    myUserId={user.id}
+                    myName={profile?.display_name || ''}
+                  />
+                ) : <span/>}
+                <MarkReadButton itemKey={it.key} alreadyRead={readSet.has(it.key)} />
+              </div>
             </div>
           ))
         )}

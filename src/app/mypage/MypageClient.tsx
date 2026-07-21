@@ -415,25 +415,6 @@ export default function MypageClient({
           <button onClick={()=>setShowBdModal(true)} style={{padding:'6px 14px',background:'var(--color-brand)',color:'#fff',border:'none',borderRadius:8,fontSize:12,fontWeight:600,cursor:'pointer',flexShrink:0}}>設定する</button>
         </div>
       )}
-        {/* 感想・ランキングの通知リンク */}
-        <div style={{display:'flex',flexDirection:'column',gap:8,margin:'0 0 16px'}}>
-          <Link href="/mypage/comments" style={{display:'flex',alignItems:'center',justifyContent:'space-between',gap:8,background:'var(--color-bg-card)',border:`1px solid ${unreadFeedback>0?'#fecaca':'var(--color-brand-border)'}`,borderRadius:10,padding:'11px 16px',textDecoration:'none'}}>
-            <span style={{fontSize:13,fontWeight:600,color:'var(--color-text)'}}>感想・コメント</span>
-            {unreadFeedback>0 ? (
-              <span style={{fontSize:12,fontWeight:700,color:'#dc2626'}}>新しい感想が届いています（{unreadFeedback}）</span>
-            ) : (
-              <span style={{fontSize:12,color:'var(--color-text-faint)'}}>→</span>
-            )}
-          </Link>
-          <Link href="/mypage/ranking-history" style={{display:'flex',alignItems:'center',justifyContent:'space-between',gap:8,background:'var(--color-bg-card)',border:`1px solid ${unreadRanking>0?'#fecaca':'var(--color-brand-border)'}`,borderRadius:10,padding:'11px 16px',textDecoration:'none'}}>
-            <span style={{fontSize:13,fontWeight:600,color:'var(--color-text)'}}>ランキング履歴</span>
-            {unreadRanking>0 ? (
-              <span style={{fontSize:12,fontWeight:700,color:'#dc2626'}}>ランクインしました！（{unreadRanking}）</span>
-            ) : (
-              <span style={{fontSize:12,color:'var(--color-text-faint)'}}>→</span>
-            )}
-          </Link>
-        </div>
       <div style={{display:'flex',alignItems:'flex-start',gap:20,marginBottom:20}}>
         <div style={{position:'relative',flexShrink:0,cursor:'pointer'}} onClick={()=>iconInputRef.current?.click()}>
           <input ref={iconInputRef} type="file" accept="image/*" style={{display:'none'}} onChange={e=>{const f=e.target.files?.[0];if(f){handleIconUpload(f);e.target.value=''}}}/>
@@ -474,6 +455,23 @@ export default function MypageClient({
             <button onClick={()=>setShowBioModal(true)} style={{fontSize:12,border:'1px solid var(--color-brand-border)',padding:'5px 12px',borderRadius:8,background:'none',color:'var(--color-text-muted)',cursor:'pointer'}}>自己紹介を編集</button>
             <Link href={`/author/${profile.user_id}`} style={{fontSize:12,border:'1px solid var(--color-brand-border)',padding:'5px 12px',borderRadius:8,background:'none',color:'var(--color-brand)',textDecoration:'none',fontWeight:600}}>公開ページを見る →</Link>
           </div>
+          {(unreadFeedback>0 || unreadRanking>0) && (
+            <div style={{marginTop:14,border:'1px solid #fecaca',borderRadius:10,overflow:'hidden'}}>
+              <div style={{fontSize:11,fontWeight:700,color:'#dc2626',background:'#fef2f2',padding:'6px 14px'}}>新着通知</div>
+              {unreadFeedback>0 && (
+                <Link href="/mypage/comments" style={{display:'flex',alignItems:'center',justifyContent:'space-between',gap:8,padding:'11px 14px',textDecoration:'none',borderTop:'1px solid #fee2e2'}}>
+                  <span style={{fontSize:13,fontWeight:700,color:'#dc2626'}}>新しい感想が届いています（{unreadFeedback}）</span>
+                  <span style={{fontSize:12,color:'#dc2626'}}>→</span>
+                </Link>
+              )}
+              {unreadRanking>0 && (
+                <Link href="/mypage/ranking-history" style={{display:'flex',alignItems:'center',justifyContent:'space-between',gap:8,padding:'11px 14px',textDecoration:'none',borderTop:'1px solid #fee2e2'}}>
+                  <span style={{fontSize:13,fontWeight:700,color:'#dc2626'}}>ランクインしました！（{unreadRanking}）</span>
+                  <span style={{fontSize:12,color:'#dc2626'}}>→</span>
+                </Link>
+              )}
+            </div>
+          )}
         </div>
       </div>
       {followingAuthors.length > 0 && (
