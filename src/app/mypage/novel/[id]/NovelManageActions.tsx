@@ -41,7 +41,7 @@ export default function NovelManageActions({ novelId, novelTitle, initialPublish
   async function toggleSerial() {
     setSaving('serial')
     const next = !isSerial
-    const { error } = await supabase.from('novels').update({ is_serial: next }).eq('id', novelId)
+    const { error } = await supabase.from('novels').update({ is_serial: next, completed_at: next ? null : new Date().toISOString() }).eq('id', novelId)
     if (!error) { setIsSerial(next); showToast(next ? '連載中に戻しました' : '完結にしました') }
     setSaving('')
   }

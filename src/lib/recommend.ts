@@ -26,7 +26,7 @@ async function computeRecommendScores(): Promise<ScoredNovel[]> {
   // 候補作品（公開・全年齢・直近300件）
   const { data: novels } = await supabase
     .from('novels')
-    .select('id, title, genre, novel_type, author_id, summary, catchcopy, tags, created_at, originality_score, ai_usage, is_serial')
+    .select('id, title, genre, novel_type, author_id, summary, catchcopy, tags, created_at, originality_score, ai_usage, is_serial, completed_at')
     .eq('published', true).eq('is_r18', false).neq('genre', '官能')
     .order('created_at', { ascending: false }).limit(300)
   if (!novels || novels.length === 0) return []
@@ -181,8 +181,9 @@ async function computeRecommendScores(): Promise<ScoredNovel[]> {
     // PV勢いブースト：直近72時間のPVが多いほど上昇（PV10≈×1.10 / PV100≈×1.20 / PV1000≈×1.30、上限1.35）
     const momentum = Math.min(1.35, 1 + Math.log10((recentPvMap[n.id] || 0) + 1) * 0.1)
 
-    // 完結ブースト：完結作品を押し上げ（×1.21）
-    const completeBoost = n.is_serial === false ? 1.21 : 1.0
+    // 完結ブースト：完結後1ヶ月だけ×1.15（完結の節目を押し上げる）
+    const completedAt = n.completed_at || (n.is_serial === false ? n.created_at : null)
+    const completeBoost = (n.is_serial === false && completedAt && (now - new Date(completedAt).getTime()) < 30 * 86400000) ? 1.15 : 1.0
 
     const finalScore = score * freshness * trust * origBoost * awardBoost * momentum * completeBoost
 
