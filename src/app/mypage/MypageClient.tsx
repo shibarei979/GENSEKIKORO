@@ -445,7 +445,8 @@ export default function MypageClient({
               </>
             )}
           </div>
-          {userNumber && <div style={{fontSize:12,color:'var(--color-text-faint)',marginBottom:12}}>{userNumber}</div>}
+          {userNumber && <div style={{fontSize:12,color:'var(--color-text-faint)',marginBottom:4}}>{userNumber}</div>}
+          <div style={{fontSize:12.5,color:'var(--color-text-muted)',marginBottom:12}}>{profile.email}</div>
           <div style={{display:'flex',gap:28,flexWrap:'wrap',marginBottom:12}}>
             <div style={{textAlign:'center' as const}}>
               <div style={{fontSize:20,fontWeight:800,color:'var(--color-text)',lineHeight:1.2}}>{followerCount}</div>
@@ -460,11 +461,10 @@ export default function MypageClient({
               <div style={{fontSize:11,color:'var(--color-text-muted)'}}>公開作品</div>
             </div>
           </div>
-          <div style={{fontSize:12.5,color:'var(--color-text-muted)'}}>{profile.email}</div>
         </div>
         <div style={{flex:'1 1 240px',minWidth:220,display:'flex',flexDirection:'column',gap:12,alignItems:'center'}}>
-          {profile.bio && <div style={{fontSize:13,color:'var(--color-text)',lineHeight:1.8}}>{profile.bio}</div>}
-          <div style={{display:'flex',gap:8,flexWrap:'wrap'}}>
+          {profile.bio && <div style={{fontSize:13,color:'var(--color-text)',lineHeight:1.8,textAlign:'center'}}>{profile.bio}</div>}
+          <div style={{display:'flex',gap:8,flexWrap:'wrap',justifyContent:'center'}}>
             <button onClick={()=>setEditingName(true)} style={{fontSize:12.5,border:'1px solid var(--color-brand-border)',padding:'8px 16px',borderRadius:8,background:'var(--color-bg-card)',color:'var(--color-text-muted)',cursor:'pointer'}}>名前を変更</button>
             <button onClick={()=>setShowBioModal(true)} style={{fontSize:12.5,border:'1px solid var(--color-brand-border)',padding:'8px 16px',borderRadius:8,background:'var(--color-bg-card)',color:'var(--color-text-muted)',cursor:'pointer'}}>自己紹介を編集</button>
             <Link href={`/author/${profile.user_id}`} style={{fontSize:12.5,padding:'8px 16px',borderRadius:8,background:'var(--color-brand)',color:'#fff',textDecoration:'none',fontWeight:700}}>公開ページを見る →</Link>
