@@ -649,24 +649,25 @@ export default function MypageClient({
                 </button>
               </div>
             </div>
-            {/* 中央：数値（4項目・縦線区切り） */}
+            {/* 中央：数値（4項目・縦線区切り・アイコン付き） */}
             <div style={{display:'grid',gridTemplateColumns:'repeat(4, minmax(64px, 1fr))'}}>
               {[
-                {v:(charCountMap[novel.id]||0).toLocaleString(), l:'文字数'},
-                {v:novel.published?(novelViewMap[novel.id]||0).toLocaleString():'—', l:'閲覧数'},
-                {v:novel.published?(novelLikeMap[novel.id]||0):'—', l:'いいね'},
-                {v:novel.published?(novelCommentMap[novel.id]||0):'—', l:'コメント'},
+                {v:(charCountMap[novel.id]||0).toLocaleString(), l:'文字数', icon:<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><line x1="10" y1="9" x2="8" y2="9"/></svg>},
+                {v:novel.published?(novelViewMap[novel.id]||0).toLocaleString():'—', l:'閲覧数', icon:<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>},
+                {v:novel.published?(novelLikeMap[novel.id]||0):'—', l:'いいね', icon:<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>},
+                {v:novel.published?(novelCommentMap[novel.id]||0):'—', l:'コメント', icon:<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>},
               ].map((s,idx)=>(
                 <div key={s.l} style={{textAlign:'center',padding:'0 14px',borderLeft:idx>0?'1px solid var(--color-brand-light)':'none'}}>
                   <div style={{fontSize:16,fontWeight:700,color:'var(--color-text)'}}>{s.v}</div>
-                  <div style={{fontSize:11,color:'var(--color-text-muted)',marginTop:5}}>{s.l}</div>
+                  <div style={{fontSize:11,color:'var(--color-text-muted)',marginTop:5,display:'inline-flex',alignItems:'center',gap:3}}><span style={{color:'var(--color-text-faint)'}}>{s.icon}</span>{s.l}</div>
                 </div>
               ))}
             </div>
             {/* 右：操作ボタン（縦並び） */}
             <div style={{display:'flex',flexDirection:'column',gap:8,alignItems:'stretch'}}>
               <button onClick={()=>router.push(`/mypage/novel/${novel.id}`)}
-                style={{fontSize:12,fontWeight:700,border:'none',padding:'9px 14px',borderRadius:8,color:'#fff',background:'var(--color-brand)',cursor:'pointer'}}>
+                style={{fontSize:12,fontWeight:700,border:'none',padding:'9px 14px',borderRadius:8,color:'#fff',background:'var(--color-brand)',cursor:'pointer',display:'inline-flex',alignItems:'center',justifyContent:'center',gap:5}}>
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/></svg>
                 作品を管理する
               </button>
               <Link href={`/novel/${novel.id}`}
