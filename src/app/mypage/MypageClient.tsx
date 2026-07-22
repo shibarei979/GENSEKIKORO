@@ -427,7 +427,7 @@ export default function MypageClient({
           }
           <div style={{position:'absolute',bottom:2,right:2,width:22,height:22,background:'#fff',borderRadius:'50%',border:'2px solid var(--color-brand)',display:'flex',alignItems:'center',justifyContent:'center',fontSize:11}}>{iconUploading?'⟳':'📷'}</div>
         </div>
-        <div style={{flex:'1 1 260px',minWidth:180}}>
+        <div style={{flex:'1 1 200px',minWidth:180}}>
           <div style={{display:'flex',alignItems:'center',gap:8,marginBottom:4}}>
             {editingName ? (
               <div style={{display:'flex',alignItems:'center',gap:8,flexWrap:'wrap'}}>
@@ -462,7 +462,7 @@ export default function MypageClient({
           </div>
           <div style={{fontSize:12.5,color:'var(--color-text-muted)'}}>{profile.email}</div>
         </div>
-        <div style={{flex:'0 1 300px',minWidth:220,display:'flex',flexDirection:'column',gap:12,alignItems:'flex-start'}}>
+        <div style={{flex:'1 1 240px',minWidth:220,display:'flex',flexDirection:'column',gap:12,alignItems:'center'}}>
           {profile.bio && <div style={{fontSize:13,color:'var(--color-text)',lineHeight:1.8}}>{profile.bio}</div>}
           <div style={{display:'flex',gap:8,flexWrap:'wrap'}}>
             <button onClick={()=>setEditingName(true)} style={{fontSize:12.5,border:'1px solid var(--color-brand-border)',padding:'8px 16px',borderRadius:8,background:'var(--color-bg-card)',color:'var(--color-text-muted)',cursor:'pointer'}}>名前を変更</button>
