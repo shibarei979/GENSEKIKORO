@@ -147,9 +147,14 @@ export default function MypageDashboard({ novels, historyItems, bookmarkedNovels
   )
 
   return (
-    <div style={{ display: 'flex', gap: 16, alignItems: 'flex-start', flexWrap: 'wrap' }}>
+    <div id="mypage-dashboard" style={{ display: 'flex', gap: 16, alignItems: 'flex-start', flexWrap: 'wrap' }}>
       <style>{`
-        a.dash-link, a.dash-link:hover, a.dash-link:focus, a.dash-link:active, a.dash-link:visited {
+        #mypage-dashboard a.dash-link:hover > div,
+        #mypage-dashboard a.dash-link:hover,
+        #mypage-dashboard a.dash-link:focus > div,
+        #mypage-dashboard a.dash-link:active > div,
+        #mypage-dashboard a.dash-link:hover *,
+        #mypage-dashboard a.dash-link:focus * {
           background: none !important;
           background-color: transparent !important;
           opacity: 1 !important;
