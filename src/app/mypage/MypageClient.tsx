@@ -818,10 +818,13 @@ export default function MypageClient({
 
   const BookmarksTab = () => (
     <div>
-      <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',marginBottom:14}}>
-        <div style={{fontSize:15,fontWeight:700,color:'var(--color-text)'}}>保存済み作品（{myBookmarks.length}）</div>
+      <div style={{display:'flex',alignItems:'flex-start',justifyContent:'space-between',marginBottom:20,flexWrap:'wrap',gap:8}}>
+        <div>
+          <div style={{fontSize:22,fontWeight:700,color:'var(--color-text)'}}>保存済み作品（{myBookmarks.length}）</div>
+          <div style={{fontSize:12.5,color:'var(--color-text-muted)',marginTop:4}}>気になる作品をリストに保存して、あとでゆっくり読むことができます。</div>
+        </div>
         <button onClick={()=>setShowFolderModal(true)}
-          style={{fontSize:12,padding:'5px 12px',border:'1px solid var(--color-brand)',borderRadius:8,background:'none',color:'var(--color-brand)',cursor:'pointer'}}>
+          style={{fontSize:12,padding:'8px 14px',border:'1px solid var(--color-brand)',borderRadius:8,background:'none',color:'var(--color-brand)',cursor:'pointer',fontWeight:600}}>
           ＋ リスト作成
         </button>
       </div>
@@ -850,7 +853,10 @@ export default function MypageClient({
   // ===== 閲覧履歴タブ =====
   const HistoryTab = () => (
     <div>
-      <div style={{fontSize:15,fontWeight:700,color:'var(--color-text)',marginBottom:16}}>閲覧履歴（{historyItems.length}件）</div>
+      <div style={{marginBottom:20}}>
+        <div style={{fontSize:22,fontWeight:700,color:'var(--color-text)'}}>閲覧履歴（{historyItems.length}件）</div>
+        <div style={{fontSize:12.5,color:'var(--color-text-muted)',marginTop:4}}>過去に閲覧した作品の履歴です。続きから読むことができます。</div>
+      </div>
       {historyItems.length === 0 ? (
         <div style={{textAlign:'center',padding:'40px',color:'var(--color-text-muted)',fontSize:13}}>まだ閲覧履歴がありません</div>
       ) : historyItems.map((item:any) => (
@@ -901,7 +907,10 @@ export default function MypageClient({
   // ===== つぶやきタブ =====
   const TweetTab = () => (
     <div>
-      <div style={{fontSize:15,fontWeight:700,color:'var(--color-text)',marginBottom:16}}>つぶやき</div>
+      <div style={{marginBottom:20}}>
+        <div style={{fontSize:22,fontWeight:700,color:'var(--color-text)'}}>つぶやき</div>
+        <div style={{fontSize:12.5,color:'var(--color-text-muted)',marginTop:4}}>近況や作品の進捗を、気軽に共有しましょう。</div>
+      </div>
       <TweetSection authorId={profile.user_id} currentUserId={profile.user_id} currentUserName={profile.display_name} currentUserIconUrl={profile.icon_url||null} isOwner={true}/>
     </div>
   )
