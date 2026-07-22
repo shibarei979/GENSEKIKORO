@@ -933,138 +933,145 @@ export default function MypageClient({
   }
 
   // ===== 設定タブ =====
-  const SettingsTab = () => (
+  const SettingsTab = () => {
+    const secCard: React.CSSProperties = { background:'var(--color-bg-card)',border:'1px solid var(--color-brand-border)',borderRadius:12,padding:'18px 20px',marginBottom:16 }
+    const secTitle: React.CSSProperties = { fontSize:15,fontWeight:700,color:'var(--color-text)',marginBottom:14 }
+    const rowBase: React.CSSProperties = { display:'flex',alignItems:'center',justifyContent:'space-between',gap:10,padding:'12px 0' }
+    const Toggle = ({on,onClick,disabled}:{on:boolean;onClick:()=>void;disabled?:boolean}) => (
+      <button onClick={onClick} disabled={disabled}
+        style={{width:44,height:24,borderRadius:12,border:'none',cursor:disabled?'default':'pointer',background:on?'var(--color-brand)':'#d1d5db',position:'relative',transition:'background .2s',flexShrink:0,opacity:disabled?0.6:1}}>
+        <div style={{position:'absolute',top:3,left:on?23:3,width:18,height:18,borderRadius:'50%',background:'#fff',transition:'left .2s',boxShadow:'0 1px 3px rgba(0,0,0,0.2)'}}/>
+      </button>
+    )
+    const Arrow = () => <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--color-text-faint)" strokeWidth="2"><polyline points="9 18 15 12 9 6"/></svg>
+
+    return (
     <div>
-      <div style={{fontSize:15,fontWeight:700,color:'var(--color-text)',marginBottom:20}}>設定</div>
+      <div style={{fontSize:22,fontWeight:700,color:'var(--color-text)',marginBottom:4}}>設定</div>
+      <div style={{fontSize:12.5,color:'var(--color-text-muted)',marginBottom:20}}>アカウントや通知、表示などの各種設定を行います。</div>
 
-      {/* ホームタイプ選択 */}
-      <div style={{marginBottom:24,background:'var(--color-bg)',border:'1px solid var(--color-brand-border)',borderRadius:12,padding:'16px'}}>
-        <div style={{fontSize:12,fontWeight:700,color:'var(--color-text-muted)',letterSpacing:'.05em',marginBottom:12}}>ホームの表示タイプ</div>
-        <div style={{display:'flex',gap:10}}>
-          {([{v:'reader',l:'読み手',e:'📖',d:'作品を読む'},{v:'writer',l:'書き手',e:'✍️',d:'作品を書く'}] as const).map(({v,l,e,d})=>(
-            <button key={v} onClick={async()=>{
-              setUserRole(v); setRoleSaving(true)
-              await supabase.from('profiles').update({user_role:v}).eq('user_id',profile.user_id)
-              setRoleSaving(false)
-            }}
-              style={{flex:1,padding:'14px 10px',borderRadius:10,border:`2px solid ${userRole===v?'var(--color-brand)':'var(--color-brand-border)'}`,background:userRole===v?'var(--color-brand-light)':'var(--color-bg-card)',cursor:'pointer',textAlign:'center' as const}}>
-              <div style={{fontSize:24,marginBottom:4}}>{e}</div>
-              <div style={{fontSize:13,fontWeight:700,color:userRole===v?'var(--color-brand)':'var(--color-text)'}}>{l}</div>
-              <div style={{fontSize:11,color:'var(--color-text-muted)',marginTop:2}}>{d}</div>
-            </button>
-          ))}
-        </div>
-        {roleSaving && <div style={{fontSize:11,color:'var(--color-brand)',marginTop:8,textAlign:'center'}}>保存中...</div>}
-      </div>
-
-      {/* 通知設定 */}
-      <div style={{marginBottom:24}}>
-        <div style={{fontSize:12,fontWeight:700,color:'var(--color-text-muted)',letterSpacing:'.05em',marginBottom:10}}>通知設定</div>
-        {[
-          {label:'いいねされたとき',             key:'notify_like',        val:notifyLike,       set:setNotifyLike},
-          {label:'コメントされたとき',            key:'notify_comment',     val:notifyComment,    set:setNotifyComment},
-          {label:'フォローされたとき',            key:'notify_follow',      val:notifyFollow,     set:setNotifyFollow},
-          {label:'フォロー中の作者が話を更新',     key:'notify_new_episode', val:notifyNewEpisode, set:setNotifyNewEpisode},
-          {label:'フォロー中の作者が新作を公開',   key:'notify_new_work',    val:notifyNewWork,    set:setNotifyNewWork},
-        ].map((item, i, arr) => (
-          <div key={item.key} style={{display:'flex',alignItems:'center',justifyContent:'space-between',padding:'13px 0',borderBottom:i<arr.length-1?'1px solid var(--color-brand-border)':'none'}}>
-            <div style={{fontSize:13,color:'var(--color-text)'}}>{item.label}</div>
-            <button
-              onClick={async()=>{
-                const next = !item.val
-                item.set(next)
-                await handleSaveNotify(item.key, next)
-              }}
-              style={{
-                width:44, height:24, borderRadius:12, border:'none', cursor:'pointer',
-                background: item.val ? 'var(--color-brand)' : '#d1d5db',
-                position:'relative', transition:'background .2s', flexShrink:0,
-                opacity: notifySaving ? 0.6 : 1,
-              }}>
-              <div style={{
-                position:'absolute', top:3, left: item.val ? 23 : 3,
-                width:18, height:18, borderRadius:'50%', background:'#fff',
-                transition:'left .2s', boxShadow:'0 1px 3px rgba(0,0,0,0.2)',
-              }}/>
-            </button>
-          </div>
-        ))}
-      </div>
-
-      {/* プロフィール設定 */}
-      <div style={{marginBottom:24}}>
-        <div style={{fontSize:12,fontWeight:700,color:'var(--color-text-muted)',letterSpacing:'.05em',marginBottom:10}}>プロフィール設定</div>
-        <button onClick={()=>setShowGenderModal(true)}
-          style={{width:'100%',padding:'13px 0',display:'flex',alignItems:'center',justifyContent:'space-between',background:'none',border:'none',borderBottom:'1px solid var(--color-brand-border)',cursor:'pointer',textAlign:'left' as const}}>
-          <div>
-            <div style={{fontSize:13,color:'var(--color-text)'}}>性別</div>
-            {gender && <div style={{fontSize:11,color:'var(--color-text-faint)',marginTop:2}}>{gender}</div>}
-          </div>
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--color-text-faint)" strokeWidth="2"><polyline points="9 18 15 12 9 6"/></svg>
-        </button>
-        <button onClick={()=>setShowXModal(true)}
-          style={{width:'100%',padding:'13px 0',display:'flex',alignItems:'center',justifyContent:'space-between',background:'none',border:'none',borderBottom:'1px solid var(--color-brand-border)',cursor:'pointer',textAlign:'left' as const}}>
-          <div>
-            <div style={{fontSize:13,color:'var(--color-text)'}}>Xアカウント</div>
-            {xAccount && <div style={{fontSize:11,color:'var(--color-text-faint)',marginTop:2}}>@{xAccount}</div>}
-          </div>
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--color-text-faint)" strokeWidth="2"><polyline points="9 18 15 12 9 6"/></svg>
-        </button>
-      </div>
-
-      {/* コメント設定 */}
-      <div style={{marginBottom:24}}>
-        <div style={{fontSize:12,fontWeight:700,color:'var(--color-text-muted)',letterSpacing:'.05em',marginBottom:10}}>コメント設定</div>
-        <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',padding:'13px 0',borderBottom:'1px solid var(--color-brand-border)'}}>
-          <div>
-            <div style={{fontSize:13,color:'var(--color-text)'}}>エピソードへのコメントを許可</div>
-            <div style={{fontSize:11,color:'var(--color-text-faint)',marginTop:2}}>{allowComments?'許可中':'不許可'}</div>
-          </div>
-          <button onClick={handleToggleAllowComments}
-            style={{width:44,height:24,borderRadius:12,border:'none',cursor:'pointer',background:allowComments?'var(--color-brand)':'#d1d5db',position:'relative',transition:'background .2s',flexShrink:0}}>
-            <div style={{position:'absolute',top:3,left:allowComments?23:3,width:18,height:18,borderRadius:'50%',background:'#fff',transition:'left .2s',boxShadow:'0 1px 3px rgba(0,0,0,0.2)'}}/>
-          </button>
-        </div>
-      </div>
-
-      <div style={{fontSize:12,fontWeight:700,color:'var(--color-text-muted)',letterSpacing:'.05em',marginBottom:10}}>アカウント設定</div>
-      <div style={{display:'flex',flexDirection:'column'}}>
-        {[
-          ...(profile.login_provider!=='google' ? [
-            {label:'メールアドレスを変更', sub:profile.email||'', onClick:()=>setShowEmailModal(true)},
-            {label:'パスワードを変更', sub:'', onClick:()=>setShowPwModal(true)},
-          ] : []),
-          {label:'アイコンを変更', sub:'', onClick:()=>iconInputRef.current?.click()},
-          {label:'自己紹介を編集', sub:profile.bio?profile.bio.slice(0,30)+'…':'未設定', onClick:()=>setShowBioModal(true)},
-          {label:'生年月日を設定', sub:profile.birthdate||(profile as any).birthdate||'未設定', onClick:()=>setShowBdModal(true)},
-          {label:'ストーリーボード', sub:'アイデアや構想を管理', onClick:()=>setShowBoard(true)},
-          {label:'バッジ図鑑', sub:`${claimedSet.size}/${ALL_BADGES.filter(b=>!b.id.startsWith('_')).length}獲得済み`, onClick:()=>{setShowBadgeBook(true);setBadgePage(0)}},
-        ].map((item,i,arr) => (
-          <button key={item.label} onClick={item.onClick}
-            style={{padding:'14px 0',display:'flex',alignItems:'center',justifyContent:'space-between',background:'none',border:'none',borderBottom:i<arr.length-1?'1px solid var(--color-brand-border)':'none',cursor:'pointer',textAlign:'left' as const}}>
-            <div>
-              <div style={{fontSize:13,color:'var(--color-text)',fontWeight:500}}>{item.label}</div>
-              {item.sub && <div style={{fontSize:11,color:'var(--color-text-faint)',marginTop:2}}>{item.sub}</div>}
+      <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit, minmax(320px, 1fr))',gap:16,alignItems:'start'}}>
+        {/* ===== 左カラム ===== */}
+        <div>
+          {/* 表示設定：読書/執筆セグメント */}
+          <div style={secCard}>
+            <div style={secTitle}>表示設定</div>
+            <div style={{fontSize:13,fontWeight:600,color:'var(--color-text)',marginBottom:4}}>ホーム初期表示</div>
+            <div style={{fontSize:11.5,color:'var(--color-text-muted)',marginBottom:10}}>マイページを開いたときに表示する内容を選べます。いつでも変更できます。</div>
+            <div style={{display:'inline-flex',border:'1px solid var(--color-brand-border)',borderRadius:8,overflow:'hidden'}}>
+              {([{v:'reader',l:'読書向け'},{v:'writer',l:'執筆向け'}] as const).map(({v,l})=>(
+                <button key={v} onClick={async()=>{
+                    setUserRole(v); setRoleSaving(true)
+                    await supabase.from('profiles').update({user_role:v}).eq('user_id',profile.user_id)
+                    setRoleSaving(false)
+                  }}
+                  style={{padding:'8px 22px',fontSize:13,fontWeight:userRole===v?700:500,border:'none',cursor:'pointer',
+                    background:userRole===v?'var(--color-brand)':'var(--color-bg-card)',
+                    color:userRole===v?'#fff':'var(--color-text-muted)'}}>
+                  {l}
+                </button>
+              ))}
             </div>
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--color-text-faint)" strokeWidth="2"><polyline points="9 18 15 12 9 6"/></svg>
-          </button>
-        ))}
-        <div style={{height:1,background:'var(--color-brand-border)',margin:'8px 0'}}/>
-        <button onClick={handleSignOut} disabled={loading} style={{padding:'14px 0',display:'flex',alignItems:'center',background:'none',border:'none',borderBottom:'1px solid var(--color-brand-border)',cursor:'pointer',fontSize:13,color:'var(--color-text)',textAlign:'left' as const}}>
-          {loading?'...':'ログアウト'}
-        </button>
-        <button onClick={()=>setShowWithdraw(true)} style={{padding:'14px 0',display:'flex',alignItems:'center',background:'none',border:'none',cursor:'pointer',fontSize:13,color:'var(--color-danger)',textAlign:'left' as const}}>
-          退会する
-        </button>
-      </div>
+            {roleSaving && <span style={{fontSize:11,color:'var(--color-brand)',marginLeft:10}}>保存中...</span>}
+          </div>
 
-      {/* ブロック・ミュート（設定内に統合） */}
-      <div style={{marginTop:24,background:'var(--color-bg)',border:'1px solid var(--color-brand-border)',borderRadius:12,padding:'16px'}}>
-        <div style={{fontSize:12,fontWeight:700,color:'var(--color-text-muted)',letterSpacing:'.05em',marginBottom:12}}>ブロック・ミュート</div>
-        <BlockMuteTab/>
+          {/* プロフィール設定 */}
+          <div style={secCard}>
+            <div style={secTitle}>プロフィール設定</div>
+            {[
+              {label:'アイコンを変更', sub:'', onClick:()=>iconInputRef.current?.click()},
+              {label:'自己紹介を編集', sub:profile.bio?profile.bio.slice(0,24)+'…':'未設定', onClick:()=>setShowBioModal(true)},
+              {label:'性別', sub:gender||'未設定', onClick:()=>setShowGenderModal(true)},
+              {label:'Xアカウント', sub:xAccount?`@${xAccount}`:'未連携', onClick:()=>setShowXModal(true)},
+              {label:'生年月日を設定', sub:profile.birthdate||(profile as any).birthdate||'未設定', onClick:()=>setShowBdModal(true)},
+              {label:'ストーリーボード', sub:'アイデアや構想を管理', onClick:()=>setShowBoard(true)},
+              {label:'バッジ図鑑', sub:`${claimedSet.size}/${ALL_BADGES.filter(b=>!b.id.startsWith('_')).length}獲得済み`, onClick:()=>{setShowBadgeBook(true);setBadgePage(0)}},
+            ].map((item,i,arr) => (
+              <button key={item.label} onClick={item.onClick}
+                style={{...rowBase,width:'100%',background:'none',border:'none',borderBottom:i<arr.length-1?'1px solid var(--color-border-light, #f1e9e1)':'none',cursor:'pointer',textAlign:'left' as const}}>
+                <div>
+                  <div style={{fontSize:13,color:'var(--color-text)',fontWeight:500}}>{item.label}</div>
+                  {item.sub && <div style={{fontSize:11,color:'var(--color-text-faint)',marginTop:2}}>{item.sub}</div>}
+                </div>
+                <Arrow/>
+              </button>
+            ))}
+          </div>
+
+          {/* アカウント設定 */}
+          <div style={secCard}>
+            <div style={secTitle}>アカウント設定</div>
+            {(profile.login_provider!=='google' ? [
+              {label:'メールアドレスを変更', sub:profile.email||'', onClick:()=>setShowEmailModal(true)},
+              {label:'パスワードを変更', sub:'', onClick:()=>setShowPwModal(true)},
+            ] : []).map((item,i)=>(
+              <button key={item.label} onClick={item.onClick}
+                style={{...rowBase,width:'100%',background:'none',border:'none',borderBottom:'1px solid var(--color-border-light, #f1e9e1)',cursor:'pointer',textAlign:'left' as const}}>
+                <div>
+                  <div style={{fontSize:13,color:'var(--color-text)',fontWeight:500}}>{item.label}</div>
+                  {item.sub && <div style={{fontSize:11,color:'var(--color-text-faint)',marginTop:2}}>{item.sub}</div>}
+                </div>
+                <Arrow/>
+              </button>
+            ))}
+            <button onClick={handleSignOut} disabled={loading}
+              style={{...rowBase,width:'100%',background:'none',border:'none',borderBottom:'1px solid var(--color-border-light, #f1e9e1)',cursor:'pointer',fontSize:13,color:'var(--color-text)',textAlign:'left' as const}}>
+              <span>{loading?'...':'ログアウト'}</span>
+            </button>
+            <div style={{marginTop:8,paddingTop:12,borderTop:'1px solid var(--color-brand-border)'}}>
+              <button onClick={()=>setShowWithdraw(true)}
+                style={{background:'none',border:'none',cursor:'pointer',fontSize:13,color:'var(--color-danger)',padding:'4px 0',textAlign:'left' as const}}>
+                退会する
+              </button>
+              <div style={{fontSize:11,color:'var(--color-text-faint)',marginTop:2}}>アカウントとすべてのデータを削除し、原石航路を退会します。</div>
+            </div>
+          </div>
+        </div>
+
+        {/* ===== 右カラム ===== */}
+        <div>
+          {/* 通知設定 */}
+          <div style={secCard}>
+            <div style={secTitle}>通知設定</div>
+            {[
+              {label:'いいねされたとき',           desc:'あなたの作品やコメントがいいねされたときに通知します。', key:'notify_like',        val:notifyLike,       set:setNotifyLike},
+              {label:'コメントされたとき',          desc:'あなたの作品にコメントが投稿されたときに通知します。',   key:'notify_comment',     val:notifyComment,    set:setNotifyComment},
+              {label:'フォローされたとき',          desc:'あなたをフォローしたユーザーがいるときに通知します。',   key:'notify_follow',      val:notifyFollow,     set:setNotifyFollow},
+              {label:'フォロー中の作者が話を更新',   desc:'フォロー中の作者が作品を更新したときに通知します。',     key:'notify_new_episode', val:notifyNewEpisode, set:setNotifyNewEpisode},
+              {label:'フォロー中の作者が新作を公開', desc:'フォロー中の作者が新しい作品を公開したときに通知します。', key:'notify_new_work',    val:notifyNewWork,    set:setNotifyNewWork},
+            ].map((item, i, arr) => (
+              <div key={item.key} style={{...rowBase,borderBottom:i<arr.length-1?'1px solid var(--color-border-light, #f1e9e1)':'none'}}>
+                <div style={{flex:1}}>
+                  <div style={{fontSize:13,color:'var(--color-text)',fontWeight:500}}>{item.label}</div>
+                  <div style={{fontSize:11,color:'var(--color-text-faint)',marginTop:2}}>{item.desc}</div>
+                </div>
+                <Toggle on={item.val} disabled={notifySaving} onClick={async()=>{ const next=!item.val; item.set(next); await handleSaveNotify(item.key, next) }}/>
+              </div>
+            ))}
+          </div>
+
+          {/* コメント設定 */}
+          <div style={secCard}>
+            <div style={secTitle}>コメント設定</div>
+            <div style={rowBase}>
+              <div style={{flex:1}}>
+                <div style={{fontSize:13,color:'var(--color-text)',fontWeight:500}}>エピソードへのコメントを許可</div>
+                <div style={{fontSize:11,color:'var(--color-text-faint)',marginTop:2}}>あなたの作品のエピソードにコメントを投稿できるようにします。</div>
+              </div>
+              <Toggle on={allowComments} onClick={handleToggleAllowComments}/>
+            </div>
+          </div>
+
+          {/* ブロック・ミュート管理 */}
+          <div style={secCard}>
+            <div style={secTitle}>ブロック・ミュート管理</div>
+            <BlockMuteTab/>
+          </div>
+        </div>
       </div>
     </div>
-  )
+    )
+  }
 
   const tabContent: Record<Tab, React.ReactNode> = {
     mypage:'', works:'', bookmarks:'', history:'', tweet:'', mission:'', settings:'', series:'',
