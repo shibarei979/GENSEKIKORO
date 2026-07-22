@@ -422,10 +422,10 @@ export default function MypageClient({
         <div style={{position:'relative',flexShrink:0,cursor:'pointer'}} onClick={()=>iconInputRef.current?.click()}>
           <input ref={iconInputRef} type="file" accept="image/*" style={{display:'none'}} onChange={e=>{const f=e.target.files?.[0];if(f){handleIconUpload(f);e.target.value=''}}}/>
           {iconUrl
-            ? <img src={iconUrl} alt={profile.display_name} style={{width:72,height:72,borderRadius:'50%',objectFit:'cover',border:'3px solid var(--color-brand)'}}/>
-            : <div style={{width:72,height:72,borderRadius:'50%',background:'var(--color-brand)',display:'flex',alignItems:'center',justifyContent:'center',fontSize:28,fontWeight:700,color:'#fff'}}>{initial}</div>
+            ? <img src={iconUrl} alt={profile.display_name} style={{width:88,height:88,borderRadius:'50%',objectFit:'cover',border:'3px solid var(--color-brand)'}}/>
+            : <div style={{width:88,height:88,borderRadius:'50%',background:'var(--color-brand)',display:'flex',alignItems:'center',justifyContent:'center',fontSize:34,fontWeight:700,color:'#fff'}}>{initial}</div>
           }
-          <div style={{position:'absolute',bottom:0,right:0,width:20,height:20,background:'#fff',borderRadius:'50%',border:'2px solid var(--color-brand)',display:'flex',alignItems:'center',justifyContent:'center',fontSize:10}}>{iconUploading?'⟳':'📷'}</div>
+          <div style={{position:'absolute',bottom:2,right:2,width:22,height:22,background:'#fff',borderRadius:'50%',border:'2px solid var(--color-brand)',display:'flex',alignItems:'center',justifyContent:'center',fontSize:11}}>{iconUploading?'⟳':'📷'}</div>
         </div>
         <div style={{flex:'1 1 200px',minWidth:180}}>
           <div style={{display:'flex',alignItems:'center',gap:8,marginBottom:4}}>
@@ -445,11 +445,20 @@ export default function MypageClient({
               </>
             )}
           </div>
-          {userNumber && <div style={{fontSize:12,color:'var(--color-text-faint)',marginBottom:8}}>{userNumber}</div>}
-          <div style={{display:'flex',gap:18,flexWrap:'wrap',marginBottom:8}}>
-            <span style={{fontSize:13,color:'var(--color-text-muted)'}}><strong style={{color:'var(--color-text)'}}>{followerCount}</strong> フォロワー</span>
-            <span style={{fontSize:13,color:'var(--color-text-muted)'}}><strong style={{color:'var(--color-text)'}}>{followingCount}</strong> フォロー中</span>
-            <span style={{fontSize:13,color:'var(--color-brand)'}}><strong>{published.length}</strong> 公開作品</span>
+          {userNumber && <div style={{fontSize:12,color:'var(--color-text-faint)',marginBottom:12}}>{userNumber}</div>}
+          <div style={{display:'flex',gap:28,flexWrap:'wrap',marginBottom:12}}>
+            <div style={{textAlign:'center' as const}}>
+              <div style={{fontSize:20,fontWeight:800,color:'var(--color-text)',lineHeight:1.2}}>{followerCount}</div>
+              <div style={{fontSize:11,color:'var(--color-text-muted)'}}>フォロワー</div>
+            </div>
+            <div style={{textAlign:'center' as const}}>
+              <div style={{fontSize:20,fontWeight:800,color:'var(--color-text)',lineHeight:1.2}}>{followingCount}</div>
+              <div style={{fontSize:11,color:'var(--color-text-muted)'}}>フォロー中</div>
+            </div>
+            <div style={{textAlign:'center' as const}}>
+              <div style={{fontSize:20,fontWeight:800,color:'var(--color-text)',lineHeight:1.2}}>{published.length}</div>
+              <div style={{fontSize:11,color:'var(--color-text-muted)'}}>公開作品</div>
+            </div>
           </div>
           <div style={{fontSize:12.5,color:'var(--color-text-muted)'}}>{profile.email}</div>
         </div>

@@ -149,8 +149,13 @@ export default function MypageDashboard({ novels, historyItems, bookmarkedNovels
   return (
     <div style={{ display: 'flex', gap: 16, alignItems: 'flex-start', flexWrap: 'wrap' }}>
       <style>{`
-        .dash-link { transition: none !important; }
-        .dash-link:hover, .dash-link:focus, .dash-link:active { background: transparent !important; background-color: transparent !important; opacity: 1 !important; }
+        a.dash-link, a.dash-link:hover, a.dash-link:focus, a.dash-link:active, a.dash-link:visited {
+          background: none !important;
+          background-color: transparent !important;
+          opacity: 1 !important;
+          transition: none !important;
+          box-shadow: none !important;
+        }
       `}</style>
       {/* 左：コンテンツ系カード群 */}
       <div style={{ flex: '2 1 440px', minWidth: 300, display: 'flex', flexDirection: 'column', gap: 16 }}>
