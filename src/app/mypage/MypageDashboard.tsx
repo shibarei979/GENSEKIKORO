@@ -18,7 +18,7 @@ interface Props {
   onEditBio: () => void
 }
 
-const card: React.CSSProperties = { background: 'var(--color-bg-card)', border: '1px solid var(--color-brand-border)', borderRadius: 14, padding: '16px 18px' }
+const card: React.CSSProperties = { background: 'var(--color-bg-card)', border: '1px solid var(--color-brand-border)', borderRadius: 14, padding: '16px 18px', display: 'flex', flexDirection: 'column' }
 const cardHead: React.CSSProperties = { display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }
 const cardTitle: React.CSSProperties = { fontSize: 14, fontWeight: 700, color: 'var(--color-text)' }
 const seeAll: React.CSSProperties = { fontSize: 11.5, color: 'var(--color-brand)', textDecoration: 'none', fontWeight: 600 }
@@ -45,7 +45,7 @@ export default function MypageDashboard({ novels, historyItems, bookmarkedNovels
   ]
 
   return (
-    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: 16, alignItems: 'start' }}>
+    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: 16, alignItems: 'stretch' }}>
 
       {/* 最近の投稿作品 */}
       <div style={card}>
@@ -53,18 +53,13 @@ export default function MypageDashboard({ novels, historyItems, bookmarkedNovels
         {published.length === 0 ? (
           <div style={{ fontSize: 12.5, color: 'var(--color-text-faint)', padding: '10px 0' }}>まだ公開作品がありません</div>
         ) : published.slice(0, 2).map(n => (
-          <Link key={n.id} href={`/mypage/novel/${n.id}`} style={{ display: 'flex', gap: 10, marginBottom: 10, textDecoration: 'none' }}>
-            <div style={{ width: 48, height: 48, borderRadius: 8, background: 'var(--color-bg)', flexShrink: 0, overflow: 'hidden' }}>
-              {n.cover_url && <img src={n.cover_url} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />}
+          <Link key={n.id} href={`/mypage/novel/${n.id}`} style={{ display: 'block', marginBottom: 12, textDecoration: 'none' }}>
+            <div style={{ fontSize: 13.5, fontWeight: 700, color: 'var(--color-text)', marginBottom: 4, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{n.title}</div>
+            <div style={{ display: 'flex', gap: 6, marginBottom: 4, flexWrap: 'wrap' }}>
+              <span style={{ fontSize: 10, color: 'var(--color-brand)', border: '1px solid var(--color-brand-border)', borderRadius: 4, padding: '1px 7px' }}>{n.genre}</span>
+              <span style={{ fontSize: 10, color: 'var(--color-info)', border: '1px solid var(--color-info)', borderRadius: 4, padding: '1px 7px' }}>{n.is_serial ? '連載中' : '完結'}</span>
             </div>
-            <div style={{ flex: 1, minWidth: 0 }}>
-              <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--color-text)', marginBottom: 3, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{n.title}</div>
-              <div style={{ display: 'flex', gap: 6, marginBottom: 3, flexWrap: 'wrap' }}>
-                <span style={{ fontSize: 10, color: 'var(--color-brand)', border: '1px solid var(--color-brand-border)', borderRadius: 4, padding: '0 6px' }}>{n.genre}</span>
-                <span style={{ fontSize: 10, color: 'var(--color-info)', border: '1px solid var(--color-info)', borderRadius: 4, padding: '0 6px' }}>{n.is_serial ? '連載中' : '完結'}</span>
-              </div>
-              <div style={{ fontSize: 11, color: 'var(--color-text-muted)' }}>♡ {novelLikeMap[n.id] || 0}　👁 {(novelViewMap[n.id] || 0).toLocaleString()}</div>
-            </div>
+            <div style={{ fontSize: 11.5, color: 'var(--color-text-muted)' }}>♡ {novelLikeMap[n.id] || 0}　👁 {(novelViewMap[n.id] || 0).toLocaleString()}</div>
           </Link>
         ))}
       </div>
