@@ -109,6 +109,38 @@ export default async function MypagePage() {
   const { data: claimedMissions } = await supabase.from('user_missions').select('mission_id').eq('user_id', user.id)
   const claimedMissionIds = (claimedMissions || []).map((r: any) => r.mission_id)
 
+  // 活動サマリー（今月・先月比）と最近のつぶやき
+  const nowD = new Date()
+  const thisMonthStart = new Date(nowD.getFullYear(), nowD.getMonth(), 1).toISOString()
+  const lastMonthStart = new Date(nowD.getFullYear(), nowD.getMonth() - 1, 1).toISOString()
+  let monthlySummary = { novels: 0, novelsPrev: 0, chars: 0, charsPrev: 0, views: 0, viewsPrev: 0, likes: 0, likesPrev: 0 }
+  let recentTweet: any = null
+  {
+    const [epThis, epLast, myEpsAll, viewThis, viewLast, likeThis, likeLast, tw] = await Promise.all([
+      novelIds.length > 0 ? supabase.from('novels').select('id',{count:'exact',head:true}).eq('author_id',user.id).gte('created_at',thisMonthStart) : Promise.resolve({count:0} as any),
+      novelIds.length > 0 ? supabase.from('novels').select('id',{count:'exact',head:true}).eq('author_id',user.id).gte('created_at',lastMonthStart).lt('created_at',thisMonthStart) : Promise.resolve({count:0} as any),
+      novelIds.length > 0 ? supabase.from('episodes').select('body, created_at').in('novel_id',novelIds) : Promise.resolve({ data: [] } as any),
+      novelIds.length > 0 ? supabase.from('page_views').select('id',{count:'exact',head:true}).in('novel_id',novelIds).gte('created_at',thisMonthStart) : Promise.resolve({count:0} as any),
+      novelIds.length > 0 ? supabase.from('page_views').select('id',{count:'exact',head:true}).in('novel_id',novelIds).gte('created_at',lastMonthStart).lt('created_at',thisMonthStart) : Promise.resolve({count:0} as any),
+      novelIds.length > 0 ? supabase.from('likes').select('id',{count:'exact',head:true}).in('novel_id',novelIds).gte('created_at',thisMonthStart) : Promise.resolve({count:0} as any),
+      novelIds.length > 0 ? supabase.from('likes').select('id',{count:'exact',head:true}).in('novel_id',novelIds).gte('created_at',lastMonthStart).lt('created_at',thisMonthStart) : Promise.resolve({count:0} as any),
+      supabase.from('tweets').select('id, body, created_at, like_count, reply_count').eq('user_id',user.id).order('created_at',{ascending:false}).limit(1),
+    ])
+    let charsThis = 0, charsPrev = 0
+    ;(myEpsAll.data || []).forEach((e: any) => {
+      const len = (e.body || '').length
+      if (e.created_at >= thisMonthStart) charsThis += len
+      else if (e.created_at >= lastMonthStart && e.created_at < thisMonthStart) charsPrev += len
+    })
+    monthlySummary = {
+      novels: epThis.count || 0, novelsPrev: epLast.count || 0,
+      chars: charsThis, charsPrev: charsPrev,
+      views: viewThis.count || 0, viewsPrev: viewLast.count || 0,
+      likes: likeThis.count || 0, likesPrev: likeLast.count || 0,
+    }
+    recentTweet = tw.data?.[0] || null
+  }
+
   // 閲覧履歴
   const { data: views } = await supabase
     .from('page_views').select('episode_id, novel_id, viewed_at')
@@ -228,6 +260,8 @@ export default async function MypagePage() {
       novelViewMap={novelViewMap}
       novelEpCountMap={novelEpCountMap}
       bmAuthorMap={bmAuthorMap}
+      monthlySummary={monthlySummary}
+      recentTweet={recentTweet}
     />
   )
 }

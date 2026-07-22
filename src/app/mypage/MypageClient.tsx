@@ -8,6 +8,7 @@ import Link from 'next/link'
 import Header from '@/components/layout/Header'
 import type { Profile, Novel } from '@/types'
 import MissionClient from './MissionClient'
+import MypageDashboard from './MypageDashboard'
 import TweetSection from '@/components/TweetSection'
 import StoryBoard from '@/components/StoryBoard'
 import ChapterEditModal from './ChapterEditModal'
@@ -40,6 +41,8 @@ interface Props {
   charCountMap?: Record<string,number>
   likeMap?: Record<string,number>
   missionStats?: MissionStats
+  monthlySummary?: any
+  recentTweet?: any
   novelLikeMap?: Record<string,number>
   postDates?: string[]
   novelCommentMap?: Record<string,number>
@@ -487,6 +490,24 @@ export default function MypageClient({
           </div>
         </div>
       )}
+
+      <div style={{marginTop:20}}>
+        <MypageDashboard
+          novels={novels}
+          historyItems={historyItems}
+          bookmarkedNovels={bookmarkedNovels}
+          bmAuthorMap={bmAuthorMap}
+          novelLikeMap={novelLikeMap}
+          novelViewMap={novelViewMap}
+          missionStats={missionStats}
+          claimedMissionIds={claimedMissionIds}
+          isWriter={isWriterRole}
+          monthlySummary={monthlySummary || { novels:0,novelsPrev:0,chars:0,charsPrev:0,views:0,viewsPrev:0,likes:0,likesPrev:0 }}
+          recentTweet={recentTweet}
+          onEditName={()=>setEditingName(true)}
+          onEditBio={()=>setShowBioModal(true)}
+        />
+      </div>
     </div>
   )
 
