@@ -31,8 +31,8 @@ function fmtDate(s?: string) {
   const diff = Math.floor((now - d.getTime()) / 86400000)
   if (diff <= 0) return '今日'
   if (diff === 1) return '1日前'
-  if (diff < 30) return `${diff}日前`
-  return `${d.getFullYear()}/${d.getMonth() + 1}/${d.getDate()}`
+  if (diff === 2) return '2日前'
+  return `${d.getMonth() + 1}/${d.getDate()}`
 }
 
 function diffLabel(cur: number, prev: number) {
@@ -66,8 +66,7 @@ export default function MypageDashboard({ novels, historyItems, bookmarkedNovels
             <span style={{ fontSize: 10, color: 'var(--color-brand)', border: '1px solid var(--color-brand-border)', borderRadius: 4, padding: '1px 7px' }}>{n.genre}</span>
             <span style={{ fontSize: 10, color: 'var(--color-info)', border: '1px solid var(--color-info)', borderRadius: 4, padding: '1px 7px' }}>{n.is_serial ? '連載中' : '完結'}</span>
           </div>
-          <div style={{ fontSize: 11.5, color: 'var(--color-text-muted)', marginBottom: 2 }}>{(charCountMap[n.id] || 0).toLocaleString()}文字　{fmtDate(n.updated_at)}更新</div>
-          <div style={{ fontSize: 11.5, color: 'var(--color-text-muted)' }}>♡ {novelLikeMap[n.id] || 0}　👁 {(novelViewMap[n.id] || 0).toLocaleString()}</div>
+          <div style={{ fontSize: 11.5, color: 'var(--color-text-muted)' }}>{(charCountMap[n.id] || 0).toLocaleString()}文字　♡ {novelLikeMap[n.id] || 0}　👁 {(novelViewMap[n.id] || 0).toLocaleString()}　{fmtDate(n.updated_at)}更新</div>
         </Link>
       ))}
     </div>

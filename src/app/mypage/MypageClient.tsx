@@ -464,7 +464,7 @@ export default function MypageClient({
         </div>
         <div style={{flex:'1 1 240px',minWidth:220,display:'flex',flexDirection:'column',gap:12,alignItems:'flex-end'}}>
           {profile.bio && <div style={{fontSize:13,color:'var(--color-text)',lineHeight:1.8}}>{profile.bio}</div>}
-          <div style={{display:'flex',gap:8,flexWrap:'wrap'}}>
+          <div style={{display:'flex',gap:8,flexWrap:'wrap',marginLeft:'auto',justifyContent:'flex-end'}}>
             <button onClick={()=>setEditingName(true)} style={{fontSize:12.5,border:'1px solid var(--color-brand-border)',padding:'8px 16px',borderRadius:8,background:'var(--color-bg-card)',color:'var(--color-text-muted)',cursor:'pointer'}}>名前を変更</button>
             <button onClick={()=>setShowBioModal(true)} style={{fontSize:12.5,border:'1px solid var(--color-brand-border)',padding:'8px 16px',borderRadius:8,background:'var(--color-bg-card)',color:'var(--color-text-muted)',cursor:'pointer'}}>自己紹介を編集</button>
             <Link href={`/author/${profile.user_id}`} style={{fontSize:12.5,padding:'8px 16px',borderRadius:8,background:'var(--color-brand)',color:'#fff',textDecoration:'none',fontWeight:700}}>公開ページを見る →</Link>
