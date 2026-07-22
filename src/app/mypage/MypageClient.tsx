@@ -462,23 +462,23 @@ export default function MypageClient({
           </div>
         </div>
       </div>
-      {(unreadFeedback>0 || unreadRanking>0) && (
-            <div style={{marginBottom:20,border:'1px solid #fecaca',borderRadius:10,overflow:'hidden'}}>
-              <div style={{fontSize:11,fontWeight:700,color:'#dc2626',background:'#fef2f2',padding:'6px 14px'}}>新着通知</div>
-              {unreadFeedback>0 && (
-                <Link href="/mypage/comments" style={{display:'flex',alignItems:'center',justifyContent:'space-between',gap:8,padding:'11px 14px',textDecoration:'none',borderTop:'1px solid #fee2e2'}}>
-                  <span style={{fontSize:13,fontWeight:700,color:'#dc2626'}}>新しい感想が届いています（{unreadFeedback}）</span>
-                  <span style={{fontSize:12,color:'#dc2626'}}>→</span>
-                </Link>
-              )}
-              {unreadRanking>0 && (
-                <Link href="/mypage/ranking-history" style={{display:'flex',alignItems:'center',justifyContent:'space-between',gap:8,padding:'11px 14px',textDecoration:'none',borderTop:'1px solid #fee2e2'}}>
-                  <span style={{fontSize:13,fontWeight:700,color:'#dc2626'}}>ランクインしました！（{unreadRanking}）</span>
-                  <span style={{fontSize:12,color:'#dc2626'}}>→</span>
-                </Link>
-              )}
-            </div>
+      {(unreadFeedback > 0 || unreadRanking > 0) && (
+        <div style={{marginBottom:20,border:'1px solid #fecaca',borderRadius:10,overflow:'hidden'}}>
+          <div style={{fontSize:11,fontWeight:700,color:'#dc2626',background:'#fef2f2',padding:'6px 14px'}}>新着通知</div>
+          {unreadFeedback > 0 && (
+            <Link href="/mypage/comments" style={{display:'flex',alignItems:'center',justifyContent:'space-between',gap:8,padding:'11px 14px',textDecoration:'none',borderTop:'1px solid #fee2e2'}}>
+              <span style={{fontSize:13,fontWeight:700,color:'#dc2626'}}>新しい感想が届いています（{unreadFeedback}）</span>
+              <span style={{fontSize:12,color:'#dc2626'}}>→</span>
+            </Link>
           )}
+          {unreadRanking > 0 && (
+            <Link href="/mypage/ranking-history" style={{display:'flex',alignItems:'center',justifyContent:'space-between',gap:8,padding:'11px 14px',textDecoration:'none',borderTop:'1px solid #fee2e2'}}>
+              <span style={{fontSize:13,fontWeight:700,color:'#dc2626'}}>ランクインしました！（{unreadRanking}）</span>
+              <span style={{fontSize:12,color:'#dc2626'}}>→</span>
+            </Link>
+          )}
+        </div>
+      )}
       </div>
       {followingAuthors.length > 0 && (
         <div style={{marginTop:16}}>
