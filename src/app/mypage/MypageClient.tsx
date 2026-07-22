@@ -918,7 +918,49 @@ export default function MypageClient({
         <div style={{fontSize:22,fontWeight:700,color:'var(--color-text)'}}>つぶやき</div>
         <div style={{fontSize:12.5,color:'var(--color-text-muted)',marginTop:4}}>近況や作品の進捗を、気軽に共有しましょう。</div>
       </div>
-      <TweetSection authorId={profile.user_id} currentUserId={profile.user_id} currentUserName={profile.display_name} currentUserIconUrl={profile.icon_url||null} isOwner={true}/>
+      <div style={{display:'flex',gap:20,alignItems:'flex-start',flexWrap:'wrap'}}>
+        {/* 左：つぶやき本体 */}
+        <div style={{flex:'1 1 480px',minWidth:300}}>
+          <TweetSection authorId={profile.user_id} currentUserId={profile.user_id} currentUserName={profile.display_name} currentUserIconUrl={profile.icon_url||null} isOwner={true}/>
+        </div>
+        {/* 右：サイドパネル */}
+        <div style={{flex:'0 1 300px',minWidth:260,display:'flex',flexDirection:'column',gap:16}}>
+          {/* よく絡む作者 */}
+          {followingAuthors.length > 0 && (
+            <div style={{background:'var(--color-bg-card)',border:'1px solid var(--color-brand-border)',borderRadius:12,padding:'16px 18px'}}>
+              <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',marginBottom:12}}>
+                <span style={{fontSize:14,fontWeight:700,color:'var(--color-text)'}}>よく絡む作者</span>
+                <a href={`/author/${profile.user_id}/following`} style={{fontSize:11.5,color:'var(--color-brand)',textDecoration:'none',fontWeight:600}}>すべて見る →</a>
+              </div>
+              {followingAuthors.slice(0,5).map((a:any)=>(
+                <a key={a.user_id} href={`/author/${a.user_id}`} style={{display:'flex',alignItems:'center',gap:10,marginBottom:12,textDecoration:'none'}}>
+                  {a.icon_url
+                    ? <img src={a.icon_url} style={{width:36,height:36,borderRadius:'50%',objectFit:'cover',flexShrink:0}} alt=""/>
+                    : <div style={{width:36,height:36,borderRadius:'50%',background:'var(--color-brand-border)',display:'flex',alignItems:'center',justifyContent:'center',fontSize:13,color:'var(--color-brand)',fontWeight:700,flexShrink:0}}>{a.display_name?.[0]}</div>}
+                  <div style={{minWidth:0}}>
+                    <div style={{fontSize:13,fontWeight:600,color:'var(--color-text)',overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap'}}>{a.display_name}</div>
+                    <div style={{fontSize:11,color:'var(--color-brand)'}}>フォロー中</div>
+                  </div>
+                </a>
+              ))}
+            </div>
+          )}
+          {/* つぶやきのヒント */}
+          <div style={{background:'var(--color-bg-card)',border:'1px solid var(--color-brand-border)',borderRadius:12,padding:'16px 18px'}}>
+            <div style={{fontSize:14,fontWeight:700,color:'var(--color-text)',marginBottom:14}}>つぶやきのヒント</div>
+            {[
+              {t:'進捗を共有しよう',d:'書き終えた章や、これからの展開を気軽につぶやいてみましょう。'},
+              {t:'他の作者と交流しよう',d:'感想や応援の言葉で、創作の輪を広げてみましょう。'},
+              {t:'ハッシュタグを使おう',d:'#執筆ログ や #創作メモ などで見つけてもらいやすくなります。'},
+            ].map((h,i,arr)=>(
+              <div key={h.t} style={{marginBottom:i<arr.length-1?14:0}}>
+                <div style={{fontSize:12.5,fontWeight:700,color:'var(--color-text)',marginBottom:3}}>{h.t}</div>
+                <div style={{fontSize:11.5,color:'var(--color-text-muted)',lineHeight:1.6}}>{h.d}</div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
     </div>
   )
 
