@@ -146,6 +146,7 @@ export default function MypageClient({
   }
   const [myNovels,       setMyNovels]       = useState(initialNovels)
   const [expandedWork,   setExpandedWork]   = useState<string | null>(null)
+  const [worksFilter,    setWorksFilter]    = useState<'all'|'published'|'serial'|'completed'|'short'|'draft'>('all')
   const [workEpisodes,   setWorkEpisodes]   = useState<Record<string, any[]>>({})
   const [loadingEps,     setLoadingEps]     = useState<string | null>(null)
   const [editMenuOpen,   setEditMenuOpen]   = useState<string | null>(null)
@@ -586,12 +587,40 @@ export default function MypageClient({
           <Link href="/post" style={{background:'var(--color-brand)',color:'#fff',fontSize:12,fontWeight:700,padding:'7px 16px',borderRadius:16,textDecoration:'none'}}>＋ 新しく投稿する</Link>
         </div>
       </div>
+
+      {/* フィルタ */}
+      <div style={{display:'flex',gap:6,marginBottom:16,flexWrap:'wrap'}}>
+        {([
+          {v:'all',l:'すべて',c:myNovels.length},
+          {v:'published',l:'公開中',c:published.length},
+          {v:'serial',l:'連載中',c:myNovels.filter(n=>n.published&&(n as any).is_serial).length},
+          {v:'completed',l:'完結',c:myNovels.filter(n=>n.published&&!(n as any).is_serial).length},
+          {v:'short',l:'短編',c:myNovels.filter(n=>(n as any).novel_type==='短編').length},
+          {v:'draft',l:'下書き',c:drafts.length},
+        ] as const).map(({v,l,c})=>(
+          <button key={v} onClick={()=>setWorksFilter(v as any)}
+            style={{fontSize:12,fontWeight:worksFilter===v?700:500,padding:'6px 14px',borderRadius:16,cursor:'pointer',
+              border:`1px solid ${worksFilter===v?'var(--color-brand)':'var(--color-brand-border)'}`,
+              background:worksFilter===v?'var(--color-brand)':'var(--color-bg-card)',
+              color:worksFilter===v?'#fff':'var(--color-text-muted)'}}>
+            {l} {c}
+          </button>
+        ))}
+      </div>
       {myNovels.length === 0 ? (
         <div style={{textAlign:'center',padding:'60px 0',color:'var(--color-text-muted)'}}>
           <div style={{fontSize:14,marginBottom:6}}>まだ投稿作品がありません</div>
           <Link href="/post" style={{background:'var(--color-brand)',color:'#fff',fontSize:13,fontWeight:700,padding:'10px 24px',borderRadius:20,display:'inline-block',textDecoration:'none',marginTop:12}}>最初の作品を投稿する</Link>
         </div>
-      ) : myNovels.map((novel, i) => (
+      ) : myNovels.filter(n => {
+        if (worksFilter==='all') return true
+        if (worksFilter==='published') return n.published
+        if (worksFilter==='serial') return n.published && (n as any).is_serial
+        if (worksFilter==='completed') return n.published && !(n as any).is_serial
+        if (worksFilter==='short') return (n as any).novel_type==='短編'
+        if (worksFilter==='draft') return !n.published
+        return true
+      }).map((novel, i) => (
         <div key={novel.id} style={{border:'1px solid var(--color-brand-border)',borderRadius:12,overflow:editMenuOpen===novel.id?'visible':'hidden',marginBottom:14,background:'var(--color-bg-card)'}}>
           {/* 作品ヘッダー部分 */}
           <div style={{padding:'16px 18px',borderBottom:'1px solid var(--color-brand-light)'}}>
@@ -603,7 +632,15 @@ export default function MypageClient({
                   <span style={{fontSize:10,background:'var(--color-brand-light)',color:'var(--color-brand)',border:'1px solid var(--color-tag-border)',padding:'2px 9px',borderRadius:4}}>{novel.genre}</span>
                   {(novel as any).novel_type && <span style={{fontSize:10,background:'var(--color-info-bg)',color:'var(--color-info)',border:'1px solid var(--color-info-border)',padding:'2px 9px',borderRadius:4}}>{(novel as any).novel_type}</span>}
                 </div>
-                <div style={{fontSize:16,fontWeight:700,color:'var(--color-text)',lineHeight:1.4}}>{novel.title}</div>
+                <div style={{fontSize:16,fontWeight:700,color:'var(--color-text)',lineHeight:1.4,marginBottom:6}}>{novel.title}</div>
+                {(novel as any).summary && <div style={{fontSize:12.5,color:'var(--color-text-muted)',lineHeight:1.6,marginBottom:8,display:'-webkit-box',WebkitLineClamp:2,WebkitBoxOrient:'vertical' as any,overflow:'hidden'}}>{(novel as any).summary}</div>}
+                {/* 数値（下書きは—表示） */}
+                <div style={{display:'flex',gap:18,flexWrap:'wrap'}}>
+                  <span style={{fontSize:12,color:'var(--color-text-muted)'}}><strong style={{color:'var(--color-text)'}}>{(charCountMap[novel.id]||0).toLocaleString()}</strong> 文字</span>
+                  <span style={{fontSize:12,color:'var(--color-text-muted)'}}><strong style={{color:'var(--color-text)'}}>{novel.published?(novelViewMap[novel.id]||0).toLocaleString():'—'}</strong> 閲覧</span>
+                  <span style={{fontSize:12,color:'var(--color-text-muted)'}}><strong style={{color:'var(--color-text)'}}>{novel.published?(novelLikeMap[novel.id]||0):'—'}</strong> いいね</span>
+                  <span style={{fontSize:12,color:'var(--color-text-muted)'}}><strong style={{color:'var(--color-text)'}}>{novel.published?(novelCommentMap[novel.id]||0):'—'}</strong> コメント</span>
+                </div>
               </div>
               {/* 下矢印（話一覧展開） */}
               <button onClick={()=>toggleWorkExpand(novel.id)}
