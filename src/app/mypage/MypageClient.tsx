@@ -250,6 +250,8 @@ export default function MypageClient({
   }
   function fmtNum(n:number) { return n>=10000?`${(n/10000).toFixed(1)}万`:n.toString() }
   function fmtChars(n:number) { return n>=10000?`${(n/10000).toFixed(1)}万文字`:`${n.toLocaleString()}文字` }
+  function fmtDateTime(s?:string) { if(!s) return '—'; const d=new Date(s); return `${d.getFullYear()}/${String(d.getMonth()+1).padStart(2,'0')}/${String(d.getDate()).padStart(2,'0')} ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}` }
+  function fmtDateShort(s?:string) { if(!s) return '—'; const d=new Date(s); return `${d.getFullYear()}/${String(d.getMonth()+1).padStart(2,'0')}/${String(d.getDate()).padStart(2,'0')}` }
 
   async function handleSaveGender(val: string) {
     setGender(val)
@@ -612,7 +614,9 @@ export default function MypageClient({
           <div style={{fontSize:14,marginBottom:6}}>まだ投稿作品がありません</div>
           <Link href="/post" style={{background:'var(--color-brand)',color:'#fff',fontSize:13,fontWeight:700,padding:'10px 24px',borderRadius:20,display:'inline-block',textDecoration:'none',marginTop:12}}>最初の作品を投稿する</Link>
         </div>
-      ) : myNovels.filter(n => {
+      ) : (
+      <div style={{background:'var(--color-bg-card)',border:'1px solid var(--color-brand-border)',borderRadius:12,overflow:'hidden'}}>
+      {myNovels.filter(n => {
         if (worksFilter==='all') return true
         if (worksFilter==='published') return n.published
         if (worksFilter==='serial') return n.published && (n as any).is_serial
@@ -621,61 +625,75 @@ export default function MypageClient({
         if (worksFilter==='draft') return !n.published
         return true
       }).map((novel, i) => (
-        <div key={novel.id} style={{border:'1px solid var(--color-brand-border)',borderRadius:12,overflow:editMenuOpen===novel.id?'visible':'hidden',marginBottom:14,background:'var(--color-bg-card)'}}>
-          {/* 作品ヘッダー部分 */}
-          <div style={{padding:'16px 18px',borderBottom:'1px solid var(--color-brand-light)'}}>
-            <div style={{display:'flex',alignItems:'flex-start',gap:10}}>
-              <div style={{flex:1,minWidth:0,cursor:'pointer'}} onClick={()=>router.push(`/mypage/novel/${novel.id}`)}>
-                <div style={{display:'flex',gap:6,marginBottom:8,flexWrap:'wrap',alignItems:'center'}}>
-                  <span style={{fontSize:10,fontWeight:700,color:'#fff',background:novel.published?'var(--color-info)':'var(--color-text-faint)',padding:'2px 9px',borderRadius:4}}>{novel.published?'公開中':'下書き'}</span>
-                  <span style={{fontSize:10,fontWeight:700,color:(novel as any).is_serial?'var(--color-success)':'var(--color-text-muted)',background:(novel as any).is_serial?'#e8f5e9':'#f5f5f5',border:`1px solid ${(novel as any).is_serial?'#a5d6a7':'#e0e0e0'}`,padding:'2px 9px',borderRadius:4}}>{(novel as any).is_serial?'連載中':'完結'}</span>
-                  <span style={{fontSize:10,background:'var(--color-brand-light)',color:'var(--color-brand)',border:'1px solid var(--color-tag-border)',padding:'2px 9px',borderRadius:4}}>{novel.genre}</span>
-                  {(novel as any).novel_type && <span style={{fontSize:10,background:'var(--color-info-bg)',color:'var(--color-info)',border:'1px solid var(--color-info-border)',padding:'2px 9px',borderRadius:4}}>{(novel as any).novel_type}</span>}
-                </div>
-                <div style={{fontSize:16,fontWeight:700,color:'var(--color-text)',lineHeight:1.4,marginBottom:6}}>{novel.title}</div>
-                {(novel as any).summary && <div style={{fontSize:12.5,color:'var(--color-text-muted)',lineHeight:1.6,marginBottom:8,display:'-webkit-box',WebkitLineClamp:2,WebkitBoxOrient:'vertical' as any,overflow:'hidden'}}>{(novel as any).summary}</div>}
-                {/* 数値（下書きは—表示） */}
-                <div style={{display:'flex',gap:18,flexWrap:'wrap'}}>
-                  <span style={{fontSize:12,color:'var(--color-text-muted)'}}><strong style={{color:'var(--color-text)'}}>{(charCountMap[novel.id]||0).toLocaleString()}</strong> 文字</span>
-                  <span style={{fontSize:12,color:'var(--color-text-muted)'}}><strong style={{color:'var(--color-text)'}}>{novel.published?(novelViewMap[novel.id]||0).toLocaleString():'—'}</strong> 閲覧</span>
-                  <span style={{fontSize:12,color:'var(--color-text-muted)'}}><strong style={{color:'var(--color-text)'}}>{novel.published?(novelLikeMap[novel.id]||0):'—'}</strong> いいね</span>
-                  <span style={{fontSize:12,color:'var(--color-text-muted)'}}><strong style={{color:'var(--color-text)'}}>{novel.published?(novelCommentMap[novel.id]||0):'—'}</strong> コメント</span>
-                </div>
+        <div key={novel.id} style={{borderTop:i>0?'1px solid var(--color-brand-light)':'none'}}>
+          {/* 横長の作品行：作品情報 | 数値 | 操作 */}
+          <div style={{display:'grid',gridTemplateColumns:'minmax(0,1fr) auto 172px',gap:24,alignItems:'center',padding:'20px 24px'}}>
+            {/* 左：作品情報 */}
+            <div style={{minWidth:0,cursor:'pointer'}} onClick={()=>router.push(`/mypage/novel/${novel.id}`)}>
+              <div style={{fontSize:17,fontWeight:700,color:'var(--color-text)',lineHeight:1.4,marginBottom:8,overflowWrap:'anywhere' as any}}>{novel.title}</div>
+              <div style={{display:'flex',gap:6,marginBottom:10,flexWrap:'wrap',alignItems:'center'}}>
+                <span style={{fontSize:10,fontWeight:700,color:'#fff',background:novel.published?'var(--color-info)':'var(--color-text-faint)',padding:'2px 9px',borderRadius:4}}>{novel.published?'公開中':'下書き'}</span>
+                <span style={{fontSize:10,fontWeight:700,color:(novel as any).is_serial?'var(--color-success)':'var(--color-text-muted)',background:(novel as any).is_serial?'#e8f5e9':'#f5f5f5',border:`1px solid ${(novel as any).is_serial?'#a5d6a7':'#e0e0e0'}`,padding:'2px 9px',borderRadius:4}}>{(novel as any).is_serial?'連載中':'完結'}</span>
+                <span style={{fontSize:10,background:'var(--color-brand-light)',color:'var(--color-brand)',border:'1px solid var(--color-tag-border)',padding:'2px 9px',borderRadius:4}}>{novel.genre}</span>
+                {(novel as any).novel_type && <span style={{fontSize:10,background:'var(--color-info-bg)',color:'var(--color-info)',border:'1px solid var(--color-info-border)',padding:'2px 9px',borderRadius:4}}>{(novel as any).novel_type}</span>}
               </div>
-              {/* 下矢印（話一覧展開） */}
-              <button onClick={()=>toggleWorkExpand(novel.id)}
-                style={{flexShrink:0,width:36,height:36,borderRadius:8,border:'1px solid var(--color-brand-border)',background:'var(--color-bg)',cursor:'pointer',display:'flex',alignItems:'center',justifyContent:'center'}}
-                title="話一覧を表示">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--color-brand)" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"
-                  style={{transform:expandedWork===novel.id?'rotate(180deg)':'rotate(0deg)',transition:'transform .2s'}}>
-                  <polyline points="6 9 12 15 18 9"/>
-                </svg>
+              {(novel as any).summary && <div style={{fontSize:12.5,color:'var(--color-text-muted)',lineHeight:1.6,marginBottom:10,maxWidth:620,display:'-webkit-box',WebkitLineClamp:2,WebkitBoxOrient:'vertical' as any,overflow:'hidden',overflowWrap:'anywhere' as any,wordBreak:'break-word'}}>{(novel as any).summary}</div>}
+              <div style={{fontSize:12,color:'var(--color-text-faint)'}}>
+                最終更新：{fmtDateTime((novel as any).updated_at)}
+                {novel.published
+                  ? `｜連載開始：${fmtDateShort((novel as any).created_at)}`
+                  : `｜作成日：${fmtDateShort((novel as any).created_at)}`}
+                <button onClick={(e)=>{e.stopPropagation();toggleWorkExpand(novel.id)}}
+                  style={{marginLeft:10,fontSize:11,color:'var(--color-brand)',background:'none',border:'none',cursor:'pointer',fontWeight:600}}>
+                  話一覧 {expandedWork===novel.id?'▲':'▼'}
+                </button>
+              </div>
+            </div>
+            {/* 中央：数値（4項目・縦線区切り） */}
+            <div style={{display:'grid',gridTemplateColumns:'repeat(4, minmax(64px, 1fr))'}}>
+              {[
+                {v:(charCountMap[novel.id]||0).toLocaleString(), l:'文字数'},
+                {v:novel.published?(novelViewMap[novel.id]||0).toLocaleString():'—', l:'閲覧数'},
+                {v:novel.published?(novelLikeMap[novel.id]||0):'—', l:'いいね'},
+                {v:novel.published?(novelCommentMap[novel.id]||0):'—', l:'コメント'},
+              ].map((s,idx)=>(
+                <div key={s.l} style={{textAlign:'center',padding:'0 14px',borderLeft:idx>0?'1px solid var(--color-brand-light)':'none'}}>
+                  <div style={{fontSize:16,fontWeight:700,color:'var(--color-text)'}}>{s.v}</div>
+                  <div style={{fontSize:11,color:'var(--color-text-muted)',marginTop:5}}>{s.l}</div>
+                </div>
+              ))}
+            </div>
+            {/* 右：操作ボタン（縦並び） */}
+            <div style={{display:'flex',flexDirection:'column',gap:8,alignItems:'stretch'}}>
+              <button onClick={()=>router.push(`/mypage/novel/${novel.id}`)}
+                style={{fontSize:12,fontWeight:700,border:'none',padding:'9px 14px',borderRadius:8,color:'#fff',background:'var(--color-brand)',cursor:'pointer'}}>
+                作品を管理する
               </button>
+              <Link href={`/novel/${novel.id}`}
+                style={{fontSize:12,fontWeight:600,border:'1px solid var(--color-brand-border)',padding:'9px 14px',borderRadius:8,color:'var(--color-brand)',background:'var(--color-bg-card)',textDecoration:'none',textAlign:'center' as const}}>
+                作品ページへ →
+              </Link>
             </div>
           </div>
 
           {/* 話一覧（展開時） */}
           {expandedWork===novel.id && (
-            <div style={{borderBottom:'1px solid var(--color-brand-light)',background:'var(--color-bg)'}}>
+            <div style={{borderTop:'1px solid var(--color-brand-light)',background:'var(--color-bg)'}}>
               {loadingEps===novel.id ? (
                 <div style={{padding:'20px',textAlign:'center',fontSize:12,color:'var(--color-text-muted)'}}>読み込み中...</div>
               ) : (workEpisodes[novel.id] || []).length === 0 ? (
                 <div style={{padding:'20px',textAlign:'center',fontSize:12,color:'var(--color-text-faint)'}}>話がありません</div>
               ) : (
                 <>
-                  <div style={{display:'flex',padding:'8px 18px',borderBottom:'1px solid var(--color-brand-light)',fontSize:10,color:'var(--color-text-faint)',fontWeight:600}}>
+                  <div style={{display:'flex',padding:'8px 24px',borderBottom:'1px solid var(--color-brand-light)',fontSize:10,color:'var(--color-text-faint)',fontWeight:600}}>
                     <span style={{flex:1}}>エピソード</span>
                     <span style={{width:56,textAlign:'right'}}>文字数</span>
                     <span style={{width:40,textAlign:'right'}}>PV</span>
-                    <span style={{width:36,textAlign:'right',display:'inline-flex',justifyContent:'flex-end',alignItems:'center'}}>
-                      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
-                    </span>
-                    <span style={{width:36,textAlign:'right',display:'inline-flex',justifyContent:'flex-end',alignItems:'center'}}>
-                      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
-                    </span>
+                    <span style={{width:36,textAlign:'right'}}>♡</span>
+                    <span style={{width:36,textAlign:'right'}}>💬</span>
                   </div>
                   {(workEpisodes[novel.id] || []).map((ep: any) => (
-                    <div key={ep.id} style={{display:'flex',alignItems:'center',padding:'10px 18px',borderBottom:'1px solid var(--color-brand-light)'}}>
+                    <div key={ep.id} style={{display:'flex',alignItems:'center',padding:'10px 24px',borderBottom:'1px solid var(--color-brand-light)'}}>
                       <div style={{flex:1,minWidth:0}}>
                         <div style={{display:'flex',alignItems:'center',gap:6}}>
                           <span style={{fontSize:10,color:'#fff',background:ep.published===false?'var(--color-text-faint)':'var(--color-info)',padding:'1px 6px',borderRadius:3,flexShrink:0}}>{ep.published===false?'下書':'公開'}</span>
@@ -693,21 +711,10 @@ export default function MypageClient({
               )}
             </div>
           )}
-
-          {/* 操作ボタン部分（機能は個々の作品管理ページに集約） */}
-          <div style={{padding:'12px 18px',background:'var(--color-bg)',display:'flex',gap:8,flexWrap:'wrap',alignItems:'center',justifyContent:'space-between'}}>
-            <button onClick={()=>router.push(`/mypage/novel/${novel.id}`)}
-              style={{display:'inline-flex',alignItems:'center',gap:5,fontSize:12,fontWeight:700,border:'none',padding:'8px 16px',borderRadius:8,color:'#fff',background:'var(--color-brand)',cursor:'pointer'}}>
-              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/></svg>
-              作品を管理する
-            </button>
-            <Link href={`/novel/${novel.id}`}
-              style={{display:'inline-flex',alignItems:'center',gap:5,fontSize:12,fontWeight:600,border:'1px solid var(--color-brand-border)',padding:'8px 16px',borderRadius:8,color:'var(--color-brand)',background:'var(--color-bg-card)',textDecoration:'none'}}>
-              作品ページへ →
-            </Link>
-          </div>
         </div>
       ))}
+      </div>
+      )}
     </div>
   )
 
