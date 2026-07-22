@@ -859,48 +859,55 @@ export default function MypageClient({
       </div>
       {historyItems.length === 0 ? (
         <div style={{textAlign:'center',padding:'40px',color:'var(--color-text-muted)',fontSize:13}}>まだ閲覧履歴がありません</div>
-      ) : historyItems.map((item:any) => (
-        <div key={item.novelId} style={{borderBottom:'1px solid var(--color-brand-border)',paddingBottom:14,marginBottom:14}}>
-          <div style={{display:'flex',gap:5,marginBottom:5,flexWrap:'wrap',alignItems:'center'}}>
-            <span style={{fontSize:10,background:'var(--color-brand-light)',color:'var(--color-brand)',border:'1px solid var(--color-tag-border)',padding:'1px 6px',borderRadius:3}}>{item.genre}</span>
-            {item.novelType && <span style={{fontSize:10,background:'var(--color-info-bg)',color:'var(--color-info)',border:'1px solid var(--color-info-border)',padding:'1px 6px',borderRadius:3}}>{item.novelType}</span>}
-            {item.isSerial
-              ? <span style={{fontSize:10,background:'#f0fdf4',color:'#15803d',border:'1px solid #86efac',padding:'1px 6px',borderRadius:3}}>連載中</span>
-              : <span style={{fontSize:10,background:'#f5f5f5',color:'#757575',border:'1px solid #e0e0e0',padding:'1px 6px',borderRadius:3}}>完結</span>}
-          </div>
-          <a href={`/novel/${item.novelId}`} className="history-title" style={{textDecoration:'none',color:'var(--color-text)',display:'block',marginBottom:2}}>
-            <div style={{fontSize:15,fontWeight:700,color:'var(--color-text)',lineHeight:1.4}}>{item.novelTitle}</div>
-          </a>
-          <div style={{fontSize:12,color:'var(--color-text-muted)',marginBottom:5}}>作者：{item.displayName}</div>
-          {item.summary && <div style={{fontSize:12,color:'#5a3a20',lineHeight:1.7,marginBottom:6,overflow:'hidden',display:'-webkit-box',WebkitLineClamp:2,WebkitBoxOrient:'vertical' as any}}>{item.summary}</div>}
-          {item.tags.length > 0 && (
-            <div style={{display:'flex',gap:4,flexWrap:'wrap',marginBottom:6}}>
-              {item.tags.slice(0,4).map((t:string) => (
-                <span key={t} style={{fontSize:10,background:'var(--color-bg)',color:'var(--color-text-muted)',border:'1px solid var(--color-brand-border)',padding:'1px 6px',borderRadius:3}}>#{t}</span>
+      ) : (
+      <div style={{background:'var(--color-bg-card)',border:'1px solid var(--color-brand-border)',borderRadius:12,overflow:'hidden'}}>
+      {historyItems.map((item:any, hi:number) => {
+        const totalEps = novelEpCountMap[item.novelId] || 0
+        return (
+        <div key={item.novelId} style={{display:'grid',gridTemplateColumns:'minmax(0,1fr) 210px',gap:24,alignItems:'center',padding:'18px 22px',borderTop:hi>0?'1px solid var(--color-brand-light)':'none'}}>
+          {/* 左：作品情報 */}
+          <div style={{minWidth:0}}>
+            <a href={`/novel/${item.novelId}`} className="history-title" style={{textDecoration:'none',color:'var(--color-text)',display:'block',marginBottom:3}}>
+              <div style={{fontSize:16,fontWeight:700,color:'var(--color-text)',lineHeight:1.4,overflowWrap:'anywhere' as any}}>{item.novelTitle}</div>
+            </a>
+            <div style={{fontSize:12,color:'var(--color-text-muted)',marginBottom:6}}>作者：{item.displayName}</div>
+            {item.summary && <div style={{fontSize:12,color:'var(--color-text-muted)',lineHeight:1.6,marginBottom:8,maxWidth:620,overflow:'hidden',display:'-webkit-box',WebkitLineClamp:2,WebkitBoxOrient:'vertical' as any,overflowWrap:'anywhere' as any}}>{item.summary}</div>}
+            <div style={{display:'flex',gap:5,flexWrap:'wrap',alignItems:'center'}}>
+              <span style={{fontSize:10,background:'var(--color-brand-light)',color:'var(--color-brand)',border:'1px solid var(--color-tag-border)',padding:'1px 7px',borderRadius:4}}>{item.genre}</span>
+              {item.novelType && <span style={{fontSize:10,background:'var(--color-info-bg)',color:'var(--color-info)',border:'1px solid var(--color-info-border)',padding:'1px 7px',borderRadius:4}}>{item.novelType}</span>}
+              {item.isSerial
+                ? <span style={{fontSize:10,background:'#f0fdf4',color:'#15803d',border:'1px solid #86efac',padding:'1px 7px',borderRadius:4}}>連載中</span>
+                : <span style={{fontSize:10,background:'#f5f5f5',color:'#757575',border:'1px solid #e0e0e0',padding:'1px 7px',borderRadius:4}}>完結</span>}
+              {item.tags.slice(0,3).map((t:string) => (
+                <span key={t} style={{fontSize:10,background:'var(--color-bg)',color:'var(--color-text-muted)',border:'1px solid var(--color-brand-border)',padding:'1px 7px',borderRadius:4}}>#{t}</span>
               ))}
             </div>
-          )}
-          <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',flexWrap:'wrap',gap:8}}>
-            <div style={{display:'flex',gap:10,fontSize:11,color:'var(--color-text-faint)',flexWrap:'wrap'}}>
-              {charCountMap[item.novelId]>0 && <span>{fmtChars(charCountMap[item.novelId])}</span>}
-              <span>{fmtDate(item.viewedAt)}</span>
-              {likeMap[item.novelId]>0 && <span>♡ {likeMap[item.novelId]}</span>}
-            </div>
-            <div style={{display:'flex',gap:6}}>
+          </div>
+          {/* 右：数値＋続きを読む＋進捗 */}
+          <div style={{textAlign:'right'}}>
+            <div style={{fontSize:12,color:'var(--color-text-muted)',marginBottom:2}}>{charCountMap[item.novelId]>0?fmtChars(charCountMap[item.novelId]):''}</div>
+            <div style={{fontSize:11,color:'var(--color-text-faint)',marginBottom:8}}>最終閲覧：{fmtDate(item.viewedAt)}</div>
+            <div style={{display:'flex',gap:6,justifyContent:'flex-end',marginBottom:8}}>
               {firstEpMap[item.novelId] && firstEpMap[item.novelId]!==item.epId && (
                 <Link href={`/novel/${item.novelId}/episode/${firstEpMap[item.novelId]}`}
-                  style={{display:'inline-block',padding:'5px 12px',background:'var(--color-brand)',color:'#fff',borderRadius:12,fontSize:11,fontWeight:600,textDecoration:'none',whiteSpace:'nowrap'}}>
-                  最初から読む
+                  style={{padding:'6px 12px',background:'var(--color-bg-card)',color:'var(--color-brand)',border:'1px solid var(--color-brand-border)',borderRadius:8,fontSize:11,fontWeight:600,textDecoration:'none',whiteSpace:'nowrap'}}>
+                  最初から
                 </Link>
               )}
               <Link href={`/novel/${item.novelId}/episode/${item.epId}`}
-                style={{display:'inline-block',padding:'5px 12px',background:'var(--color-brand)',color:'#fff',borderRadius:12,fontSize:11,fontWeight:600,textDecoration:'none',whiteSpace:'nowrap'}}>
+                style={{padding:'6px 14px',background:'var(--color-brand)',color:'#fff',borderRadius:8,fontSize:11,fontWeight:700,textDecoration:'none',whiteSpace:'nowrap'}}>
                 続きを読む
               </Link>
             </div>
+            {totalEps > 0 && (
+              <div style={{fontSize:11,color:'var(--color-text-faint)'}}>全{totalEps}話</div>
+            )}
           </div>
         </div>
-      ))}
+        )
+      })}
+      </div>
+      )}
     </div>
   )
 
