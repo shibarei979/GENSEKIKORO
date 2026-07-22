@@ -9,6 +9,7 @@ interface Props {
   bmAuthorMap: Record<string, string>
   novelLikeMap: Record<string, number>
   novelViewMap: Record<string, number>
+  charCountMap: Record<string, number>
   missionStats: MissionStats
   claimedMissionIds: string[]
   isWriter: boolean
@@ -24,6 +25,16 @@ const cardTitle: React.CSSProperties = { fontSize: 14, fontWeight: 700, color: '
 const seeAll: React.CSSProperties = { fontSize: 11.5, color: 'var(--color-brand)', textDecoration: 'none', fontWeight: 600 }
 const emptyText: React.CSSProperties = { fontSize: 12.5, color: 'var(--color-text-faint)', padding: '10px 0' }
 
+function fmtDate(s?: string) {
+  if (!s) return ''
+  const d = new Date(s), now = Date.now()
+  const diff = Math.floor((now - d.getTime()) / 86400000)
+  if (diff <= 0) return '今日'
+  if (diff === 1) return '1日前'
+  if (diff < 30) return `${diff}日前`
+  return `${d.getFullYear()}/${d.getMonth() + 1}/${d.getDate()}`
+}
+
 function diffLabel(cur: number, prev: number) {
   const d = cur - prev
   if (d === 0) return <span style={{ fontSize: 11, color: 'var(--color-text-faint)' }}>先月比 ±0</span>
@@ -31,7 +42,7 @@ function diffLabel(cur: number, prev: number) {
   return <span style={{ fontSize: 11, color: up ? 'var(--color-success, #15803d)' : 'var(--color-text-muted)' }}>先月比 {up ? '+' : ''}{d.toLocaleString()}</span>
 }
 
-export default function MypageDashboard({ novels, historyItems, bookmarkedNovels, bmAuthorMap, novelLikeMap, novelViewMap, missionStats, claimedMissionIds, isWriter, monthlySummary, recentTweet }: Props) {
+export default function MypageDashboard({ novels, historyItems, bookmarkedNovels, bmAuthorMap, novelLikeMap, novelViewMap, charCountMap, missionStats, claimedMissionIds, isWriter, monthlySummary, recentTweet }: Props) {
   const published = novels.filter(n => n.published)
   const drafts = novels.filter(n => !n.published)
   const missions = isWriter ? [...READER_MISSIONS, ...WRITER_MISSIONS] : READER_MISSIONS
@@ -55,6 +66,7 @@ export default function MypageDashboard({ novels, historyItems, bookmarkedNovels
             <span style={{ fontSize: 10, color: 'var(--color-brand)', border: '1px solid var(--color-brand-border)', borderRadius: 4, padding: '1px 7px' }}>{n.genre}</span>
             <span style={{ fontSize: 10, color: 'var(--color-info)', border: '1px solid var(--color-info)', borderRadius: 4, padding: '1px 7px' }}>{n.is_serial ? '連載中' : '完結'}</span>
           </div>
+          <div style={{ fontSize: 11.5, color: 'var(--color-text-muted)', marginBottom: 2 }}>{(charCountMap[n.id] || 0).toLocaleString()}文字　{fmtDate(n.updated_at)}更新</div>
           <div style={{ fontSize: 11.5, color: 'var(--color-text-muted)' }}>♡ {novelLikeMap[n.id] || 0}　👁 {(novelViewMap[n.id] || 0).toLocaleString()}</div>
         </Link>
       ))}
@@ -67,7 +79,7 @@ export default function MypageDashboard({ novels, historyItems, bookmarkedNovels
       {drafts.length === 0 ? <div style={emptyText}>下書きはありません</div> : drafts.slice(0, 3).map(n => (
         <Link key={n.id} href={`/mypage/novel/${n.id}`} className="dash-link" style={{ display: 'block', marginBottom: 10, textDecoration: 'none', borderRadius: 6 }}>
           <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--color-text)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{n.title}</div>
-          <div style={{ fontSize: 10.5, color: 'var(--color-text-faint)' }}>{n.genre}</div>
+          <div style={{ fontSize: 10.5, color: 'var(--color-text-faint)' }}>{n.genre}　{(charCountMap[n.id] || 0).toLocaleString()}文字　{fmtDate(n.updated_at)}更新</div>
         </Link>
       ))}
     </div>
