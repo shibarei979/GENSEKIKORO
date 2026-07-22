@@ -493,9 +493,9 @@ export default function MypageClient({
 
       <div style={{marginTop:20}}>
         <MypageDashboard
-          novels={novels}
+          novels={myNovels}
           historyItems={historyItems}
-          bookmarkedNovels={bookmarkedNovels}
+          bookmarkedNovels={myBookmarks}
           bmAuthorMap={bmAuthorMap}
           novelLikeMap={novelLikeMap}
           novelViewMap={novelViewMap}
