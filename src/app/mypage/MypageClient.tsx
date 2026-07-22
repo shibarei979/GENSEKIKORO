@@ -125,7 +125,7 @@ export default function MypageClient({
   historyItems=[], firstEpMap={}, charCountMap={}, likeMap={},
   missionStats={ likeCount:0, discoverCount:0, commentCount:0, bookmarkCount:0, novelCount:0, episodeCount:0, followCount:0 },
   novelLikeMap={}, novelCommentMap={}, novelViewMap={}, novelEpCountMap={}, bmAuthorMap={},
-  postDates=[],
+  postDates=[], monthlySummary=null, recentTweet=null,
 }: Props) {
   const router   = useRouter()
   const supabase = createClient()
