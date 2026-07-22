@@ -108,6 +108,11 @@ export default function MissionClient({ user, stats, initialClaimedIds, isWriter
     if (tab === 'done') return isDone
     if (tab === 'progress') return !isDone
     return true
+  }).sort((a, b) => {
+    // 未クリアを上、クリア済みを下に
+    const aDone = claimed.has(a.id) ? 1 : 0
+    const bDone = claimed.has(b.id) ? 1 : 0
+    return aDone - bDone
   })
 
   return (
