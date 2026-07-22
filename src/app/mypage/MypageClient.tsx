@@ -479,7 +479,6 @@ export default function MypageClient({
           )}
         </div>
       )}
-      </div>
       {followingAuthors.length > 0 && (
         <div style={{marginTop:16}}>
           <div style={{fontSize:12,fontWeight:700,color:'var(--color-text-muted)',marginBottom:8}}>フォロー中の作者（{followingAuthors.length}）</div>
