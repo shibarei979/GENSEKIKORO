@@ -418,48 +418,52 @@ export default function MypageClient({
           <button onClick={()=>setShowBdModal(true)} style={{padding:'6px 14px',background:'var(--color-brand)',color:'#fff',border:'none',borderRadius:8,fontSize:12,fontWeight:600,cursor:'pointer',flexShrink:0}}>設定する</button>
         </div>
       )}
-      <div style={{display:'flex',alignItems:'flex-start',gap:20,marginBottom:20}}>
+      <div style={{display:'flex',alignItems:'flex-start',gap:24,marginBottom:20,flexWrap:'wrap',background:'var(--color-bg-card)',border:'1px solid var(--color-brand-border)',borderRadius:14,padding:'20px 22px'}}>
         <div style={{position:'relative',flexShrink:0,cursor:'pointer'}} onClick={()=>iconInputRef.current?.click()}>
           <input ref={iconInputRef} type="file" accept="image/*" style={{display:'none'}} onChange={e=>{const f=e.target.files?.[0];if(f){handleIconUpload(f);e.target.value=''}}}/>
           {iconUrl
-            ? <img src={iconUrl} alt={profile.display_name} style={{width:60,height:60,borderRadius:'50%',objectFit:'cover',border:'3px solid var(--color-brand)'}}/>
-            : <div style={{width:60,height:60,borderRadius:'50%',background:'var(--color-brand)',display:'flex',alignItems:'center',justifyContent:'center',fontSize:24,fontWeight:700,color:'#fff'}}>{initial}</div>
+            ? <img src={iconUrl} alt={profile.display_name} style={{width:72,height:72,borderRadius:'50%',objectFit:'cover',border:'3px solid var(--color-brand)'}}/>
+            : <div style={{width:72,height:72,borderRadius:'50%',background:'var(--color-brand)',display:'flex',alignItems:'center',justifyContent:'center',fontSize:28,fontWeight:700,color:'#fff'}}>{initial}</div>
           }
-          <div style={{position:'absolute',bottom:0,right:0,width:18,height:18,background:'#fff',borderRadius:'50%',border:'2px solid var(--color-brand)',display:'flex',alignItems:'center',justifyContent:'center',fontSize:9}}>{iconUploading?'⟳':'📷'}</div>
+          <div style={{position:'absolute',bottom:0,right:0,width:20,height:20,background:'#fff',borderRadius:'50%',border:'2px solid var(--color-brand)',display:'flex',alignItems:'center',justifyContent:'center',fontSize:10}}>{iconUploading?'⟳':'📷'}</div>
         </div>
-        <div style={{flex:1}}>
-          <div style={{display:'flex',alignItems:'center',gap:8,marginBottom:3}}>
+        <div style={{flex:'1 1 200px',minWidth:180}}>
+          <div style={{display:'flex',alignItems:'center',gap:8,marginBottom:4}}>
             {editingName ? (
               <div style={{display:'flex',alignItems:'center',gap:8,flexWrap:'wrap'}}>
                 <input value={nameInput} onChange={e=>setNameInput(e.target.value)}
                   onKeyDown={e=>{if(e.key==='Enter')handleSaveName();if(e.key==='Escape')setEditingName(false)}}
-                  style={{fontSize:16,fontWeight:700,border:'1.5px solid var(--color-brand)',borderRadius:6,padding:'3px 10px',outline:'none',width:160}} autoFocus/>
+                  style={{fontSize:18,fontWeight:700,border:'1.5px solid var(--color-brand)',borderRadius:6,padding:'3px 10px',outline:'none',width:160}} autoFocus/>
                 <button onClick={handleSaveName} disabled={nameSaving} style={{fontSize:12,background:'var(--color-brand)',color:'#fff',border:'none',borderRadius:6,padding:'5px 12px',cursor:'pointer'}}>{nameSaving?'保存中':'保存'}</button>
                 <button onClick={()=>{setEditingName(false);setNameInput(profile.display_name);setNameError('')}} style={{fontSize:12,background:'none',color:'var(--color-text-muted)',border:'1px solid var(--color-brand-border)',borderRadius:6,padding:'5px 10px',cursor:'pointer'}}>×</button>
                 {nameError && <span style={{fontSize:11,color:'var(--color-danger)'}}>{nameError}</span>}
               </div>
             ) : (
               <>
-                <div style={{fontSize:18,fontWeight:700,color:'var(--color-text)'}}>{nameInput}</div>
+                <div style={{fontSize:22,fontWeight:700,color:'var(--color-text)'}}>{nameInput}</div>
                 {nameSaved && <span style={{fontSize:11,color:'var(--color-success)'}}>✓</span>}
               </>
             )}
           </div>
-          {userNumber && <div style={{fontSize:11,color:'var(--color-text-faint)',marginBottom:6}}>{userNumber}</div>}
-          <div style={{display:'flex',gap:16,flexWrap:'wrap',marginBottom:6}}>
-            <span style={{fontSize:12,color:'var(--color-text-muted)'}}><strong style={{color:'var(--color-text)'}}>{followerCount}</strong> フォロワー</span>
-            <span style={{fontSize:12,color:'var(--color-text-muted)'}}><strong style={{color:'var(--color-text)'}}>{followingCount}</strong> フォロー中</span>
-            <span style={{fontSize:12,color:'var(--color-brand)'}}><strong>{published.length}</strong> 公開作品</span>
+          {userNumber && <div style={{fontSize:12,color:'var(--color-text-faint)',marginBottom:8}}>{userNumber}</div>}
+          <div style={{display:'flex',gap:18,flexWrap:'wrap',marginBottom:8}}>
+            <span style={{fontSize:13,color:'var(--color-text-muted)'}}><strong style={{color:'var(--color-text)'}}>{followerCount}</strong> フォロワー</span>
+            <span style={{fontSize:13,color:'var(--color-text-muted)'}}><strong style={{color:'var(--color-text)'}}>{followingCount}</strong> フォロー中</span>
+            <span style={{fontSize:13,color:'var(--color-brand)'}}><strong>{published.length}</strong> 公開作品</span>
           </div>
-          <div style={{fontSize:12,color:'var(--color-text-muted)',marginBottom:8}}>{profile.email}</div>
-          {profile.bio && <div style={{fontSize:12,color:'var(--color-text)',lineHeight:1.7,marginBottom:8}}>{profile.bio}</div>}
+          <div style={{fontSize:12.5,color:'var(--color-text-muted)'}}>{profile.email}</div>
+        </div>
+        <div style={{flex:'1 1 240px',minWidth:220,display:'flex',flexDirection:'column',gap:12}}>
+          {profile.bio && <div style={{fontSize:13,color:'var(--color-text)',lineHeight:1.8}}>{profile.bio}</div>}
           <div style={{display:'flex',gap:8,flexWrap:'wrap'}}>
-            <button onClick={()=>setEditingName(true)} style={{fontSize:12,border:'1px solid var(--color-brand-border)',padding:'5px 12px',borderRadius:8,background:'none',color:'var(--color-text-muted)',cursor:'pointer'}}>名前を変更</button>
-            <button onClick={()=>setShowBioModal(true)} style={{fontSize:12,border:'1px solid var(--color-brand-border)',padding:'5px 12px',borderRadius:8,background:'none',color:'var(--color-text-muted)',cursor:'pointer'}}>自己紹介を編集</button>
-            <Link href={`/author/${profile.user_id}`} style={{fontSize:12,border:'1px solid var(--color-brand-border)',padding:'5px 12px',borderRadius:8,background:'none',color:'var(--color-brand)',textDecoration:'none',fontWeight:600}}>公開ページを見る →</Link>
+            <button onClick={()=>setEditingName(true)} style={{fontSize:12.5,border:'1px solid var(--color-brand-border)',padding:'8px 16px',borderRadius:8,background:'var(--color-bg-card)',color:'var(--color-text-muted)',cursor:'pointer'}}>名前を変更</button>
+            <button onClick={()=>setShowBioModal(true)} style={{fontSize:12.5,border:'1px solid var(--color-brand-border)',padding:'8px 16px',borderRadius:8,background:'var(--color-bg-card)',color:'var(--color-text-muted)',cursor:'pointer'}}>自己紹介を編集</button>
+            <Link href={`/author/${profile.user_id}`} style={{fontSize:12.5,padding:'8px 16px',borderRadius:8,background:'var(--color-brand)',color:'#fff',textDecoration:'none',fontWeight:700}}>公開ページを見る →</Link>
           </div>
-          {(unreadFeedback>0 || unreadRanking>0) && (
-            <div style={{marginTop:14,border:'1px solid #fecaca',borderRadius:10,overflow:'hidden'}}>
+        </div>
+      </div>
+      {(unreadFeedback>0 || unreadRanking>0) && (
+            <div style={{marginBottom:20,border:'1px solid #fecaca',borderRadius:10,overflow:'hidden'}}>
               <div style={{fontSize:11,fontWeight:700,color:'#dc2626',background:'#fef2f2',padding:'6px 14px'}}>新着通知</div>
               {unreadFeedback>0 && (
                 <Link href="/mypage/comments" style={{display:'flex',alignItems:'center',justifyContent:'space-between',gap:8,padding:'11px 14px',textDecoration:'none',borderTop:'1px solid #fee2e2'}}>
@@ -475,7 +479,6 @@ export default function MypageClient({
               )}
             </div>
           )}
-        </div>
       </div>
       {followingAuthors.length > 0 && (
         <div style={{marginTop:16}}>
