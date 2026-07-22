@@ -49,7 +49,7 @@ export default function MypageDashboard({ novels, historyItems, bookmarkedNovels
     <div style={card}>
       <div style={cardHead}><span style={cardTitle}>最近の投稿作品</span><Link href="/mypage/works" style={seeAll}>すべて見る →</Link></div>
       {published.length === 0 ? <div style={emptyText}>まだ公開作品がありません</div> : published.slice(0, 2).map(n => (
-        <Link key={n.id} href={`/mypage/novel/${n.id}`} style={{ display: 'block', marginBottom: 12, textDecoration: 'none' }}>
+        <Link key={n.id} href={`/mypage/novel/${n.id}`} className="dash-link" style={{ display: 'block', marginBottom: 12, textDecoration: 'none', borderRadius: 6 }}>
           <div style={{ fontSize: 13.5, fontWeight: 700, color: 'var(--color-text)', marginBottom: 4, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{n.title}</div>
           <div style={{ display: 'flex', gap: 6, marginBottom: 4, flexWrap: 'wrap' }}>
             <span style={{ fontSize: 10, color: 'var(--color-brand)', border: '1px solid var(--color-brand-border)', borderRadius: 4, padding: '1px 7px' }}>{n.genre}</span>
@@ -65,7 +65,7 @@ export default function MypageDashboard({ novels, historyItems, bookmarkedNovels
     <div style={card}>
       <div style={cardHead}><span style={cardTitle}>下書き</span><Link href="/mypage/works" style={seeAll}>すべて見る →</Link></div>
       {drafts.length === 0 ? <div style={emptyText}>下書きはありません</div> : drafts.slice(0, 3).map(n => (
-        <Link key={n.id} href={`/mypage/novel/${n.id}`} style={{ display: 'block', marginBottom: 10, textDecoration: 'none' }}>
+        <Link key={n.id} href={`/mypage/novel/${n.id}`} className="dash-link" style={{ display: 'block', marginBottom: 10, textDecoration: 'none', borderRadius: 6 }}>
           <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--color-text)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{n.title}</div>
           <div style={{ fontSize: 10.5, color: 'var(--color-text-faint)' }}>{n.genre}</div>
         </Link>
@@ -77,7 +77,7 @@ export default function MypageDashboard({ novels, historyItems, bookmarkedNovels
     <div style={card}>
       <div style={cardHead}><span style={cardTitle}>最近の閲覧履歴</span><Link href="/mypage/history" style={seeAll}>すべて見る →</Link></div>
       {historyItems.length === 0 ? <div style={emptyText}>まだ閲覧履歴がありません</div> : historyItems.slice(0, 2).map((h, i) => (
-        <Link key={i} href={h.episodeId ? `/novel/${h.novelId}/episode/${h.episodeId}` : `/novel/${h.novelId}`} style={{ display: 'block', marginBottom: 10, textDecoration: 'none' }}>
+        <Link key={i} href={h.episodeId ? `/novel/${h.novelId}/episode/${h.episodeId}` : `/novel/${h.novelId}`} className="dash-link" style={{ display: 'block', marginBottom: 10, textDecoration: 'none', borderRadius: 6 }}>
           <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--color-text)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{h.novelTitle}</div>
           <div style={{ fontSize: 10.5, color: 'var(--color-text-faint)' }}>{h.authorName}</div>
         </Link>
@@ -89,7 +89,7 @@ export default function MypageDashboard({ novels, historyItems, bookmarkedNovels
     <div style={card}>
       <div style={cardHead}><span style={cardTitle}>保存済み作品</span><Link href="/mypage/bookmarks" style={seeAll}>すべて見る →</Link></div>
       {bookmarkedNovels.length === 0 ? <div style={emptyText}>保存済み作品はありません</div> : bookmarkedNovels.slice(0, 2).map((b: any, i: number) => (
-        <Link key={i} href={`/novel/${b.novels?.id}`} style={{ display: 'block', marginBottom: 10, textDecoration: 'none' }}>
+        <Link key={i} href={`/novel/${b.novels?.id}`} className="dash-link" style={{ display: 'block', marginBottom: 10, textDecoration: 'none', borderRadius: 6 }}>
           <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--color-text)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{b.novels?.title}</div>
           <div style={{ fontSize: 10.5, color: 'var(--color-text-faint)' }}>{bmAuthorMap[b.novels?.author_id] || ''}</div>
         </Link>
@@ -148,6 +148,10 @@ export default function MypageDashboard({ novels, historyItems, bookmarkedNovels
 
   return (
     <div style={{ display: 'flex', gap: 16, alignItems: 'flex-start', flexWrap: 'wrap' }}>
+      <style>{`
+        .dash-link { transition: none !important; }
+        .dash-link:hover, .dash-link:focus, .dash-link:active { background: transparent !important; background-color: transparent !important; opacity: 1 !important; }
+      `}</style>
       {/* 左：コンテンツ系カード群 */}
       <div style={{ flex: '2 1 440px', minWidth: 300, display: 'flex', flexDirection: 'column', gap: 16 }}>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 16 }}>
