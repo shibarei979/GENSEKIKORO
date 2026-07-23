@@ -80,22 +80,24 @@ export default function HomeSelectPage() {
             後からマイページで変更できます
           </p>
 
-          <div style={{ display: 'flex', gap: 16, width: '100%', maxWidth: 640, flexDirection: 'row' }}>
-            <button onClick={() => handleSelectRole('reader')} disabled={loading}
-              style={{ ...cardBtn, padding: '40px 24px' }} onMouseOver={hoverOn} onMouseOut={hoverOff}>
-              <div style={{ fontSize: 48, marginBottom: 16 }}>📖</div>
-              <div style={{ fontSize: 18, fontWeight: 700, color: 'var(--color-text)', marginBottom: 8 }}>読み手</div>
-              <div style={{ fontSize: 12, color: 'var(--color-text-muted)', lineHeight: 1.7 }}>
-                作品を読んで<br/>お気に入りを見つけたい
-              </div>
-            </button>
-
+          <div style={{ display: 'flex', gap: 16, width: '100%', maxWidth: 720, flexDirection: 'row' }}>
             <button onClick={() => handleSelectRole('writer')} disabled={loading}
-              style={{ ...cardBtn, padding: '40px 24px' }} onMouseOver={hoverOn} onMouseOut={hoverOff}>
-              <div style={{ fontSize: 48, marginBottom: 16 }}>✍️</div>
+              style={{ ...cardBtn, padding: '24px 20px 28px' }} onMouseOver={hoverOn} onMouseOut={hoverOff}>
+              <img src="/writer.png" alt="書き手"
+                style={{ width: '100%', maxWidth: 200, height: 220, objectFit: 'contain', objectPosition: 'bottom', marginBottom: 14 }}/>
               <div style={{ fontSize: 18, fontWeight: 700, color: 'var(--color-text)', marginBottom: 8 }}>書き手</div>
               <div style={{ fontSize: 12, color: 'var(--color-text-muted)', lineHeight: 1.7 }}>
                 作品を書いて<br/>読者に届けたい
+              </div>
+            </button>
+
+            <button onClick={() => handleSelectRole('reader')} disabled={loading}
+              style={{ ...cardBtn, padding: '24px 20px 28px' }} onMouseOver={hoverOn} onMouseOut={hoverOff}>
+              <img src="/reader.png" alt="読み手"
+                style={{ width: '100%', maxWidth: 200, height: 220, objectFit: 'contain', objectPosition: 'bottom', marginBottom: 14 }}/>
+              <div style={{ fontSize: 18, fontWeight: 700, color: 'var(--color-text)', marginBottom: 8 }}>読み手</div>
+              <div style={{ fontSize: 12, color: 'var(--color-text-muted)', lineHeight: 1.7 }}>
+                作品を読んで<br/>お気に入りを見つけたい
               </div>
             </button>
           </div>
@@ -114,7 +116,11 @@ export default function HomeSelectPage() {
           <div style={{ display: 'flex', gap: 16, width: '100%', maxWidth: 640, flexWrap: 'wrap' }}>
             <button onClick={() => handleReaderAi(true)} disabled={loading}
               style={cardBtn} onMouseOver={hoverOn} onMouseOut={hoverOff}>
-              <div style={{ fontSize: 40, marginBottom: 12 }}>🤖</div>
+              <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 14, color: 'var(--color-brand)' }}>
+                <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                  <rect x="3" y="11" width="18" height="10" rx="2"/><circle cx="12" cy="5" r="2"/><path d="M12 7v4"/><line x1="8" y1="16" x2="8" y2="16"/><line x1="16" y1="16" x2="16" y2="16"/>
+                </svg>
+              </div>
               <div style={{ fontSize: 16, fontWeight: 700, color: 'var(--color-text)', marginBottom: 6 }}>表示する</div>
               <div style={{ fontSize: 12, color: 'var(--color-text-muted)', lineHeight: 1.6 }}>
                 AI作品も人間の作品も<br/>すべて楽しみたい
@@ -123,7 +129,11 @@ export default function HomeSelectPage() {
 
             <button onClick={() => handleReaderAi(false)} disabled={loading}
               style={cardBtn} onMouseOver={hoverOn} onMouseOut={hoverOff}>
-              <div style={{ fontSize: 40, marginBottom: 12 }}>🚫</div>
+              <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 14, color: 'var(--color-text-muted)' }}>
+                <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                  <circle cx="12" cy="12" r="10"/><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/>
+                </svg>
+              </div>
               <div style={{ fontSize: 16, fontWeight: 700, color: 'var(--color-text)', marginBottom: 6 }}>表示しない</div>
               <div style={{ fontSize: 12, color: 'var(--color-text-muted)', lineHeight: 1.6 }}>
                 人の手で書かれた<br/>作品だけを読みたい
@@ -145,7 +155,11 @@ export default function HomeSelectPage() {
           <div style={{ display: 'flex', gap: 12, width: '100%', maxWidth: 720, flexWrap: 'wrap' }}>
             <button onClick={() => handleWriterAi('none')} disabled={loading}
               style={cardBtn} onMouseOver={hoverOn} onMouseOut={hoverOff}>
-              <div style={{ fontSize: 36, marginBottom: 10 }}>✍️</div>
+              <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 12, color: 'var(--color-brand)' }}>
+                <svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M12 19l7-7 3 3-7 7-3-3z"/><path d="M18 13l-1.5-7.5L2 2l3.5 14.5L13 18l5-5z"/><path d="M2 2l7.586 7.586"/><circle cx="11" cy="11" r="2"/>
+                </svg>
+              </div>
               <div style={{ fontSize: 15, fontWeight: 700, color: 'var(--color-text)', marginBottom: 6 }}>AI未使用</div>
               <div style={{ fontSize: 11.5, color: 'var(--color-text-muted)', lineHeight: 1.6 }}>
                 AIを使わずに執筆する
@@ -154,7 +168,11 @@ export default function HomeSelectPage() {
 
             <button onClick={() => handleWriterAi('assist')} disabled={loading}
               style={cardBtn} onMouseOver={hoverOn} onMouseOut={hoverOff}>
-              <div style={{ fontSize: 36, marginBottom: 10 }}>🛠️</div>
+              <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 12, color: 'var(--color-brand)' }}>
+                <svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/>
+                </svg>
+              </div>
               <div style={{ fontSize: 15, fontWeight: 700, color: 'var(--color-text)', marginBottom: 6 }}>補助的利用</div>
               <div style={{ fontSize: 11.5, color: 'var(--color-text-muted)', lineHeight: 1.6 }}>
                 校正・アイデア出し等に<br/>AIを利用する
@@ -163,7 +181,11 @@ export default function HomeSelectPage() {
 
             <button onClick={() => handleWriterAi('full')} disabled={loading}
               style={cardBtn} onMouseOver={hoverOn} onMouseOut={hoverOff}>
-              <div style={{ fontSize: 36, marginBottom: 10 }}>🤖</div>
+              <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 12, color: 'var(--color-brand)' }}>
+                <svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                  <rect x="3" y="11" width="18" height="10" rx="2"/><circle cx="12" cy="5" r="2"/><path d="M12 7v4"/><line x1="8" y1="16" x2="8" y2="16"/><line x1="16" y1="16" x2="16" y2="16"/>
+                </svg>
+              </div>
               <div style={{ fontSize: 15, fontWeight: 700, color: 'var(--color-text)', marginBottom: 6 }}>全面的利用</div>
               <div style={{ fontSize: 11.5, color: 'var(--color-text-muted)', lineHeight: 1.6 }}>
                 本文生成などAIが主体<br/>（AI作品バッジが付きます）
