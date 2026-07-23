@@ -758,85 +758,126 @@ export default function MypageClient({
   }
 
   // ===== 保存済みタブ =====
-  const [openSections, setOpenSections] = useState<Set<string>>(new Set(['unclassified']))
-  const toggleSection = (id: string) => setOpenSections(prev => {
-    const next = new Set(prev); next.has(id) ? next.delete(id) : next.add(id); return next
-  })
+  const [selectedFolder, setSelectedFolder] = useState<string>('all')
 
-  const BookmarkItem = ({ bm }: { bm: any }) => {
-    const n = bm.novels; if (!n) return null
-    const authorName = bmAuthorMap[n.author_id] || ''
+  const BookmarksTab = () => {
+    const listed = selectedFolder === 'all'
+      ? myBookmarks
+      : selectedFolder === 'unclassified'
+        ? myBookmarks.filter((bm:any) => !bm.folder_id)
+        : myBookmarks.filter((bm:any) => bm.folder_id === selectedFolder)
+    const currentName = selectedFolder === 'all' ? 'すべての保存済み'
+      : selectedFolder === 'unclassified' ? '未分類'
+      : (folders.find((f:any)=>f.id===selectedFolder)?.name || 'リスト')
+
     return (
-      <div style={{display:'flex',alignItems:'flex-start',gap:8,padding:'12px 0',borderBottom:'1px solid var(--color-brand-border)'}}>
-        <div style={{flex:1,cursor:'pointer'}} onClick={()=>router.push(`/novel/${n.id}`)}>
-          <div style={{display:'flex',gap:4,marginBottom:4,flexWrap:'wrap',alignItems:'center'}}>
-            <span style={{fontSize:10,background:'var(--color-brand-light)',color:'var(--color-brand)',border:'1px solid var(--color-tag-border)',padding:'1px 6px',borderRadius:4}}>{n.genre}</span>
-            {n.novel_type && <span style={{fontSize:10,background:'var(--color-info-bg)',color:'var(--color-info)',border:'1px solid var(--color-info-border)',padding:'1px 6px',borderRadius:4}}>{n.novel_type}</span>}
-            {n.is_serial
-              ? <span style={{fontSize:10,background:'#f0fdf4',color:'#15803d',border:'1px solid #86efac',padding:'1px 6px',borderRadius:4}}>連載中</span>
-              : <span style={{fontSize:10,background:'#f5f5f5',color:'#757575',border:'1px solid #e0e0e0',padding:'1px 6px',borderRadius:4}}>完結</span>}
-          </div>
-          <div style={{fontSize:13,fontWeight:700,color:'var(--color-text)',marginBottom:1}}>{n.title}</div>
-          <div style={{fontSize:11,color:'var(--color-text-muted)'}}>{authorName}</div>
-        </div>
-        <div style={{flexShrink:0}}>
-          <select
-            value={bm.folder_id||''}
-            onChange={e=>handleMoveBookmark(bm.novel_id,e.target.value||null)}
-            style={{fontSize:12,padding:'4px 8px',border:'1px solid var(--color-brand-border)',borderRadius:6,background:'var(--color-bg-card)',color:'var(--color-text)',cursor:'pointer'}}>
-            <option value=''>未分類</option>
-            {folders.map((f:any)=>(<option key={f.id} value={f.id}>{f.name}</option>))}
-          </select>
-        </div>
-      </div>
-    )
-  }
-
-  const BookmarkSection = ({ id, title, items, onDelete }: { id:string; title:string; items:any[]; onDelete?:()=>void }) => {
-    const isOpen = openSections.has(id)
-    return (
-      <div style={{marginBottom:10,border:'1px solid var(--color-brand-border)',borderRadius:10,overflow:'visible'}}>
-        <div style={{display:'flex',alignItems:'center',padding:'16px 18px',background:'var(--color-bg)',borderRadius:isOpen?'10px 10px 0 0':'10px'}}>
-          <div style={{flex:1,display:'flex',alignItems:'center',gap:8,cursor:'pointer'}} onClick={()=>toggleSection(id)}>
-            <span style={{fontSize:13,fontWeight:700,color:'var(--color-text)'}}>{title}</span>
-            <span style={{fontSize:11,color:'var(--color-text-muted)'}}>{items.length}作品</span>
-            <span style={{fontSize:11,color:'var(--color-text-faint)'}}>{isOpen?'▲':'▼'}</span>
-          </div>
-          {onDelete && (
-            <button onClick={()=>onDelete()}
-              style={{fontSize:11,color:'var(--color-text-faint)',background:'none',border:'none',cursor:'pointer',padding:'2px 6px'}}>削除</button>
-          )}
-        </div>
-        {isOpen && (
-          <div style={{padding:'0 16px',borderTop:'1px solid var(--color-brand-border)'}}>
-            {items.length===0
-              ? <div style={{padding:'16px 0',textAlign:'center',fontSize:12,color:'var(--color-text-faint)'}}>作品がありません</div>
-              : items.map((bm:any) => <BookmarkItem key={bm.novel_id} bm={bm}/>)
-            }
-          </div>
-        )}
-      </div>
-    )
-  }
-
-  const BookmarksTab = () => (
     <div>
-      <div style={{display:'flex',alignItems:'flex-start',justifyContent:'space-between',marginBottom:20,flexWrap:'wrap',gap:8}}>
+      {/* 見出し */}
+      <div style={{display:'flex',alignItems:'flex-start',justifyContent:'space-between',marginBottom:32,flexWrap:'wrap',gap:12}}>
         <div>
-          <div style={{fontSize:22,fontWeight:700,color:'var(--color-text)'}}>保存済み作品（{myBookmarks.length}）</div>
-          <div style={{fontSize:12.5,color:'var(--color-text-muted)',marginTop:4}}>気になる作品をリストに保存して、あとでゆっくり読むことができます。</div>
+          <h1 style={{fontSize:30,fontWeight:800,color:'var(--color-text)',letterSpacing:'-0.01em',lineHeight:1.3}}>
+            保存済み作品 <span style={{fontSize:18,fontWeight:600,color:'var(--color-text-muted)'}}>（{myBookmarks.length}）</span>
+          </h1>
+          <p style={{fontSize:14,color:'var(--color-text-muted)',marginTop:10,lineHeight:1.7}}>気になる作品をリストに保存して、あとでゆっくり読むことができます。</p>
         </div>
         <button onClick={()=>setShowFolderModal(true)}
-          style={{fontSize:12,padding:'8px 14px',border:'1px solid var(--color-brand)',borderRadius:8,background:'none',color:'var(--color-brand)',cursor:'pointer',fontWeight:600}}>
+          style={{height:44,display:'inline-flex',alignItems:'center',gap:6,padding:'0 20px',border:'1px solid var(--color-brand)',borderRadius:10,
+            background:'var(--color-bg-card)',color:'var(--color-brand)',cursor:'pointer',fontWeight:600,fontSize:14}}>
           ＋ リスト作成
         </button>
       </div>
-      {folders.map((f:any) => (
-        <BookmarkSection key={f.id} id={f.id} title={f.name}
-          items={myBookmarks.filter((bm:any) => bm.folder_id === f.id)}
-          onDelete={()=>handleDeleteFolder(f.id)}/>
-      ))}
-      <BookmarkSection id="unclassified" title="未分類" items={myBookmarks.filter((bm:any) => !bm.folder_id)}/>
+
+      <div style={{display:'flex',gap:24,alignItems:'flex-start',flexWrap:'wrap'}}>
+        {/* 左：リストパネル */}
+        <div style={{flex:'0 1 260px',minWidth:220,background:'var(--color-bg-card)',border:'1px solid #F3ECE5',borderRadius:16,padding:'20px 8px',boxShadow:'0 1px 3px rgba(0,0,0,0.02)'}}>
+          <div style={{fontSize:13,fontWeight:700,color:'var(--color-text)',padding:'0 14px',marginBottom:12}}>リスト</div>
+          {[
+            {id:'all', name:'すべての保存済み', count:myBookmarks.length, deletable:false},
+            ...folders.map((f:any)=>({id:f.id, name:f.name, count:myBookmarks.filter((bm:any)=>bm.folder_id===f.id).length, deletable:true})),
+            {id:'unclassified', name:'未分類', count:myBookmarks.filter((bm:any)=>!bm.folder_id).length, deletable:false},
+          ].map(item => (
+            <div key={item.id}
+              onClick={()=>setSelectedFolder(item.id)}
+              style={{display:'flex',alignItems:'center',justifyContent:'space-between',gap:8,padding:'11px 14px',cursor:'pointer',borderRadius:8,
+                background:selectedFolder===item.id?'#FFF0E5':'transparent',
+                color:selectedFolder===item.id?'var(--color-brand)':'var(--color-text)',
+                fontWeight:selectedFolder===item.id?700:500}}>
+              <span style={{fontSize:13.5,overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap'}}>{item.name}</span>
+              <span style={{fontSize:12,color:selectedFolder===item.id?'var(--color-brand)':'var(--color-text-faint)',flexShrink:0}}>{item.count}</span>
+            </div>
+          ))}
+          <div style={{borderTop:'1px solid #F7F2EC',marginTop:12,paddingTop:12}}>
+            <button onClick={()=>setShowFolderModal(true)}
+              style={{width:'100%',textAlign:'left' as const,padding:'8px 14px',background:'none',border:'none',cursor:'pointer',fontSize:13,color:'var(--color-brand)',fontWeight:600}}>
+              ＋ リストを作成
+            </button>
+            {selectedFolder!=='all' && selectedFolder!=='unclassified' && (
+              <button onClick={()=>{ handleDeleteFolder(selectedFolder); setSelectedFolder('all') }}
+                style={{width:'100%',textAlign:'left' as const,padding:'8px 14px',background:'none',border:'none',cursor:'pointer',fontSize:12.5,color:'var(--color-text-faint)'}}>
+                このリストを削除
+              </button>
+            )}
+          </div>
+        </div>
+
+        {/* 右：作品一覧 */}
+        <div style={{flex:'1 1 520px',minWidth:300}}>
+          <div style={{display:'flex',alignItems:'center',gap:8,marginBottom:16}}>
+            <span style={{fontSize:16,fontWeight:700,color:'var(--color-text)'}}>{currentName}</span>
+            <span style={{fontSize:13,color:'var(--color-text-muted)'}}>（{listed.length}）</span>
+          </div>
+
+          {listed.length === 0 ? (
+            <div style={{textAlign:'center',padding:'64px 24px',color:'var(--color-text-faint)',fontSize:14,
+              background:'var(--color-bg-card)',border:'1px solid #F3ECE5',borderRadius:20}}>
+              このリストに作品がありません
+            </div>
+          ) : (
+            <div style={{display:'flex',flexDirection:'column',gap:16}}>
+              {listed.map((bm:any) => {
+                const n = bm.novels; if (!n) return null
+                const authorName = bmAuthorMap[n.author_id] || ''
+                return (
+                  <div key={bm.novel_id}
+                    style={{background:'var(--color-bg-card)',border:'1px solid #F3ECE5',borderRadius:20,padding:'24px 28px',
+                      boxShadow:'0 1px 3px rgba(0,0,0,0.02)',display:'grid',gridTemplateColumns:'minmax(0,1fr) 180px',gap:28,alignItems:'center'}}>
+                    <div style={{minWidth:0,cursor:'pointer'}} onClick={()=>router.push(`/novel/${n.id}`)}>
+                      <div style={{fontSize:19,fontWeight:700,color:'var(--color-text)',lineHeight:1.4,marginBottom:6,overflowWrap:'anywhere' as any}}>{n.title}</div>
+                      <div style={{fontSize:13,color:'var(--color-text-muted)',marginBottom:12}}>{authorName}</div>
+                      {n.summary && (
+                        <p style={{fontSize:13.5,color:'var(--color-text-muted)',lineHeight:1.8,marginBottom:14,maxWidth:600,
+                          display:'-webkit-box',WebkitLineClamp:2,WebkitBoxOrient:'vertical' as any,overflow:'hidden',overflowWrap:'anywhere' as any}}>{n.summary}</p>
+                      )}
+                      <div style={{display:'flex',gap:7,flexWrap:'wrap',alignItems:'center'}}>
+                        <span style={{fontSize:11.5,height:22,display:'inline-flex',alignItems:'center',background:'#FFF0E5',color:'var(--color-brand)',padding:'0 10px',borderRadius:6,fontWeight:600}}>{n.genre}</span>
+                        {n.novel_type && <span style={{fontSize:11.5,height:22,display:'inline-flex',alignItems:'center',background:'#EEF4FF',color:'#2563eb',padding:'0 10px',borderRadius:6,fontWeight:600}}>{n.novel_type}</span>}
+                        {n.is_serial
+                          ? <span style={{fontSize:11.5,height:22,display:'inline-flex',alignItems:'center',background:'#EAF8EF',color:'#35a45d',padding:'0 10px',borderRadius:6,fontWeight:600}}>連載中</span>
+                          : <span style={{fontSize:11.5,height:22,display:'inline-flex',alignItems:'center',background:'#F4F4F5',color:'#71717a',padding:'0 10px',borderRadius:6,fontWeight:600}}>完結</span>}
+                      </div>
+                    </div>
+                    <div style={{display:'flex',flexDirection:'column',gap:10,alignItems:'stretch'}}>
+                      <Link href={`/novel/${n.id}`}
+                        style={{height:44,display:'inline-flex',alignItems:'center',justifyContent:'center',background:'var(--color-brand)',color:'#fff',
+                          borderRadius:10,fontSize:14,fontWeight:600,textDecoration:'none'}}>
+                        続きを読む
+                      </Link>
+                      <select
+                        value={bm.folder_id||''}
+                        onChange={e=>handleMoveBookmark(bm.novel_id,e.target.value||null)}
+                        style={{height:40,padding:'0 12px',border:'1px solid #EADFD4',borderRadius:10,background:'var(--color-bg-card)',color:'var(--color-text-muted)',cursor:'pointer',fontSize:12.5}}>
+                        <option value=''>未分類</option>
+                        {folders.map((f:any)=>(<option key={f.id} value={f.id}>{f.name}</option>))}
+                      </select>
+                    </div>
+                  </div>
+                )
+              })}
+            </div>
+          )}
+        </div>
+      </div>
+
       {showFolderModal && (
         <FolderCreateModal
           onClose={()=>setShowFolderModal(false)}
@@ -851,7 +892,8 @@ export default function MypageClient({
         />
       )}
     </div>
-  )
+    )
+  }
 
   // ===== 閲覧履歴タブ =====
   const HistoryTab = () => {
