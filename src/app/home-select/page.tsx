@@ -43,20 +43,6 @@ export default function HomeSelectPage() {
     router.push('/')
   }
 
-  const cardBtn = {
-    flex: 1,
-    minWidth: 150,
-    padding: '28px 20px',
-    borderRadius: 16,
-    border: '2px solid var(--color-brand-border)',
-    background: 'var(--color-bg-card)',
-    cursor: 'pointer',
-    textAlign: 'center' as const,
-    transition: 'all .2s',
-  }
-  const hoverOn = (e: any) => { e.currentTarget.style.borderColor = 'var(--color-brand)'; e.currentTarget.style.background = 'var(--color-brand-light)' }
-  const hoverOff = (e: any) => { e.currentTarget.style.borderColor = 'var(--color-brand-border)'; e.currentTarget.style.background = 'var(--color-bg-card)' }
-
   return (
     <div style={{
       minHeight: '100vh',
@@ -151,37 +137,50 @@ export default function HomeSelectPage() {
 
       {step === 'ai' && role === 'reader' && (
         <>
-          <h1 style={{ fontSize: 22, fontWeight: 700, color: 'var(--color-text)', marginBottom: 10, textAlign: 'center' }}>
-            AI作品を表示しますか？
+          <svg width="70" height="44" viewBox="0 0 70 44" fill="none" style={{ marginBottom: 10, zIndex: 1 }}>
+            <path d="M35 4l7 9-7 12-7-12z" fill="#F26A21" opacity="0.9"/>
+            <path d="M35 4l7 9H28z" fill="#FFB27A"/>
+            <path d="M14 34c7-5 14-7 21-7s14 2 21 7" stroke="#F5A623" strokeWidth="1.6" strokeLinecap="round" fill="none"/>
+          </svg>
+          <h1 style={{ fontSize: 'clamp(22px, 3vw, 30px)', fontWeight: 800, color: '#333', marginBottom: 12, textAlign: 'center', letterSpacing: '0.04em' }}>
+            <span style={{ color: 'var(--color-brand)' }}>AI作品</span>を表示しますか？
           </h1>
-          <p style={{ fontSize: 13.5, color: 'var(--color-text-muted)', marginBottom: 40, textAlign: 'center', lineHeight: 1.8 }}>
-            AIが全面的に生成した作品の表示を選べます。<br/>後から設定で変更できます
+          <p style={{ fontSize: 14.5, color: '#666', marginBottom: 40, textAlign: 'center', lineHeight: 1.9 }}>
+            AIが全面的に生成した作品の表示を選べます
           </p>
 
-          <div style={{ display: 'flex', gap: 16, width: '100%', maxWidth: 640, flexWrap: 'wrap' }}>
-            <button onClick={() => handleReaderAi(true)} disabled={loading}
-              style={cardBtn} onMouseOver={hoverOn} onMouseOut={hoverOff}>
-              <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 14, color: 'var(--color-brand)' }}>
-                <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-                  <rect x="3" y="11" width="18" height="10" rx="2"/><circle cx="12" cy="5" r="2"/><path d="M12 7v4"/><line x1="8" y1="16" x2="8" y2="16"/><line x1="16" y1="16" x2="16" y2="16"/>
-                </svg>
+          <div style={{ display: 'flex', gap: 24, alignItems: 'stretch', flexWrap: 'wrap', justifyContent: 'center' }}>
+            <button onClick={() => handleReaderAi(true)} disabled={loading} className="role-card"
+              style={{ width: 250, background: '#fff', border: '1px solid #F0E4D8', borderRadius: 18, overflow: 'hidden', cursor: 'pointer', padding: 0, display: 'flex', flexDirection: 'column' }}>
+              <div style={{ padding: '32px 22px 24px', flex: 1 }}>
+                <div style={{ width: 68, height: 68, margin: '0 auto 18px', borderRadius: '50%', border: '1.5px solid #F5C9A8', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="var(--color-brand)" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+                    <rect x="3" y="11" width="18" height="10" rx="2"/><circle cx="12" cy="5" r="2"/><path d="M12 7v4"/><line x1="8" y1="16" x2="8" y2="16"/><line x1="16" y1="16" x2="16" y2="16"/>
+                  </svg>
+                </div>
+                <div style={{ fontSize: 22, fontWeight: 800, color: 'var(--color-brand)', marginBottom: 10, letterSpacing: '0.04em' }}>表示する</div>
+                <div style={{ fontSize: 13, color: '#666', lineHeight: 1.7 }}>AI作品も人間の作品も<br/>すべて楽しみたい</div>
               </div>
-              <div style={{ fontSize: 16, fontWeight: 700, color: 'var(--color-text)', marginBottom: 6 }}>表示する</div>
-              <div style={{ fontSize: 12, color: 'var(--color-text-muted)', lineHeight: 1.6 }}>
-                AI作品も人間の作品も<br/>すべて楽しみたい
+              <div style={{ background: 'var(--color-brand)', color: '#fff', padding: '16px 20px', fontSize: 14.5, fontWeight: 700, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10 }}>
+                これではじめる
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
               </div>
             </button>
 
-            <button onClick={() => handleReaderAi(false)} disabled={loading}
-              style={cardBtn} onMouseOver={hoverOn} onMouseOut={hoverOff}>
-              <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 14, color: 'var(--color-text-muted)' }}>
-                <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-                  <circle cx="12" cy="12" r="10"/><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/>
-                </svg>
+            <button onClick={() => handleReaderAi(false)} disabled={loading} className="role-card"
+              style={{ width: 250, background: '#fff', border: '1px solid #DDEEEB', borderRadius: 18, overflow: 'hidden', cursor: 'pointer', padding: 0, display: 'flex', flexDirection: 'column' }}>
+              <div style={{ padding: '32px 22px 24px', flex: 1 }}>
+                <div style={{ width: 68, height: 68, margin: '0 auto 18px', borderRadius: '50%', border: '1.5px solid #A8D8D2', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke={TEAL} strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M20 3c-7 1-12 6-14 12l-3 6 6-3c6-2 11-7 12-14z"/><path d="M14 8c-3 2-6 5-8 9"/>
+                  </svg>
+                </div>
+                <div style={{ fontSize: 22, fontWeight: 800, color: TEAL, marginBottom: 10, letterSpacing: '0.04em' }}>表示しない</div>
+                <div style={{ fontSize: 13, color: '#666', lineHeight: 1.7 }}>人の手で書かれた<br/>作品だけを読みたい</div>
               </div>
-              <div style={{ fontSize: 16, fontWeight: 700, color: 'var(--color-text)', marginBottom: 6 }}>表示しない</div>
-              <div style={{ fontSize: 12, color: 'var(--color-text-muted)', lineHeight: 1.6 }}>
-                人の手で書かれた<br/>作品だけを読みたい
+              <div style={{ background: TEAL, color: '#fff', padding: '16px 20px', fontSize: 14.5, fontWeight: 700, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10 }}>
+                これではじめる
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
               </div>
             </button>
           </div>
@@ -190,52 +189,42 @@ export default function HomeSelectPage() {
 
       {step === 'ai' && role === 'writer' && (
         <>
-          <h1 style={{ fontSize: 22, fontWeight: 700, color: 'var(--color-text)', marginBottom: 10, textAlign: 'center' }}>
-            執筆でAIを使いますか？
+          <svg width="70" height="44" viewBox="0 0 70 44" fill="none" style={{ marginBottom: 10 }}>
+            <path d="M35 4l7 9-7 12-7-12z" fill="#F26A21" opacity="0.9"/>
+            <path d="M35 4l7 9H28z" fill="#FFB27A"/>
+            <path d="M14 34c7-5 14-7 21-7s14 2 21 7" stroke="#F5A623" strokeWidth="1.6" strokeLinecap="round" fill="none"/>
+          </svg>
+          <h1 style={{ fontSize: 'clamp(22px, 3vw, 30px)', fontWeight: 800, color: '#333', marginBottom: 12, textAlign: 'center', letterSpacing: '0.04em' }}>
+            執筆で<span style={{ color: 'var(--color-brand)' }}>AI</span>を使いますか？
           </h1>
-          <p style={{ fontSize: 13.5, color: 'var(--color-text-muted)', marginBottom: 40, textAlign: 'center', lineHeight: 1.8 }}>
-            投稿時のデフォルト設定になります。<br/>作品ごとに変更できます
+          <p style={{ fontSize: 14.5, color: '#666', marginBottom: 40, textAlign: 'center', lineHeight: 1.9 }}>
+            投稿時のデフォルト設定になります。作品ごとに変更できます
           </p>
 
-          <div style={{ display: 'flex', gap: 12, width: '100%', maxWidth: 720, flexWrap: 'wrap' }}>
-            <button onClick={() => handleWriterAi('none')} disabled={loading}
-              style={cardBtn} onMouseOver={hoverOn} onMouseOut={hoverOff}>
-              <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 12, color: 'var(--color-brand)' }}>
-                <svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M20 3c-7 1-12 6-14 12l-3 6 6-3c6-2 11-7 12-14z"/><path d="M14 8c-3 2-6 5-8 9"/>
-                </svg>
-              </div>
-              <div style={{ fontSize: 15, fontWeight: 700, color: 'var(--color-text)', marginBottom: 6 }}>AI未使用</div>
-              <div style={{ fontSize: 11.5, color: 'var(--color-text-muted)', lineHeight: 1.6 }}>
-                AIを使わずに執筆する
-              </div>
-            </button>
-
-            <button onClick={() => handleWriterAi('assist')} disabled={loading}
-              style={cardBtn} onMouseOver={hoverOn} onMouseOut={hoverOff}>
-              <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 12, color: 'var(--color-brand)' }}>
-                <svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/>
-                </svg>
-              </div>
-              <div style={{ fontSize: 15, fontWeight: 700, color: 'var(--color-text)', marginBottom: 6 }}>補助的利用</div>
-              <div style={{ fontSize: 11.5, color: 'var(--color-text-muted)', lineHeight: 1.6 }}>
-                校正・アイデア出し等に<br/>AIを利用する
-              </div>
-            </button>
-
-            <button onClick={() => handleWriterAi('full')} disabled={loading}
-              style={cardBtn} onMouseOver={hoverOn} onMouseOut={hoverOff}>
-              <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 12, color: 'var(--color-brand)' }}>
-                <svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-                  <rect x="3" y="11" width="18" height="10" rx="2"/><circle cx="12" cy="5" r="2"/><path d="M12 7v4"/><line x1="8" y1="16" x2="8" y2="16"/><line x1="16" y1="16" x2="16" y2="16"/>
-                </svg>
-              </div>
-              <div style={{ fontSize: 15, fontWeight: 700, color: 'var(--color-text)', marginBottom: 6 }}>全面的利用</div>
-              <div style={{ fontSize: 11.5, color: 'var(--color-text-muted)', lineHeight: 1.6 }}>
-                本文生成などAIが主体<br/>（AI作品バッジが付きます）
-              </div>
-            </button>
+          <div style={{ display: 'flex', gap: 20, alignItems: 'stretch', flexWrap: 'wrap', justifyContent: 'center' }}>
+            {([
+              { v: 'none',   label: 'AI未使用',   desc: 'AIを使わずに\n自分の言葉で執筆する', color: TEAL, border: '#DDEEEB', ring: '#A8D8D2',
+                icon: <><path d="M20 3c-7 1-12 6-14 12l-3 6 6-3c6-2 11-7 12-14z"/><path d="M14 8c-3 2-6 5-8 9"/></> },
+              { v: 'assist', label: '補助的利用', desc: '校正・アイデア出し等に\nAIを利用する', color: 'var(--color-brand)', border: '#F0E4D8', ring: '#F5C9A8',
+                icon: <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/> },
+              { v: 'full',   label: '全面的利用', desc: '本文生成などAIが主体\n（AI作品バッジが付きます）', color: '#9B5DE5', border: '#EADDF8', ring: '#C9A8E8',
+                icon: <><rect x="3" y="11" width="18" height="10" rx="2"/><circle cx="12" cy="5" r="2"/><path d="M12 7v4"/><line x1="8" y1="16" x2="8" y2="16"/><line x1="16" y1="16" x2="16" y2="16"/></> },
+            ] as const).map(opt => (
+              <button key={opt.v} onClick={() => handleWriterAi(opt.v as any)} disabled={loading} className="role-card"
+                style={{ width: 230, background: '#fff', border: `1px solid ${opt.border}`, borderRadius: 18, overflow: 'hidden', cursor: 'pointer', padding: 0, display: 'flex', flexDirection: 'column' }}>
+                <div style={{ padding: '30px 20px 22px', flex: 1 }}>
+                  <div style={{ width: 62, height: 62, margin: '0 auto 16px', borderRadius: '50%', border: `1.5px solid ${opt.ring}`, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke={opt.color} strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">{opt.icon}</svg>
+                  </div>
+                  <div style={{ fontSize: 19, fontWeight: 800, color: opt.color, marginBottom: 10, letterSpacing: '0.04em' }}>{opt.label}</div>
+                  <div style={{ fontSize: 12.5, color: '#666', lineHeight: 1.7, whiteSpace: 'pre-line' }}>{opt.desc}</div>
+                </div>
+                <div style={{ background: opt.color, color: '#fff', padding: '15px 18px', fontSize: 14, fontWeight: 700, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
+                  これではじめる
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+                </div>
+              </button>
+            ))}
           </div>
         </>
       )}
