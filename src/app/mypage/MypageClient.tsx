@@ -147,6 +147,9 @@ export default function MypageClient({
   const [myNovels,       setMyNovels]       = useState(initialNovels)
   const [expandedWork,   setExpandedWork]   = useState<string | null>(null)
   const [worksFilter,    setWorksFilter]    = useState<'all'|'published'|'serial'|'completed'|'short'|'draft'>('all')
+  const [histSort,       setHistSort]       = useState<'recent'|'title'>('recent')
+  const [histGenre,      setHistGenre]      = useState('すべてのジャンル')
+  const [histType,       setHistType]       = useState('すべての形式')
   const [workEpisodes,   setWorkEpisodes]   = useState<Record<string, any[]>>({})
   const [loadingEps,     setLoadingEps]     = useState<string | null>(null)
   const [editMenuOpen,   setEditMenuOpen]   = useState<string | null>(null)
@@ -851,7 +854,9 @@ export default function MypageClient({
   )
 
   // ===== 閲覧履歴タブ =====
-  const HistoryTab = () => (
+  const HistoryTab = () => {
+    const bookmarkedIds = new Set(myBookmarks.map((b:any)=>b.novels?.id).filter(Boolean))
+    return (
     <div>
       {/* ページ見出し：大きく、説明との間に呼吸を */}
       <div style={{marginBottom:32}}>
@@ -861,13 +866,52 @@ export default function MypageClient({
         <p style={{fontSize:14,color:'var(--color-text-muted)',marginTop:10,lineHeight:1.7}}>過去に閲覧した作品の履歴です。続きから読むことができます。</p>
       </div>
 
+      {/* フィルターバー */}
+      {historyItems.length > 0 && (
+        <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',gap:12,flexWrap:'wrap',
+          background:'var(--color-bg-card)',border:'1px solid #F3ECE5',borderRadius:14,padding:'14px 18px',marginBottom:24}}>
+          <div style={{display:'flex',gap:10,flexWrap:'wrap'}}>
+            <select value={histSort} onChange={e=>setHistSort(e.target.value as any)}
+              style={{height:42,padding:'0 34px 0 14px',border:'1px solid #EADFD4',borderRadius:10,fontSize:13.5,color:'var(--color-text)',background:'var(--color-bg-card)',cursor:'pointer',appearance:'none' as any,
+                backgroundImage:"url(\"data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23999' stroke-width='2'%3e%3cpolyline points='6 9 12 15 18 9'/%3e%3c/svg%3e\")",
+                backgroundRepeat:'no-repeat',backgroundPosition:'right 12px center',backgroundSize:'14px'}}>
+              <option value="recent">最近読んだ順</option>
+              <option value="title">タイトル順</option>
+            </select>
+            <select value={histGenre} onChange={e=>setHistGenre(e.target.value)}
+              style={{height:42,padding:'0 34px 0 14px',border:'1px solid #EADFD4',borderRadius:10,fontSize:13.5,color:'var(--color-text)',background:'var(--color-bg-card)',cursor:'pointer',appearance:'none' as any,
+                backgroundImage:"url(\"data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23999' stroke-width='2'%3e%3cpolyline points='6 9 12 15 18 9'/%3e%3c/svg%3e\")",
+                backgroundRepeat:'no-repeat',backgroundPosition:'right 12px center',backgroundSize:'14px'}}>
+              {['すべてのジャンル', ...Array.from(new Set(historyItems.map((h:any)=>h.genre).filter(Boolean)))].map((g:any)=>(
+                <option key={g} value={g}>{g}</option>
+              ))}
+            </select>
+            <select value={histType} onChange={e=>setHistType(e.target.value)}
+              style={{height:42,padding:'0 34px 0 14px',border:'1px solid #EADFD4',borderRadius:10,fontSize:13.5,color:'var(--color-text)',background:'var(--color-bg-card)',cursor:'pointer',appearance:'none' as any,
+                backgroundImage:"url(\"data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23999' stroke-width='2'%3e%3cpolyline points='6 9 12 15 18 9'/%3e%3c/svg%3e\")",
+                backgroundRepeat:'no-repeat',backgroundPosition:'right 12px center',backgroundSize:'14px'}}>
+              {['すべての形式','長編','短編'].map(t=>(<option key={t} value={t}>{t}</option>))}
+            </select>
+          </div>
+          <Link href="/mypage/history/clear"
+            style={{height:42,display:'inline-flex',alignItems:'center',padding:'0 16px',border:'1px solid #EADFD4',borderRadius:10,
+              fontSize:13.5,color:'var(--color-text-muted)',background:'var(--color-bg-card)',textDecoration:'none'}}>
+            履歴をクリア
+          </Link>
+        </div>
+      )}
+
       {historyItems.length === 0 ? (
         <div style={{textAlign:'center',padding:'72px 24px',color:'var(--color-text-faint)',fontSize:14,background:'var(--color-bg-card)',border:'1px solid #F3ECE5',borderRadius:20}}>
           まだ閲覧履歴がありません
         </div>
       ) : (
         <div style={{display:'flex',flexDirection:'column',gap:20}}>
-        {historyItems.map((item:any) => {
+        {historyItems
+          .filter((h:any)=> histGenre==='すべてのジャンル' || h.genre===histGenre)
+          .filter((h:any)=> histType==='すべての形式' || h.novelType===histType)
+          .sort((a:any,b:any)=> histSort==='title' ? String(a.novelTitle).localeCompare(String(b.novelTitle),'ja') : 0)
+          .map((item:any) => {
           const totalEps = novelEpCountMap[item.novelId] || 0
           return (
           <div key={item.novelId}
@@ -906,7 +950,6 @@ export default function MypageClient({
                   </div>
                 )}
                 <div style={{fontSize:12,color:'var(--color-text-faint)'}}>最終閲覧：{fmtDate(item.viewedAt)}</div>
-                {totalEps > 0 && <div style={{fontSize:12,color:'var(--color-text-faint)',marginTop:2}}>全{totalEps}話</div>}
               </div>
               <div style={{display:'flex',gap:8,alignItems:'center'}}>
                 {firstEpMap[item.novelId] && firstEpMap[item.novelId]!==item.epId && (
@@ -921,7 +964,22 @@ export default function MypageClient({
                     borderRadius:10,fontSize:14.5,fontWeight:600,textDecoration:'none',whiteSpace:'nowrap'}}>
                   続きを読む
                 </Link>
+                {/* しおり（保存） */}
+                <Link href={`/novel/${item.novelId}`}
+                  title={bookmarkedIds.has(item.novelId)?'保存済み':'作品ページで保存する'}
+                  style={{width:44,height:44,display:'inline-flex',alignItems:'center',justifyContent:'center',
+                    border:'1px solid #EADFD4',borderRadius:10,background:'var(--color-bg-card)',cursor:'pointer',flexShrink:0}}>
+                  <svg width="17" height="17" viewBox="0 0 24 24"
+                    fill={bookmarkedIds.has(item.novelId)?'var(--color-brand)':'none'}
+                    stroke={bookmarkedIds.has(item.novelId)?'var(--color-brand)':'var(--color-text-faint)'}
+                    strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/>
+                  </svg>
+                </Link>
               </div>
+              {totalEps > 0 && (
+                <div style={{fontSize:11.5,color:'var(--color-text-faint)'}}>全{totalEps}話</div>
+              )}
             </div>
           </div>
           )
@@ -929,7 +987,8 @@ export default function MypageClient({
         </div>
       )}
     </div>
-  )
+    )
+  }
 
   // ===== つぶやきタブ =====
   const TweetTab = () => (
