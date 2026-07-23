@@ -546,6 +546,7 @@ export default function MypageClient({
           recentTweet={recentTweet}
           onEditName={()=>setEditingName(true)}
           onEditBio={()=>setShowBioModal(true)}
+          onTabChange={(t:string)=>handleTabChange(t as Tab)}
         />
       </div>
     </div>
