@@ -384,7 +384,7 @@ export default async function RankingPage({ searchParams }: Props) {
 
           <div className="ranking-filter" style={{background:'var(--color-bg)',border:'1px solid var(--color-brand-border)',borderRadius:12,padding:'12px 16px',marginBottom:16}}>
             {/* 期間 */}
-            <div style={{display:'flex',alignItems:'flex-start',gap:10,marginBottom:8}}>
+            <div style={{display:'flex',alignItems:'flex-start',gap:10,marginBottom:14}}>
               <div style={{fontSize:11,color:'var(--color-text-muted)',fontWeight:600,minWidth:60,flexShrink:0,paddingTop:5,lineHeight:1.3}}>期間</div>
               <div style={{overflowX:'auto',msOverflowStyle:'none',scrollbarWidth:'none',flex:1,minWidth:0} as any}>
                 <div style={{display:'flex',gap:6,flexWrap:'nowrap'}}>
@@ -397,9 +397,9 @@ export default async function RankingPage({ searchParams }: Props) {
               </div>
             </div>
             {/* 特集 ＋ 長さ・区分 */}
-            <div style={{display:'flex',alignItems:'flex-start',gap:10,marginBottom:10,flexWrap:'wrap'}}>
+            <div style={{display:'flex',alignItems:'flex-start',gap:10,marginBottom:14,flexWrap:'wrap'}}>
               <div style={{fontSize:11,color:'var(--color-text-muted)',fontWeight:600,minWidth:60,flexShrink:0,paddingTop:5,lineHeight:1.3}}>特集</div>
-              <div style={{display:'flex',gap:6,flexWrap:'wrap',alignItems:'center',flex:1,minWidth:0}}>
+              <div style={{display:'flex',gap:6,rowGap:10,flexWrap:'wrap',alignItems:'center',flex:1,minWidth:0}}>
                 <Link href={buildUrl(['rising','newbie_focus'].includes(period)?'weekly':period,novelType,serial)} className={pillClass(!['rising','newbie_focus'].includes(period))} style={pill(!['rising','newbie_focus'].includes(period))}>総合</Link>
                 <Link href={buildUrl('rising',novelType,serial)} className={pillClass(period==='rising')} style={pill(period==='rising')}>注目度</Link>
                 <Link href={buildUrl('newbie_focus',novelType,serial)} className={pillClass(period==='newbie_focus')} style={pill(period==='newbie_focus')}>新人注目</Link>
@@ -419,7 +419,7 @@ export default async function RankingPage({ searchParams }: Props) {
               </div>
             </div>
             {/* ジャンル：気分で探す風のボタン */}
-            <div style={{display:'flex',alignItems:'flex-start',gap:10,marginBottom:10}}>
+            <div style={{display:'flex',alignItems:'flex-start',gap:10,marginBottom:14}}>
               <div style={{fontSize:11,color:'var(--color-text-muted)',fontWeight:600,minWidth:60,flexShrink:0,paddingTop:8,lineHeight:1.3}}>ジャンル</div>
               <div style={{overflowX:'auto',msOverflowStyle:'none',scrollbarWidth:'none',flex:1,minWidth:0} as any}>
                 <div style={{display:'flex',gap:6,flexWrap:'nowrap'}}>
@@ -434,7 +434,7 @@ export default async function RankingPage({ searchParams }: Props) {
             {/* 絞り込み */}
             <div style={{display:'flex',alignItems:'flex-start',gap:10}}>
               <div style={{fontSize:11,color:'var(--color-text-muted)',fontWeight:600,minWidth:60,flexShrink:0,paddingTop:5,lineHeight:1.3}}>絞り込み</div>
-              <div style={{display:'flex',gap:6,flexWrap:'wrap',flex:1,minWidth:0}}>
+              <div style={{display:'flex',gap:6,rowGap:10,flexWrap:'wrap',flex:1,minWidth:0}}>
                 {serialOptions.map(o => (
                   <Link key={o.value} href={buildUrl(period,novelType,o.value)} className={pillClass(serial===o.value)} style={pill(serial===o.value,true)}>
                     {o.label}
