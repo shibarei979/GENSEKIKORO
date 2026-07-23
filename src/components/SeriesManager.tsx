@@ -1,7 +1,6 @@
 'use client'
 import { useState, useEffect } from 'react'
 import { createClient } from '@/lib/supabase/client'
-import Link from 'next/link'
 
 interface Series {
   id: string; title: string; description: string; cover_url: string | null; order_num: number
@@ -220,16 +219,6 @@ export default function SeriesManager({ userId, myNovels }: Props) {
               </div>
             )}
           </div>
-
-          {/* 公開リンク */}
-          {(selected.novels || []).length > 0 && (
-            <div style={{ marginTop: 16, padding: '10px 14px', background: 'var(--color-brand-light)', border: '1px solid var(--color-brand-border)', borderRadius: 8, fontSize: 12 }}>
-              <span style={{ color: 'var(--color-text-muted)' }}>公開ページ：</span>
-              <Link href={`/series/${selected.id}`} style={{ color: 'var(--color-brand)', textDecoration: 'none', fontWeight: 600 }}>
-                /series/{selected.id}
-              </Link>
-            </div>
-          )}
         </div>
       ) : (
         <div style={{ flex: '1 1 480px', minWidth: 320, background: 'var(--color-bg-card)', border: '1px solid #F3ECE5', borderRadius: 20, padding: '48px 40px', boxShadow: '0 1px 3px rgba(0,0,0,0.02)' }}>
@@ -268,7 +257,7 @@ export default function SeriesManager({ userId, myNovels }: Props) {
               {[
                 { t: '作品をまとめて管理', d: '関連作品をひとつにまとめて読者に見つけやすくします。', icon: <path d="M12 2L2 7l10 5 10-5-10-5z M2 17l10 5 10-5 M2 12l10 5 10-5"/> },
                 { t: '並び順を自由に設定', d: 'ドラッグ＆ドロップで作品の順番を並び替え可能。', icon: <><path d="M7 20V4M7 4L3 8M7 4l4 4"/><path d="M17 4v16m0 0l4-4m-4 4l-4-4"/></> },
-                { t: '公開ページに表示', d: 'シリーズ専用ページで読者にまとめて紹介できます。', icon: <><circle cx="9" cy="7" r="4"/><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/></> },
+                { t: '関連作品をつなぐ', d: '続編やスピンオフの関係を整理して管理できます。', icon: <><circle cx="9" cy="7" r="4"/><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/></> },
               ].map(f => (
                 <div key={f.t} style={{ background: 'var(--color-bg)', borderRadius: 14, padding: '18px 16px', textAlign: 'center' }}>
                   <div style={{ display: 'inline-flex', marginBottom: 10, color: 'var(--color-brand)' }}>
