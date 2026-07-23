@@ -155,6 +155,17 @@ export default function MypageClient({
       window.location.hash = tab
     }
   }
+
+  // ハッシュ（/mypage#works など）の変化でタブを切り替える
+  useEffect(() => {
+    function onHashChange() {
+      const hash = window.location.hash.replace('#', '') as Tab
+      const valid: Tab[] = ['mypage','works','bookmarks','history','tweet','mission','settings','series']
+      if (valid.includes(hash)) setActiveTab(hash)
+    }
+    window.addEventListener('hashchange', onHashChange)
+    return () => window.removeEventListener('hashchange', onHashChange)
+  }, [])
   const [myNovels,       setMyNovels]       = useState(initialNovels)
   const [expandedWork,   setExpandedWork]   = useState<string | null>(null)
   const [worksFilter,    setWorksFilter]    = useState<'all'|'published'|'serial'|'completed'|'short'|'draft'>('all')
@@ -948,11 +959,15 @@ export default function MypageClient({
               {['すべての形式','長編','短編'].map(t=>(<option key={t} value={t}>{t}</option>))}
             </select>
           </div>
-          <Link href="/mypage/history/clear"
+          <button onClick={async()=>{
+              if(!confirm('閲覧履歴をすべて削除しますか？')) return
+              await supabase.from('page_views').delete().eq('user_id', profile.user_id)
+              window.location.reload()
+            }}
             style={{height:42,display:'inline-flex',alignItems:'center',padding:'0 16px',border:'1px solid #EADFD4',borderRadius:10,
-              fontSize:13.5,color:'var(--color-text-muted)',background:'var(--color-bg-card)',textDecoration:'none'}}>
+              fontSize:13.5,color:'var(--color-text-muted)',background:'var(--color-bg-card)',cursor:'pointer'}}>
             履歴をクリア
-          </Link>
+          </button>
         </div>
       )}
 
@@ -1390,7 +1405,7 @@ export default function MypageClient({
               <div style={{marginTop:28,background:'#FFF8F1',border:'1px solid #F5DFC8',borderRadius:14,padding:'18px 16px',position:'relative',overflow:'hidden'}}>
                 <div style={{fontSize:13.5,fontWeight:700,color:'var(--color-brand)',marginBottom:8}}>コンテスト開催中！</div>
                 <div style={{fontSize:12,color:'var(--color-text-muted)',lineHeight:1.7,marginBottom:14}}>テーマに沿った作品を<br/>投稿してみませんか？</div>
-                <Link href="/contest"
+                <Link href="/contests"
                   style={{display:'inline-block',padding:'8px 14px',border:'1px solid var(--color-brand)',borderRadius:8,
                     background:'var(--color-bg-card)',color:'var(--color-brand)',fontSize:12.5,fontWeight:600,textDecoration:'none'}}>
                   コンテスト一覧へ

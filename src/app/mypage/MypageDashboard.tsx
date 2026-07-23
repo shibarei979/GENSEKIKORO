@@ -58,7 +58,7 @@ export default function MypageDashboard({ novels, historyItems, bookmarkedNovels
 
   const RecentWorks = (
     <div style={card}>
-      <div style={cardHead}><span style={cardTitle}>最近の投稿作品</span><Link href="/mypage/works" style={seeAll}>すべて見る →</Link></div>
+      <div style={cardHead}><span style={cardTitle}>最近の投稿作品</span><Link href="/mypage#works" style={seeAll}>すべて見る →</Link></div>
       {published.length === 0 ? <div style={emptyText}>まだ公開作品がありません</div> : published.slice(0, 2).map(n => (
         <Link key={n.id} href={`/mypage/novel/${n.id}`} className="dash-link" style={{ display: 'block', marginBottom: 12, textDecoration: 'none', borderRadius: 6 }}>
           <div style={{ fontSize: 13.5, fontWeight: 700, color: 'var(--color-text)', marginBottom: 4, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{n.title}</div>
@@ -74,7 +74,7 @@ export default function MypageDashboard({ novels, historyItems, bookmarkedNovels
 
   const Drafts = (
     <div style={card}>
-      <div style={cardHead}><span style={cardTitle}>下書き</span><Link href="/mypage/works" style={seeAll}>すべて見る →</Link></div>
+      <div style={cardHead}><span style={cardTitle}>下書き</span><Link href="/mypage#works" style={seeAll}>すべて見る →</Link></div>
       {drafts.length === 0 ? <div style={emptyText}>下書きはありません</div> : drafts.slice(0, 3).map(n => (
         <Link key={n.id} href={`/mypage/novel/${n.id}`} className="dash-link" style={{ display: 'block', marginBottom: 10, textDecoration: 'none', borderRadius: 6 }}>
           <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--color-text)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{n.title}</div>
@@ -86,7 +86,7 @@ export default function MypageDashboard({ novels, historyItems, bookmarkedNovels
 
   const History = (
     <div style={card}>
-      <div style={cardHead}><span style={cardTitle}>最近の閲覧履歴</span><Link href="/mypage/history" style={seeAll}>すべて見る →</Link></div>
+      <div style={cardHead}><span style={cardTitle}>最近の閲覧履歴</span><Link href="/mypage#history" style={seeAll}>すべて見る →</Link></div>
       {historyItems.length === 0 ? <div style={emptyText}>まだ閲覧履歴がありません</div> : historyItems.slice(0, 2).map((h, i) => (
         <Link key={i} href={h.episodeId ? `/novel/${h.novelId}/episode/${h.episodeId}` : `/novel/${h.novelId}`} className="dash-link" style={{ display: 'block', marginBottom: 10, textDecoration: 'none', borderRadius: 6 }}>
           <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--color-text)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{h.novelTitle}</div>
@@ -98,7 +98,7 @@ export default function MypageDashboard({ novels, historyItems, bookmarkedNovels
 
   const Bookmarks = (
     <div style={card}>
-      <div style={cardHead}><span style={cardTitle}>保存済み作品</span><Link href="/mypage/bookmarks" style={seeAll}>すべて見る →</Link></div>
+      <div style={cardHead}><span style={cardTitle}>保存済み作品</span><Link href="/mypage#bookmarks" style={seeAll}>すべて見る →</Link></div>
       {bookmarkedNovels.length === 0 ? <div style={emptyText}>保存済み作品はありません</div> : bookmarkedNovels.slice(0, 2).map((b: any, i: number) => (
         <Link key={i} href={`/novel/${b.novels?.id}`} className="dash-link" style={{ display: 'block', marginBottom: 10, textDecoration: 'none', borderRadius: 6 }}>
           <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--color-text)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{b.novels?.title}</div>
@@ -110,7 +110,7 @@ export default function MypageDashboard({ novels, historyItems, bookmarkedNovels
 
   const Tweet = (
     <div style={card}>
-      <div style={cardHead}><span style={cardTitle}>最近のつぶやき</span><Link href="/mypage/tweet" style={seeAll}>すべて見る →</Link></div>
+      <div style={cardHead}><span style={cardTitle}>最近のつぶやき</span><Link href="/mypage#tweet" style={seeAll}>すべて見る →</Link></div>
       {recentTweet ? (
         <div>
           <div style={{ fontSize: 12.5, color: 'var(--color-text)', lineHeight: 1.7, whiteSpace: 'pre-wrap', wordBreak: 'break-word', marginBottom: 6 }}>
@@ -124,7 +124,7 @@ export default function MypageDashboard({ novels, historyItems, bookmarkedNovels
 
   const Missions = (
     <div style={card}>
-      <div style={cardHead}><span style={cardTitle}>ミッション進捗</span><Link href="/mypage/mission" style={seeAll}>すべて見る →</Link></div>
+      <div style={cardHead}><span style={cardTitle}>ミッション進捗</span><Link href="/mypage#mission" style={seeAll}>すべて見る →</Link></div>
       {missionPreview.length === 0 ? <div style={emptyText}>すべて達成しました！</div> : missionPreview.map(m => {
         const cur = Math.min(m.target, m.cur(missionStats))
         return (
