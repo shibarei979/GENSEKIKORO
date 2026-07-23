@@ -950,7 +950,7 @@ export default function MypageClient({
           まだ閲覧履歴がありません
         </div>
       ) : (
-        <div style={{display:'flex',flexDirection:'column',gap:20}}>
+        <div style={{display:'flex',flexDirection:'column',gap:12}}>
         {historyItems
           .filter((h:any)=> histGenre==='すべてのジャンル' || h.genre===histGenre)
           .filter((h:any)=> histType==='すべての形式' || h.novelType===histType)
@@ -959,17 +959,17 @@ export default function MypageClient({
           const totalEps = novelEpCountMap[item.novelId] || 0
           return (
           <div key={item.novelId}
-            style={{background:'var(--color-bg-card)',border:'1px solid #F3ECE5',borderRadius:20,padding:'28px 32px',
-              boxShadow:'0 1px 3px rgba(0,0,0,0.03)',display:'grid',gridTemplateColumns:'minmax(0,1fr) 220px',gap:36,alignItems:'center'}}>
+            style={{background:'var(--color-bg-card)',border:'1px solid #F3ECE5',borderRadius:16,padding:'18px 22px',
+              boxShadow:'0 1px 3px rgba(0,0,0,0.03)',display:'grid',gridTemplateColumns:'minmax(0,1fr) 200px',gap:24,alignItems:'center'}}>
 
             {/* 左：作品情報（サイズと色で階層をつける） */}
             <div style={{minWidth:0}}>
               <a href={`/novel/${item.novelId}`} className="history-title" style={{textDecoration:'none',display:'block'}}>
-                <div style={{fontSize:20,fontWeight:700,color:'var(--color-text)',lineHeight:1.4,marginBottom:8,overflowWrap:'anywhere' as any}}>{item.novelTitle}</div>
+                <div style={{fontSize:16,fontWeight:700,color:'var(--color-text)',lineHeight:1.4,marginBottom:4,overflowWrap:'anywhere' as any}}>{item.novelTitle}</div>
               </a>
-              <div style={{fontSize:13,color:'var(--color-text-muted)',marginBottom:14}}>作者：{item.displayName}</div>
+              <div style={{fontSize:12,color:'var(--color-text-muted)',marginBottom:8}}>作者：{item.displayName}</div>
               {item.summary && (
-                <p style={{fontSize:13.5,color:'var(--color-text-muted)',lineHeight:1.8,marginBottom:16,maxWidth:640,
+                <p style={{fontSize:12.5,color:'var(--color-text-muted)',lineHeight:1.7,marginBottom:10,maxWidth:640,
                   display:'-webkit-box',WebkitLineClamp:2,WebkitBoxOrient:'vertical' as any,overflow:'hidden',overflowWrap:'anywhere' as any}}>{item.summary}</p>
               )}
               <div style={{display:'flex',gap:7,flexWrap:'wrap',alignItems:'center'}}>
@@ -985,7 +985,7 @@ export default function MypageClient({
             </div>
 
             {/* 右：数値・ボタン（アイコン付き・ボタンは大きく） */}
-            <div style={{display:'flex',flexDirection:'column',alignItems:'flex-end',gap:14}}>
+            <div style={{display:'flex',flexDirection:'column',alignItems:'flex-end',gap:8}}>
               <div style={{textAlign:'right'}}>
                 {charCountMap[item.novelId]>0 && (
                   <div style={{display:'inline-flex',alignItems:'center',gap:5,fontSize:13.5,fontWeight:600,color:'var(--color-text)',marginBottom:4}}>
@@ -998,21 +998,21 @@ export default function MypageClient({
               <div style={{display:'flex',gap:8,alignItems:'center'}}>
                 {firstEpMap[item.novelId] && firstEpMap[item.novelId]!==item.epId && (
                   <Link href={`/novel/${item.novelId}/episode/${firstEpMap[item.novelId]}`}
-                    style={{height:44,display:'inline-flex',alignItems:'center',padding:'0 16px',background:'var(--color-bg-card)',color:'var(--color-text-muted)',
-                      border:'1px solid #EADFD4',borderRadius:10,fontSize:13.5,fontWeight:600,textDecoration:'none',whiteSpace:'nowrap'}}>
+                    style={{height:36,display:'inline-flex',alignItems:'center',padding:'0 12px',background:'var(--color-bg-card)',color:'var(--color-text-muted)',
+                      border:'1px solid #EADFD4',borderRadius:8,fontSize:12.5,fontWeight:600,textDecoration:'none',whiteSpace:'nowrap'}}>
                     最初から
                   </Link>
                 )}
                 <Link href={`/novel/${item.novelId}/episode/${item.epId}`}
-                  style={{height:44,display:'inline-flex',alignItems:'center',padding:'0 22px',background:'var(--color-brand)',color:'#fff',
-                    borderRadius:10,fontSize:14.5,fontWeight:600,textDecoration:'none',whiteSpace:'nowrap'}}>
+                  style={{height:36,display:'inline-flex',alignItems:'center',padding:'0 16px',background:'var(--color-brand)',color:'#fff',
+                    borderRadius:8,fontSize:13,fontWeight:600,textDecoration:'none',whiteSpace:'nowrap'}}>
                   続きを読む
                 </Link>
                 {/* しおり（保存） */}
                 <Link href={`/novel/${item.novelId}`}
                   title={bookmarkedIds.has(item.novelId)?'保存済み':'作品ページで保存する'}
-                  style={{width:44,height:44,display:'inline-flex',alignItems:'center',justifyContent:'center',
-                    border:'1px solid #EADFD4',borderRadius:10,background:'var(--color-bg-card)',cursor:'pointer',flexShrink:0}}>
+                  style={{width:36,height:36,display:'inline-flex',alignItems:'center',justifyContent:'center',
+                    border:'1px solid #EADFD4',borderRadius:8,background:'var(--color-bg-card)',cursor:'pointer',flexShrink:0}}>
                   <svg width="17" height="17" viewBox="0 0 24 24"
                     fill={bookmarkedIds.has(item.novelId)?'var(--color-brand)':'none'}
                     stroke={bookmarkedIds.has(item.novelId)?'var(--color-brand)':'var(--color-text-faint)'}
