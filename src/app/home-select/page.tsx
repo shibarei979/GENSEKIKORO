@@ -46,7 +46,7 @@ export default function HomeSelectPage() {
   return (
     <div style={{
       minHeight: '100vh',
-      background: 'linear-gradient(180deg, #FFFDFB 0%, #FFF9F4 100%)',
+      background: 'linear-gradient(165deg, #FFFDFB 0%, #FFF6EC 55%, #FFF0E0 100%)',
       display: 'flex',
       flexDirection: 'column',
       alignItems: 'center',
@@ -57,6 +57,9 @@ export default function HomeSelectPage() {
       overflow: 'hidden',
     }}>
       <style>{`
+        .bg-blob { position: absolute; border-radius: 50%; filter: blur(70px); pointer-events: none; }
+        .bg-dot  { position: absolute; border-radius: 50%; pointer-events: none; }
+        @keyframes floaty { 0%,100% { transform: translateY(0) } 50% { transform: translateY(-14px) } }
         .role-illust { position: absolute; bottom: 0; height: min(78vh, 620px); object-fit: contain; pointer-events: none; user-select: none; }
         .role-illust-left  { left: max(-40px, calc(50% - 760px)); }
         .role-illust-right { right: max(-40px, calc(50% - 760px)); }
@@ -65,23 +68,27 @@ export default function HomeSelectPage() {
         .role-card:hover { transform: translateY(-4px); box-shadow: 0 10px 30px rgba(0,0,0,0.08); }
       `}</style>
 
+      {/* 背景装飾 */}
+      <div className="bg-blob" style={{ width: 460, height: 460, background: 'rgba(242,106,33,0.10)', top: '-140px', left: '-120px' }}/>
+      <div className="bg-blob" style={{ width: 400, height: 400, background: 'rgba(42,157,143,0.09)', bottom: '-130px', right: '-110px' }}/>
+      <div className="bg-blob" style={{ width: 300, height: 300, background: 'rgba(245,166,35,0.07)', top: '18%', right: '12%' }}/>
+      <div className="bg-dot" style={{ width: 10, height: 10, background: 'rgba(242,106,33,0.28)', top: '16%', left: '18%', animation: 'floaty 6s ease-in-out infinite' }}/>
+      <div className="bg-dot" style={{ width: 7, height: 7, background: 'rgba(42,157,143,0.30)', top: '68%', left: '24%', animation: 'floaty 7s ease-in-out infinite .8s' }}/>
+      <div className="bg-dot" style={{ width: 12, height: 12, background: 'rgba(245,166,35,0.25)', top: '26%', right: '20%', animation: 'floaty 8s ease-in-out infinite .4s' }}/>
+      <div className="bg-dot" style={{ width: 8, height: 8, background: 'rgba(242,106,33,0.22)', bottom: '20%', right: '26%', animation: 'floaty 6.5s ease-in-out infinite 1.2s' }}/>
+
       {step === 'role' && (
         <>
           {/* 左右のイラスト */}
           <img src="/writer.png" alt="" className="role-illust role-illust-left"/>
           <img src="/reader.png" alt="" className="role-illust role-illust-right"/>
 
-          {/* 原石アイコン */}
-          <svg width="70" height="44" viewBox="0 0 70 44" fill="none" style={{ marginBottom: 10, zIndex: 1 }}>
-            <path d="M35 4l7 9-7 12-7-12z" fill="#F26A21" opacity="0.9"/>
-            <path d="M35 4l7 9H28z" fill="#FFB27A"/>
-            <path d="M14 34c7-5 14-7 21-7s14 2 21 7" stroke="#F5A623" strokeWidth="1.6" strokeLinecap="round" fill="none"/>
-            <path d="M20 12l1.4 3.2L24.6 16l-3.2 1.4L20 20.6l-1.4-3.2L15.4 16l3.2-.8z" fill="#F5A623" opacity="0.8"/>
-            <path d="M50 12l1.4 3.2L54.6 16l-3.2 1.4L50 20.6l-1.4-3.2L45.4 16l3.2-.8z" fill="#F5A623" opacity="0.8"/>
-          </svg>
+          {/* ロゴ */}
+          <img src="/logo.png" alt="原石航路"
+            style={{ height: 'clamp(74px, 9vw, 108px)', objectFit: 'contain', marginBottom: 22, zIndex: 1, filter: 'drop-shadow(0 3px 10px rgba(242,106,33,0.16))' }}/>
 
-          <h1 style={{ fontSize: 'clamp(26px, 4vw, 40px)', fontWeight: 800, color: '#333', marginBottom: 12, textAlign: 'center', letterSpacing: '0.04em', zIndex: 1 }}>
-            ようこそ、<span style={{ color: 'var(--color-brand)' }}>原石航路</span>へ
+          <h1 style={{ fontSize: 'clamp(24px, 3.4vw, 34px)', fontWeight: 800, color: '#333', marginBottom: 12, textAlign: 'center', letterSpacing: '0.05em', zIndex: 1 }}>
+            ようこそ、原石航路へ
           </h1>
           <p style={{ fontSize: 16, color: '#666', marginBottom: 40, textAlign: 'center', zIndex: 1 }}>
             あなたはどちら？
@@ -137,11 +144,8 @@ export default function HomeSelectPage() {
 
       {step === 'ai' && role === 'reader' && (
         <>
-          <svg width="70" height="44" viewBox="0 0 70 44" fill="none" style={{ marginBottom: 10, zIndex: 1 }}>
-            <path d="M35 4l7 9-7 12-7-12z" fill="#F26A21" opacity="0.9"/>
-            <path d="M35 4l7 9H28z" fill="#FFB27A"/>
-            <path d="M14 34c7-5 14-7 21-7s14 2 21 7" stroke="#F5A623" strokeWidth="1.6" strokeLinecap="round" fill="none"/>
-          </svg>
+          <img src="/logo.png" alt="原石航路"
+            style={{ height: 'clamp(62px, 7vw, 86px)', objectFit: 'contain', marginBottom: 20, zIndex: 1, filter: 'drop-shadow(0 3px 10px rgba(242,106,33,0.16))' }}/>
           <h1 style={{ fontSize: 'clamp(22px, 3vw, 30px)', fontWeight: 800, color: '#333', marginBottom: 12, textAlign: 'center', letterSpacing: '0.04em' }}>
             <span style={{ color: 'var(--color-brand)' }}>AI作品</span>を表示しますか？
           </h1>
@@ -189,11 +193,8 @@ export default function HomeSelectPage() {
 
       {step === 'ai' && role === 'writer' && (
         <>
-          <svg width="70" height="44" viewBox="0 0 70 44" fill="none" style={{ marginBottom: 10 }}>
-            <path d="M35 4l7 9-7 12-7-12z" fill="#F26A21" opacity="0.9"/>
-            <path d="M35 4l7 9H28z" fill="#FFB27A"/>
-            <path d="M14 34c7-5 14-7 21-7s14 2 21 7" stroke="#F5A623" strokeWidth="1.6" strokeLinecap="round" fill="none"/>
-          </svg>
+          <img src="/logo.png" alt="原石航路"
+            style={{ height: 'clamp(62px, 7vw, 86px)', objectFit: 'contain', marginBottom: 20, zIndex: 1, filter: 'drop-shadow(0 3px 10px rgba(242,106,33,0.16))' }}/>
           <h1 style={{ fontSize: 'clamp(22px, 3vw, 30px)', fontWeight: 800, color: '#333', marginBottom: 12, textAlign: 'center', letterSpacing: '0.04em' }}>
             執筆で<span style={{ color: 'var(--color-brand)' }}>AI</span>を使いますか？
           </h1>
