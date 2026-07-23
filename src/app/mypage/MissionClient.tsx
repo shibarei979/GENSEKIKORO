@@ -120,8 +120,9 @@ export default function MissionClient({ user, stats, initialClaimedIds, isWriter
 
   return (
     <div>
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16, flexWrap: 'wrap', gap: 8 }}>
-        <div style={{ fontSize: 22, fontWeight: 700, color: 'var(--color-text)' }}>ミッション</div>
+      <div style={{ marginBottom: 32 }}>
+        <h1 style={{ fontSize: 22, fontWeight: 700, color: 'var(--color-text)', letterSpacing: '-0.01em', lineHeight: 1.3 }}>ミッション</h1>
+        <p style={{ fontSize: 14, color: 'var(--color-text-muted)', marginTop: 10, lineHeight: 1.7 }}>読んで、応援して、書いて。挑戦するとバッジや報酬がもらえます。</p>
       </div>
 
       {/* サマリーカード */}

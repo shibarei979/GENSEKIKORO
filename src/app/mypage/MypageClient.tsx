@@ -575,10 +575,12 @@ export default function MypageClient({
 
   const WorksTab = () => (
     <div>
-      <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',marginBottom:16}}>
+      <div style={{display:'flex',alignItems:'flex-start',justifyContent:'space-between',marginBottom:28,flexWrap:'wrap',gap:12}}>
         <div>
-          <span style={{fontSize:15,fontWeight:700,color:'var(--color-text)'}}>投稿作品</span>
-          <span style={{fontSize:12,color:'var(--color-text-muted)',marginLeft:8}}>{published.length}公開・{drafts.length}下書き</span>
+          <h1 style={{fontSize:22,fontWeight:700,color:'var(--color-text)',letterSpacing:'-0.01em',lineHeight:1.3}}>
+            投稿作品 <span style={{fontSize:15,fontWeight:600,color:'var(--color-text-muted)'}}>{myNovels.length}作品</span>
+          </h1>
+          <p style={{fontSize:14,color:'var(--color-text-muted)',marginTop:10,lineHeight:1.7}}>公開中 {published.length}・下書き {drafts.length}</p>
         </div>
         <div style={{display:'flex',gap:8,alignItems:'center',flexWrap:'wrap'}}>
           <Link href="/mypage/report" style={{display:'inline-flex',alignItems:'center',gap:5,border:'1px solid var(--color-brand-border)',color:'var(--color-brand)',fontSize:12,fontWeight:600,padding:'7px 14px',borderRadius:16,textDecoration:'none'}}>
@@ -775,8 +777,8 @@ export default function MypageClient({
       {/* 見出し */}
       <div style={{display:'flex',alignItems:'flex-start',justifyContent:'space-between',marginBottom:32,flexWrap:'wrap',gap:12}}>
         <div>
-          <h1 style={{fontSize:30,fontWeight:800,color:'var(--color-text)',letterSpacing:'-0.01em',lineHeight:1.3}}>
-            保存済み作品 <span style={{fontSize:18,fontWeight:600,color:'var(--color-text-muted)'}}>（{myBookmarks.length}）</span>
+          <h1 style={{fontSize:22,fontWeight:700,color:'var(--color-text)',letterSpacing:'-0.01em',lineHeight:1.3}}>
+            保存済み作品 <span style={{fontSize:15,fontWeight:600,color:'var(--color-text-muted)'}}>（{myBookmarks.length}）</span>
           </h1>
           <p style={{fontSize:14,color:'var(--color-text-muted)',marginTop:10,lineHeight:1.7}}>気になる作品をリストに保存して、あとでゆっくり読むことができます。</p>
         </div>
@@ -902,8 +904,8 @@ export default function MypageClient({
     <div>
       {/* ページ見出し：大きく、説明との間に呼吸を */}
       <div style={{marginBottom:32}}>
-        <h1 style={{fontSize:30,fontWeight:800,color:'var(--color-text)',letterSpacing:'-0.01em',lineHeight:1.3}}>
-          閲覧履歴 <span style={{fontSize:18,fontWeight:600,color:'var(--color-text-muted)'}}>（{historyItems.length}件）</span>
+        <h1 style={{fontSize:22,fontWeight:700,color:'var(--color-text)',letterSpacing:'-0.01em',lineHeight:1.3}}>
+          閲覧履歴 <span style={{fontSize:15,fontWeight:600,color:'var(--color-text-muted)'}}>（{historyItems.length}件）</span>
         </h1>
         <p style={{fontSize:14,color:'var(--color-text-muted)',marginTop:10,lineHeight:1.7}}>過去に閲覧した作品の履歴です。続きから読むことができます。</p>
       </div>
@@ -1036,7 +1038,7 @@ export default function MypageClient({
   const TweetTab = () => (
     <div>
       <div style={{marginBottom:32}}>
-        <h1 style={{fontSize:30,fontWeight:800,color:'var(--color-text)',letterSpacing:'-0.01em',lineHeight:1.3}}>つぶやき</h1>
+        <h1 style={{fontSize:22,fontWeight:700,color:'var(--color-text)',letterSpacing:'-0.01em',lineHeight:1.3}}>つぶやき</h1>
         <p style={{fontSize:14,color:'var(--color-text-muted)',marginTop:10,lineHeight:1.7}}>近況や作品の進捗を、気軽に共有しましょう。</p>
       </div>
       <div style={{display:'flex',gap:24,alignItems:'flex-start',flexWrap:'wrap'}}>
@@ -1183,8 +1185,10 @@ export default function MypageClient({
 
     return (
     <div>
-      <div style={{fontSize:22,fontWeight:700,color:'var(--color-text)',marginBottom:4}}>設定</div>
-      <div style={{fontSize:12.5,color:'var(--color-text-muted)',marginBottom:20}}>アカウントや通知、表示などの各種設定を行います。</div>
+      <div style={{marginBottom:32}}>
+        <h1 style={{fontSize:22,fontWeight:700,color:'var(--color-text)',letterSpacing:'-0.01em',lineHeight:1.3}}>設定</h1>
+        <p style={{fontSize:14,color:'var(--color-text-muted)',marginTop:10,lineHeight:1.7}}>アカウントや通知、表示などの各種設定を行います。</p>
+      </div>
 
       <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit, minmax(320px, 1fr))',gap:16,alignItems:'start'}}>
         {/* ===== 左カラム ===== */}
@@ -1341,7 +1345,7 @@ export default function MypageClient({
               {activeTab==='series' && (
                 <div>
                   <div style={{marginBottom:32}}>
-                    <h1 style={{fontSize:30,fontWeight:800,color:'var(--color-text)',letterSpacing:'-0.01em',lineHeight:1.3}}>シリーズ</h1>
+                    <h1 style={{fontSize:22,fontWeight:700,color:'var(--color-text)',letterSpacing:'-0.01em',lineHeight:1.3}}>シリーズ</h1>
                     <p style={{fontSize:14,color:'var(--color-text-muted)',marginTop:10,lineHeight:1.7}}>関連する作品をまとめて、読者にわかりやすく紹介できます。</p>
                   </div>
                   <SeriesManager userId={profile.user_id} myNovels={myNovels||[]} />
@@ -1372,7 +1376,7 @@ export default function MypageClient({
               {activeTab==='series' && (
                 <div>
                   <div style={{marginBottom:32}}>
-                    <h1 style={{fontSize:30,fontWeight:800,color:'var(--color-text)',letterSpacing:'-0.01em',lineHeight:1.3}}>シリーズ</h1>
+                    <h1 style={{fontSize:22,fontWeight:700,color:'var(--color-text)',letterSpacing:'-0.01em',lineHeight:1.3}}>シリーズ</h1>
                     <p style={{fontSize:14,color:'var(--color-text-muted)',marginTop:10,lineHeight:1.7}}>関連する作品をまとめて、読者にわかりやすく紹介できます。</p>
                   </div>
                   <SeriesManager userId={profile.user_id} myNovels={myNovels||[]} />
