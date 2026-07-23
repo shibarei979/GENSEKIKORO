@@ -108,28 +108,50 @@ export default function SeriesManager({ userId, myNovels }: Props) {
   const inp = { width: '100%', padding: '8px 12px', border: '1.5px solid var(--color-brand-border)', borderRadius: 8, fontSize: 13, outline: 'none', background: 'var(--color-bg-card)', color: 'var(--color-text)', boxSizing: 'border-box' as const }
 
   return (
-    <div style={{ display: 'flex', gap: 0, minHeight: 400 }}>
-      {/* シリーズ一覧 */}
-      <div style={{ width: 200, flexShrink: 0, borderRight: '1px solid var(--color-brand-border)', display: 'flex', flexDirection: 'column' }}>
-        <div style={{ padding: '12px', borderBottom: '1px solid var(--color-brand-border)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexShrink: 0 }}>
-          <span style={{ fontSize: 13, fontWeight: 700, color: 'var(--color-text)' }}>シリーズ</span>
-          <button onClick={handleNew} style={{ background: 'var(--color-brand)', color: '#fff', border: 'none', borderRadius: 6, padding: '3px 10px', fontSize: 12, cursor: 'pointer' }}>＋</button>
+    <div style={{ display: 'flex', gap: 28, alignItems: 'flex-start', flexWrap: 'wrap' }}>
+      {/* 左：シリーズ一覧 */}
+      <div style={{ flex: '0 1 340px', minWidth: 280 }}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, marginBottom: 20 }}>
+          <span style={{ fontSize: 15, fontWeight: 700, color: 'var(--color-text)' }}>シリーズ一覧</span>
+          <button onClick={handleNew}
+            style={{ height: 42, display: 'inline-flex', alignItems: 'center', gap: 6, background: 'var(--color-bg-card)', color: 'var(--color-brand)',
+              border: '1px solid var(--color-brand)', borderRadius: 10, padding: '0 16px', fontSize: 13.5, fontWeight: 600, cursor: 'pointer' }}>
+            ＋ シリーズを作成
+          </button>
         </div>
-        <div style={{ flex: 1, overflowY: 'auto' }}>
-          {series.length === 0 ? (
-            <div style={{ padding: 16, fontSize: 11, color: 'var(--color-text-faint)', textAlign: 'center' }}>シリーズを作成してください</div>
-          ) : series.map(s => (
-            <div key={s.id} onClick={() => selectSeries(s)}
-              style={{ padding: '10px 12px', borderBottom: '1px solid var(--color-brand-light)', cursor: 'pointer', background: selected?.id === s.id ? 'var(--color-brand-light)' : 'none' }}>
-              <div style={{ fontSize: 12, fontWeight: 600, color: selected?.id === s.id ? 'var(--color-brand)' : 'var(--color-text)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{s.title}</div>
-            </div>
-          ))}
-        </div>
+
+        <div style={{ fontSize: 12.5, color: 'var(--color-text-muted)', marginBottom: 14 }}>{series.length}件のシリーズ</div>
+
+        {series.length === 0 ? (
+          <div style={{ padding: '32px 20px', fontSize: 13, color: 'var(--color-text-faint)', textAlign: 'center',
+            background: 'var(--color-bg-card)', border: '1px solid #F3ECE5', borderRadius: 16 }}>
+            まだシリーズがありません
+          </div>
+        ) : (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+            {series.map(s => (
+              <div key={s.id} onClick={() => selectSeries(s)}
+                style={{ padding: '16px 18px', cursor: 'pointer', borderRadius: 16,
+                  background: selected?.id === s.id ? '#FFF8F1' : 'var(--color-bg-card)',
+                  border: `1px solid ${selected?.id === s.id ? 'var(--color-brand)' : '#F3ECE5'}`,
+                  boxShadow: '0 1px 3px rgba(0,0,0,0.02)' }}>
+                <div style={{ fontSize: 15, fontWeight: 700, color: 'var(--color-text)', marginBottom: 8, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{s.title}</div>
+                {s.description && (
+                  <div style={{ fontSize: 12, color: 'var(--color-text-muted)', lineHeight: 1.6, marginBottom: 8,
+                    display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical' as any, overflow: 'hidden' }}>{s.description}</div>
+                )}
+                <div style={{ fontSize: 12, color: 'var(--color-text-faint)' }}>
+                  {selected?.id === s.id ? `${(selected.novels || []).length}作品` : ''}
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
       </div>
 
       {/* 詳細 */}
       {selected ? (
-        <div style={{ flex: 1, padding: '16px 20px', overflowY: 'auto' }}>
+        <div style={{ flex: '1 1 480px', minWidth: 320, background: 'var(--color-bg-card)', border: '1px solid #F3ECE5', borderRadius: 20, padding: '28px 32px', boxShadow: '0 1px 3px rgba(0,0,0,0.02)' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 16 }}>
             <h3 style={{ margin: 0, fontSize: 15, fontWeight: 700, color: 'var(--color-text)' }}>シリーズ編集</h3>
             <button onClick={handleSave} disabled={saving} style={{ marginLeft: 'auto', background: 'var(--color-brand)', color: '#fff', border: 'none', borderRadius: 8, padding: '6px 16px', fontSize: 12, cursor: 'pointer' }}>
@@ -210,8 +232,54 @@ export default function SeriesManager({ userId, myNovels }: Props) {
           )}
         </div>
       ) : (
-        <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--color-text-faint)', fontSize: 13 }}>
-          シリーズを選択または作成してください
+        <div style={{ flex: '1 1 480px', minWidth: 320, background: 'var(--color-bg-card)', border: '1px solid #F3ECE5', borderRadius: 20, padding: '48px 40px', boxShadow: '0 1px 3px rgba(0,0,0,0.02)' }}>
+          {/* 空状態：イラスト＋説明＋アクション */}
+          <div style={{ textAlign: 'center', paddingBottom: 40, borderBottom: '1px solid #F7F2EC' }}>
+            <svg width="120" height="120" viewBox="0 0 120 120" fill="none" style={{ marginBottom: 20 }}>
+              <path d="M78 26c-14 4-28 16-34 30-4 9-5 18-4 26l-8 8a3 3 0 0 0 4 4l8-8c8 1 17 0 26-4 14-6 26-20 30-34 2-8 3-16 3-22 0-2-2-4-4-4-6 0-14 1-21 4z"
+                fill="#FFF0E5" stroke="#F26A21" strokeWidth="2.5" strokeLinejoin="round"/>
+              <path d="M74 40c-10 6-20 16-26 28" stroke="#F26A21" strokeWidth="2.5" strokeLinecap="round"/>
+              <circle cx="32" cy="34" r="2.5" fill="#F5A623"/>
+              <circle cx="92" cy="66" r="2" fill="#F5A623"/>
+              <circle cx="26" cy="60" r="1.8" fill="#F5A623"/>
+            </svg>
+            <h3 style={{ margin: 0, fontSize: 24, fontWeight: 700, color: 'var(--color-text)', marginBottom: 14 }}>シリーズを選択してください</h3>
+            <p style={{ fontSize: 14, color: 'var(--color-text-muted)', lineHeight: 1.9, marginBottom: 28 }}>
+              選択したシリーズの詳細や、作品の並び替え・追加ができます。<br/>
+              左の一覧からシリーズを選ぶか、新しくシリーズを作成しましょう。
+            </p>
+            <div style={{ display: 'flex', gap: 12, justifyContent: 'center', flexWrap: 'wrap' }}>
+              <button onClick={handleNew}
+                style={{ height: 48, display: 'inline-flex', alignItems: 'center', gap: 8, background: 'var(--color-brand)', color: '#fff',
+                  border: 'none', borderRadius: 10, padding: '0 26px', fontSize: 15, fontWeight: 600, cursor: 'pointer' }}>
+                ＋ シリーズを作成
+              </button>
+            </div>
+          </div>
+
+          {/* シリーズとは？ */}
+          <div style={{ paddingTop: 36 }}>
+            <h4 style={{ margin: 0, fontSize: 17, fontWeight: 700, color: 'var(--color-text)', marginBottom: 12 }}>シリーズとは？</h4>
+            <p style={{ fontSize: 13.5, color: 'var(--color-text-muted)', lineHeight: 1.9, marginBottom: 24 }}>
+              関連する作品をまとめて読者にわかりやすく紹介できる機能です。<br/>
+              長編の複数巻や、短編集・スピンオフなどの整理にご活用ください。
+            </p>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: 14 }}>
+              {[
+                { t: '作品をまとめて管理', d: '関連作品をひとつにまとめて読者に見つけやすくします。', icon: <path d="M12 2L2 7l10 5 10-5-10-5z M2 17l10 5 10-5 M2 12l10 5 10-5"/> },
+                { t: '並び順を自由に設定', d: 'ドラッグ＆ドロップで作品の順番を並び替え可能。', icon: <><path d="M7 20V4M7 4L3 8M7 4l4 4"/><path d="M17 4v16m0 0l4-4m-4 4l-4-4"/></> },
+                { t: '公開ページに表示', d: 'シリーズ専用ページで読者にまとめて紹介できます。', icon: <><circle cx="9" cy="7" r="4"/><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/></> },
+              ].map(f => (
+                <div key={f.t} style={{ background: 'var(--color-bg)', borderRadius: 14, padding: '18px 16px', textAlign: 'center' }}>
+                  <div style={{ display: 'inline-flex', marginBottom: 10, color: 'var(--color-brand)' }}>
+                    <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">{f.icon}</svg>
+                  </div>
+                  <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--color-text)', marginBottom: 6 }}>{f.t}</div>
+                  <div style={{ fontSize: 11.5, color: 'var(--color-text-muted)', lineHeight: 1.7 }}>{f.d}</div>
+                </div>
+              ))}
+            </div>
+          </div>
         </div>
       )}
     </div>

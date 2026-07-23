@@ -1288,7 +1288,15 @@ export default function MypageClient({
               {activeTab==='tweet' && <TweetTab/>}
               {activeTab==='mission' && <MissionTab/>}
               {activeTab==='settings' && <SettingsTab/>}
-              {activeTab==='series' && <SeriesManager userId={profile.user_id} myNovels={myNovels||[]} />}
+              {activeTab==='series' && (
+                <div>
+                  <div style={{marginBottom:32}}>
+                    <h1 style={{fontSize:30,fontWeight:800,color:'var(--color-text)',letterSpacing:'-0.01em',lineHeight:1.3}}>シリーズ</h1>
+                    <p style={{fontSize:14,color:'var(--color-text-muted)',marginTop:10,lineHeight:1.7}}>関連する作品をまとめて、読者にわかりやすく紹介できます。</p>
+                  </div>
+                  <SeriesManager userId={profile.user_id} myNovels={myNovels||[]} />
+                </div>
+              )}
             </div>
           </>
         ) : (
@@ -1311,7 +1319,15 @@ export default function MypageClient({
               {activeTab==='tweet' && <TweetTab/>}
               {activeTab==='mission' && <MissionTab/>}
               {activeTab==='settings' && <SettingsTab/>}
-              {activeTab==='series' && <SeriesManager userId={profile.user_id} myNovels={myNovels||[]} />}
+              {activeTab==='series' && (
+                <div>
+                  <div style={{marginBottom:32}}>
+                    <h1 style={{fontSize:30,fontWeight:800,color:'var(--color-text)',letterSpacing:'-0.01em',lineHeight:1.3}}>シリーズ</h1>
+                    <p style={{fontSize:14,color:'var(--color-text-muted)',marginTop:10,lineHeight:1.7}}>関連する作品をまとめて、読者にわかりやすく紹介できます。</p>
+                  </div>
+                  <SeriesManager userId={profile.user_id} myNovels={myNovels||[]} />
+                </div>
+              )}
             </div>
           </div>
         )}
