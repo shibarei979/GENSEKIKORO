@@ -2,9 +2,9 @@ import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
-import Header from '@/components/layout/Header'
-import Footer from '@/components/layout/Footer'
-import AiReviewSection from '../AiReviewSection'
+import Header from '@/components/layout/header'
+import Footer from '@/components/layout/footer'
+import AiReviewSection from '@/components/admin/ai-review-section'
 
 export const dynamic = 'force-dynamic'
 
@@ -30,7 +30,7 @@ export default async function AdminAiReviewPage() {
       <div style={{maxWidth:1100,margin:'0 auto',padding:'32px'}}>
         {/* パンくず */}
         <div style={{display:'flex',alignItems:'center',gap:6,fontSize:12,color:'#94a3b8',marginBottom:20}}>
-          <Link href="/admin" style={{color:'#F26A21',textDecoration:'none'}}>管理画面</Link>
+          <Link href="/admin" style={{color:'var(--color-brand)',textDecoration:'none'}}>管理画面</Link>
           <span>›</span>
           <span style={{color:'#1e293b'}}>AI審査</span>
         </div>
@@ -39,7 +39,7 @@ export default async function AdminAiReviewPage() {
           <div style={{display:'flex',alignItems:'center',gap:10,marginBottom:4}}>
             <span style={{fontSize:20,fontWeight:800,color:'#1e293b'}}>AI審査</span>
             {pending > 0 && (
-              <span style={{fontSize:11,background:'#ef4444',color:'#fff',padding:'2px 10px',borderRadius:10,fontWeight:700}}>
+              <span style={{fontSize:11,background:'#ef4444',color:'var(--color-text-inverse)',padding:'2px 10px',borderRadius:10,fontWeight:700}}>
                 {pending} 件待ち
               </span>
             )}

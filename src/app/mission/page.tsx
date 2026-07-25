@@ -1,9 +1,9 @@
 import { createClient } from '@/lib/supabase/server'
-import Header from '@/components/layout/Header'
-import Footer from '@/components/layout/Footer'
-import AdBanner from '@/components/layout/AdBanner'
-import Sidebar from '@/components/layout/Sidebar'
-import MissionClient from './MissionClient'
+import Header from '@/components/layout/header'
+import Footer from '@/components/layout/footer'
+import AdBanner from '@/components/layout/ad-banner'
+import Sidebar from '@/components/layout/sidebar'
+import MissionClient from '@/components/mission/mission-client'
 
 export const dynamic = 'force-dynamic'
 
@@ -54,7 +54,7 @@ export default async function MissionPage() {
   }
 
   return (
-    <div style={{minHeight:'100vh',background:'#FFF9F2',fontFamily:"'Noto Sans JP',sans-serif"}}>
+    <div style={{minHeight:'100vh',fontFamily:"'Noto Sans JP',sans-serif"}}>
       <Header profile={profile} user={user}/>
       <div style={{maxWidth:1200,margin:'0 auto',padding:'24px 32px',display:'flex',gap:20,alignItems:'flex-start'}}>
         <div style={{flex:1,minWidth:0}}>

@@ -1,9 +1,9 @@
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
-import Header from '@/components/layout/Header'
-import Footer from '@/components/layout/Footer'
-import AnnouncementManager from './AnnouncementManager'
+import Header from '@/components/layout/header'
+import Footer from '@/components/layout/footer'
+import AnnouncementManager from '@/components/admin/announcements/announcement-manager'
 
 export default async function AdminAnnouncementsPage() {
   const supabase = await createClient()

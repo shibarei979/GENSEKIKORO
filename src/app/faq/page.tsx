@@ -1,7 +1,7 @@
 import { createClient } from '@/lib/supabase/server'
-import Header from '@/components/layout/Header'
-import Footer from '@/components/layout/Footer'
-import AdBanner from '@/components/layout/AdBanner'
+import Header from '@/components/layout/header'
+import Footer from '@/components/layout/footer'
+import AdBanner from '@/components/layout/ad-banner'
 import Link from 'next/link'
 
 const navLinks: {href:string;label:string;active?:boolean}[] = [
@@ -65,15 +65,15 @@ export default async function FaqPage() {
   }
 
   return (
-    <div style={{minHeight:'100vh',background:'#fff',fontFamily:"'Noto Sans JP',sans-serif"}}>
+    <div style={{minHeight:'100vh',fontFamily:"'Noto Sans JP',sans-serif"}}>
       <Header profile={profile} user={user} />
 
-      <div style={{background:'#FFF9F2',borderBottom:'1px solid #F0D9C9',overflowX:'auto'}}>
+      <div style={{background:'var(--color-bg)',borderBottom:'1px solid var(--color-brand-border)',overflowX:'auto'}}>
         <div style={{maxWidth:860,margin:'0 auto',padding:'0 24px',display:'flex'}}>
           {navLinks.map(n => (
             <Link key={n.href} href={n.href}
-              style={{padding:'12px 18px',fontSize:13,color:n.active?'#F26A21':'#77706A',textDecoration:'none',whiteSpace:'nowrap',
-                borderBottom:n.active?'2px solid #F26A21':'2px solid transparent',fontWeight:n.active?700:400}}>
+              style={{padding:'12px 18px',fontSize:13,color:n.active?'var(--color-brand)':'var(--color-text-muted)',textDecoration:'none',whiteSpace:'nowrap',
+                borderBottom:n.active?'2px solid var(--color-brand)':'2px solid transparent',fontWeight:n.active?700:400}}>
               {n.label}
             </Link>
           ))}
@@ -82,26 +82,26 @@ export default async function FaqPage() {
 
       <div style={{maxWidth:860,margin:'0 auto',padding:'40px 24px 60px'}}>
         <div style={{marginBottom:28}}>
-          <h1 style={{fontSize:24,fontWeight:700,color:'#2B211B',marginBottom:4}}>よくある質問</h1>
-          <p style={{fontSize:13,color:'#77706A'}}>原石航路についてよくある質問をまとめています</p>
+          <h1 style={{fontSize:24,fontWeight:700,color:'var(--color-text)',marginBottom:4}}>よくある質問</h1>
+          <p style={{fontSize:13,color:'var(--color-text-muted)'}}>原石航路についてよくある質問をまとめています</p>
         </div>
 
         {faqCategories.map((cat, ci) => (
           <div key={ci} style={{marginBottom:24}}>
             <div style={{display:'flex',alignItems:'center',gap:8,marginBottom:12}}>
-              <h2 style={{fontSize:16,fontWeight:700,color:'#2B211B'}}>{cat.label}</h2>
+              <h2 style={{fontSize:16,fontWeight:700,color:'var(--color-text)'}}>{cat.label}</h2>
             </div>
             <div style={{display:'flex',flexDirection:'column',gap:8}}>
               {cat.items.map((item, i) => (
-                <details key={i} style={{background:'#FFF9F2',border:'1px solid #F0D9C9',borderRadius:10,overflow:'hidden'}}>
-                  <summary style={{padding:'14px 18px',fontSize:14,fontWeight:600,color:'#2B211B',cursor:'pointer',
+                <details key={i} style={{background:'var(--color-bg)',border:'1px solid var(--color-brand-border)',borderRadius:10,overflow:'hidden'}}>
+                  <summary style={{padding:'14px 18px',fontSize:14,fontWeight:600,color:'var(--color-text)',cursor:'pointer',
                     display:'flex',alignItems:'center',gap:10,listStyle:'none'}}>
-                    <span style={{color:'#F26A21',fontWeight:700,fontSize:16,flexShrink:0}}>Q</span>
+                    <span style={{color:'var(--color-brand)',fontWeight:700,fontSize:16,flexShrink:0}}>Q</span>
                     {item.q}
                   </summary>
-                  <div style={{padding:'12px 18px 14px',borderTop:'1px solid #FFF1E6',display:'flex',gap:10,alignItems:'flex-start',background:'#FFF9F2'}}>
+                  <div style={{padding:'12px 18px 14px',borderTop:'1px solid var(--color-brand-light)',display:'flex',gap:10,alignItems:'flex-start',background:'var(--color-bg)'}}>
                     <span style={{color:'#2563eb',fontWeight:700,fontSize:16,flexShrink:0}}>A</span>
-                    <p style={{fontSize:13,color:'#2B211B',lineHeight:1.8,margin:0}}>{item.a}</p>
+                    <p style={{fontSize:13,color:'var(--color-text)',lineHeight:1.8,margin:0}}>{item.a}</p>
                   </div>
                 </details>
               ))}
@@ -109,9 +109,9 @@ export default async function FaqPage() {
           </div>
         ))}
 
-        <div style={{background:'#FFF9F2',border:'1px solid #F0D9C9',borderRadius:12,padding:'20px 24px',textAlign:'center',marginTop:8}}>
-          <p style={{fontSize:13,color:'#77706A',marginBottom:12}}>解決しない場合はお問い合わせください</p>
-          <Link href="/contact" style={{padding:'10px 24px',background:'#F26A21',color:'#fff',borderRadius:20,textDecoration:'none',fontSize:13,fontWeight:700}}>
+        <div style={{background:'var(--color-bg)',border:'1px solid var(--color-brand-border)',borderRadius:12,padding:'20px 24px',textAlign:'center',marginTop:8}}>
+          <p style={{fontSize:13,color:'var(--color-text-muted)',marginBottom:12}}>解決しない場合はお問い合わせください</p>
+          <Link href="/contact" style={{padding:'10px 24px',background:'var(--color-brand)',color:'var(--color-text-inverse)',borderRadius:20,textDecoration:'none',fontSize:13,fontWeight:700}}>
             お問い合わせはこちら
           </Link>
         </div>

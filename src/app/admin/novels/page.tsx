@@ -2,9 +2,9 @@ import { createClient } from '@/lib/supabase/server'
 export const dynamic = 'force-dynamic'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
-import Header from '@/components/layout/Header'
-import Footer from '@/components/layout/Footer'
-import NovelManager from './NovelManager'
+import Header from '@/components/layout/header'
+import Footer from '@/components/layout/footer'
+import NovelManager from '@/components/admin/novels/novel-manager'
 
 export default async function AdminNovelsPage({ searchParams }: { searchParams: { q?: string; page?: string; publishing?: string } }) {
   const supabase = await createClient()
@@ -19,7 +19,7 @@ export default async function AdminNovelsPage({ searchParams }: { searchParams: 
   const PAGE_SIZE = 20
   const offset = (page - 1) * PAGE_SIZE
 
-  let query = supabase.from('novels').select('id, title, genre, author_id, published, is_r18, created_at, aims_publishing', { count: 'exact' })
+  let query = supabase.from('novels').select('id, title, genre, author_id, published, is_r18, created_at, aims_publishing, official_tags', { count: 'exact' })
   if (q) query = (query as any).ilike('title', `%${q}%`)
   if (publishingOnly) query = (query as any).eq('aims_publishing', true)
   const { data: novels, count } = await (query as any).order('created_at', { ascending: false }).range(offset, offset + PAGE_SIZE - 1)
@@ -42,7 +42,7 @@ export default async function AdminNovelsPage({ searchParams }: { searchParams: 
           <span style={{fontSize:13,color:'#64748b'}}>（{count?.toLocaleString()}作品）</span>
           <a href={`/admin/novels?publishing=${publishingOnly?'0':'1'}`}
             style={{marginLeft:'auto',padding:'6px 14px',borderRadius:8,fontSize:12,fontWeight:600,textDecoration:'none',
-              background:publishingOnly?'#eab308':'#fff',color:publishingOnly?'#fff':'#64748b',
+              background:publishingOnly?'#eab308':'var(--base-color-1)',color:publishingOnly?'var(--base-color-1)':'#64748b',
               border:`1px solid ${publishingOnly?'#eab308':'#e2e8f0'}`}}>
             書籍化希望{publishingOnly?' ✓':''}
           </a>

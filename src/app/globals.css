@@ -3,53 +3,61 @@
 @tailwind utilities;
 
 /* ===================================================================
+   ※ 新デザイン (home_10) 移行後の色定義
+   旧 --color-* 変数はすべて新デザインのパレット
+   （--base-color-1〜5 / --main-color-1〜4 / --text-color、
+     src/styles/home/base.css で定義）への参照に再定義した。
+   これによりサイト全体が Home と同じ色だけを使う。
+   例外: --color-danger（エラー表示の機能色）と --admin-*（管理画面）。
+   =================================================================== */
+/* ===================================================================
    原石航路 デザインテーマ（CSS変数）
    ここで色を変更すると、var(--xxx) を参照しているサイト全体に反映されます。
    将来のダークモード対応は [data-theme="dark"] のブロックで上書きするだけで可能。
    =================================================================== */
 :root {
   /* --- ブランドカラー（オレンジ系） --- */
-  --color-brand:        #F26A21; /* メインのオレンジ（ボタン・アクセント・リンク） */
-  --color-brand-dark:   #d95a18; /* ホバー時など少し濃いオレンジ */
-  --color-brand-light:  #FFF1E6; /* 薄いオレンジ背景（タグ・選択状態など） */
-  --color-brand-border: #F0D9C9; /* ベージュ系の境界線・枠線（サイト全体で多用） */
+  --color-brand: var(--main-color-2); /* メインのオレンジ（ボタン・アクセント・リンク） */
+  --color-brand-dark: var(--main-color-3); /* ホバー時など少し濃いオレンジ */
+  --color-brand-light: var(--base-color-2); /* 薄いオレンジ背景（タグ・選択状態など） */
+  --color-brand-border: var(--base-color-3); /* ベージュ系の境界線・枠線（サイト全体で多用） */
 
   /* --- 背景色 --- */
-  --color-bg:           #FFF9F2; /* ページ全体の基本背景（クリーム色） */
-  --color-bg-card:      #ffffff; /* カード・パネルの背景 */
-  --color-bg-subtle:    #FFF9F2; /* セクション内の薄い背景区切り */
+  --color-bg: var(--base-color-1); /* ページ全体の基本背景（クリーム色） */
+  --color-bg-card: var(--base-color-1); /* カード・パネルの背景 */
+  --color-bg-subtle: var(--base-color-2); /* セクション内の薄い背景区切り */
 
   /* --- テキストカラー --- */
-  --color-text:         #2B211B; /* 基本の本文・見出し文字色（濃いブラウン系） */
-  --color-text-muted:   #77706A; /* 補助テキスト・キャプション */
-  --color-text-faint:   #B8AEA8; /* さらに薄い補助テキスト（日付・件数など） */
+  --color-text: var(--text-color); /* 基本の本文・見出し文字色（濃いブラウン系） */
+  --color-text-muted: var(--base-color-5); /* 補助テキスト・キャプション */
+  --color-text-faint: var(--base-color-4); /* さらに薄い補助テキスト（日付・件数など） */
 
   /* --- 状態色 --- */
-  --color-success:      #16a34a;
+  --color-success: var(--main-color-2);
   --color-danger:       #dc2626;
-  --color-info:         #2563eb;
-  --color-warning:      #92400e;
+  --color-info: var(--main-color-3);
+  --color-warning: var(--base-color-5);
 
   /* --- 「文章から探す」「本棚」等のダークセクション用 --- */
-  --color-dark-bg:       #232323;
-  --color-dark-bg-light: #3a3a3a;
-  --color-dark-text:     #ffffff;
+  --color-dark-bg: var(--main-color-4);
+  --color-dark-bg-light: var(--main-color-3);
+  --color-dark-text: var(--base-color-1);
 
   /* --- 本棚（ユーザーの推し）テーマカラー --- */
-  --color-spine-base:  #6b3a22;
-  --color-spine-dark:  #4a2715;
-  --color-spine-light: #8a4f2e;
+  --color-spine-base: var(--base-color-4);
+  --color-spine-dark: var(--base-color-5);
+  --color-spine-light: var(--base-color-3);
 
   /* --- ランキング順位カラー（金・銀・銅） --- */
-  --color-rank-gold:   #F26A21; /* 1位（ブランドカラーを流用） */
-  --color-rank-silver: #9ca3af; /* 2位 */
-  --color-rank-bronze: #cd7f32; /* 3位 */
-  --color-rank-muted:  #E8C8B0; /* 準備中アイテムの薄い番号色 */
+  --color-rank-gold: var(--base-color-4); /* 1位（ブランドカラーを流用） */
+  --color-rank-silver: var(--base-color-3); /* 2位 */
+  --color-rank-bronze: var(--base-color-5); /* 3位 */
+  --color-rank-muted: var(--base-color-2); /* 準備中アイテムの薄い番号色 */
 
   /* --- タグ・補助バッジの追加色 --- */
-  --color-tag-border:  #f5b080; /* ジャンルタグの枠線（brand-lightより少し濃い） */
-  --color-info-bg:     #eff6ff; /* 「長編／短編」等の青系バッジ背景 */
-  --color-info-border: #bfdbfe; /* 同バッジの枠線 */
+  --color-tag-border: var(--base-color-3); /* ジャンルタグの枠線（brand-lightより少し濃い） */
+  --color-info-bg: var(--base-color-2); /* 「長編／短編」等の青系バッジ背景 */
+  --color-info-border: var(--base-color-3); /* 同バッジの枠線 */
 
   /* --- 管理画面（Admin）専用カラー --- */
   --admin-bg:           #f8fafc; /* 管理画面の背景 */
@@ -70,38 +78,38 @@
 
 /* ===== ダークモード ===== */
 [data-theme="dark"] {
-  --color-brand:        #F26A21;
-  --color-brand-dark:   #d95a18;
-  --color-brand-light:  #332418;
-  --color-brand-border: #5a3a22;
+  --color-brand: var(--main-color-1);
+  --color-brand-dark: var(--main-color-2);
+  --color-brand-light: var(--main-color-3);
+  --color-brand-border: var(--main-color-2);
 
   /* 背景：真っ黒ではなくグレーがかった暗色 */
-  --color-bg:           #2a2520;
-  --color-bg-card:      #332d28;
-  --color-bg-subtle:    #2a2520;
+  --color-bg: var(--main-color-4);
+  --color-bg-card: var(--main-color-3);
+  --color-bg-subtle: var(--main-color-4);
 
   /* テキスト：明るく読みやすい */
-  --color-text:         #f5f0eb;
-  --color-text-muted:   #d4c8bc;
-  --color-text-faint:   #a09088;
+  --color-text: var(--base-color-1);
+  --color-text-muted: var(--base-color-2);
+  --color-text-faint: var(--base-color-3);
 
-  --color-success:      #4ade80;
+  --color-success: var(--main-color-1);
   --color-danger:       #f87171;
-  --color-info:         #60a5fa;
-  --color-warning:      #fbbf24;
+  --color-info: var(--main-color-1);
+  --color-warning: var(--base-color-3);
 
-  --color-dark-bg:       #1e1a16;
-  --color-dark-bg-light: #332d28;
-  --color-dark-text:     #f2ede8;
+  --color-dark-bg: var(--main-color-4);
+  --color-dark-bg-light: var(--main-color-3);
+  --color-dark-text: var(--base-color-1);
 
-  --color-tag-border:   #7a5030;
-  --color-info-bg:      #1e2b3e;
-  --color-info-border:  #2e4460;
+  --color-tag-border: var(--main-color-2);
+  --color-info-bg: var(--main-color-3);
+  --color-info-border: var(--main-color-2);
 
-  --color-rank-gold:    #F26A21;
-  --color-rank-silver:  #8a9098;
-  --color-rank-bronze:  #b07040;
-  --color-rank-muted:   #4a3420;
+  --color-rank-gold: var(--base-color-4);
+  --color-rank-silver: var(--base-color-3);
+  --color-rank-bronze: var(--base-color-5);
+  --color-rank-muted: var(--main-color-3);
 
   --admin-bg:           #2a2520;
   --admin-bg-card:      #332d28;
@@ -112,100 +120,75 @@
   --admin-row-border:   #3a3028;
 }
 
-/* ダークモード：ヘッダー・フッターを肌色ベースに */
-[data-theme="dark"] header {
-  background: #3d2e22 !important;
-  border-bottom-color: #5a3e28 !important;
-}
-[data-theme="dark"] footer {
-  background: #3d2e22 !important;
-  border-top-color: #5a3e28 !important;
-}
-[data-theme="dark"] footer,
-[data-theme="dark"] footer * {
-  color: #e8d8c8 !important;
-}
-[data-theme="dark"] footer a {
-  color: #c4a888 !important;
-}
-[data-theme="dark"] footer a:hover {
-  color: var(--color-brand) !important;
-}
-[data-theme="dark"] header nav a,
-[data-theme="dark"] header a {
-  color: #e8d8c8 !important;
-}
-[data-theme="dark"] header nav a:hover {
-  color: var(--color-brand) !important;
-}
+/* （旧ヘッダー / フッター向けのダーク上書きは新デザイン移行に伴い削除） */
 
 /* ダークモード：ランキング・検索ピルボタン */
 [data-theme="dark"] .ranking-pill-inactive {
-  background: #ddc9b0 !important;
-  color: #2a1a0e !important;
-  border-color: #c4a882 !important;
+  background: var(--main-color-3) !important;
+  color: var(--base-color-1) !important;
+  border-color: var(--main-color-2) !important;
 }
 [data-theme="dark"] .ranking-pill-active {
-  background: #F26A21 !important;
-  color: #fff !important;
-  border-color: #F26A21 !important;
+  background: var(--main-color-2) !important;
+  color: var(--base-color-1) !important;
+  border-color: var(--color-brand) !important;
 }
 
 /* ダークモード：入力欄・セレクトボックスのみ肌色 */
 [data-theme="dark"] input:not([type="checkbox"]):not([type="radio"]):not([type="file"]),
 [data-theme="dark"] textarea,
 [data-theme="dark"] select {
-  background: #ddc9b0 !important;
-  color: #2a1a0e !important;
-  border-color: #c4a882 !important;
+  background: var(--base-color-2) !important;
+  color: var(--main-color-4) !important;
+  border-color: var(--base-color-3) !important;
 }
 [data-theme="dark"] input::placeholder,
 [data-theme="dark"] textarea::placeholder {
-  color: #9a7a5a !important;
+  color: var(--base-color-4) !important;
 }
 
 /* ダークモード：気分で探す・詳細条件ボタン */
 [data-theme="dark"] button.ranking-pill-inactive {
-  background: #ddc9b0 !important;
-  color: #2a1a0e !important;
-  border-color: #c4a882 !important;
+  background: var(--base-color-2) !important;
+  color: var(--main-color-4) !important;
+  border-color: var(--base-color-3) !important;
 }
 [data-theme="dark"] button.ranking-pill-active {
-  background: #F26A21 !important;
-  color: #fff !important;
-  border-color: #F26A21 !important;
+  background: var(--color-brand) !important;
+  color: var(--base-color-1) !important;
+  border-color: var(--color-brand) !important;
 }
 
 /* ダークモード：検索・ランキングのカード背景 */
 [data-theme="dark"] .search-result-row:hover,
 [data-theme="dark"] .list-row:hover {
-  background: #3a3028 !important;
+  background: var(--main-color-3) !important;
 }
 
 /* ダークモード：コンテストカード背景を肌色に */
 [data-theme="dark"] .contest-card {
-  background: #ddc9b0 !important;
-  border-color: #c4a882 !important;
+  background: var(--base-color-2) !important;
+  border-color: var(--base-color-3) !important;
 }
 
 /* ダークモード：検索結果カード内の文字を強制的に明るく */
 [data-theme="dark"] .search-result-row * ,
 [data-theme="dark"] .search-result-row,
-[data-theme="dark"] div[style*="color:'#5a3a20'"],
-[data-theme="dark"] div[style*='color:"#5a3a20"'],
+[data-theme="dark"] div[style*="color:'var(--main-color-3)'"],
+[data-theme="dark"] div[style*='color:"var(--main-color-3)"'],
 [data-theme="dark"] div[style*="color: rgb(90, 58, 32)"],
-[data-theme="dark"] span[style*="color:'#5a3a20'"],
-[data-theme="dark"] span[style*='color:"#5a3a20"'],
+[data-theme="dark"] span[style*="color:'var(--main-color-3)'"],
+[data-theme="dark"] span[style*='color:"var(--main-color-3)"'],
 [data-theme="dark"] span[style*="color: rgb(90, 58, 32)"] {
-  color: #d4c8bc !important;
+  color: var(--base-color-2) !important;
 }
-[data-theme="dark"] div[style*="color:'#B8AEA8'"],
-[data-theme="dark"] div[style*='color:"#B8AEA8"'],
+[data-theme="dark"] div[style*="color:'var(--color-text-faint)'"],
+[data-theme="dark"] div[style*='color:"var(--color-text-faint)"'],
 [data-theme="dark"] div[style*="color: rgb(184, 174, 168)"],
-[data-theme="dark"] span[style*="color:'#B8AEA8'"],
-[data-theme="dark"] span[style*='color:"#B8AEA8"'],
+[data-theme="dark"] span[style*="color:'var(--color-text-faint)'"],
+[data-theme="dark"] span[style*='color:"var(--color-text-faint)"'],
 [data-theme="dark"] span[style*="color: rgb(184, 174, 168)"] {
-  color: #a09088 !important;
+  color: var(--base-color-3) !important;
 }
 
 
@@ -222,37 +205,37 @@ body {
 ::-webkit-scrollbar-thumb { background: var(--color-brand-border); border-radius: 3px; }
 input[type="checkbox"] { accent-color: var(--color-brand); }
 button { cursor: pointer; }
-button[style*="background:'#F26A21'"]:hover,
-button[style*='background:"#F26A21"']:hover { background: var(--color-brand-dark) !important; }
-button[style*="color:'#F26A21'"]:hover { background: var(--color-brand-light) !important; }
-a { transition: opacity 0.15s ease; }
-a[href*="/novel"]:not(.history-title):hover > div,
+button[style*="background:'var(--color-brand)'"]:hover,
+button[style*='background:"var(--color-brand)"']:hover { background: var(--color-brand-dark) !important; }
+button[style*="color:'var(--color-brand)'"]:hover { background: var(--color-brand-light) !important; }
+/* （新デザイン移行に伴い削除: 汎用ホバー / トランジション） */
+a[href*="/novel"]:not(.history-title):not(.book):hover > div,
 div[style*="cursor:'pointer'"]:hover { background: var(--color-bg) !important; }
 .list-row { transition: background 0.1s; cursor: pointer; }
 .list-row:hover { background: var(--color-bg) !important; }
 .list-row:hover .list-row-title { color: var(--color-brand) !important; }
 .sw-item:hover { background: var(--color-bg) !important; }
 .gem-card { transition: transform .15s, box-shadow .15s; cursor: pointer; }
-.gem-card:hover { transform: translateY(-2px); box-shadow: 0 6px 18px rgba(242,106,33,.12); }
-nav a:hover { color: var(--color-brand) !important; opacity: 1; }
+.gem-card:hover { transform: translateY(-2px); box-shadow: 0 6px 18px color-mix(in srgb, var(--color-brand) 12%, transparent); }
+/* （新デザイン移行に伴い削除: 汎用ホバー / トランジション） */
 .pager:hover { border-color: var(--color-brand); color: var(--color-brand); }
 .finput:focus, .ftarea:focus, input:focus, textarea:focus { border-color: var(--color-brand) !important; outline: none; }
 [style*="cursor:'pointer'"] { cursor: pointer; }
 a:not(.history-title):hover [style*="fontWeight:700"][style*="color:'#2B211B'"] { color: var(--color-brand) !important; }
 .history-title:hover > div { color: var(--color-text) !important; background: transparent !important; }
 .history-title:hover { color: var(--color-text) !important; opacity: 1 !important; }
-button { transition: background 0.15s ease, transform 0.1s ease, opacity 0.15s ease; }
-button:hover:not(:disabled) { transform: translateY(-1px); }
-button:active:not(:disabled) { transform: translateY(0); }
+/* （新デザイン移行に伴い削除: 汎用ホバー / トランジション） */
+/* （新デザイン移行に伴い削除: 汎用ホバー / トランジション） */
+/* （新デザイン移行に伴い削除: 汎用ホバー / トランジション） */
 .footer-col li:hover { color: var(--color-brand); }
 .user-menu:hover .user-tooltip { opacity: 1 !important; }
-footer a:hover { color: var(--color-brand) !important; opacity: 1; }
+/* （新デザイン移行に伴い削除: 汎用ホバー / トランジション） */
 .header-post-btn { transition: transform 0.15s ease, box-shadow 0.15s ease !important; }
-.header-post-btn:hover { transform: translateY(-3px) !important; box-shadow: 0 4px 12px rgba(242,106,33,0.25) !important; background: #fff8f5 !important; }
+.header-post-btn:hover { transform: translateY(-3px) !important; box-shadow: 0 4px 12px color-mix(in srgb, var(--color-brand) 25%, transparent) !important; background: var(--color-brand-light) !important; }
 .more-link:hover { transform: scale(1.08) !important; opacity: 1 !important; }
 .search-result-row:hover { background: var(--color-bg) !important; }
 .search-banner-link { transition: transform 0.15s ease, box-shadow 0.15s ease; display: block; border-radius: 14px; }
-.search-banner-link:hover { transform: translateY(-4px) !important; box-shadow: 0 8px 24px rgba(242,106,33,0.4) !important; opacity: 1 !important; }
+.search-banner-link:hover { transform: translateY(-4px) !important; box-shadow: 0 8px 24px color-mix(in srgb, var(--color-brand) 40%, transparent) !important; opacity: 1 !important; }
 .announcement-title-link { font-size: 11px; color: var(--color-text); line-height: 1.5; text-decoration: none; display: inline-block; }
 .announcement-title-link:hover { text-decoration: underline; opacity: 1 !important; }
 
@@ -440,7 +423,7 @@ footer a:hover { color: var(--color-brand) !important; opacity: 1; }
   div[style*="gridTemplateColumns:'1fr 1fr'"] {
     grid-template-columns: 1fr !important;
   }
-  div[style*="borderRight:'1px solid #FFF1E6'"] {
+  div[style*="borderRight:'1px solid var(--color-brand-light)'"] {
     border-right: none !important;
   }
   div[style*="borderRight:i%2===0"] {
@@ -648,6 +631,44 @@ footer a:hover { color: var(--color-brand) !important; opacity: 1; }
 /* ===== モバイルのタップハイライト ===== */
 @media (max-width: 768px) {
   a, button {
-    -webkit-tap-highlight-color: rgba(242,106,33,0.08);
+    -webkit-tap-highlight-color: color-mix(in srgb, var(--color-brand) 8%, transparent);
   }
 }
+
+/* ===== テキストコピー禁止（投稿ページ以外） ===== */
+body {
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
+/* 入力欄（執筆・検索・コメント等）は選択・コピー可能にする */
+input,
+textarea,
+[contenteditable="true"],
+.allow-select,
+.allow-select * {
+  -webkit-user-select: text;
+  -moz-user-select: text;
+  -ms-user-select: text;
+  user-select: text;
+}
+
+
+/* ===================================================================
+   新デザイン移行の調整
+   ヘッダーは #header { position: fixed }（style/header.css）。
+   トップページは背景に重ねる設計のため余白なし、
+   他ページはヘッダー高さ分のスペーサーで内容を下げる。
+   =================================================================== */
+.header_spacer { height: 160px; }
+@media (max-width: 800px) {
+  .header_spacer { height: 110px; }
+}
+#home-page .header_spacer { display: none; }
+
+/* 背景キャンバス（.bg）は全ページ共通（layout.tsx が描画、site.js が生成）。
+   トップページは元デザインどおりページ全体に敷く（style/home/base.css の absolute）。
+   他ページはビューポート固定にし、長大なページでもキャンバスの
+   サイズ上限に達しないようにする（見た目はほぼ同一）。 */
+body:not(:has(#home-page)) .bg { position: fixed; }

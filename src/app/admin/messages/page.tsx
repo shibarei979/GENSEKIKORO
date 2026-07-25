@@ -2,9 +2,9 @@ import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
-import Header from '@/components/layout/Header'
-import Footer from '@/components/layout/Footer'
-import MessageSender from './MessageSender'
+import Header from '@/components/layout/header'
+import Footer from '@/components/layout/footer'
+import MessageSender from '@/components/admin/messages/message-sender'
 
 export default async function AdminMessagesPage() {
   const supabase = await createClient()

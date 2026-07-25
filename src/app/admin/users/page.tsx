@@ -2,9 +2,9 @@ import { createClient } from '@/lib/supabase/server'
 export const dynamic = 'force-dynamic'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
-import Header from '@/components/layout/Header'
-import Footer from '@/components/layout/Footer'
-import UserManager from './UserManager'
+import Header from '@/components/layout/header'
+import Footer from '@/components/layout/footer'
+import UserManager from '@/components/admin/users/user-manager'
 
 export default async function AdminUsersPage({ searchParams }: { searchParams: { q?: string; page?: string } }) {
   const supabase = await createClient()

@@ -2,9 +2,9 @@ import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
-import Header from '@/components/layout/Header'
-import Footer from '@/components/layout/Footer'
-import AdminAnalytics from '../AdminAnalytics'
+import Header from '@/components/layout/header'
+import Footer from '@/components/layout/footer'
+import AdminAnalytics from '@/components/admin/admin-analytics'
 
 export const dynamic = 'force-dynamic'
 
@@ -91,7 +91,7 @@ export default async function AdminAnalyticsPage() {
       <div style={{maxWidth:1100,margin:'0 auto',padding:'32px'}}>
         {/* パンくず */}
         <div style={{display:'flex',alignItems:'center',gap:6,fontSize:12,color:'#94a3b8',marginBottom:20}}>
-          <Link href="/admin" style={{color:'#F26A21',textDecoration:'none'}}>管理画面</Link>
+          <Link href="/admin" style={{color:'var(--color-brand)',textDecoration:'none'}}>管理画面</Link>
           <span>›</span>
           <span style={{color:'#1e293b'}}>詳細分析</span>
         </div>

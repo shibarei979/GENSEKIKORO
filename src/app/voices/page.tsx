@@ -1,7 +1,8 @@
 import { createClient } from '@/lib/supabase/server'
-import Header from '@/components/layout/Header'
-import Footer from '@/components/layout/Footer'
-import VoicesFloat from './VoicesFloat'
+import { getCachedRecommendScores, pickWeightedRandom } from '@/lib/recommend'
+import Header from '@/components/layout/header'
+import Footer from '@/components/layout/footer'
+import VoicesFloat from '@/components/voices/voices-float'
 
 export const metadata = {
   title: '文章から探す | 原石航路',
@@ -48,16 +49,25 @@ export default async function VoicesPage() {
 
   // 1作品からは1件のみ（最新のもの）採用し、最大100件まで
   const seenNovelIds = new Set<string>()
-  const voices: typeof allVoices = []
+  const picked: typeof allVoices = []
   for (const v of allVoices) {
     if (seenNovelIds.has(v.novelId)) continue
     seenNovelIds.add(v.novelId)
-    voices.push(v)
-    if (voices.length >= 100) break
+    picked.push(v)
+    if (picked.length >= 100) break
   }
 
+  // おすすめアルゴリズムの設定を通す：スコアが高い作品の文章ほど出やすい重み付き抽選で並べる
+  let voices = picked
+  try {
+    const scoredAll = await getCachedRecommendScores()
+    const scoreMap = new Map(scoredAll.map(s => [s.id, s.finalScore]))
+    const weighted = picked.map(v => ({ ...v, finalScore: Math.max(0.005, scoreMap.get(v.novelId) || 0.005) }))
+    voices = pickWeightedRandom(weighted, weighted.length)
+  } catch (_) { /* スコア取得失敗時は従来どおり */ }
+
   return (
-    <div style={{minHeight:'100vh',background:'#EDEDEA',fontFamily:"'Noto Sans JP',sans-serif"}}>
+    <div style={{minHeight:'100vh',fontFamily:"'Noto Sans JP',sans-serif"}}>
       <Header profile={profile} user={user} />
       <VoicesFloat voices={voices} />
       <div style={{background:'var(--color-bg)'}}>

@@ -49,7 +49,7 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="min-h-screen bg-bg flex items-center justify-center px-4 py-12">
+    <div className="min-h-screen flex items-center justify-center px-4 py-12">
       <div className="w-full max-w-md bg-white rounded-2xl border border-border p-8 shadow-sm">
         <div className="text-center mb-8">
           <img src="/logo.png" alt="原石航路" className="h-16 mx-auto mb-3 object-contain" />
@@ -105,8 +105,8 @@ export default function LoginPage() {
           </button>
         </form>
 
-        <p className="text-center text-xs mt-3" style={{color:'#77706A'}}>
-          <Link href="/auth/reset-password" style={{color:'#F26A21',fontSize:12}}>パスワードを忘れた方はこちら</Link>
+        <p className="text-center text-xs mt-3" style={{color:'var(--color-text-muted)'}}>
+          <Link href="/auth/reset-password" style={{color:'var(--color-brand)',fontSize:12}}>パスワードを忘れた方はこちら</Link>
         </p>
 
         <p className="text-center text-xs text-muted mt-4">

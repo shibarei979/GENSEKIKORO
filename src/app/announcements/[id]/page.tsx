@@ -1,8 +1,8 @@
 import { createClient } from '@/lib/supabase/server'
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
-import Header from '@/components/layout/Header'
-import Footer from '@/components/layout/Footer'
+import Header from '@/components/layout/header'
+import Footer from '@/components/layout/footer'
 
 const TYPE_OPTIONS: Record<string, { label: string; color: string }> = {
   info:      { label: 'お知らせ',       color: '#3b82f6' },
@@ -33,7 +33,7 @@ export default async function AnnouncementDetailPage({ params }: Props) {
   const t = TYPE_OPTIONS[announcement.type] ?? TYPE_OPTIONS['info']
 
   return (
-    <div style={{minHeight:'100vh',background:'var(--color-bg)',fontFamily:"'Noto Sans JP',sans-serif"}}>
+    <div style={{minHeight:'100vh',fontFamily:"'Noto Sans JP',sans-serif"}}>
       <Header profile={profile} user={user} />
 
       <div style={{maxWidth:800,margin:'0 auto',padding:'32px 24px'}}>

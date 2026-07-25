@@ -1,11 +1,11 @@
 import { createClient } from '@/lib/supabase/server'
 export const dynamic = 'force-dynamic'
-import Header from '@/components/layout/Header'
-import Footer from '@/components/layout/Footer'
-import AdBanner from '@/components/layout/AdBanner'
+import Header from '@/components/layout/header'
+import Footer from '@/components/layout/footer'
+import AdBanner from '@/components/layout/ad-banner'
 import Link from 'next/link'
-import NovelPreviewPopup from '@/components/NovelPreviewPopup'
-import SearchForm from './SearchForm'
+import NovelPreviewPopup from '@/components/novel-preview-popup'
+import SearchForm from '@/components/search/search-form'
 
 const PAGE_SIZE = 50
 
@@ -13,7 +13,8 @@ interface Props {
   searchParams: {
     q?: string; exclude?: string; genre?: string; type?: string
     serial?: string; tag?: string; sort?: string; page?: string
-    author?: string
+    author?: string; contest?: string
+    charMin?: string; charMax?: string; ptMin?: string; ptMax?: string
   }
 }
 
@@ -37,9 +38,21 @@ export default async function SearchPage({ searchParams }: Props) {
   const offset   = (page - 1) * PAGE_SIZE
   const tags     = tagParam ? tagParam.split(',').filter(Boolean) : []
   const authorQ  = searchParams.author  || ''
-  const hasSearch = !!(q || exclude || genre || type || serial || tags.length > 0 || authorQ)
+  const contestId = searchParams.contest || ''
+  const charMin = Number(searchParams.charMin) || 0
+  const charMax = Number(searchParams.charMax) || 0
+  const ptMin = Number(searchParams.ptMin) || 0
+  const ptMax = Number(searchParams.ptMax) || 0
+  const hasMetaFilter = !!(charMin || charMax || ptMin || ptMax)
+  const hasSearch = !!(q || exclude || genre || type || serial || tags.length > 0 || authorQ || contestId || hasMetaFilter)
 
   const isAgeVerified = profile?.age_verified || false
+
+  // コンテスト絞り込み用の一覧（サイト内・公開中）
+  const { data: searchContests } = await supabase
+    .from('contests').select('id, title')
+    .eq('is_published', true).eq('is_site_contest', true)
+    .order('created_at', { ascending: false })
 
   let results: any[] = []
   let count = 0
@@ -53,12 +66,15 @@ export default async function SearchPage({ searchParams }: Props) {
   // いいね数・ブックマーク数・閲覧数・コメント数を後で集計するためnovel_idsを先に取得
   if (!hasSearch) {
     let q2 = supabase.from('novels')
-      .select('id, title, summary, catchcopy, genre, tags, novel_type, is_serial, author_id, created_at, updated_at, is_r18', { count: 'exact' })
+      .select('id, title, summary, catchcopy, genre, tags, novel_type, is_serial, author_id, created_at, updated_at, is_r18, ai_usage', { count: 'exact' })
       .eq('published', true)
       .order('created_at', { ascending: false })
       .limit(200)
     if (!user || !isAgeVerified) {
       q2 = (q2 as any).eq('is_r18', false).neq('genre', '官能')
+    }
+    if (profile?.show_ai_works === false) {
+      q2 = (q2 as any).neq('ai_usage', 'full')
     }
     const { data: allData, count: allCount } = await q2
     const shuffled = [...(allData || [])].sort(() => Math.random() - 0.5)
@@ -66,11 +82,14 @@ export default async function SearchPage({ searchParams }: Props) {
     count = allCount || 0
   } else {
     let query = supabase.from('novels')
-      .select('id, title, summary, catchcopy, genre, tags, novel_type, is_serial, author_id, created_at, updated_at, is_r18', { count: 'exact' })
+      .select('id, title, summary, catchcopy, genre, tags, novel_type, is_serial, author_id, created_at, updated_at, is_r18, ai_usage', { count: 'exact' })
       .eq('published', true)
 
     if (!user || !isAgeVerified) {
       query = (query as any).eq('is_r18', false).neq('genre', '官能')
+    }
+    if (profile?.show_ai_works === false) {
+      query = (query as any).neq('ai_usage', 'full')
     }
     if (q) {
       query = (query as any).or(`title.ilike.%${q}%,summary.ilike.%${q}%,catchcopy.ilike.%${q}%`)
@@ -90,6 +109,17 @@ export default async function SearchPage({ searchParams }: Props) {
     if (type)   query = (query as any).eq('novel_type', type)
     if (serial === 'serial')   query = (query as any).eq('is_serial', true)
     if (serial === 'complete') query = (query as any).eq('is_serial', false)
+    if (contestId) {
+      // 指定コンテストの参加作品に絞り込み
+      const { data: contestEntries } = await supabase
+        .from('contest_entries').select('novel_id').eq('contest_id', contestId)
+      const entryNovelIds = (contestEntries||[]).map((e:any) => e.novel_id)
+      if (entryNovelIds.length > 0) {
+        query = (query as any).in('id', entryNovelIds)
+      } else {
+        results = []; count = 0
+      }
+    }
     if (tags.length > 0) {
       for (const tag of tags) {
         query = (query as any).contains('tags', [tag])
@@ -111,12 +141,35 @@ export default async function SearchPage({ searchParams }: Props) {
     count = c2 || 0
   }
 
-  const novelIds = results.map((n: any) => n.id)
+  let novelIds = results.map((n: any) => n.id)
 
-  // 文字数
+  // 文字数・ポイント（RPCで一括集計：本文転送なしで軽量）
   const charCountMap: Record<string, number> = {}
+  const pointsMap: Record<string, number> = {}
   if (novelIds.length > 0) {
-    const { data: epData } = await supabase.from('episodes').select('novel_id, body').in('novel_id', novelIds)
+    const { data: metaData } = await supabase.rpc('get_novel_search_meta', { ids: novelIds })
+    metaData?.forEach((m: any) => {
+      charCountMap[m.novel_id] = Number(m.char_count) || 0
+      pointsMap[m.novel_id] = Number(m.points) || 0
+    })
+  }
+  // 文字数・Pt範囲フィルタ
+  if (hasMetaFilter) {
+    results = results.filter((n: any) => {
+      const ch = charCountMap[n.id] || 0
+      const pt = pointsMap[n.id] || 0
+      if (charMin && ch < charMin) return false
+      if (charMax && ch > charMax) return false
+      if (ptMin && pt < ptMin) return false
+      if (ptMax && pt > ptMax) return false
+      return true
+    })
+    count = results.length
+    novelIds = results.map((n: any) => n.id)
+  }
+  // （旧集計コードの残骸吸収）
+  if (false) {
+    const epData: any[] = []
     epData?.forEach((ep: any) => {
       charCountMap[ep.novel_id] = (charCountMap[ep.novel_id] || 0) + (ep.body?.length || 0)
     })
@@ -196,13 +249,21 @@ export default async function SearchPage({ searchParams }: Props) {
     Object.entries(authorCount).forEach(([id, cnt]) => { if (cnt <= 3) newbieSet.add(id) })
   }
 
-  let novels = results.map((n: any) => ({
-    ...n,
-    display_name: authorMap[n.author_id] || '',
-    is_newbie: newbieSet.has(n.author_id),
-    likeCount: likeMap[n.id] || 0,
-    charCount: charCountMap[n.id] || 0,
-  }))
+  const sevenDaysAgo = Date.now() - 7 * 24 * 60 * 60 * 1000
+  let novels = results.map((n: any) => {
+    const likeCount = likeMap[n.id] || 0
+    const isNewWork = new Date(n.created_at).getTime() > sevenDaysAgo
+    // 投稿7日以内 または いいねが50未満の場合、数値を非表示
+    const hideStats = isNewWork || likeCount < 50
+    return {
+      ...n,
+      display_name: authorMap[n.author_id] || '',
+      is_newbie: newbieSet.has(n.author_id),
+      likeCount,
+      charCount: charCountMap[n.id] || 0,
+      hideStats,
+    }
+  })
 
   // ポストソート（いいね・ブックマーク・閲覧数・コメント・話数・文字数・受賞）
   if (hasSearch) {
@@ -267,7 +328,7 @@ export default async function SearchPage({ searchParams }: Props) {
   const totalPages = Math.ceil(count / PAGE_SIZE)
 
   return (
-    <div style={{minHeight:'100vh',background:'var(--color-bg-card)',fontFamily:"'Noto Sans JP',sans-serif"}}>
+    <div style={{minHeight:'100vh',fontFamily:"'Noto Sans JP',sans-serif"}}>
       <Header profile={profile} user={user} />
 
       <div className="main-layout" style={{maxWidth:1200,margin:'0 auto',padding:'24px 32px',display:'flex',gap:20,alignItems:'flex-start'}}>
@@ -277,6 +338,9 @@ export default async function SearchPage({ searchParams }: Props) {
             defaultQ={q} defaultExclude={exclude} defaultGenre={genre}
             defaultType={type} defaultSerial={serial} defaultTag={tagParam}
             defaultSort={sort} ageVerified={isAgeVerified}
+            defaultContest={contestId} contests={searchContests || []}
+            defaultCharMin={searchParams.charMin || ''} defaultCharMax={searchParams.charMax || ''}
+            defaultPtMin={searchParams.ptMin || ''} defaultPtMax={searchParams.ptMax || ''}
           />
 
           <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',marginBottom:10,fontSize:13,color:'var(--color-text-muted)'}}>
@@ -293,7 +357,7 @@ export default async function SearchPage({ searchParams }: Props) {
                 <div style={{fontSize:12}}>検索条件を変えてお試しください</div>
               </div>
             ) : novels.map((n: any, idx: number) => (
-              <NovelPreviewPopup key={n.id} novel={{...n, like_count: n.likeCount||0}}>
+              <NovelPreviewPopup key={n.id} novel={{...n, like_count: n.hideStats ? 0 : (n.likeCount||0)}}>
               <div style={{cursor:'pointer',padding:'16px 20px',borderBottom:idx<novels.length-1?'1px solid var(--color-brand-light)':'none'}}>
                 <span style={{display:'flex',gap:5,marginBottom:6,flexWrap:'wrap',alignItems:'center'}}>
                   <span style={{fontSize:10,background:'var(--color-brand-light)',color:'var(--color-brand)',border:'1px solid var(--color-tag-border)',padding:'1px 6px',borderRadius:3}}>{n.genre}</span>
@@ -318,10 +382,10 @@ export default async function SearchPage({ searchParams }: Props) {
                     ))}
                   </span>
                 )}
-                <span style={{display:'flex',gap:12,fontSize:11,color:'var(--color-text-faint)',flexWrap:'wrap'}}>
+                <span style={{display:'flex',gap:12,fontSize:11,color:'var(--color-text-faint)',flexWrap:'wrap',alignItems:'center'}}>
                   {n.charCount > 0 && <span>{n.charCount >= 10000 ? `${(n.charCount/10000).toFixed(1)}万文字` : `${n.charCount.toLocaleString()}文字`}</span>}
                   {n.updated_at && <span>最終更新：{new Date(n.updated_at).toLocaleDateString('ja-JP',{year:'numeric',month:'numeric',day:'numeric'})}</span>}
-                  {n.likeCount > 0 && <span style={{color:'var(--color-text-muted)',fontWeight:600}}>♡ {fmtNum(n.likeCount)}</span>}
+                  {!n.hideStats && n.likeCount > 0 && <span style={{color:'var(--color-text-muted)',fontWeight:600}}>♡ {fmtNum(n.likeCount)}</span>}
                 </span>
               </div>
               </NovelPreviewPopup>

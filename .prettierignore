@@ -1,0 +1,12 @@
+node_modules
+.next
+out
+dist
+coverage
+build
+package-lock.json
+*.log
+*.min.js
+*.min.css
+public
+supabase/migrations

@@ -2,10 +2,10 @@ import { createClient } from '@/lib/supabase/server'
 export const revalidate = 10
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
-import Header from '@/components/layout/Header'
-import Footer from '@/components/layout/Footer'
-import AdBanner from '@/components/layout/AdBanner'
-import ContestClient from './ContestClient'
+import Header from '@/components/layout/header'
+import Footer from '@/components/layout/footer'
+import AdBanner from '@/components/layout/ad-banner'
+import ContestClient from '@/components/contests/contest-client'
 
 interface Props { params: { id: string } }
 
@@ -69,7 +69,7 @@ export default async function ContestPage({ params }: Props) {
   }
 
   return (
-    <div style={{minHeight:'100vh',background:'var(--color-bg)',fontFamily:"'Noto Sans JP',sans-serif"}}>
+    <div style={{minHeight:'100vh',fontFamily:"'Noto Sans JP',sans-serif"}}>
       <Header profile={profile} user={user} />
 
       <div style={{maxWidth:900,margin:'0 auto',padding:'32px 24px'}}>

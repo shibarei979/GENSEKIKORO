@@ -2,9 +2,9 @@ import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
-import Header from '@/components/layout/Header'
-import Footer from '@/components/layout/Footer'
-import NgWordManager from './NgWordManager'
+import Header from '@/components/layout/header'
+import Footer from '@/components/layout/footer'
+import NgWordManager from '@/components/admin/ngwords/ng-word-manager'
 
 export default async function AdminNgWordsPage() {
   const supabase = await createClient()

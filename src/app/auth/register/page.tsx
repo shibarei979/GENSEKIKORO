@@ -39,7 +39,7 @@ export default function RegisterPage() {
   function pwStrength() {
     let n = 0
     if (password.length >= 8) n++
-    if (password !== password.toLowerCase()) n++ // 大文字あり
+    if (password !== password.toLowerCase()) n++
     if (/[0-9]/.test(password)) n++
     if (password.length > 0 && !/[A-Za-z0-9]/.test(password.slice(-1))) n++
     return n
@@ -51,11 +51,7 @@ export default function RegisterPage() {
     if (!email.includes('@') || !email.includes('.')) { setError('正しいメールアドレスを入力してください'); return }
     if (password.length < 6) { setError('パスワードは6文字以上で入力してください'); return }
     if (password !== pwConfirm) { setError('パスワードが一致しません'); return }
-    // メールアドレス重複チェック
     setLoading(true)
-    const { data: signInData } = await supabase.auth.signInWithOtp({ email, options: { shouldCreateUser: false } })
-    // OTPを送ろうとして失敗＝未登録、成功＝登録済み判定はできないので別手段
-    // profilesテーブルでメールアドレス確認
     const { data: existing } = await supabase.from('profiles').select('user_id').eq('email', email).maybeSingle()
     setLoading(false)
     if (existing) { setError('このメールアドレスはすでに登録されています'); return }
@@ -67,7 +63,7 @@ export default function RegisterPage() {
     const { error } = await supabase.auth.signInWithOAuth({
       provider: 'google',
       options: {
-        redirectTo: `${window.location.origin}/auth/callback`,
+        redirectTo: `${window.location.origin}/auth/callback?next=/home-select`,
         queryParams: { access_type: 'offline', prompt: 'consent' },
       },
     })
@@ -75,7 +71,6 @@ export default function RegisterPage() {
       setError('Googleログインに失敗しました')
       setGoogleLoading(false)
     }
-    // 成功時はGoogleにリダイレクトされる
   }
 
   async function handleEmailRegister() {
@@ -85,14 +80,6 @@ export default function RegisterPage() {
     if (age < 13) { setError('13歳未満の方は登録できません'); return }
     if (!agree) { setError('利用規約への同意が必要です'); return }
     if (!agreeAge) { setError('年齢確認への同意が必要です'); return }
-    // 生年月日が入力されている場合は年齢チェック
-    if (birthYear && birthMonth && birthDay) {
-      const age = getAge()
-      if (age >= 0 && age < 13) {
-        setError('13歳未満の方はご利用いただけません')
-        return
-      }
-    }
 
     setLoading(true)
     const { data, error } = await supabase.auth.signUp({
@@ -111,7 +98,6 @@ export default function RegisterPage() {
       return
     }
 
-    // profiles をAPI経由で作成
     if (data.user) {
       const res = await fetch('/api/create-profile', {
         method: 'POST',
@@ -136,21 +122,20 @@ export default function RegisterPage() {
     }
 
     setLoading(false)
-    // ホームへ遷移
-    window.location.href = '/'
+    window.location.href = '/home-select'
   }
 
   const age = getAge()
   const str = pwStrength()
   const strColor = str <= 1 ? '#dc2626' : str === 2 ? '#f59e0b' : str === 3 ? '#3b82f6' : '#22c55e'
   const strLabel = str <= 1 ? '弱い' : str === 2 ? '普通' : str === 3 ? '強い' : 'とても強い'
-  const ageColor = age < 0 ? '#B8AEA8' : age >= 18 ? '#2e7d32' : age >= 13 ? '#e65100' : '#dc2626'
+  const ageColor = age < 0 ? 'var(--color-text-faint)' : age >= 18 ? '#2e7d32' : age >= 13 ? '#e65100' : '#dc2626'
   const ageMsg   = age < 0 ? '' : age >= 18 ? '✓ 18歳以上：すべての機能を利用できます'
                  : age >= 13 ? '⚠️ 13〜17歳：R18コンテンツは閲覧できません'
                  : '✗ 13歳未満の方は登録できません'
 
   return (
-    <div className="min-h-screen bg-bg flex items-center justify-center px-4 py-12">
+    <div className="min-h-screen flex items-center justify-center px-4 py-12">
       <div className="w-full max-w-md bg-white rounded-2xl border border-border p-8 shadow-sm">
         <div className="text-center mb-6">
           <img src="/logo.png" alt="原石航路" className="h-20 mx-auto mb-3 object-contain" />
@@ -161,8 +146,8 @@ export default function RegisterPage() {
         <div className="flex mb-6">
           {['1 アカウント情報', '2 年齢・同意'].map((label, i) => (
             <div key={label} className="flex-1 text-center text-xs pb-2 font-medium transition-colors"
-              style={{ borderBottom: step === i+1 ? '2px solid #F26A21' : '2px solid #F0D9C9',
-                       color: step === i+1 ? '#F26A21' : '#B8AEA8' }}>
+              style={{ borderBottom: step === i+1 ? '2px solid var(--color-brand)' : '2px solid var(--color-brand-border)',
+                       color: step === i+1 ? 'var(--color-brand)' : 'var(--color-text-faint)' }}>
               {label}
             </div>
           ))}

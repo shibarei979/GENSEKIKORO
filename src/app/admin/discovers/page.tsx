@@ -2,9 +2,9 @@ import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
-import Header from '@/components/layout/Header'
-import Footer from '@/components/layout/Footer'
-import DiscoverManager from './DiscoverManager'
+import Header from '@/components/layout/header'
+import Footer from '@/components/layout/footer'
+import DiscoverManager from '@/components/admin/discovers/discover-manager'
 
 export default async function AdminDiscoversPage() {
   const supabase = await createClient()
@@ -42,7 +42,7 @@ export default async function AdminDiscoversPage() {
           <Link href="/admin" style={{fontSize:13,color:'#64748b',textDecoration:'none'}}>← 管理画面</Link>
           <span style={{fontSize:18,fontWeight:800,color:'#1e293b'}}>拡散コメント審査</span>
           {items.length > 0 && (
-            <span style={{fontSize:11,background:'#ef4444',color:'#fff',padding:'2px 8px',borderRadius:10,fontWeight:700}}>
+            <span style={{fontSize:11,background:'#ef4444',color:'var(--color-text-inverse)',padding:'2px 8px',borderRadius:10,fontWeight:700}}>
               {items.length}件待ち
             </span>
           )}

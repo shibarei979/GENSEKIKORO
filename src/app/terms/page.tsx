@@ -1,7 +1,7 @@
 import { createClient } from '@/lib/supabase/server'
-import Header from '@/components/layout/Header'
-import Footer from '@/components/layout/Footer'
-import AdBanner from '@/components/layout/AdBanner'
+import Header from '@/components/layout/header'
+import Footer from '@/components/layout/footer'
+import AdBanner from '@/components/layout/ad-banner'
 import Link from 'next/link'
 
 export default async function TermsPage() {
@@ -47,27 +47,27 @@ export default async function TermsPage() {
   ]
 
   return (
-    <div style={{minHeight:'100vh',background:'#fff',fontFamily:"'Noto Sans JP',sans-serif"}}>
+    <div style={{minHeight:'100vh',fontFamily:"'Noto Sans JP',sans-serif"}}>
       <Header profile={profile} user={user} />
 
       <div style={{maxWidth:860,margin:'0 auto',padding:'40px 24px 60px'}}>
         {/* タイトル */}
-        <div style={{marginBottom:32,paddingBottom:20,borderBottom:'2px solid #F0D9C9'}}>
-          <h1 style={{fontSize:28,fontWeight:700,color:'#2B211B',marginBottom:8}}>利用規約</h1>
-          <p style={{fontSize:13,color:'#77706A',lineHeight:1.7}}>
+        <div style={{marginBottom:32,paddingBottom:20,borderBottom:'2px solid var(--color-brand-border)'}}>
+          <h1 style={{fontSize:28,fontWeight:700,color:'var(--color-text)',marginBottom:8}}>利用規約</h1>
+          <p style={{fontSize:13,color:'var(--color-text-muted)',lineHeight:1.7}}>
             本利用規約（以下「本規約」といいます）は、「原石航路」（以下「本サービス」といいます）の利用条件を定めるものです。<br/>
             ユーザーは、本規約に同意の上、本サービスを利用するものとします。
           </p>
-          <div style={{marginTop:12,fontSize:12,color:'#B8AEA8'}}>制定日：2026年07月01日</div>
+          <div style={{marginTop:12,fontSize:12,color:'var(--color-text-faint)'}}>制定日：2026年07月01日</div>
         </div>
 
         {/* 目次 */}
-        <div style={{background:'#FFF9F2',border:'1px solid #F0D9C9',borderRadius:12,padding:'20px 24px',marginBottom:32}}>
-          <div style={{fontSize:13,fontWeight:700,color:'#2B211B',marginBottom:12}}>目次</div>
+        <div style={{background:'var(--color-bg)',border:'1px solid var(--color-brand-border)',borderRadius:12,padding:'20px 24px',marginBottom:32}}>
+          <div style={{fontSize:13,fontWeight:700,color:'var(--color-text)',marginBottom:12}}>目次</div>
           <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:'4px 24px'}}>
             {sections.map(s => (
               <a key={s.num} href={`#section-${s.num}`}
-                style={{fontSize:12,color:'#F26A21',textDecoration:'none',padding:'3px 0',borderBottom:'1px solid #FFF1E6'}}>
+                style={{fontSize:12,color:'var(--color-brand)',textDecoration:'none',padding:'3px 0',borderBottom:'1px solid var(--color-brand-light)'}}>
                 第{s.num}条　{s.title}
               </a>
             ))}
@@ -78,14 +78,14 @@ export default async function TermsPage() {
         <div style={{display:'flex',flexDirection:'column',gap:0}}>
           {sections.map(s => (
             <div key={s.num} id={`section-${s.num}`}
-              style={{borderBottom:'1px solid #F0D9C9',padding:'24px 0'}}>
-              <h2 style={{fontSize:15,fontWeight:700,color:'#2B211B',marginBottom:12,display:'flex',alignItems:'center',gap:10}}>
-                <span style={{background:'#F26A21',color:'#fff',fontSize:11,fontWeight:700,padding:'2px 8px',borderRadius:4,flexShrink:0}}>
+              style={{borderBottom:'1px solid var(--color-brand-border)',padding:'24px 0'}}>
+              <h2 style={{fontSize:15,fontWeight:700,color:'var(--color-text)',marginBottom:12,display:'flex',alignItems:'center',gap:10}}>
+                <span style={{background:'var(--color-brand)',color:'var(--color-text-inverse)',fontSize:11,fontWeight:700,padding:'2px 8px',borderRadius:4,flexShrink:0}}>
                   第{s.num}条
                 </span>
                 {s.title}
               </h2>
-              <div style={{fontSize:13,color:'#2B211B',lineHeight:1.9,whiteSpace:'pre-line'}}>
+              <div style={{fontSize:13,color:'var(--color-text)',lineHeight:1.9,whiteSpace:'pre-line'}}>
                 {s.body}
               </div>
             </div>
@@ -93,12 +93,12 @@ export default async function TermsPage() {
         </div>
 
         {/* フッターリンク */}
-        <div style={{marginTop:40,padding:'20px',background:'#FFF9F2',borderRadius:12,border:'1px solid #F0D9C9',textAlign:'center'}}>
-          <div style={{fontSize:12,color:'#77706A',marginBottom:12}}>その他のページ</div>
+        <div style={{marginTop:40,padding:'20px',background:'var(--color-bg)',borderRadius:12,border:'1px solid var(--color-brand-border)',textAlign:'center'}}>
+          <div style={{fontSize:12,color:'var(--color-text-muted)',marginBottom:12}}>その他のページ</div>
           <div style={{display:'flex',gap:16,justifyContent:'center',flexWrap:'wrap'}}>
-            <Link href="/" style={{fontSize:13,color:'#F26A21',textDecoration:'none'}}>ホーム</Link>
-            <Link href="/auth/register" style={{fontSize:13,color:'#F26A21',textDecoration:'none'}}>新規登録</Link>
-            <Link href="/auth/login" style={{fontSize:13,color:'#F26A21',textDecoration:'none'}}>ログイン</Link>
+            <Link href="/" style={{fontSize:13,color:'var(--color-brand)',textDecoration:'none'}}>ホーム</Link>
+            <Link href="/auth/register" style={{fontSize:13,color:'var(--color-brand)',textDecoration:'none'}}>新規登録</Link>
+            <Link href="/auth/login" style={{fontSize:13,color:'var(--color-brand)',textDecoration:'none'}}>ログイン</Link>
           </div>
         </div>
       </div>

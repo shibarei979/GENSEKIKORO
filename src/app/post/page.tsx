@@ -1,7 +1,7 @@
 import { createClient } from '@/lib/supabase/server'
 export const dynamic = 'force-dynamic'
 import { redirect } from 'next/navigation'
-import PostClient from './PostClient'
+import PostClient from '@/components/post/post-client'
 import { Suspense } from 'react'
 
 export default async function PostPage() {
@@ -16,7 +16,7 @@ export default async function PostPage() {
     .single()
 
   return (
-    <Suspense fallback={<div style={{minHeight:'100vh',background:'#FFF9F2'}}/>}>
+    <Suspense fallback={<div style={{minHeight:'100vh'}}/>}>
       <PostClient profile={profile} userId={user.id} />
     </Suspense>
   )

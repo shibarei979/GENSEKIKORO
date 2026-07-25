@@ -1,0 +1,389 @@
+'use client'
+import { useState } from 'react'
+import { createClient } from '@/lib/supabase/client'
+import Link from 'next/link'
+
+interface Contest {
+  id: string; title: string; description: string | null; prize: string | null;
+  deadline: string | null; judging_end: string | null; apply_url: string | null;
+  image_url: string | null; is_published: boolean; is_site_contest: boolean; created_at: string; exclusive: boolean
+}
+
+interface Entry {
+  novel_id: string
+  novel_title: string
+  novel_genre: string
+  novel_summary: string
+  novel_url: string
+  author_name: string
+  like_count: number
+  discover_count: number
+  created_at: string
+}
+
+interface Props {
+  initialContests: Contest[]
+  entriesMap: Record<string, Entry[]>
+}
+
+const btn = (color: string, bg: string, border: string) => ({
+  padding:'6px 14px',borderRadius:6,fontSize:12,fontWeight:600,cursor:'pointer',color,background:bg,border:`1px solid ${border}`,
+})
+
+function getStatus(deadline: string | null, judging_end: string | null) {
+  const now = new Date()
+  if (!deadline) return { label: '募集中', color: '#10b981', bg: '#f0fdf4', border: '#86efac' }
+  const d = new Date(deadline)
+  if (now < d) return { label: '募集中', color: '#10b981', bg: '#f0fdf4', border: '#86efac' }
+  if (!judging_end) return { label: '選考中', color: '#8b5cf6', bg: '#f5f3ff', border: '#c4b5fd' }
+  const j = new Date(judging_end)
+  if (now < j) return { label: '選考中', color: '#8b5cf6', bg: '#f5f3ff', border: '#c4b5fd' }
+  const expire = new Date(j.getTime() + 30 * 24 * 60 * 60 * 1000)
+  if (now < expire) return { label: '結果発表', color: '#f59e0b', bg: '#fffbeb', border: '#fde68a' }
+  return { label: '掲載終了', color: '#94a3b8', bg: '#f1f5f9', border: '#e2e8f0' }
+}
+
+function validate(form: { title:string; apply_url:string; image_url:string; deadline:string; judging_end:string; is_site_contest:boolean }) {
+  const errors: Record<string, string> = {}
+  if (!form.title.trim()) errors.title = 'タイトルは必須です'
+  if (!form.is_site_contest && !form.apply_url.trim()) errors.apply_url = '応募URLは必須です'
+  if (!form.deadline) errors.deadline = '締切日時は必須です'
+  if (!form.judging_end) errors.judging_end = '選考終了日時は必須です'
+  if (form.deadline && form.judging_end && new Date(form.judging_end) <= new Date(form.deadline)) {
+    errors.judging_end = '選考終了日時は締切日時より後にしてください'
+  }
+  if (!form.image_url) errors.image_url = '画像は必須です'
+  return errors
+}
+
+export default function ContestManager({ initialContests, entriesMap }: Props) {
+  const supabase = createClient()
+  const [items, setItems] = useState(initialContests)
+  const [editing, setEditing] = useState<Contest | null>(null)
+  const [creating, setCreating] = useState(false)
+  const [form, setForm] = useState({ title:'', description:'', start_date:'', deadline:'', judging_end:'', apply_url:'', image_url:'', is_published:true, is_site_contest:false, exclusive:false })
+  const [errors, setErrors] = useState<Record<string, string>>({})
+  const [loading, setLoading] = useState(false)
+  const [uploading, setUploading] = useState(false)
+  const [expandedId, setExpandedId] = useState<string | null>(null)
+
+  function openCreate() {
+    setForm({title:'',description:'',start_date:'',deadline:'',judging_end:'',apply_url:'',image_url:'',is_published:true,is_site_contest:false,exclusive:false})
+    setErrors({})
+    setCreating(true); setEditing(null)
+  }
+  function openEdit(c: Contest) {
+    setForm({
+      title:c.title, description:c.description||'',
+      start_date:(c as any).start_date?(c as any).start_date.slice(0,16):'',
+      deadline:c.deadline?c.deadline.slice(0,16):'',
+      judging_end:c.judging_end?c.judging_end.slice(0,16):'',
+      apply_url:c.apply_url||'', image_url:c.image_url||'',
+      is_published:c.is_published, is_site_contest:c.is_site_contest||false,
+      exclusive:c.exclusive||false,
+    })
+    setErrors({})
+    setEditing(c); setCreating(false)
+  }
+  function closeForm() { setCreating(false); setEditing(null); setErrors({}) }
+
+  async function handleImageUpload(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0]
+    if (!file) return
+    setUploading(true)
+    const ext = file.name.split('.').pop()
+    const path = `contests/${Date.now()}.${ext}`
+    const { error } = await supabase.storage.from('images').upload(path, file, { upsert: true })
+    if (!error) {
+      const { data } = supabase.storage.from('images').getPublicUrl(path)
+      setForm(f => ({...f, image_url: data.publicUrl}))
+      setErrors(e => ({...e, image_url: ''}))
+    }
+    setUploading(false)
+  }
+
+  async function handleSave() {
+    const errs = validate({title:form.title, apply_url:form.apply_url, image_url:form.image_url, deadline:form.deadline, judging_end:form.judging_end, is_site_contest:form.is_site_contest})
+    if (Object.keys(errs).length > 0) { setErrors(errs); return }
+    setLoading(true)
+    const payload = {
+      ...form,
+      start_date: form.start_date ? new Date(form.start_date).toISOString() : null,
+      deadline: new Date(form.deadline).toISOString(),
+      judging_end: new Date(form.judging_end).toISOString(),
+      image_url: form.image_url || null
+    }
+    if (creating) {
+      const { data } = await supabase.from('contests').insert(payload).select().single()
+      if (data) setItems([data, ...items])
+    } else if (editing) {
+      await supabase.from('contests').update(payload).eq('id', editing.id)
+      setItems(items.map(i => i.id === editing.id ? {...i,...payload} : i))
+    }
+    setLoading(false); closeForm()
+  }
+
+  async function handleDelete(id: string) {
+    if (!confirm('削除しますか？')) return
+    await supabase.from('contests').delete().eq('id', id)
+    setItems(items.filter(i => i.id !== id))
+  }
+
+  async function handleExportExcel(contest: Contest) {
+    // Excel生成時のみ読み込む（初期バンドルから除外して読み込みを軽くする）
+    const XLSX = await import('xlsx-js-style')
+    const entries = entriesMap[contest.id] || []
+
+    const headers = ['応募番号','作品タイトル','ジャンル','作者名','あらすじ','作品URL','いいね数','拡散数','応募日']
+    const rows = entries.map((e, i) => [
+      i + 1,
+      e.novel_title,
+      e.novel_genre,
+      e.author_name,
+      e.novel_summary,
+      e.novel_url,
+      e.like_count,
+      e.discover_count,
+      new Date(e.created_at).toLocaleDateString('ja-JP'),
+    ])
+
+    const ws = XLSX.utils.aoa_to_sheet([headers, ...rows])
+
+    ws['!cols'] = [
+      {wch:8},{wch:32},{wch:12},{wch:18},{wch:60},{wch:55},{wch:10},{wch:10},{wch:14}
+    ]
+    ws['!rows'] = [{ hpt: 22 }, ...rows.map(() => ({ hpt: 18 }))]
+
+    const range = XLSX.utils.decode_range(ws['!ref'] || 'A1')
+    const gridBorder = {
+      top:    { style: 'thin', color: { rgb: '555555' } },
+      bottom: { style: 'thin', color: { rgb: '555555' } },
+      left:   { style: 'thin', color: { rgb: '555555' } },
+      right:  { style: 'thin', color: { rgb: '555555' } },
+    }
+
+    // ヘッダー行：黒背景・白文字・太字
+    for (let c = range.s.c; c <= range.e.c; c++) {
+      const addr = XLSX.utils.encode_cell({ r: 0, c })
+      if (!ws[addr]) continue
+      ws[addr].s = {
+        font: { bold: true, color: { rgb: 'FFFFFF' }, sz: 11 },
+        fill: { patternType: 'solid', fgColor: { rgb: '222222' } },
+        alignment: { horizontal: 'center', vertical: 'center' },
+        border: gridBorder,
+      }
+    }
+
+    // データ行：交互背景・格子罫線
+    for (let r = 1; r <= rows.length; r++) {
+      for (let c = range.s.c; c <= range.e.c; c++) {
+        const addr = XLSX.utils.encode_cell({ r, c })
+        if (!ws[addr]) ws[addr] = { t: 's', v: '' }
+        ws[addr].s = {
+          fill: { patternType: 'solid', fgColor: { rgb: r % 2 === 0 ? 'F2F2F2' : 'FFFFFF' } },
+          alignment: { vertical: 'top', wrapText: c === 4 },
+          border: gridBorder,
+        }
+      }
+    }
+
+    const wb = XLSX.utils.book_new()
+    XLSX.utils.book_append_sheet(wb, ws, '応募作品')
+    wb.Props = { Title: contest.title, Author: '原石航路' }
+
+    const fileName = `${contest.title}_応募作品_${new Date().toISOString().slice(0,10)}.xlsx`
+    XLSX.writeFile(wb, fileName)
+  }
+
+  const inputStyle = (key: string) => ({
+    padding:'7px 12px',
+    border:`1px solid ${errors[key] ? '#fca5a5' : '#e2e8f0'}`,
+    borderRadius:6, fontSize:13, width:'100%',
+    background: errors[key] ? '#fef2f2' : 'var(--base-color-1)'
+  })
+
+  return (
+    <div>
+      <div style={{display:'flex',justifyContent:'flex-end',marginBottom:16}}>
+        <button onClick={openCreate} style={{...btn('var(--base-color-1)','var(--color-brand)','var(--color-brand)'),fontSize:13,padding:'8px 20px'}}>＋ コンテストを作成</button>
+      </div>
+
+      {(creating || editing) && (
+        <div style={{background:'var(--color-bg-card)',border:'1px solid #e2e8f0',borderRadius:12,padding:'24px',marginBottom:20}}>
+          <div style={{fontSize:14,fontWeight:700,color:'#1e293b',marginBottom:16}}>{creating?'新規作成':'編集'}</div>
+          <div style={{display:'grid',gap:12}}>
+            <div>
+              <label style={{fontSize:12,color:'#64748b',display:'block',marginBottom:4}}>タイトル <span style={{color:'#ef4444'}}>*</span></label>
+              <input value={form.title} onChange={e=>{setForm({...form,title:e.target.value});setErrors(ev=>({...ev,title:''}))}}
+                style={inputStyle('title')} placeholder="第XX回 原石航路小説コンテスト"/>
+              {errors.title && <div style={{fontSize:11,color:'#ef4444',marginTop:3}}>{errors.title}</div>}
+            </div>
+            {!form.is_site_contest && (
+              <div>
+                <label style={{fontSize:12,color:'#64748b',display:'block',marginBottom:4}}>応募URL <span style={{color:'#ef4444'}}>*</span></label>
+                <input value={form.apply_url} onChange={e=>{setForm({...form,apply_url:e.target.value});setErrors(ev=>({...ev,apply_url:''}))}}
+                  style={inputStyle('apply_url')} placeholder="https://..."/>
+                {errors.apply_url && <div style={{fontSize:11,color:'#ef4444',marginTop:3}}>{errors.apply_url}</div>}
+              </div>
+            )}
+            <div>
+              <label style={{fontSize:12,color:'#64748b',display:'block',marginBottom:4}}>説明</label>
+              <textarea value={form.description} onChange={e=>setForm({...form,description:e.target.value})} rows={3}
+                style={{...inputStyle('description'),resize:'vertical' as const}} placeholder="コンテストの詳細"/>
+            </div>
+            <div style={{marginBottom:12}}>
+              <label style={{fontSize:12,color:'#64748b',display:'block',marginBottom:4}}>開始日時（任意・未来にすると「近日開催」表示）</label>
+              <input type="datetime-local" value={form.start_date} onChange={e=>setForm({...form,start_date:e.target.value})}
+                style={inputStyle('start_date')}/>
+            </div>
+            <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:12}}>
+              <div>
+                <label style={{fontSize:12,color:'#64748b',display:'block',marginBottom:4}}>締切日時 <span style={{color:'#ef4444'}}>*</span></label>
+                <input type="datetime-local" value={form.deadline} onChange={e=>{setForm({...form,deadline:e.target.value});setErrors(ev=>({...ev,deadline:'',judging_end:''}))}}
+                  style={inputStyle('deadline')}/>
+                {errors.deadline && <div style={{fontSize:11,color:'#ef4444',marginTop:3}}>{errors.deadline}</div>}
+              </div>
+              <div>
+                <label style={{fontSize:12,color:'#64748b',display:'block',marginBottom:4}}>選考終了日時 <span style={{color:'#ef4444'}}>*</span></label>
+                <input type="datetime-local" value={form.judging_end} onChange={e=>{setForm({...form,judging_end:e.target.value});setErrors(ev=>({...ev,judging_end:''}))}}
+                  style={inputStyle('judging_end')}/>
+                {errors.judging_end && <div style={{fontSize:11,color:'#ef4444',marginTop:3}}>{errors.judging_end}</div>}
+              </div>
+            </div>
+            <div>
+              <label style={{fontSize:12,color:'#64748b',display:'block',marginBottom:6}}>
+                バナー画像 <span style={{color:'#ef4444'}}>*</span>
+                <span style={{fontSize:10,color:'#94a3b8',fontWeight:400,marginLeft:6}}>推奨サイズ：600×300px（2:1）</span>
+              </label>
+              <input type="file" accept="image/*" onChange={handleImageUpload} style={{fontSize:12,marginBottom:4}}/>
+              {uploading && <div style={{fontSize:12,color:'#64748b'}}>アップロード中...</div>}
+              {errors.image_url && !form.image_url && <div style={{fontSize:11,color:'#ef4444',marginTop:3}}>{errors.image_url}</div>}
+              {form.image_url && (
+                <div style={{marginTop:8}}>
+                  <img src={form.image_url} alt="プレビュー" style={{maxWidth:400,maxHeight:150,objectFit:'contain',borderRadius:8,border:'1px solid #e2e8f0',display:'block',marginBottom:8,background:'var(--color-bg-card)'}}/>
+                  <button onClick={()=>setForm(f=>({...f,image_url:''}))} style={{...btn('#dc2626','#fef2f2','#fca5a5'),fontSize:11}}>画像を削除</button>
+                </div>
+              )}
+            </div>
+            <div style={{display:'flex',flexDirection:'column',gap:10}}>
+              <label style={{display:'flex',alignItems:'center',gap:8,fontSize:13,cursor:'pointer'}}>
+                <input type="checkbox" checked={form.is_published} onChange={e=>setForm({...form,is_published:e.target.checked})}/>公開する
+              </label>
+              <div>
+                <div style={{fontSize:12,color:'#64748b',marginBottom:4}}>コンテスト種別</div>
+                <div style={{display:'flex',gap:16}}>
+                  <label style={{display:'flex',alignItems:'center',gap:6,fontSize:13,cursor:'pointer'}}>
+                    <input type="radio" name="contest_type" checked={!form.is_site_contest} onChange={()=>setForm({...form,is_site_contest:false})}/>
+                    外部コンテスト
+                  </label>
+                  <label style={{display:'flex',alignItems:'center',gap:6,fontSize:13,cursor:'pointer'}}>
+                    <input type="radio" name="contest_type" checked={form.is_site_contest} onChange={()=>setForm({...form,is_site_contest:true})}/>
+                    サイトコンテスト
+                  </label>
+                </div>
+              </div>
+              {form.is_site_contest && (
+                <div style={{padding:'12px 14px',background:'#fef2f2',border:'1px solid #fca5a5',borderRadius:8}}>
+                  <label style={{display:'flex',alignItems:'flex-start',gap:8,cursor:'pointer'}}>
+                    <input type="checkbox" checked={form.exclusive} onChange={e=>setForm({...form,exclusive:e.target.checked})}
+                      style={{marginTop:2,accentColor:'#dc2626'}}/>
+                    <div>
+                      <div style={{fontSize:13,fontWeight:600,color:'#dc2626'}}>専任コンテスト</div>
+                      <div style={{fontSize:11,color:'#7f1d1d',marginTop:2,lineHeight:1.5}}>
+                        ONにすると他のコンテストへの同時応募ができなくなります。
+                      </div>
+                    </div>
+                  </label>
+                </div>
+              )}
+            </div>
+          </div>
+          <div style={{display:'flex',gap:8,marginTop:16,justifyContent:'flex-end'}}>
+            <button onClick={closeForm} style={btn('#64748b','var(--base-color-1)','#e2e8f0')}>キャンセル</button>
+            <button onClick={handleSave} disabled={loading} style={{...btn('var(--base-color-1)', loading?'#fdba74':'var(--color-brand)', loading?'#fdba74':'var(--color-brand)'),opacity:loading?0.7:1}}>
+              {loading?'保存中...':'保存する'}
+            </button>
+          </div>
+        </div>
+      )}
+
+      <div style={{background:'var(--color-bg-card)',border:'1px solid #e2e8f0',borderRadius:12,overflow:'hidden'}}>
+        {items.length === 0 ? (
+          <div style={{padding:'48px',textAlign:'center',color:'#94a3b8',fontSize:13}}>コンテストがありません</div>
+        ) : items.map((c, idx) => {
+          const status = getStatus(c.deadline, c.judging_end)
+          const contestEntries = entriesMap[c.id] || []
+          const isExpanded = expandedId === c.id
+          return (
+            <div key={c.id} style={{borderBottom:idx<items.length-1?'1px solid #f1f5f9':'none'}}>
+              <div style={{padding:'14px 20px',display:'flex',alignItems:'center',gap:14}}>
+                {c.image_url
+                  ? <img src={c.image_url} alt="" style={{width:90,height:30,objectFit:'contain',borderRadius:6,flexShrink:0,background:'var(--color-bg-card)'}}/>
+                  : <div style={{width:90,height:30,borderRadius:6,flexShrink:0,background:'#f1f5f9',display:'flex',alignItems:'center',justifyContent:'center',fontSize:10,color:'#94a3b8'}}>画像なし</div>
+                }
+                <div style={{flex:1,minWidth:0}}>
+                  <div style={{display:'flex',alignItems:'center',gap:6,marginBottom:3,flexWrap:'wrap'}}>
+                    <span style={{fontSize:10,fontWeight:700,color:status.color,background:status.bg,border:`1px solid ${status.border}`,padding:'1px 7px',borderRadius:10}}>{status.label}</span>
+                    {c.exclusive && <span style={{fontSize:10,fontWeight:700,color:'#dc2626',background:'#fef2f2',border:'1px solid #fca5a5',padding:'1px 7px',borderRadius:10}}>専任</span>}
+                    {!c.is_published && <span style={{fontSize:10,color:'#94a3b8',background:'#f1f5f9',padding:'1px 7px',borderRadius:10}}>非公開</span>}
+                  </div>
+                  <div style={{fontSize:13,fontWeight:600,color:'#1e293b',marginBottom:2}}>{c.title}</div>
+                  <div style={{display:'flex',gap:12,fontSize:11,color:'#94a3b8'}}>
+                    {c.deadline && <span>締切：{new Date(c.deadline).toLocaleDateString('ja-JP')}</span>}
+                    {c.judging_end && <span>選考終了：{new Date(c.judging_end).toLocaleDateString('ja-JP')}</span>}
+                  </div>
+                </div>
+                <div style={{display:'flex',gap:6,flexShrink:0,alignItems:'center',flexWrap:'wrap'}}>
+                  <button onClick={()=>setExpandedId(isExpanded ? null : c.id)}
+                    style={{...btn('var(--color-brand)','var(--color-brand-light)','#f5b080'),fontSize:11}}>
+                    応募 {contestEntries.length}件 {isExpanded ? '▲' : '▼'}
+                  </button>
+                  {contestEntries.length > 0 && (
+                    <button onClick={()=>handleExportExcel(c)}
+                      style={btn('#10b981','#f0fdf4','#86efac')}>
+                      Excel
+                    </button>
+                  )}
+                  <button onClick={async()=>{await supabase.from('contests').update({is_published:!c.is_published}).eq('id',c.id);setItems(items.map(x=>x.id===c.id?{...x,is_published:!c.is_published}:x))}}
+                    style={btn(c.is_published?'#f59e0b':'#10b981',c.is_published?'#fffbeb':'#f0fdf4',c.is_published?'#fde68a':'#86efac')}>
+                    {c.is_published?'非公開':'公開'}
+                  </button>
+                  {c.is_site_contest && (
+                    <a href={`/contests/${c.id}`} target="_blank" rel="noopener noreferrer"
+                      style={{...btn('#8b5cf6','#f5f3ff','#c4b5fd'),textDecoration:'none',display:'inline-flex',alignItems:'center'}}>
+                      ページ
+                    </a>
+                  )}
+                  <button onClick={()=>openEdit(c)} style={btn('#3b82f6','#eff6ff','#bfdbfe')}>編集</button>
+                  <button onClick={()=>handleDelete(c.id)} style={btn('#dc2626','#fef2f2','#fca5a5')}>削除</button>
+                </div>
+              </div>
+              {isExpanded && (
+                <div style={{borderTop:'1px solid #f1f5f9',background:'#f8fafc',padding:'12px 20px'}}>
+                  <div style={{fontSize:12,fontWeight:700,color:'#1e293b',marginBottom:8}}>応募作品一覧（{contestEntries.length}件）</div>
+                  {contestEntries.length === 0 ? (
+                    <div style={{fontSize:12,color:'#94a3b8'}}>応募作品はまだありません</div>
+                  ) : (
+                    <div style={{display:'flex',flexDirection:'column',gap:6}}>
+                      {contestEntries.map((e, i) => (
+                        <div key={i} style={{display:'flex',alignItems:'center',gap:10,padding:'8px 12px',background:'var(--color-bg-card)',borderRadius:8,border:'1px solid #e2e8f0'}}>
+                          <div style={{flex:1,minWidth:0}}>
+                            <Link href={`/novel/${e.novel_id}`} target="_blank"
+                              style={{fontSize:13,fontWeight:600,color:'var(--color-brand)',textDecoration:'none'}}>{e.novel_title}</Link>
+                            <div style={{fontSize:11,color:'#94a3b8'}}>
+                              作者：{e.author_name} · ♡{e.like_count} · 拡散{e.discover_count} · 応募日：{new Date(e.created_at).toLocaleDateString('ja-JP')}
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
+          )
+        })}
+      </div>
+    </div>
+  )
+}

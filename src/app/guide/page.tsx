@@ -1,7 +1,7 @@
 import { createClient } from '@/lib/supabase/server'
-import Header from '@/components/layout/Header'
-import Footer from '@/components/layout/Footer'
-import AdBanner from '@/components/layout/AdBanner'
+import Header from '@/components/layout/header'
+import Footer from '@/components/layout/footer'
+import AdBanner from '@/components/layout/ad-banner'
 import Link from 'next/link'
 
 type NavLink = { href: string; label: string; active?: boolean }
@@ -74,7 +74,7 @@ export default async function GuidePage() {
   }
 
   return (
-    <div style={{minHeight:'100vh',background:'var(--color-bg-card)',fontFamily:"'Noto Sans JP',sans-serif"}}>
+    <div style={{minHeight:'100vh',fontFamily:"'Noto Sans JP',sans-serif"}}>
       <Header profile={profile} user={user} />
 
       {/* サブナビ */}

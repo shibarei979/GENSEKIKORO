@@ -1,9 +1,9 @@
 import { createClient } from '@/lib/supabase/server'
 import Link from 'next/link'
-import Header from '@/components/layout/Header'
-import Footer from '@/components/layout/Footer'
+import Header from '@/components/layout/header'
+import Footer from '@/components/layout/footer'
 
-import { TYPE_OPTIONS, getAnnouncementType } from './announcement-types'
+import { TYPE_OPTIONS, getAnnouncementType } from '@/types/announcement'
 
 function getType(t: string) {
   return getAnnouncementType(t)
@@ -29,7 +29,7 @@ export default async function AnnouncementsPage() {
   const usedTypes = (announcements||[]).map((n:any) => n.type).filter(Boolean).filter((v:string,i:number,a:string[]) => a.indexOf(v) === i)
 
   return (
-    <div style={{minHeight:'100vh',background:'var(--color-bg)',fontFamily:"'Noto Sans JP',sans-serif"}}>
+    <div style={{minHeight:'100vh',fontFamily:"'Noto Sans JP',sans-serif"}}>
       <Header profile={profile} user={user} />
 
       <div style={{maxWidth:800,margin:'0 auto',padding:'32px 24px'}}>

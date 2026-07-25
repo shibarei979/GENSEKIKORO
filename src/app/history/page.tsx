@@ -1,9 +1,9 @@
 import { createClient } from '@/lib/supabase/server'
 export const dynamic = 'force-dynamic'
 import { redirect } from 'next/navigation'
-import Header from '@/components/layout/Header'
-import Footer from '@/components/layout/Footer'
-import AdBanner from '@/components/layout/AdBanner'
+import Header from '@/components/layout/header'
+import Footer from '@/components/layout/footer'
+import AdBanner from '@/components/layout/ad-banner'
 import Link from 'next/link'
 
 export default async function HistoryPage() {
@@ -120,7 +120,7 @@ export default async function HistoryPage() {
   }
 
   return (
-    <div style={{minHeight:'100vh',background:'var(--color-bg-card)',fontFamily:"'Noto Sans JP',sans-serif"}}>
+    <div style={{minHeight:'100vh',fontFamily:"'Noto Sans JP',sans-serif"}}>
       <Header profile={profile} user={user} />
 
       <div className="main-layout" style={{maxWidth:1200,margin:'0 auto',padding:'28px 32px',display:'flex',gap:20,alignItems:'flex-start'}}>

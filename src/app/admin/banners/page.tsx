@@ -1,9 +1,9 @@
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
-import Header from '@/components/layout/Header'
-import Footer from '@/components/layout/Footer'
-import BannerManager from './BannerManager'
+import Header from '@/components/layout/header'
+import Footer from '@/components/layout/footer'
+import BannerManager from '@/components/admin/banners/banner-manager'
 
 export default async function AdminBannersPage() {
   const supabase = await createClient()

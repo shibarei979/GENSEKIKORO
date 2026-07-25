@@ -1,8 +1,8 @@
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
-import Header from '@/components/layout/Header'
-import Footer from '@/components/layout/Footer'
+import Header from '@/components/layout/header'
+import Footer from '@/components/layout/footer'
 
 export default async function MessagesPage() {
   const supabase = await createClient()
@@ -26,32 +26,32 @@ export default async function MessagesPage() {
   }
 
   return (
-    <div style={{minHeight:'100vh',background:'#FFF9F2',fontFamily:"'Noto Sans JP',sans-serif"}}>
+    <div style={{minHeight:'100vh',fontFamily:"'Noto Sans JP',sans-serif"}}>
       <Header profile={profile} user={user} />
       <div style={{maxWidth:700,margin:'0 auto',padding:'32px 24px'}}>
         <div style={{display:'flex',alignItems:'center',gap:8,marginBottom:24}}>
-          <Link href="/mypage" style={{fontSize:13,color:'#F26A21',textDecoration:'none'}}>← マイページ</Link>
-          <span style={{fontSize:18,fontWeight:700,color:'#2B211B'}}>運営からのメッセージ</span>
+          <Link href="/mypage" style={{fontSize:13,color:'var(--color-brand)',textDecoration:'none'}}>← マイページ</Link>
+          <span style={{fontSize:18,fontWeight:700,color:'var(--color-text)'}}>運営からのメッセージ</span>
         </div>
 
         {(!messages || messages.length === 0) ? (
-          <div style={{background:'#fff',border:'1px solid #F0D9C9',borderRadius:12,padding:'48px',textAlign:'center',color:'#B8AEA8',fontSize:14}}>
+          <div style={{background:'var(--color-bg-card)',border:'1px solid var(--color-brand-border)',borderRadius:12,padding:'48px',textAlign:'center',color:'var(--color-text-faint)',fontSize:14}}>
             メッセージはまだありません
           </div>
         ) : (
           <div style={{display:'flex',flexDirection:'column',gap:12}}>
             {messages.map((m: any) => (
-              <div key={m.id} style={{background:'#fff',border:'1px solid #F0D9C9',borderRadius:12,padding:'20px 24px'}}>
+              <div key={m.id} style={{background:'var(--color-bg-card)',border:'1px solid var(--color-brand-border)',borderRadius:12,padding:'20px 24px'}}>
                 <div style={{display:'flex',alignItems:'center',gap:8,marginBottom:10}}>
-                  <span style={{fontSize:11,fontWeight:700,color:'#F26A21',background:'#FFF1E6',border:'1px solid #f5b080',padding:'1px 8px',borderRadius:4}}>
+                  <span style={{fontSize:11,fontWeight:700,color:'var(--color-brand)',background:'var(--color-brand-light)',border:'1px solid var(--color-tag-border)',padding:'1px 8px',borderRadius:4}}>
                     運営
                   </span>
-                  <span style={{fontSize:11,color:'#B8AEA8',marginLeft:'auto'}}>
+                  <span style={{fontSize:11,color:'var(--color-text-faint)',marginLeft:'auto'}}>
                     {new Date(m.created_at).toLocaleString('ja-JP')}
                   </span>
                 </div>
-                <div style={{fontSize:15,fontWeight:700,color:'#2B211B',marginBottom:10}}>{m.subject}</div>
-                <div style={{fontSize:13,color:'#77706A',lineHeight:1.85,whiteSpace:'pre-wrap'}}>{m.body}</div>
+                <div style={{fontSize:15,fontWeight:700,color:'var(--color-text)',marginBottom:10}}>{m.subject}</div>
+                <div style={{fontSize:13,color:'var(--color-text-muted)',lineHeight:1.85,whiteSpace:'pre-wrap'}}>{m.body}</div>
               </div>
             ))}
           </div>

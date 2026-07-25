@@ -2,9 +2,9 @@ import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
-import Header from '@/components/layout/Header'
-import Footer from '@/components/layout/Footer'
-import ContactManager from './ContactManager'
+import Header from '@/components/layout/header'
+import Footer from '@/components/layout/footer'
+import ContactManager from '@/components/admin/contacts/contact-manager'
 
 export default async function AdminContactsPage() {
   const supabase = await createClient()
@@ -27,7 +27,7 @@ export default async function AdminContactsPage() {
           <Link href="/admin" style={{fontSize:13,color:'#64748b',textDecoration:'none'}}>← 管理画面</Link>
           <span style={{fontSize:18,fontWeight:800,color:'#1e293b'}}>問い合わせ管理</span>
           {(contacts||[]).filter((c:any)=>!c.is_read).length > 0 && (
-            <span style={{fontSize:11,background:'#ef4444',color:'#fff',padding:'2px 8px',borderRadius:10,fontWeight:700}}>
+            <span style={{fontSize:11,background:'#ef4444',color:'var(--color-text-inverse)',padding:'2px 8px',borderRadius:10,fontWeight:700}}>
               未読 {(contacts||[]).filter((c:any)=>!c.is_read).length}件
             </span>
           )}
